@@ -1,0 +1,122 @@
+# Netlify Configuration for SYMFARMIA Next.js App
+# https://docs.netlify.com/configure-builds/file-based-configuration/
+
+[build]
+  # Build command
+  command = "npm run build"
+  
+  # Directory to publish (Next.js output)
+  publish = ".next"
+  
+  # Build environment
+  environment = { NODE_VERSION = "18", NPM_VERSION = "9" }
+
+[build.processing]
+  # Optimize images
+  skip_processing = false
+
+[build.processing.images]
+  compress = true
+
+[build.processing.css]
+  bundle = true
+  minify = true
+
+[build.processing.js]
+  bundle = true
+  minify = true
+
+# Netlify Functions (if needed for API routes)
+[functions]
+  directory = "netlify/functions"
+
+# Headers for security and performance
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # Security headers
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "geolocation=(), microphone=(), camera=()"
+    # HSTS
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
+
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    # API routes should not be cached
+    Cache-Control = "no-store, max-age=0"
+
+[[headers]]
+  for = "/_next/static/*"
+  [headers.values]
+    # Static assets can be cached for a long time
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Redirects for SEO and routing
+[[redirects]]
+  from = "/home"
+  to = "/"
+  status = 301
+
+[[redirects]]
+  from = "/dashboard"
+  to = "/legacy"
+  status = 302
+
+# SPA fallback for client-side routing
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  conditions = {Role = ["admin"], Country = ["US"]}
+
+# Environment-specific settings
+[context.production]
+  command = "npm run build"
+  environment = { NODE_ENV = "production", NETLIFY = "true" }
+
+[context.deploy-preview]
+  command = "npm run build"
+  environment = { NODE_ENV = "development", NETLIFY = "true" }
+
+[context.branch-deploy]
+  command = "npm run build"
+  environment = { NODE_ENV = "development", NETLIFY = "true" }
+
+# Plugin configurations
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+[[plugins]]
+  package = "netlify-plugin-cypress"
+  [plugins.inputs]
+    enable = false
+
+# Edge functions (if needed)
+[[edge_functions]]
+  function = "geo-location"
+  path = "/api/location"
+
+# Form handling (if you have contact forms)
+[forms]
+  settings = { spam_filter = true }
+
+# Large Media (for large files)
+[lfs]
+  gitlfs = false
+
+# Split testing (A/B testing)
+[split_testing]
+  enabled = false
