@@ -76,7 +76,6 @@ const Menu = ({ user, setLoadingState }) => {
           </div>          
 
           <div className="text-gray-500 text-base lg:text-xl font-normal leading-5 lg:leading-7">
-            {/* Display different content based on the user's role */}
             {isAdmin ? (
               <div>
                 Panel de administración
@@ -131,12 +130,11 @@ const NotFound = () => {
 const RedirectComponent = () => {
   const router = useRouter();
 
-  // Perform the redirect
   React.useEffect(() => {
     router.push("/api/auth/login");
   }, [router]);
 
-  return null; // or any loading indicator if needed
+  return null;
 };
 
 const App = () => {
@@ -153,7 +151,7 @@ const App = () => {
     user.roles = roles;
   }
 
-  const [loadingState, setLoadingState] = useState(false); // Nuevo estado para la función setLoadingState
+  const [loadingState, setLoadingState] = useState(false);
 
 
   return (
@@ -178,7 +176,6 @@ const App = () => {
           {user ? (
             <Menu isLoading={isLoading} user={user} setLoadingState={setLoadingState}></Menu>
           ) : (
-            // Render the RedirectComponent only if the user is not logged in and data is not loading
             !isLoading && <RedirectComponent />
           )}
           <ToastAlert />

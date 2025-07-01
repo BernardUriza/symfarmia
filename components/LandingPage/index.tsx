@@ -11,6 +11,11 @@ interface LandingPageProps extends BaseComponentProps {
   onRegisterClick?: () => void;
 }
 
+/**
+ * Landing page component for SYMFARMIA application
+ * Provides authentication entry point and feature overview
+ * @param props - Component props including demo mode and callback handlers
+ */
 const LandingPage: React.FC<LandingPageProps> = ({
   className = '',
   showDemo = true,
@@ -39,7 +44,6 @@ const LandingPage: React.FC<LandingPageProps> = ({
 
   return (
     <div className={`min-h-screen bg-gradient-to-br from-blue-50 to-white flex flex-col ${className}`}>
-      {/* Header */}
       <header className="w-full px-6 py-4">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
           <div className="text-2xl font-bold text-blue-600">
@@ -48,10 +52,8 @@ const LandingPage: React.FC<LandingPageProps> = ({
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="flex-1 flex items-center justify-center px-6">
         <div className="max-w-4xl mx-auto text-center">
-          {/* Hero Section */}
           <div className="mb-12">
             <h1 className="text-5xl font-bold text-gray-900 mb-6">
               Welcome to <span className="text-blue-600">SYMFARMIA</span>
@@ -69,7 +71,6 @@ const LandingPage: React.FC<LandingPageProps> = ({
             )}
           </div>
 
-          {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <button
               onClick={handleLoginClick}
@@ -96,7 +97,6 @@ const LandingPage: React.FC<LandingPageProps> = ({
             )}
           </div>
 
-          {/* Features Preview */}
           <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
             <FeatureCard
               icon={
@@ -134,7 +134,6 @@ const LandingPage: React.FC<LandingPageProps> = ({
         </div>
       </main>
 
-      {/* Footer */}
       <footer className="w-full px-6 py-4 border-t border-gray-200">
         <div className="max-w-6xl mx-auto text-center text-gray-600">
           <p>&copy; 2024 SYMFARMIA. Intelligent platform for independent doctors.</p>

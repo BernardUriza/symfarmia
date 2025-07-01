@@ -21,6 +21,8 @@ const defaultConfig: ApiConfig = {
 
 /**
  * HTTP client with retry logic and error handling
+ * Provides a comprehensive API client with automatic retries, timeout handling,
+ * and authentication support for Next.js applications
  */
 export class ApiClient {
   private config: ApiConfig;

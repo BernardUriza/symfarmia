@@ -1,5 +1,7 @@
-//npx prisma db push --force-reset   
-//node .\prisma\seeds\medicalReportSeed.js
+/**
+ * Prisma database seeding script
+ * Run with: node .\prisma\seeds\medicalReportSeed.js
+ */
 const { PrismaClient } = require('@prisma/client');
 const { faker } = require('@faker-js/faker');
 

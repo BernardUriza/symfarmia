@@ -8,7 +8,6 @@ const nextConfig = {
   },
   async rewrites() {
     return [
-      // Add more custom routes as needed
     ];
   },
 };

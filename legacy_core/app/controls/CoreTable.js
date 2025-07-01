@@ -27,7 +27,6 @@ const CoreTable = ({
     const textToSearch = Object.values(item)
       .flatMap((value) => {
         if (typeof value === 'object') {
-          // If the value is an object, extract its properties
           return Object.values(value);
         } else {
           return [value];
@@ -46,12 +45,11 @@ const CoreTable = ({
       let value = item;
       if (filterParts[1] == "*") {
         let objectArray = item[filterParts[0]];
-        value = objectArray.map(obj => obj.name).join(' '); // que aqui solo sea una lista de nombres separadas por coma, no necesito mas que eso
+        value = objectArray.map(obj => obj.name).join(' ');
       } else for (const part of filterParts) {
         if (value && value.hasOwnProperty(part)) {
           value = value[part];
         } else {
-          // Handle the case where the property doesn't exist
           value = null;
           break;
         }

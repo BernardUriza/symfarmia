@@ -18,7 +18,10 @@ import {
   PaginatedResponse
 } from './index';
 
-// Re-export ApiResponse for use in other modules
+/**
+ * Standard API response format used throughout the application
+ * @template T - The type of data returned in the response
+ */
 export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
@@ -26,10 +29,10 @@ export interface ApiResponse<T = unknown> {
   message?: string;
 }
 
-// HTTP Methods
+/** Supported HTTP methods for API endpoints */
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 
-// API Handler Types
+/** Type definitions for Next.js API route handlers */
 export type ApiHandler = (
   request: NextRequest,
   context: { params: Record<string, string | string[]> }
@@ -43,9 +46,9 @@ export type ApiRouteHandler = {
   PATCH?: ApiHandler;
 };
 
-// Request/Response Types for each entity
+/** Request and response types for each entity in the system */
 
-// Patients API
+/** Patient-related API types */
 export interface PatientsGetResponse extends ApiResponse<PaginatedResponse<Patient>> {}
 export interface PatientGetResponse extends ApiResponse<Patient> {}
 export interface PatientCreateRequest extends CreatePatientData {}
@@ -54,7 +57,7 @@ export interface PatientUpdateRequest extends UpdatePatientData {}
 export interface PatientUpdateResponse extends ApiResponse<Patient> {}
 export interface PatientDeleteResponse extends ApiResponse<{ deleted: boolean }> {}
 
-// Medical Reports API
+/** Medical Report-related API types */
 export interface MedicalReportsGetResponse extends ApiResponse<PaginatedResponse<MedicalReport>> {}
 export interface MedicalReportGetResponse extends ApiResponse<MedicalReport> {}
 export interface MedicalReportCreateRequest extends CreateMedicalReportData {}
@@ -63,7 +66,7 @@ export interface MedicalReportUpdateRequest extends UpdateMedicalReportData {}
 export interface MedicalReportUpdateResponse extends ApiResponse<MedicalReport> {}
 export interface MedicalReportDeleteResponse extends ApiResponse<{ deleted: boolean }> {}
 
-// Studies API
+/** Study-related API types */
 export interface StudiesGetResponse extends ApiResponse<PaginatedResponse<Study>> {}
 export interface StudyGetResponse extends ApiResponse<Study> {}
 export interface StudyCreateRequest extends CreateStudyData {}
@@ -72,7 +75,7 @@ export interface StudyUpdateRequest extends UpdateStudyData {}
 export interface StudyUpdateResponse extends ApiResponse<Study> {}
 export interface StudyDeleteResponse extends ApiResponse<{ deleted: boolean }> {}
 
-// Study Types API
+/** Study Type-related API types */
 export interface StudyTypesGetResponse extends ApiResponse<PaginatedResponse<StudyType>> {}
 export interface StudyTypeGetResponse extends ApiResponse<StudyType> {}
 export interface StudyTypeCreateRequest extends CreateStudyTypeData {}
@@ -81,7 +84,7 @@ export interface StudyTypeUpdateRequest extends UpdateStudyTypeData {}
 export interface StudyTypeUpdateResponse extends ApiResponse<StudyType> {}
 export interface StudyTypeDeleteResponse extends ApiResponse<{ deleted: boolean }> {}
 
-// Categories API
+/** Category-related API types */
 export interface CategoriesGetResponse extends ApiResponse<PaginatedResponse<Category>> {}
 export interface CategoryGetResponse extends ApiResponse<Category> {}
 export interface CategoryCreateRequest extends CreateCategoryData {}

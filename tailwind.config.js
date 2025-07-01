@@ -15,61 +15,27 @@ module.exports = {
       colors: {
         tremor: {
           brand: {
-            faint: "#eff6ff", // Cambiado a verde
-            muted: "#bfdbfe", // Cambiado a verde
-            subtle: "#60a5fa", // Cambiado a verde
-            DEFAULT: "#12B76A", // Cambiado a verde
-            emphasis: "#0d7444", // Cambiado a verde
-            inverted: "#ffffff", // Cambiado a verde
-          },
+            faint: "#eff6ff",            muted: "#bfdbfe",            subtle: "#60a5fa",            DEFAULT: "#12B76A",            emphasis: "#0d7444",            inverted: "#ffffff",          },
           background: {
-            muted: "#f9fafb", // Cambiado a verde
-            subtle: "#f3f4f6", // Cambiado a verde
-            DEFAULT: "#ffffff", // Cambiado a verde
-            emphasis: "#374151", // Cambiado a verde
-          },
+            muted: "#f9fafb",            subtle: "#f3f4f6",            DEFAULT: "#ffffff",            emphasis: "#374151",          },
           border: {
-            DEFAULT: "#e5e7eb", // Cambiado a verde
-          },
+            DEFAULT: "#e5e7eb",          },
           ring: {
-            DEFAULT: "#e5e7eb", // Cambiado a verde
-          },
+            DEFAULT: "#e5e7eb",          },
           content: {
-            subtle: "#9ca3af", // Cambiado a verde
-            DEFAULT: "#6b7280", // Cambiado a verde
-            emphasis: "#374151", // Cambiado a verde
-            strong: "#111827", // Cambiado a verde
-            inverted: "#ffffff", // Cambiado a verde
-          },
+            subtle: "#9ca3af",            DEFAULT: "#6b7280",            emphasis: "#374151",            strong: "#111827",            inverted: "#ffffff",          },
         },
         "dark-tremor": {
           brand: {
-            faint: "#0B1229", // Cambiado a verde
-            muted: "#172554", // Cambiado a verde
-            subtle: "#1e40af", // Cambiado a verde
-            DEFAULT: "#12B76A", // Cambiado a verde
-            emphasis: "#60a5fa", // Cambiado a verde
-            inverted: "#030712", // Cambiado a verde
-          },
+            faint: "#0B1229",            muted: "#172554",            subtle: "#1e40af",            DEFAULT: "#12B76A",            emphasis: "#60a5fa",            inverted: "#030712",          },
           background: {
-            muted: "#131A2B", // Cambiado a verde
-            subtle: "#1f2937", // Cambiado a verde
-            DEFAULT: "#111827", // Cambiado a verde
-            emphasis: "#d1d5db", // Cambiado a verde
-          },
+            muted: "#131A2B",            subtle: "#1f2937",            DEFAULT: "#111827",            emphasis: "#d1d5db",          },
           border: {
-            DEFAULT: "#1f2937", // Cambiado a verde
-          },
+            DEFAULT: "#1f2937",          },
           ring: {
-            DEFAULT: "#1f2937", // Cambiado a verde
-          },
+            DEFAULT: "#1f2937",          },
           content: {
-            subtle: "#4b5563", // Cambiado a verde
-            DEFAULT: "#6b7280", // Cambiado a verde
-            emphasis: "#e5e7eb", // Cambiado a verde
-            strong: "#f9fafb", // Cambiado a verde
-            inverted: "#000000", // Cambiado a verde
-          },
+            subtle: "#4b5563",            DEFAULT: "#6b7280",            emphasis: "#e5e7eb",            strong: "#f9fafb",            inverted: "#000000",          },
         },
       },
       boxShadow: {

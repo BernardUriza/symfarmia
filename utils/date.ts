@@ -16,6 +16,10 @@ export interface DateFormatOptions {
 
 /**
  * Format a date with custom options
+ * @param date - The date to format (Date object, ISO string, or timestamp)
+ * @param options - Formatting options including year, month, day format and locale
+ * @returns Formatted date string
+ * @throws {Error} When date is invalid
  */
 export function formatDate(
   date: Date | string | number,
@@ -75,6 +79,11 @@ export function formatDate(
 
 /**
  * Format date using date-fns format function
+ * @param date - The date to format
+ * @param pattern - Date format pattern (e.g., 'dd/MM/yyyy')
+ * @param locale - Locale to use for formatting (defaults to Spanish)
+ * @returns Formatted date string
+ * @throws {Error} When date is invalid
  */
 export function formatDateWithPattern(
   date: Date | string | number,

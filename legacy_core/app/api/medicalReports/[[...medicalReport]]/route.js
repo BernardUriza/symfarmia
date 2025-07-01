@@ -7,7 +7,6 @@ import {
   deleteMedicalReport
 } from '../../../../prisma/medicalReportsClient';
 
-// Manejador para el método GET
 export async function GET(req) {
   const reportId = parseInt(req.nextUrl.pathname.split('/').pop());
 
@@ -21,7 +20,6 @@ export async function GET(req) {
   return NextResponse.json(medicalReports, { status: 200 });
 }
 
-// Manejador para el método POST
 export const POST = async (req) => {
   const body = await req.json();
   const { id, name, date, status, expirationDate, patient, studies } = body;
