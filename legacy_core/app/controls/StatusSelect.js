@@ -1,6 +1,6 @@
 import React from 'react';
 import { Select, SelectItem } from '@tremor/react';
-import { ClockIcon, UploadIcon, BanIcon, CheckCircleIcon } from '@heroicons/react/outline';
+import { ClockIcon, UploadIcon, BanIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 
 const StatusSelect = ({ value, onValueChange }) => {
   const getStatusColor = (status) => {

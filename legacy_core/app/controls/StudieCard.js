@@ -2,7 +2,7 @@
 import React from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { DocumentAddIcon, DocumentTextIcon } from '@heroicons/react/outline';
+import { DocumentAddIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
 import { saveAs } from 'file-saver'; // Importing file-saver
 
 // Add this function outside of the StudieCard component

@@ -32,7 +32,8 @@
       "Bash(npx next:*)",
       "Bash(./node_modules/.bin/next:*)",
       "Bash(timeout 300 npm install)",
-      "Bash(sudo rm:*)"
+      "Bash(sudo rm:*)",
+      "Bash(npm run type-check:*)"
     ],
     "deny": []
   }

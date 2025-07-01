@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button, TextInput, DatePicker, SearchSelect, SearchSelectItem } from '@tremor/react';
 import CustomModal from '../controls/CustomModal/CustomModal';
 import StudieCard from '../controls/StudieCard';
-import esLocale from 'date-fns/locale/es';
+import { es as esLocale } from 'date-fns/locale';
 import { HiDocumentArrowUp } from 'react-icons/hi2';
 import { FaTrash } from "react-icons/fa";
 import { useEdgeStore } from '../lib/edgestore';

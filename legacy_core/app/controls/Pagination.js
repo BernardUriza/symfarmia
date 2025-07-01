@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { ArrowLeftIcon, ArrowRightIcon } from '@heroicons/react/outline';
+import { ArrowLeftIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
 import { Button } from "@tremor/react";
 
 const Pagination = ({

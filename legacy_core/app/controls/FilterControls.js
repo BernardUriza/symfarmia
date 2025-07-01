@@ -1,6 +1,6 @@
 import React from 'react';
 import { Select, SelectItem } from "@tremor/react";
-import { FilterIcon } from '@heroicons/react/outline';
+import { FilterIcon } from '@heroicons/react/24/outline';
 import TextInputWithIcon from './TextInputWithIcon';
 
 const FilterControls = ({

@@ -1,7 +1,7 @@
 // NumericIndicators.js
 import React from 'react';
 import { Text, Metric, Card, Button } from "@tremor/react";
-import { UserGroupIcon, ClipboardListIcon, DocumentAddIcon } from '@heroicons/react/solid';
+import { UserGroupIcon, ClipboardListIcon, DocumentAddIcon } from '@heroicons/react/24/solid';
 
 const NumericIndicators = ({setOpenForm, patientsCount, reportsSentCount}) => {
   return (

@@ -1,6 +1,6 @@
 import React from "react";
 import { Card } from '@tremor/react';
-import { DocumentTextIcon } from '@heroicons/react/outline';
+import { DocumentTextIcon } from '@heroicons/react/24/outline';
 
 export const CardEstudio = ({ tipoEstudio, nombreEstudio, fechaEstudio, url }) => {
     // Función para extraer la extensión del archivo del URL

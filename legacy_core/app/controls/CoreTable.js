@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Table, TableHead, TableHeaderCell, TableBody, TableRow, TableCell } from "@tremor/react";
-import { TrashIcon, PencilIcon, SortAscendingIcon, SortDescendingIcon } from '@heroicons/react/outline';
+import { TrashIcon, PencilIcon, SortAscendingIcon, SortDescendingIcon } from '@heroicons/react/24/outline';
 import TableCellButtonIcon from './TableCellButtonIcon';
 import CustomCheckbox from './CustomCheckbox';
 

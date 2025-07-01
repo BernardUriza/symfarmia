@@ -1,5 +1,5 @@
 import React from "react";
-import { ClockIcon, UploadIcon, BanIcon, CheckCircleIcon } from "@heroicons/react/outline";
+import { ClockIcon, UploadIcon, BanIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
 import { Badge } from "@tremor/react";
 
 const StatusBadge = ({ status }) => {

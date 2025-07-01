@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { Button, TextInput, DatePicker } from '@tremor/react';
 import CustomModal from '../controls/CustomModal/CustomModal';
 import { Select, SelectItem } from "@tremor/react";
-import esLocale from 'date-fns/locale/es';
-import { BanIcon, CheckCircleIcon } from "@heroicons/react/outline";
+import { es as esLocale } from 'date-fns/locale';
+import { BanIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
 
 const PatientForm = ({ patient, onClose, onSave, disableSave}) => {
     // Set initial state based on whether patient is null

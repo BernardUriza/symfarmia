@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { SearchIcon, XIcon } from '@heroicons/react/outline';
+import { SearchIcon, XIcon } from '@heroicons/react/24/outline';
 const TextInputWithIcon = ({ value, onChange }) => {
   const [inputValue, setInputValue] = useState(value);
 
