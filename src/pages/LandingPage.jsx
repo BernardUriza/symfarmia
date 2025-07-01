@@ -1,7 +1,14 @@
 "use client"
 import React from 'react';
+import SmokeTest from '../components/SmokeTest';
+import Logger from '../utils/logger';
 
 const LandingPage = () => {
+  // Log component render in development
+  React.useEffect(() => {
+    Logger.component('LandingPage', { timestamp: new Date().toISOString() })
+  }, [])
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex flex-col">
       {/* Header */}
@@ -92,6 +99,9 @@ const LandingPage = () => {
           <p>&copy; 2024 SYMFARMIA. Intelligent platform for independent doctors.</p>
         </div>
       </footer>
+
+      {/* Smoke Test Component */}
+      <SmokeTest />
     </div>
   );
 };
