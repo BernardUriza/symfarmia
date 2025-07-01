@@ -63,7 +63,6 @@ const Tabs = ({ setLoadingState }) => {
 };
 const Menu = ({ user, setLoadingState }) => {
 
-  console.log("username", user)
   const isAdmin = user.roles && user.roles.includes('SYMFARMIA-Admin');
   return (
     <div className="container px-1 mx-auto my-5 font-sans">

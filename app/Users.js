@@ -24,7 +24,6 @@ const Users = () => {
       .then((result) => {
         if (result.success) {
           // Patient data saved successfully, you can perform additional actions if needed
-          console.log('Patient data saved successfully in dashboard.');
           getPatients(); // Refresh the list of medical reports
         } else {
           // Error while saving, you can display an error message
