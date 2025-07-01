@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: #F9FAFB;
+  --background-start-rgb: #F9FAFB;
+  --background-end-rgb: #F9FAFB;
+}
+
+.slick-prev:before, .slick-next:before {
+  color: black;
+}
+
+.onhoverunderline:hover {
+  text-decoration: underline;
+}

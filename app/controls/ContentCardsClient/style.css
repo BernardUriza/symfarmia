@@ -1,0 +1,29 @@
+.frame {
+  align-items: flex-start;
+  background-color: #006fcb;
+  border-radius: 0px 0px 10px 10px;
+  display: flex;
+  flex-direction: column;
+  padding: 40px 0px 10px;
+  position: relative;
+}
+
+.frame .centro-de-diagn {
+  align-self: stretch;
+  color: #ffffff;
+  font-family: "SF Pro Text-Regular", Helvetica;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 28px;
+  margin-top: -1px;
+  position: relative;
+  text-align: center;
+}
+
+.frame .text-wrapper {
+  font-family: "SF Pro Text-Regular", Helvetica;
+  font-size: 14px;
+  letter-spacing: 0;
+  line-height: 28px;
+}

@@ -1,0 +1,65 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Patient {
+  id         Int       @id @default(autoincrement())
+  name       String
+  email      String
+  phone      String
+  information String @db.Text
+  dateOfBirth DateTime
+  gender     String
+  status     String
+  createdAt  DateTime  @default(now())
+  medicalReports MedicalReport[]
+  // Otros campos relevantes para el paciente
+}
+model MedicalReport {
+  id         Int       @id @default(autoincrement())
+  name String
+  status  String
+  diagnosis  String?
+  date  DateTime
+  expirationDate DateTime?
+  createdAt  DateTime  @default(now())
+  patientId Int
+  patient    Patient   @relation(fields: [patientId], references: [id])
+  studies Study[]
+  // Otros campos relevantes para tu informe médico
+}
+
+model Category {
+  id           Int       @id @default(autoincrement())
+  name         String
+  studyTypes StudyType[]
+}
+
+model StudyType {
+  id           Int       @id @default(autoincrement())
+  name         String
+  description  String
+  categoryId Int
+  category    Category?  @relation(fields: [categoryId], references: [id]) 
+  studies Study[]
+}
+
+model Study {
+  id         Int       @id @default(autoincrement())
+  name String
+  title String
+  medicalReportId Int
+  createdAt  DateTime  @default(now())
+  studyTypeId Int
+  type    StudyType?  @relation(fields: [studyTypeId], references: [id]) 
+  medicalReport    MedicalReport?  @relation(fields: [medicalReportId], references: [id], onDelete: Cascade) 
+  // Otros campos relevantes para tu estudio
+}

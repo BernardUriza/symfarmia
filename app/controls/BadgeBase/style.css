@@ -1,0 +1,92 @@
+.badge-base {
+  align-items: center;
+  background-color: var(--brand-50);
+  border-radius: 16px;
+  display: inline-flex;
+  justify-content: center;
+  position: relative;
+}
+
+.badge-base .text {
+  color: var(--brand-700);
+  font-family: var(--text-xs-medium-font-family);
+  font-size: var(--text-xs-medium-font-size);
+  font-style: var(--text-xs-medium-font-style);
+  font-weight: var(--text-xs-medium-font-weight);
+  letter-spacing: var(--text-xs-medium-letter-spacing);
+  line-height: var(--text-xs-medium-line-height);
+  margin-top: -1px;
+  position: relative;
+  text-align: center;
+  white-space: nowrap;
+  width: fit-content;
+}
+
+.badge-base .dot-instance {
+  background-color: var(--brand-500) !important;
+}
+
+.badge-base .instance-node {
+  position: relative !important;
+}
+
+.badge-base .AU {
+  height: 16px !important;
+  position: relative !important;
+  width: 16px !important;
+}
+
+.badge-base .avatar {
+  background-image: url(https://c.animaapp.com/UJ5Kw0Oh/img/avatar@2x.png);
+  background-position: 50% 50%;
+  background-size: cover;
+  border-radius: 8px;
+  height: 16px;
+  position: relative;
+  width: 16px;
+}
+
+.badge-base .instance-node-2 {
+  height: 12px !important;
+  position: relative !important;
+  width: 12px !important;
+}
+
+.badge-base.icon-icon-left {
+  gap: 4px;
+  padding: 2px 8px 2px 6px;
+}
+
+.badge-base.icon-country {
+  gap: 6px;
+  padding: 2px 8px 2px 3px;
+}
+
+.badge-base.icon-only {
+  gap: 4px;
+  padding: 4px;
+}
+
+.badge-base.icon-icon-right {
+  gap: 4px;
+  padding: 2px 6px 2px 8px;
+}
+
+.badge-base.icon-x-close {
+  gap: 4px;
+  padding: 2px 6px 2px 8px;
+}
+
+.badge-base.icon-avatar {
+  gap: 6px;
+  padding: 2px 8px 2px 3px;
+}
+
+.badge-base.icon-dot {
+  gap: 6px;
+  padding: 2px 8px 2px 6px;
+}
+
+.badge-base.icon-false {
+  padding: 2px 8px;
+}
