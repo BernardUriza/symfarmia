@@ -29,13 +29,13 @@ const LandingPage = () => {
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <a
-              href="/api/auth/login"
+              href="/api/auth/login?returnTo=/legacy"
               className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg transition duration-200 shadow-lg hover:shadow-xl"
             >
               Login
             </a>
             <a
-              href="/api/auth/login"
+              href="/api/auth/login?returnTo=/legacy"
               className="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-8 rounded-lg transition duration-200 shadow-lg hover:shadow-xl"
             >
               Register
