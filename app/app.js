@@ -64,12 +64,12 @@ const Tabs = ({ setLoadingState }) => {
 const Menu = ({ user, setLoadingState }) => {
 
   console.log("username", user)
-  const isAdmin = user.roles && user.roles.includes('FM-Admin');
+  const isAdmin = user.roles && user.roles.includes('SYMFARMIA-Admin');
   return (
     <div className="container px-1 mx-auto my-5 font-sans">
       <div className="flex items-center my-5 space-x-4 flex-col lg:flex-row justify-between">
         <div className="w-28">
-          <img src="/images/ferboliMovil.png" alt="Logo Image" className="mx-auto my-auto" />
+          <img src="/images/symfarmia.png" alt="Logo Image" className="mx-auto my-auto" />
         </div>
         <div className="flex-1">
           <div className="text-gray-700 text-xl lg:text-2xl font-normal leading-7 lg:leading-10">
@@ -84,7 +84,7 @@ const Menu = ({ user, setLoadingState }) => {
               </div>
             ) : (
               <div>
-                Por favor, solicite al administrador que le asigne el rol de 'FM-Admin' para acceder a este panel.
+                Por favor, solicite al administrador que le asigne el rol de 'SYMFARMIA-Admin' para acceder a este panel.
               </div>
             )}
           </div>
@@ -111,7 +111,7 @@ const Menu = ({ user, setLoadingState }) => {
       )}
 
       <span className="text-gray-500 text-sm px-2">
-        FerboliMovil® App v1.0.1
+SYMFARMIA® App v1.0.1
       </span>
     </div>
   );

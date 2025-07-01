@@ -12,7 +12,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Architecture Overview
 
-This is a Next.js 14 medical management system called "Ferboli Móvil" that manages patients, medical reports, and studies.
+This is a Next.js 14 medical management system called "SYMFARMIA" that manages patients, medical reports, and studies.
 
 ### Database Architecture (Prisma + PostgreSQL)
 - **Patient**: Core entity with personal info, medical reports relationship

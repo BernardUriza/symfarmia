@@ -1,4 +1,4 @@
-# Ferboli Móvil
+# SYMFARMIA
 
 A comprehensive medical management system built with Next.js for managing patients, medical reports, and studies.
 

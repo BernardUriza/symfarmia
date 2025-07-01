@@ -57,10 +57,10 @@ const MedicalReportDetails = ({ loading, medicalReportId }) => {
         </p>
       </div>
       <div className="flex justify-between mx-3 my-6">
-        <a href="https://ferbolimovil.com/" target='_blank'>
-          <img src="/images/ferboliMovil.png" alt="Logo Image" className="my-auto pt-2" width={105.426} height={40} />
+        <a href="https://symfarmia.com/" target='_blank'>
+          <img src="/images/symfarmia.png" alt="Logo Image" className="my-auto pt-2" width={105.426} height={40} />
         </a>
-        <a href="https://ferbolimovil.com/">
+        <a href="https://symfarmia.com/">
           <HiOutlineArrowRightOnRectangle className="mx-1 w-6 h-6" />
         </a>
       </div>
