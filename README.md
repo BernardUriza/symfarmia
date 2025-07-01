@@ -107,12 +107,49 @@ npm run test:coverage # Generate test coverage report
 
 ### Demo Mode
 
-The app runs in demo mode without any external dependencies:
+SYMFARMIA includes a comprehensive demo mode using the Strategy pattern for seamless switching between live and demo environments:
 
-1. **Mock Data**: Uses `@faker-js/faker` to generate realistic patient data
-2. **Local Storage**: Persists demo data in browser storage  
-3. **Smoke Tests**: Built-in testing to validate all functionality
-4. **No Database Required**: Works completely offline for demonstration
+#### Features
+- **Strategy Pattern Implementation**: Clean separation between live and demo data providers
+- **In-Memory Mock Data**: Complete dataset with realistic patient, medical report, and study information
+- **No External Dependencies**: Works completely offline without database, Auth0, or EdgeStore
+- **Visual Demo Banner**: Clear indication when in demo mode with easy exit options
+- **Full UI Functionality**: All features work normally with mock data and simulated delays
+
+#### Accessing Demo Mode
+
+1. **URL Parameter**: Add `?demo=true` to any URL (e.g., `http://localhost:3000?demo=true`)
+2. **Environment Variable**: Set `NEXT_PUBLIC_APP_MODE=demo` in your `.env.local`
+3. **Landing Page Link**: Click "Try Demo Mode" button on the landing page
+
+#### Demo Mode Behavior
+
+- **Data Persistence**: Changes persist in memory during the session
+- **Simulated API Delays**: Realistic 300-1500ms delays for better UX testing
+- **Safe Operations**: Destructive actions work but only affect mock data
+- **Email/PDF Operations**: Console logging instead of real operations
+- **Session Storage**: Optional persistence using browser storage
+
+#### Developer Extension
+
+To extend demo functionality:
+
+```javascript
+// Add new mock data to DemoAPIProvider.js
+initializeDemoData() {
+  return {
+    // Add your new entities here
+    newEntity: [...]
+  }
+}
+
+// Add corresponding methods
+async fetchNewEntity() {
+  return this.demoData.newEntity;
+}
+```
+
+The Strategy pattern makes it easy to add new demo behaviors while keeping live functionality unchanged.
 
 ## ⚙️ Full Setup (Optional)
 

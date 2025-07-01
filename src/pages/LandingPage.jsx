@@ -31,6 +31,12 @@ const LandingPage = () => {
             <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
               Intelligent platform for independent doctors
             </p>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8 max-w-2xl mx-auto">
+              <p className="text-blue-800 text-sm">
+                <strong>Try SYMFARMIA in demo mode</strong> — no account required! 
+                Explore all features with sample data to see how it can transform your medical practice.
+              </p>
+            </div>
           </div>
 
           {/* Action Buttons */}
@@ -47,15 +53,12 @@ const LandingPage = () => {
             >
               Register
             </a>
-            <button
-              onClick={() => {
-                // For now, this will just show an alert, but could be expanded later
-                alert('Demo functionality coming soon!');
-              }}
-              className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 px-8 rounded-lg transition duration-200 border-2 border-gray-300"
+            <a
+              href="?demo=true"
+              className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 px-8 rounded-lg transition duration-200 border-2 border-gray-300 inline-block"
             >
-              Explore Without Account
-            </button>
+              Try Demo Mode
+            </a>
           </div>
 
           {/* Features Preview */}
