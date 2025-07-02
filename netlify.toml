@@ -98,9 +98,6 @@
 # Plugin configurations
 [[plugins]]
   package = "@netlify/plugin-nextjs"
-
-[[plugins]]
-  package = "netlify-plugin-cypress"
   [plugins.inputs]
     enable = false
 
