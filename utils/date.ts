@@ -5,6 +5,7 @@
 
 import { format, parseISO, isValid, addDays, subDays, startOfDay, endOfDay, differenceInDays } from 'date-fns';
 import { es } from 'date-fns/locale';
+import type { Locale } from 'date-fns';
 
 export interface DateFormatOptions {
   year?: 'numeric' | '2-digit';
