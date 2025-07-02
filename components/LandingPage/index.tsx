@@ -17,13 +17,13 @@ interface LandingPageProps extends BaseComponentProps {
  * Provides authentication entry point and feature overview
  * @param props - Component props including demo mode and callback handlers
  */
-const LandingPage: React.FC<LandingPageProps> = ({
+const LandingPage = ({
   className = '',
   showDemo = true,
   onDemoClick,
   onLoginClick,
   onRegisterClick,
-}) => {
+}: LandingPageProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
@@ -167,18 +167,18 @@ const LandingPage: React.FC<LandingPageProps> = ({
 };
 
 interface FeatureCardProps {
-  icon: React.ReactNode;
+  icon: JSX.Element;
   iconBgColor: string;
   title: string;
   description: string;
 }
 
-const FeatureCard: React.FC<FeatureCardProps> = ({
+const FeatureCard = ({
   icon,
   iconBgColor,
   title,
   description,
-}) => (
+}: FeatureCardProps) => (
   <div className="p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200">
     <div className={`w-12 h-12 ${iconBgColor} rounded-lg flex items-center justify-center mx-auto mb-4`}>
       {icon}

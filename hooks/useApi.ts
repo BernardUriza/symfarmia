@@ -55,7 +55,7 @@ export function useApi<T>(
   });
 
   const abortControllerRef = useRef<AbortController | null>(null);
-  const retryCountRef = useRef(0);
+  const retryCountRef = useRef<number>(0);
 
   const execute = useCallback(async (...args: unknown[]) => {
     // Cancel previous request
@@ -97,9 +97,9 @@ export function useApi<T>(
         const errorMessage = parseApiError(error).message;
         Logger.error('API Error', error);
 
-        if (retryCountRef.current < retries) {
+        if (retryCountRef.current !== null && retryCountRef.current < retries) {
           retryCountRef.current++;
-          setTimeout(executeWithRetry, retryDelay * retryCountRef.current);
+          setTimeout(executeWithRetry, retryDelay * (retryCountRef.current ?? 1));
           return;
         }
 
@@ -182,7 +182,7 @@ export function usePost<T, D = unknown>(
     return apiClient.post<T>(endpoint, data);
   }, [endpoint]);
 
-  const apiHook: UseApiReturn<T> = useApi(postFunction, [endpoint], options);
+  const apiHook: UseApiReturn<T> = useApi(postFunction as (...args: unknown[]) => Promise<ApiResponse<T>>, [endpoint], options);
 
   const post = useCallback(async (data: D) => {
     await apiHook.execute(data);
@@ -207,7 +207,7 @@ export function usePut<T, D = unknown>(
     return apiClient.put<T>(endpoint, data);
   }, [endpoint]);
 
-  const apiHook: UseApiReturn<T> = useApi(putFunction, [endpoint], options);
+  const apiHook: UseApiReturn<T> = useApi(putFunction as (...args: unknown[]) => Promise<ApiResponse<T>>, [endpoint], options);
 
   const put = useCallback(async (data: D) => {
     await apiHook.execute(data);
@@ -257,7 +257,7 @@ export function useUpload<T>(
     return apiClient.upload<T>(endpoint, file, additionalData);
   }, [endpoint]);
 
-  const apiHook: UseApiReturn<T> = useApi(uploadFunction, [endpoint], options);
+  const apiHook: UseApiReturn<T> = useApi(uploadFunction as (...args: unknown[]) => Promise<ApiResponse<T>>, [endpoint], options);
 
   const upload = useCallback(async (file: File, additionalData?: Record<string, string>) => {
     await apiHook.execute(file, additionalData);

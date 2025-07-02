@@ -122,20 +122,20 @@ export function useModal(): {
  * Hook for managing previous value
  */
 export function usePrevious<T>(value: T): T | undefined {
-  const ref = useRef<T>();
+  const ref = useRef<T | undefined>(undefined);
   
   useEffect(() => {
     ref.current = value;
   });
   
-  return ref.current;
+  return ref.current ?? undefined;
 }
 
 /**
  * Hook for component mount status
  */
 export function useIsMounted(): () => boolean {
-  const isMountedRef = useRef(true);
+  const isMountedRef = useRef<boolean>(true);
   
   useEffect(() => {
     return () => {
@@ -143,7 +143,7 @@ export function useIsMounted(): () => boolean {
     };
   }, []);
   
-  return useCallback(() => isMountedRef.current, []);
+  return useCallback(() => isMountedRef.current ?? false, []);
 }
 
 /**
