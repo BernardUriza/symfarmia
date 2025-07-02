@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BaseComponentProps } from '@/types';
 import { logComponent } from '@/utils/logger';
+import DemoLoginModal from '../DemoLoginModal';
 
 interface LandingPageProps extends BaseComponentProps {
   showDemo?: boolean;
@@ -23,6 +24,8 @@ const LandingPage: React.FC<LandingPageProps> = ({
   onLoginClick,
   onRegisterClick,
 }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   useEffect(() => {
     logComponent({
       componentName: 'LandingPage',
@@ -31,7 +34,20 @@ const LandingPage: React.FC<LandingPageProps> = ({
   }, [showDemo]);
 
   const handleDemoClick = () => {
-    onDemoClick?.() || (window.location.href = '?demo=true');
+    if (onDemoClick) {
+      onDemoClick();
+    } else {
+      setIsModalOpen(true);
+    }
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleDemoLogin = () => {
+    setIsModalOpen(false);
+    window.location.href = '?demo=true';
   };
 
   const handleLoginClick = () => {
@@ -139,6 +155,13 @@ const LandingPage: React.FC<LandingPageProps> = ({
           <p>&copy; 2024 SYMFARMIA. Intelligent platform for independent doctors.</p>
         </div>
       </footer>
+
+      {/* Demo Login Modal */}
+      <DemoLoginModal
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+        onLogin={handleDemoLogin}
+      />
     </div>
   );
 };

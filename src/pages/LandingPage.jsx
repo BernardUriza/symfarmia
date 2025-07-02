@@ -1,13 +1,29 @@
 "use client"
-import React from 'react';
+import React, { useState } from 'react';
 import SmokeTest from '../components/SmokeTest';
 import Logger from '../utils/logger';
+import DemoLoginModal from '../../components/DemoLoginModal';
 
 const LandingPage = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   // Log component render in development
   React.useEffect(() => {
     Logger.component('LandingPage', { timestamp: new Date().toISOString() })
   }, [])
+
+  const handleDemoClick = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleDemoLogin = () => {
+    setIsModalOpen(false);
+    window.location.href = '?demo=true';
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex flex-col">
@@ -53,12 +69,12 @@ const LandingPage = () => {
             >
               Register
             </a>
-            <a
-              href="?demo=true"
+            <button
+              onClick={handleDemoClick}
               className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 px-8 rounded-lg transition duration-200 border-2 border-gray-300 inline-block"
             >
               Try Demo Mode
-            </a>
+            </button>
           </div>
 
           {/* Features Preview */}
@@ -102,6 +118,13 @@ const LandingPage = () => {
           <p>&copy; 2024 SYMFARMIA. Intelligent platform for independent doctors.</p>
         </div>
       </footer>
+
+      {/* Demo Login Modal */}
+      <DemoLoginModal
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+        onLogin={handleDemoLogin}
+      />
 
       {/* Smoke Test Component */}
       <SmokeTest />
