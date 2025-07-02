@@ -138,7 +138,7 @@ export interface FormState {
 export interface ModalState {
   isOpen: boolean;
   title: string;
-  content?: React.ReactNode;
+  content?: unknown;
   onConfirm?: () => void;
   onCancel?: () => void;
 }
@@ -186,7 +186,7 @@ export interface AuthState {
 export interface NavigationItem {
   label: string;
   href: string;
-  icon?: React.ComponentType;
+  icon?: unknown;
   active?: boolean;
   children?: NavigationItem[];
 }
@@ -229,7 +229,7 @@ export interface EmailData {
   html: string;
   attachments?: Array<{
     filename: string;
-    content: Buffer;
+    content: ArrayBuffer;
     contentType: string;
   }>;
 }
@@ -281,7 +281,7 @@ export interface ThemeColors {
 // Component Props Types
 export interface BaseComponentProps {
   className?: string;
-  children?: React.ReactNode;
+  children?: unknown;
   id?: string;
 }
 
@@ -306,7 +306,7 @@ export interface InputProps extends BaseComponentProps {
   onFocus?: () => void;
   error?: string;
   label?: string;
-  icon?: React.ComponentType;
+  icon?: unknown;
 }
 
 export interface ModalProps extends BaseComponentProps {
@@ -315,7 +315,7 @@ export interface ModalProps extends BaseComponentProps {
   title?: string;
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
   closable?: boolean;
-  footer?: React.ReactNode;
+  footer?: unknown;
 }
 
 // Hook Return Types

@@ -3,7 +3,7 @@
  * Provides comprehensive form state management and validation
  */
 
-import { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { UseFormResult } from '@/types';
 import { validate } from '@/utils/validation';
 
@@ -62,24 +62,24 @@ export function useForm<T extends Record<string, unknown>>(
   }, [values, validateField]);
 
   const handleChange = useCallback((field: keyof T, value: unknown) => {
-    setValues(prev => ({ ...prev, [field]: value }));
+    setValues((prev: T) => ({ ...prev, [field]: value }));
 
     if (validateOnChange) {
       const error = validateField(field, value);
-      setErrors(prev => ({ ...prev, [field]: error }));
+      setErrors((prev: Record<keyof T, string>) => ({ ...prev, [field]: error }));
     } else if (touched[field]) {
       // Clear error if field was previously touched and had an error
       const error = validateField(field, value);
-      setErrors(prev => ({ ...prev, [field]: error }));
+      setErrors((prev: Record<keyof T, string>) => ({ ...prev, [field]: error }));
     }
   }, [validateField, validateOnChange, touched]);
 
   const handleBlur = useCallback((field: keyof T) => {
-    setTouched(prev => ({ ...prev, [field]: true }));
+    setTouched((prev: Record<keyof T, boolean>) => ({ ...prev, [field]: true }));
 
     if (validateOnBlur) {
       const error = validateField(field, values[field]);
-      setErrors(prev => ({ ...prev, [field]: error }));
+      setErrors((prev: Record<keyof T, string>) => ({ ...prev, [field]: error }));
     }
   }, [validateField, validateOnBlur, values]);
 
@@ -132,7 +132,7 @@ export function useForm<T extends Record<string, unknown>>(
   }, [handleChange]);
 
   const setFieldError = useCallback((field: keyof T, error: string) => {
-    setErrors(prev => ({ ...prev, [field]: error }));
+    setErrors((prev: Record<keyof T, string>) => ({ ...prev, [field]: error }));
   }, []);
 
   const isValid = Object.values(errors).every(error => !error);
@@ -177,15 +177,15 @@ export function useFormArray<T>(
   const [items, setItems] = useState<T[]>(initialValues);
 
   const append = useCallback((item: T) => {
-    setItems(prev => [...prev, item]);
+    setItems((prev: T[]) => [...prev, item]);
   }, []);
 
   const prepend = useCallback((item: T) => {
-    setItems(prev => [item, ...prev]);
+    setItems((prev: T[]) => [item, ...prev]);
   }, []);
 
   const insert = useCallback((index: number, item: T) => {
-    setItems(prev => {
+    setItems((prev: T[]) => {
       const newItems = [...prev];
       newItems.splice(index, 0, item);
       return newItems;
@@ -193,19 +193,27 @@ export function useFormArray<T>(
   }, []);
 
   const remove = useCallback((index: number) => {
-    setItems(prev => prev.filter((_, i) => i !== index));
+    setItems((prev: T[]) => prev.filter((_, i) => i !== index));
   }, []);
 
   const swap = useCallback((indexA: number, indexB: number) => {
-    setItems(prev => {
+    setItems((prev: T[]) => {
       const newItems = [...prev];
+      if (
+        indexA < 0 ||
+        indexB < 0 ||
+        indexA >= newItems.length ||
+        indexB >= newItems.length
+      ) {
+        return newItems;
+      }
       [newItems[indexA], newItems[indexB]] = [newItems[indexB], newItems[indexA]];
       return newItems;
     });
   }, []);
 
   const move = useCallback((from: number, to: number) => {
-    setItems(prev => {
+    setItems((prev: T[]) => {
       const newItems = [...prev];
       const item = newItems.splice(from, 1)[0];
       newItems.splice(to, 0, item);
@@ -214,7 +222,7 @@ export function useFormArray<T>(
   }, []);
 
   const replace = useCallback((index: number, item: T) => {
-    setItems(prev => prev.map((existingItem, i) => i === index ? item : existingItem));
+    setItems((prev: T[]) => prev.map((existingItem, i) => (i === index ? item : existingItem)));
   }, []);
 
   const clear = useCallback(() => {

@@ -66,7 +66,7 @@ export function useApi<T>(
     abortControllerRef.current = new AbortController();
     retryCountRef.current = 0;
 
-    setState(prev => ({
+    setState((prev: UseApiState<T>) => ({
       ...prev,
       isLoading: true,
       isError: false,
@@ -182,7 +182,7 @@ export function usePost<T, D = unknown>(
     return apiClient.post<T>(endpoint, data);
   }, [endpoint]);
 
-  const apiHook = useApi(postFunction, [endpoint], options);
+  const apiHook: UseApiReturn<T> = useApi(postFunction, [endpoint], options);
 
   const post = useCallback(async (data: D) => {
     await apiHook.execute(data);
@@ -207,7 +207,7 @@ export function usePut<T, D = unknown>(
     return apiClient.put<T>(endpoint, data);
   }, [endpoint]);
 
-  const apiHook = useApi(putFunction, [endpoint], options);
+  const apiHook: UseApiReturn<T> = useApi(putFunction, [endpoint], options);
 
   const put = useCallback(async (data: D) => {
     await apiHook.execute(data);
@@ -232,7 +232,7 @@ export function useDelete<T>(
     return apiClient.delete<T>(endpoint);
   }, [endpoint]);
 
-  const apiHook = useApi(deleteFunction, [endpoint], options);
+  const apiHook: UseApiReturn<T> = useApi(deleteFunction, [endpoint], options);
 
   const deleteResource = useCallback(async () => {
     await apiHook.execute();
@@ -257,7 +257,7 @@ export function useUpload<T>(
     return apiClient.upload<T>(endpoint, file, additionalData);
   }, [endpoint]);
 
-  const apiHook = useApi(uploadFunction, [endpoint], options);
+  const apiHook: UseApiReturn<T> = useApi(uploadFunction, [endpoint], options);
 
   const upload = useCallback(async (file: File, additionalData?: Record<string, string>) => {
     await apiHook.execute(file, additionalData);
@@ -288,17 +288,17 @@ export function usePagination<T>(
     });
   }, [endpoint, page, limit]);
 
-  const apiHook = useApi(fetchFunction, [endpoint, page, limit], {
+  const apiHook: UseApiReturn<T> = useApi(fetchFunction, [endpoint, page, limit], {
     ...options,
     immediate: true,
   });
 
   const nextPage = useCallback(() => {
-    setPage(prev => prev + 1);
+    setPage((prev: number) => prev + 1);
   }, []);
 
   const prevPage = useCallback(() => {
-    setPage(prev => Math.max(1, prev - 1));
+    setPage((prev: number) => Math.max(1, prev - 1));
   }, []);
 
   const goToPage = useCallback((newPage: number) => {
@@ -350,9 +350,9 @@ export function useInfiniteScroll<T>(
       if (result.data.length === 0) {
         setHasMore(false);
       } else {
-        setData(prev => [...prev, ...result.data]);
+        setData((prev: T[]) => [...prev, ...result.data]);
         setHasMore(result.hasMore);
-        setPage(prev => prev + 1);
+        setPage((prev: number) => prev + 1);
       }
     } catch (error) {
       Logger.error('Infinite scroll error', error);

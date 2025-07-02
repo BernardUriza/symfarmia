@@ -310,7 +310,7 @@ export function useKeyboardShortcut(
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      const pressedKeys = [];
+      const pressedKeys: string[] = [];
       
       if (event.ctrlKey) pressedKeys.push('ctrl');
       if (event.shiftKey) pressedKeys.push('shift');
@@ -350,7 +350,7 @@ export function useIntersectionObserver(
     if (!element) return;
 
     const observer = new IntersectionObserver(([entry]) => {
-      setEntry(entry);
+      setEntry(entry ?? null);
     }, options);
 
     observer.observe(element);

@@ -29,8 +29,14 @@ interface UserLogData {
   metadata?: Record<string, unknown>;
 }
 
+// Provide a minimal process type for environments without Node types
+declare const process: {
+  env: Record<string, string | undefined>;
+};
+
 class Logger {
-  private static isDevelopment = process.env.NODE_ENV === 'development';
+  private static isDevelopment =
+    typeof process !== 'undefined' && process.env.NODE_ENV === 'development';
   private static prefix = '[SYMFARMIA]';
 
   /**
