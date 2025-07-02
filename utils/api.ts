@@ -11,7 +11,8 @@ import Logger from './logger';
  * Default API configuration
  */
 const defaultConfig: ApiConfig = {
-  baseUrl: process.env.NEXT_PUBLIC_API_URL || '',
+  baseUrl:
+    typeof process !== 'undefined' ? process.env.NEXT_PUBLIC_API_URL || '' : '',
   timeout: 30000,
   retries: 3,
   headers: {
@@ -155,7 +156,7 @@ export class ApiClient {
   async post<T>(endpoint: string, data?: unknown): Promise<ApiResponse<T>> {
     return this.makeRequest<T>(endpoint, {
       method: 'POST',
-      body: data ? JSON.stringify(data) : undefined,
+      body: data ? JSON.stringify(data) : null,
     });
   }
 
@@ -165,7 +166,7 @@ export class ApiClient {
   async put<T>(endpoint: string, data?: unknown): Promise<ApiResponse<T>> {
     return this.makeRequest<T>(endpoint, {
       method: 'PUT',
-      body: data ? JSON.stringify(data) : undefined,
+      body: data ? JSON.stringify(data) : null,
     });
   }
 
@@ -175,7 +176,7 @@ export class ApiClient {
   async patch<T>(endpoint: string, data?: unknown): Promise<ApiResponse<T>> {
     return this.makeRequest<T>(endpoint, {
       method: 'PATCH',
-      body: data ? JSON.stringify(data) : undefined,
+      body: data ? JSON.stringify(data) : null,
     });
   }
 
@@ -261,11 +262,20 @@ export function parseApiError(error: unknown): {
   
   if (typeof error === 'object' && error !== null) {
     const errorObj = error as Record<string, unknown>;
-    return {
+    const status = errorObj.statusCode;
+    const parsed = {
       message: String(errorObj.message || 'Unknown error'),
       code: String(errorObj.code || 'UNKNOWN_ERROR'),
-      statusCode: Number(errorObj.statusCode) || undefined,
-    };
+    } as { message: string; code: string; statusCode?: number };
+
+    if (status !== undefined) {
+      const num = Number(status);
+      if (!Number.isNaN(num)) {
+        parsed.statusCode = num;
+      }
+    }
+
+    return parsed;
   }
   
   return {
@@ -334,7 +344,7 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
   func: T,
   delay: number
 ): (...args: Parameters<T>) => void {
-  let timeoutId: NodeJS.Timeout;
+  let timeoutId: ReturnType<typeof setTimeout>;
   
   return (...args: Parameters<T>) => {
     clearTimeout(timeoutId);
@@ -381,7 +391,7 @@ export function transformResponse<T, U>(
   transformer: (data: T) => U
 ): ApiResponse<U> {
   if (!response.success || !response.data) {
-    return response as ApiResponse<U>;
+    return response as unknown as ApiResponse<U>;
   }
   
   try {

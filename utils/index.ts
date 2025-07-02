@@ -152,7 +152,7 @@ export function deepMerge<T extends Record<string, unknown>>(
   target: T,
   source: Partial<T>
 ): T {
-  const result = { ...target };
+  const result: T & Record<string, unknown> = { ...target };
   
   Object.keys(source).forEach(key => {
     const sourceValue = source[key];
@@ -166,9 +166,12 @@ export function deepMerge<T extends Record<string, unknown>>(
       typeof targetValue === 'object' &&
       !Array.isArray(targetValue)
     ) {
-      result[key] = deepMerge(targetValue, sourceValue);
+      result[key as keyof T] = deepMerge(
+        targetValue as T,
+        sourceValue as Partial<T>
+      ) as T[Extract<keyof T, string>];
     } else {
-      result[key] = sourceValue as T[Extract<keyof T, string>];
+      result[key as keyof T] = sourceValue as T[Extract<keyof T, string>];
     }
   });
   
@@ -418,7 +421,7 @@ export function groupBy<T>(
  */
 export function sortBy<T>(
   array: T[],
-  ...keyFns: Array<(item: T) => unknown>
+  ...keyFns: Array<(item: T) => string | number>
 ): T[] {
   return [...array].sort((a, b) => {
     for (const keyFn of keyFns) {
