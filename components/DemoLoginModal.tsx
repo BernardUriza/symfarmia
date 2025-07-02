@@ -8,11 +8,11 @@ interface DemoLoginModalProps {
   onLogin: () => void;
 }
 
-const DemoLoginModal: React.FC<DemoLoginModalProps> = ({
+const DemoLoginModal = ({
   isOpen,
   onClose,
   onLogin,
-}) => {
+}: DemoLoginModalProps) => {
   const [emailValue, setEmailValue] = useState('');
   const [passwordValue, setPasswordValue] = useState('');
   const [isTypingEmail, setIsTypingEmail] = useState(false);
@@ -102,9 +102,9 @@ const DemoLoginModal: React.FC<DemoLoginModalProps> = ({
     }
 
     return cleanup;
-  }, [isOpen]);
+  }, [isOpen, startTypewriterEffect]);
 
-  const handleBackdropClick = (e: React.MouseEvent) => {
+  const handleBackdropClick = (e: any) => {
     if (e.target === e.currentTarget && !isLoading) {
       onClose();
     }
@@ -220,7 +220,7 @@ const DemoLoginModal: React.FC<DemoLoginModalProps> = ({
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .animate-scale-in {
           animation: scaleIn 0.2s ease-out;
         }

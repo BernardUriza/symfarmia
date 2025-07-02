@@ -84,7 +84,7 @@ export function useForm<T extends Record<string, unknown>>(
   }, [validateField, validateOnBlur, values]);
 
   const handleSubmit = useCallback((submitHandler?: (values: T) => void | Promise<void>) => {
-    return async (event?: React.FormEvent) => {
+    return async (event?: any) => {
       if (event) {
         event.preventDefault();
       }
@@ -207,7 +207,11 @@ export function useFormArray<T>(
       ) {
         return newItems;
       }
-      [newItems[indexA], newItems[indexB]] = [newItems[indexB], newItems[indexA]];
+      if (newItems[indexA] !== undefined && newItems[indexB] !== undefined) {
+        const temp = newItems[indexA];
+        newItems[indexA] = newItems[indexB];
+        newItems[indexB] = temp;
+      }
       return newItems;
     });
   }, []);
@@ -215,7 +219,7 @@ export function useFormArray<T>(
   const move = useCallback((from: number, to: number) => {
     setItems((prev: T[]) => {
       const newItems = [...prev];
-      const item = newItems.splice(from, 1)[0];
+      const item = newItems.splice(from, 1)[0] as T;
       newItems.splice(to, 0, item);
       return newItems;
     });

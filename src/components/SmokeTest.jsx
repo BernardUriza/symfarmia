@@ -140,7 +140,7 @@ const SmokeTest = () => {
           Promise: typeof Promise !== 'undefined'
         }
         
-        const unsupported = Object.entries(features).filter(([_, supported]) => !supported)
+        const unsupported = Object.entries(features).filter(([, supported]) => !supported)
         
         if (unsupported.length === 0) {
           addTest('Browser Features', 'passed', 'All required browser features available')
