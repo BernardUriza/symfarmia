@@ -98,8 +98,6 @@
 # Plugin configurations
 [[plugins]]
   package = "@netlify/plugin-nextjs"
-  [plugins.inputs]
-    enable = false
 
 # Edge functions (if needed)
 [[edge_functions]]
