@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, Text, BarList } from "@tremor/react";
-import { useAppMode } from '../../providers/AppModeProvider';
+import { useAppMode } from '../../../app/providers/AppModeProvider';
 
 const TopStudiesList = ({ medicalReports }) => {
   const { isDemoMode } = useAppMode();
