@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 interface DemoLoginModalProps {
   isOpen: boolean;
@@ -19,6 +19,7 @@ const DemoLoginModal = ({
   const [isTypingPassword, setIsTypingPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [hasStarted, setHasStarted] = useState(false);
 
   const emailTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const passwordTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -28,13 +29,14 @@ const DemoLoginModal = ({
 
   const typewriterDelay = 80; // milliseconds between characters
 
-  const startTypewriterEffect = () => {
+  const startTypewriterEffect = useCallback(() => {
     setEmailValue('');
     setPasswordValue('');
     setIsTypingEmail(true);
     setIsTypingPassword(false);
     setIsLoading(false);
     setShowPassword(false);
+    setHasStarted(true);
 
     // Type email first
     let emailIndex = 0;
@@ -75,9 +77,9 @@ const DemoLoginModal = ({
     
     // Start typing after modal animation
     setTimeout(typeEmail, 500);
-  };
+  }, [onLogin]);
 
-  const cleanup = () => {
+  const cleanup = useCallback(() => {
     if (emailTimeoutRef.current) {
       clearTimeout(emailTimeoutRef.current);
       emailTimeoutRef.current = null;
@@ -92,17 +94,18 @@ const DemoLoginModal = ({
     setIsTypingPassword(false);
     setIsLoading(false);
     setShowPassword(false);
-  };
+    setHasStarted(false);
+  }, []);
 
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && !hasStarted) {
       startTypewriterEffect();
-    } else {
+    } else if (!isOpen) {
       cleanup();
     }
 
     return cleanup;
-  }, [isOpen, startTypewriterEffect]);
+  }, [isOpen, hasStarted, startTypewriterEffect, cleanup]);
 
   const handleBackdropClick = (e: any) => {
     if (e.target === e.currentTarget && !isLoading) {
