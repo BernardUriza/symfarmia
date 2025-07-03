@@ -1,5 +1,5 @@
 "use client"
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import SmokeTest from '../components/SmokeTest';
 import Logger from '../utils/logger';
 import DemoLoginModal from '../../components/DemoLoginModal';

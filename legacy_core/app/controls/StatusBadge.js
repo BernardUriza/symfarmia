@@ -1,5 +1,5 @@
 import React from "react";
-import { ClockIcon, UploadIcon, NoSymbolIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
+import { ClockIcon, ArrowUpTrayIcon, NoSymbolIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
 import { Badge } from "@tremor/react";
 
 const StatusBadge = ({ status }) => {
@@ -13,7 +13,7 @@ const StatusBadge = ({ status }) => {
       break;
     case "Enviado":
       badgeColor = "blue";
-      badgeIcon = UploadIcon;
+      badgeIcon = ArrowUpTrayIcon;
       break;
     case "No entregado":
       badgeColor = "red";
