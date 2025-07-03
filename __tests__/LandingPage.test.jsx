@@ -1,6 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import LandingPage from '../src/pages/LandingPage'
 import { AppModeProvider } from '../app/providers/AppModeProvider'
+import { ThemeProvider } from '../app/providers/ThemeProvider'
 
 // Mock window.alert
 window.alert = jest.fn()
@@ -12,9 +13,11 @@ describe('LandingPage', () => {
 
   it('renders the main heading', () => {
     render(
-      <AppModeProvider>
-        <LandingPage />
-      </AppModeProvider>
+      <ThemeProvider>
+        <AppModeProvider>
+          <LandingPage />
+        </AppModeProvider>
+      </ThemeProvider>
     )
     expect(screen.getByText('Welcome to')).toBeInTheDocument()
     expect(screen.getAllByText('SYMFARMIA').length).toBeGreaterThan(0)
@@ -22,18 +25,22 @@ describe('LandingPage', () => {
 
   it('renders the subtitle', () => {
     render(
-      <AppModeProvider>
-        <LandingPage />
-      </AppModeProvider>
+      <ThemeProvider>
+        <AppModeProvider>
+          <LandingPage />
+        </AppModeProvider>
+      </ThemeProvider>
     )
     expect(screen.getByText('Intelligent platform for independent doctors')).toBeInTheDocument()
   })
 
   it('renders Login and Register buttons', () => {
     render(
-      <AppModeProvider>
-        <LandingPage />
-      </AppModeProvider>
+      <ThemeProvider>
+        <AppModeProvider>
+          <LandingPage />
+        </AppModeProvider>
+      </ThemeProvider>
     )
     expect(screen.getByRole('link', { name: /login/i })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /register/i })).toBeInTheDocument()
@@ -41,18 +48,22 @@ describe('LandingPage', () => {
 
   it('renders Try Demo Mode button', () => {
     render(
-      <AppModeProvider>
-        <LandingPage />
-      </AppModeProvider>
+      <ThemeProvider>
+        <AppModeProvider>
+          <LandingPage />
+        </AppModeProvider>
+      </ThemeProvider>
     )
     expect(screen.getByRole('button', { name: /try demo mode/i })).toBeInTheDocument()
   })
 
   it('opens the demo modal when Try Demo Mode is clicked', () => {
     render(
-      <AppModeProvider>
-        <LandingPage />
-      </AppModeProvider>
+      <ThemeProvider>
+        <AppModeProvider>
+          <LandingPage />
+        </AppModeProvider>
+      </ThemeProvider>
     )
     const demoButton = screen.getByRole('button', { name: /try demo mode/i })
     fireEvent.click(demoButton)
@@ -61,9 +72,11 @@ describe('LandingPage', () => {
 
   it('renders feature cards', () => {
     render(
-      <AppModeProvider>
-        <LandingPage />
-      </AppModeProvider>
+      <ThemeProvider>
+        <AppModeProvider>
+          <LandingPage />
+        </AppModeProvider>
+      </ThemeProvider>
     )
     expect(screen.getByText('Patient Management')).toBeInTheDocument()
     expect(screen.getByText('Medical Reports')).toBeInTheDocument()
@@ -72,9 +85,11 @@ describe('LandingPage', () => {
 
   it('has correct Login link href', () => {
     render(
-      <AppModeProvider>
-        <LandingPage />
-      </AppModeProvider>
+      <ThemeProvider>
+        <AppModeProvider>
+          <LandingPage />
+        </AppModeProvider>
+      </ThemeProvider>
     )
     const loginLink = screen.getByRole('link', { name: /login/i })
     expect(loginLink).toHaveAttribute('href', '/api/auth/login?returnTo=/legacy')
@@ -82,9 +97,11 @@ describe('LandingPage', () => {
 
   it('has correct Register link href', () => {
     render(
-      <AppModeProvider>
-        <LandingPage />
-      </AppModeProvider>
+      <ThemeProvider>
+        <AppModeProvider>
+          <LandingPage />
+        </AppModeProvider>
+      </ThemeProvider>
     )
     const registerLink = screen.getByRole('link', { name: /register/i })
     expect(registerLink).toHaveAttribute('href', '/api/auth/login?returnTo=/legacy')
@@ -92,9 +109,11 @@ describe('LandingPage', () => {
 
   it('renders footer copyright', () => {
     render(
-      <AppModeProvider>
-        <LandingPage />
-      </AppModeProvider>
+      <ThemeProvider>
+        <AppModeProvider>
+          <LandingPage />
+        </AppModeProvider>
+      </ThemeProvider>
     )
     expect(screen.getByText(/© 2024 SYMFARMIA/)).toBeInTheDocument()
   })

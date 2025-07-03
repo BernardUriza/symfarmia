@@ -121,12 +121,12 @@ const DemoLoginModal = ({
       className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
       onClick={handleBackdropClick}
     >
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 relative animate-scale-in">
+      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl max-w-md w-full p-6 relative animate-scale-in">
         {/* Close button */}
         {!isLoading && (
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
             aria-label="Close modal"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -137,8 +137,8 @@ const DemoLoginModal = ({
 
         {/* Header */}
         <div className="text-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Demo Login</h2>
-          <p className="text-gray-600 text-sm">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Demo Login</h2>
+          <p className="text-gray-600 dark:text-gray-300 text-sm">
             Watch as we automatically fill in demo credentials
           </p>
         </div>
@@ -147,7 +147,7 @@ const DemoLoginModal = ({
         <div className="space-y-4">
           {/* Email Field */}
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Email
             </label>
             <div className="relative">
@@ -156,7 +156,7 @@ const DemoLoginModal = ({
                 id="email"
                 value={emailValue}
                 readOnly
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 placeholder=""
               />
               {isTypingEmail && (
@@ -169,7 +169,7 @@ const DemoLoginModal = ({
 
           {/* Password Field */}
           <div className={showPassword ? 'opacity-100' : 'opacity-30'}>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Password
             </label>
             <div className="relative">
@@ -178,7 +178,7 @@ const DemoLoginModal = ({
                 id="password"
                 value={passwordValue}
                 readOnly
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 placeholder=""
               />
               {isTypingPassword && (
@@ -196,7 +196,7 @@ const DemoLoginModal = ({
               className={`w-full py-3 px-4 rounded-md font-semibold text-white transition-all duration-200 ${
                 isLoading || isTypingEmail || isTypingPassword
                   ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
+                  : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
               }`}
             >
               {isLoading ? (
@@ -218,7 +218,7 @@ const DemoLoginModal = ({
 
         {/* Info message */}
         <div className="mt-4 text-center">
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
             Demo mode provides full access with sample data
           </p>
         </div>

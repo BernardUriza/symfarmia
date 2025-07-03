@@ -1,9 +1,12 @@
 import { render, screen } from '@testing-library/react'
 import { useUser } from '@auth0/nextjs-auth0/client'
 
+jest.mock('@auth0/nextjs-auth0/client', () => ({ useUser: jest.fn() }))
+
 // Mock the legacy page since it requires complex dependencies
-jest.mock('../app/legacy/page', () => {
-  return function MockLegacyPage() {
+jest.mock('../app/legacy/page', () => ({
+  __esModule: true,
+  default: function MockLegacyPage() {
     const { user, isLoading } = useUser()
     
     if (isLoading) return <div>Loading...</div>
@@ -16,13 +19,13 @@ jest.mock('../app/legacy/page', () => {
       </div>
     )
   }
-})
+}))
 
 const LegacyPage = require('../app/legacy/page').default
 
 describe('LegacyPage', () => {
   it('shows loading state when user is loading', () => {
-    require('@auth0/nextjs-auth0/client').useUser.mockReturnValue({
+    jest.spyOn(require('@auth0/nextjs-auth0/client'), 'useUser').mockReturnValue({
       user: null,
       isLoading: true,
       error: null,
@@ -33,7 +36,7 @@ describe('LegacyPage', () => {
   })
 
   it('shows login prompt when user is not authenticated', () => {
-    require('@auth0/nextjs-auth0/client').useUser.mockReturnValue({
+    jest.spyOn(require('@auth0/nextjs-auth0/client'), 'useUser').mockReturnValue({
       user: null,
       isLoading: false,
       error: null,
@@ -44,7 +47,7 @@ describe('LegacyPage', () => {
   })
 
   it('shows legacy system when user is authenticated', () => {
-    require('@auth0/nextjs-auth0/client').useUser.mockReturnValue({
+    jest.spyOn(require('@auth0/nextjs-auth0/client'), 'useUser').mockReturnValue({
       user: { name: 'Dr. Test', email: 'test@symfarmia.com' },
       isLoading: false,
       error: null,

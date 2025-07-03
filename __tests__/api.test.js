@@ -5,6 +5,7 @@
 
 // Mock fetch for API testing
 global.fetch = jest.fn()
+jest.mock('../app/api/auth/[auth0]/route', () => ({ GET: jest.fn() }))
 
 describe('API Tests', () => {
   beforeEach(() => {

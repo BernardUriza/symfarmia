@@ -4,6 +4,7 @@ import ErrorBoundary from '../src/components/ErrorBoundary'
 import { UserProvider } from '@auth0/nextjs-auth0/client'
 import { AppModeProvider } from './providers/AppModeProvider'
 import DemoModeBanner from './components/DemoModeBanner'
+import { ThemeProvider } from './providers/ThemeProvider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -15,15 +16,17 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={inter.className} style={{backgroundColor: "#F9FAFB"}}>
-        <ErrorBoundary>
-          <UserProvider>
-            <AppModeProvider>
-              <DemoModeBanner />
-              {children}
-            </AppModeProvider>
-          </UserProvider>
-        </ErrorBoundary>
+      <body className={`${inter.className} bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-gray-100`}>
+        <ThemeProvider>
+          <ErrorBoundary>
+            <UserProvider>
+              <AppModeProvider>
+                <DemoModeBanner />
+                {children}
+              </AppModeProvider>
+            </UserProvider>
+          </ErrorBoundary>
+        </ThemeProvider>
       </body>
     </html>
   )
