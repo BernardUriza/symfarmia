@@ -1,6 +1,7 @@
 import './globals.css'
 import { Inter } from 'next/font/google'
 import ErrorBoundary from '../src/components/ErrorBoundary'
+import { UserProvider } from '@auth0/nextjs-auth0/client'
 import { AppModeProvider } from './providers/AppModeProvider'
 import DemoModeBanner from './components/DemoModeBanner'
 
@@ -16,10 +17,12 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className={inter.className} style={{backgroundColor: "#F9FAFB"}}>
         <ErrorBoundary>
-          <AppModeProvider>
-            <DemoModeBanner />
-            {children}
-          </AppModeProvider>
+          <UserProvider>
+            <AppModeProvider>
+              <DemoModeBanner />
+              {children}
+            </AppModeProvider>
+          </UserProvider>
         </ErrorBoundary>
       </body>
     </html>
