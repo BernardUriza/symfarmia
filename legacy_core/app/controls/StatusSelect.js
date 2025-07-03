@@ -1,6 +1,6 @@
 import React from 'react';
 import { Select, SelectItem } from '@tremor/react';
-import { ClockIcon, UploadIcon, NoSymbolIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
+import { ClockIcon, ArrowUpTrayIcon, NoSymbolIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 
 const StatusSelect = ({ value, onValueChange }) => {
   const getStatusColor = (status) => {
@@ -23,7 +23,7 @@ const StatusSelect = ({ value, onValueChange }) => {
       <SelectItem value="Pendiente" style={{"cursor":"pointer"}} icon={ClockIcon} color='red' className={"hover:text-gray-600 "+getStatusColor('Pendiente')}>
         Pendiente
       </SelectItem>
-      <SelectItem value="Enviando" style={{"cursor":"pointer"}} icon={UploadIcon} className={"hover:text-gray-600 "+getStatusColor('Enviando')}>
+      <SelectItem value="Enviando" style={{"cursor":"pointer"}} icon={ArrowUpTrayIcon} className={"hover:text-gray-600 "+getStatusColor('Enviando')}>
         Enviando
       </SelectItem>
       <SelectItem value="No entregado" style={{"cursor":"pointer"}} icon={NoSymbolIcon} className={"hover:text-gray-600 "+getStatusColor('No entregado')}>

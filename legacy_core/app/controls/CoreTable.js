@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Table, TableHead, TableHeaderCell, TableBody, TableRow, TableCell } from "@tremor/react";
-import { TrashIcon, PencilIcon, SortAscendingIcon, SortDescendingIcon } from '@heroicons/react/24/outline';
+import { TrashIcon, PencilIcon, ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
 import TableCellButtonIcon from './TableCellButtonIcon';
 import CustomCheckbox from './CustomCheckbox';
 
@@ -170,9 +170,9 @@ const CoreTable = ({
                 {sortedColumn === column.key && (
                   <span className="ml-2 mt-1">
                     {sortAscending ? (
-                      <SortAscendingIcon className="w-4 h-4" />
+                      <ChevronUpIcon className="w-4 h-4" />
                     ) : (
-                      <SortDescendingIcon className="w-4 h-4" />
+                      <ChevronDownIcon className="w-4 h-4" />
                     )}
                   </span>
                 )}

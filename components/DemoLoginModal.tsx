@@ -107,6 +107,7 @@ const DemoLoginModal = ({
     return cleanup;
   }, [isOpen, hasStarted, startTypewriterEffect, cleanup]);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleBackdropClick = (e: any) => {
     if (e.target === e.currentTarget && !isLoading) {
       onClose();
