@@ -2,7 +2,7 @@
 import React from 'react';
 import { Text, Metric, Card, Button } from "@tremor/react";
 import { UserGroupIcon, ClipboardListIcon, DocumentAddIcon } from '@heroicons/react/24/solid';
-import { useAppMode } from '../../providers/AppModeProvider';
+import { useAppMode } from '../../../app/providers/AppModeProvider';
 
 const NumericIndicators = ({setOpenForm, patientsCount, reportsSentCount}) => {
   const { isDemoMode } = useAppMode();
