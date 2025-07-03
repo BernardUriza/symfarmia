@@ -44,7 +44,7 @@ const nextConfig = {
 
   // Bundle optimization
   experimental: {
-    optimizeCss: true,
+    optimizeCss: false,
     optimizePackageImports: [
       '@heroicons/react',
       '@material-tailwind/react',
