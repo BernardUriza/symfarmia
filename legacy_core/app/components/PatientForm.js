@@ -3,7 +3,7 @@ import { Button, TextInput, DatePicker } from '@tremor/react';
 import CustomModal from '../controls/CustomModal/CustomModal';
 import { Select, SelectItem } from "@tremor/react";
 import { es as esLocale } from 'date-fns/locale';
-import { BanIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
+import { NoSymbolIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
 
 const PatientForm = ({ patient, onClose, onSave, disableSave}) => {
     // Set initial state based on whether patient is null
@@ -51,7 +51,7 @@ const PatientForm = ({ patient, onClose, onSave, disableSave}) => {
                             onValueChange={(value) => setEditedPatient({ ...editedPatient, status: value })}
                         >
                             <SelectItem value="Activo" icon={CheckCircleIcon}>Activo</SelectItem>
-                            <SelectItem value="Archivado" icon={BanIcon}>Archivado</SelectItem>
+                            <SelectItem value="Archivado" icon={NoSymbolIcon}>Archivado</SelectItem>
                         </Select>
                     </div>
                 </div>

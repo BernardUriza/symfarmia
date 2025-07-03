@@ -1,7 +1,7 @@
 // NumericIndicators.js
 import React from 'react';
 import { Text, Metric, Card, Button } from "@tremor/react";
-import { UserGroupIcon, ClipboardListIcon, DocumentAddIcon } from '@heroicons/react/24/solid';
+import { UserGroupIcon, ClipboardDocumentListIcon, DocumentPlusIcon } from '@heroicons/react/24/solid';
 import { useAppMode } from '../../../app/providers/AppModeProvider';
 
 const NumericIndicators = ({setOpenForm, patientsCount, reportsSentCount}) => {
@@ -11,7 +11,7 @@ const NumericIndicators = ({setOpenForm, patientsCount, reportsSentCount}) => {
       <div className={`pb-3 w-100 ${isDemoMode ? 'animate-pulse' : ''}`}>
         <Button onClick={setOpenForm} style={{width: "100%"}} className={isDemoMode ? 'ring-2 ring-blue-300' : ''}>
           <div className='flex' style={{ height: "52px" }}>
-            <DocumentAddIcon style={{ width: "20px" }}></DocumentAddIcon>
+            <DocumentPlusIcon style={{ width: "20px" }}></DocumentPlusIcon>
             <span className='mx-3 my-auto' style={{fontSize: "17px"}}>Nuevo resultado clínico</span>
           </div>
         </Button>
@@ -36,7 +36,7 @@ const NumericIndicators = ({setOpenForm, patientsCount, reportsSentCount}) => {
               <Metric>{reportsSentCount}</Metric>
             </div>
             <p className="flex-1"></p>
-            <ClipboardListIcon style={{ width: "36px", color: "#6B7280", height: "36px" }}></ClipboardListIcon>
+            <ClipboardDocumentListIcon style={{ width: "36px", color: "#6B7280", height: "36px" }}></ClipboardDocumentListIcon>
           </div>
         </Card>
       </div>
