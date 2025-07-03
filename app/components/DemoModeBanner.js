@@ -1,8 +1,10 @@
 "use client"
 import { useAppMode } from '../providers/AppModeProvider';
+import { useTranslation } from '../providers/I18nProvider';
 
 export default function DemoModeBanner() {
   const { isDemoMode, toggleMode } = useAppMode();
+  const { t } = useTranslation();
 
   if (!isDemoMode) {
     return null;
@@ -19,10 +21,10 @@ export default function DemoModeBanner() {
           </div>
           <div className="ml-3">
             <h3 className="text-sm font-medium">
-              Demo Mode Active
+              {t('demo_mode_active')}
             </h3>
             <div className="mt-1 text-sm opacity-90">
-              You're viewing SYMFARMIA with sample data. No real data will be saved or modified.
+              {t('demo_mode_desc')}
             </div>
           </div>
         </div>
@@ -31,13 +33,13 @@ export default function DemoModeBanner() {
             onClick={toggleMode}
             className="bg-white bg-opacity-20 hover:bg-opacity-30 text-white text-sm font-medium py-2 px-4 rounded-md transition duration-200"
           >
-            Switch to Live Mode
+            {t('switch_live_mode')}
           </button>
           <a
             href="?demo=false"
             className="text-white hover:text-yellow-200 text-sm underline"
           >
-            Exit Demo
+            {t('exit_demo')}
           </a>
         </div>
       </div>
