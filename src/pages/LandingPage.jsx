@@ -4,11 +4,13 @@ import SmokeTest from '../components/SmokeTest';
 import Logger from '../utils/logger';
 import DemoLoginModal from '../../components/DemoLoginModal';
 import PatientManagementPreview from '../components/PatientManagementPreview';
+import MedicalReportsPreview from '../components/MedicalReportsPreview';
 import { AppModeProvider, useAppMode } from '../../app/providers/AppModeProvider';
 
 const LandingPageContent = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPatientPreviewOpen, setIsPatientPreviewOpen] = useState(false);
+  const [isMedicalReportsPreviewOpen, setIsMedicalReportsPreviewOpen] = useState(false);
   const { isDemoMode } = useAppMode();
 
   // Log component render in development
@@ -120,7 +122,10 @@ const LandingPageContent = () => {
               )}
             </div>
 
-            <div className={`p-6 bg-white rounded-lg shadow-md cursor-pointer transition-all duration-200 hover:shadow-lg ${isDemoMode ? 'animate-pulse border-2 border-green-200' : ''}`}>
+            <div 
+              onClick={() => setIsMedicalReportsPreviewOpen(true)}
+              className={`p-6 bg-white rounded-lg shadow-md cursor-pointer transition-all duration-200 hover:shadow-lg ${isDemoMode ? 'animate-pulse border-2 border-green-200' : ''}`}
+            >
               <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
                 <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -128,6 +133,11 @@ const LandingPageContent = () => {
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Medical Reports</h3>
               <p className="text-gray-600">Digital diagnosis tracking and documentation</p>
+              {isDemoMode && (
+                <div className="mt-3 text-xs text-green-600 font-medium">
+                  ¡Haz clic para ver la demo!
+                </div>
+              )}
             </div>
 
             <div className={`p-6 bg-white rounded-lg shadow-md cursor-pointer transition-all duration-200 hover:shadow-lg ${isDemoMode ? 'animate-pulse border-2 border-purple-200' : ''}`}>
@@ -161,6 +171,12 @@ const LandingPageContent = () => {
       <PatientManagementPreview
         isOpen={isPatientPreviewOpen}
         onClose={() => setIsPatientPreviewOpen(false)}
+      />
+
+      {/* Medical Reports Preview */}
+      <MedicalReportsPreview
+        isOpen={isMedicalReportsPreviewOpen}
+        onClose={() => setIsMedicalReportsPreviewOpen(false)}
       />
 
       {/* Smoke Test Component */}
