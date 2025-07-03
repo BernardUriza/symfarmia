@@ -2,7 +2,7 @@
 import React from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { DocumentAddIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
+import { DocumentPlusIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
 import { saveAs } from 'file-saver'; // Importing file-saver
 
 // Add this function outside of the StudieCard component
@@ -14,7 +14,7 @@ const StudieCard = ({ clickFileLink, actionLink, studieData, newCard, document, 
         <p className="text-lg font-semibold flex items-center justify-center h-full">
           <a href={"/"} onClick={openNewStudyForm} rel="noopener noreferrer" className='text-green-500 flex' >
             <div className="bg-green-100 items-center justify-center rounded-full p-2 mr-2" style={{ height: '43x' }}>
-              <DocumentAddIcon className="w-6 h-6" />
+              <DocumentPlusIcon className="w-6 h-6" />
             </div>
             <div className='p-2'>Agregar Estudio</div>
           </a>
