@@ -17,7 +17,7 @@
 
 ### Prerequisites
 
-- **Node.js 18+** and npm
+- **Node.js 18** with npm 9
 - **PostgreSQL database** (optional for demo mode)
 - **Auth0 account** (optional for demo mode)
 - **EdgeStore account** (optional for demo mode)
