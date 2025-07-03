@@ -4,9 +4,9 @@ import SmokeTest from '../components/SmokeTest';
 import Logger from '../utils/logger';
 import DemoLoginModal from '../../components/DemoLoginModal';
 import PatientManagementPreview from '../components/PatientManagementPreview';
-import { useAppMode } from '../../app/providers/AppModeProvider';
+import { AppModeProvider, useAppMode } from '../../app/providers/AppModeProvider';
 
-const LandingPage = () => {
+const LandingPageContent = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPatientPreviewOpen, setIsPatientPreviewOpen] = useState(false);
   const { isDemoMode } = useAppMode();
@@ -168,5 +168,11 @@ const LandingPage = () => {
     </div>
   );
 };
+
+const LandingPage = () => (
+  <AppModeProvider>
+    <LandingPageContent />
+  </AppModeProvider>
+);
 
 export default LandingPage;
