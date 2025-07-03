@@ -63,6 +63,13 @@ check_prerequisites() {
         print_error "npm is not installed. Please install npm and try again."
         exit 1
     fi
+
+    # Check npm version
+    NPM_VERSION=$(npm --version | cut -d'.' -f1)
+    if [ "$NPM_VERSION" -ne 9 ]; then
+        print_error "npm version 9 is required. Current version: $(npm --version)"
+        exit 1
+    fi
     
     # Check if git is installed
     if ! command -v git &> /dev/null; then
