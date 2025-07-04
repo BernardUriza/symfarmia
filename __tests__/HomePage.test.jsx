@@ -18,8 +18,7 @@ describe('HomePage', () => {
         </I18nProvider>
       </ThemeProvider>
     )
-    expect(screen.getByText('Welcome to')).toBeInTheDocument()
-    expect(screen.getAllByText('SYMFARMIA').length).toBeGreaterThan(0)
+    expect(screen.getByText('The Future of Medicine Is Here')).toBeInTheDocument()
   })
 
   it('contains the main SYMFARMIA branding', () => {
@@ -34,7 +33,7 @@ describe('HomePage', () => {
         </I18nProvider>
       </ThemeProvider>
     )
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Welcome to SYMFARMIA')
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('The Future of Medicine Is Here')
   })
 
   it('displays the platform description', () => {
@@ -49,6 +48,6 @@ describe('HomePage', () => {
         </I18nProvider>
       </ThemeProvider>
     )
-    expect(screen.getByText('Intelligent platform for independent doctors')).toBeInTheDocument()
+    expect(screen.getByText('Liberate 70% of your time, restore hope to your medical practice')).toBeInTheDocument()
   })
 })

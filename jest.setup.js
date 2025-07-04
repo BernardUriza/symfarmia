@@ -43,3 +43,11 @@ global.console = {
   error: jest.fn(),
   warn: jest.fn(),
 }
+
+// Polyfill IntersectionObserver for framer-motion
+global.IntersectionObserver = class {
+  constructor() {}
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}

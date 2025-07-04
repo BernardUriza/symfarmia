@@ -1,9 +1,8 @@
-import prisma from '../prisma';
-import { Prisma } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import { BaseRepository } from './BaseRepository';
 
 export class PatientRepository extends BaseRepository<Prisma.PatientDelegate<Prisma.DefaultArgs>> {
-  constructor() {
+  constructor(prisma: PrismaClient) {
     super(prisma.patient);
   }
 
