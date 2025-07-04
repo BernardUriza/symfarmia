@@ -44,20 +44,25 @@ export function AppModeProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
+    console.log('AppModeProvider: appMode changed to:', appMode);
     const db = typeof window === 'undefined' ? createDatabase() : undefined;
     if (appMode === 'demo') {
       setApiProvider(new DemoAPIProvider(db));
       if (typeof window !== 'undefined') {
         const url = new URL(window.location.toString());
         url.searchParams.set('demo', 'true');
+        console.log('AppModeProvider: Setting demo=true in URL');
         window.history.replaceState({}, '', url);
       }
     } else {
       setApiProvider(new LiveAPIProvider(db));
       if (typeof window !== 'undefined') {
-        const url = new URL(window.location.toString());
-        url.searchParams.delete('demo');
-        window.history.replaceState({}, '', url);
+        // TEMPORARY: Comment out URL parameter removal to fix dashboard redirect
+        // const url = new URL(window.location.toString());
+        // url.searchParams.delete('demo');
+        // console.log('AppModeProvider: Removing demo parameter from URL');
+        // window.history.replaceState({}, '', url);
+        console.log('AppModeProvider: Would remove demo parameter, but disabled for dashboard fix');
       }
     }
   }, [appMode]);
