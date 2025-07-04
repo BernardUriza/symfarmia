@@ -47,7 +47,6 @@ export const POST = withErrorHandling(async (req) => {
  */
 export const DELETE = withErrorHandling(async (req) => {
   const patientId = parseInt(req.nextUrl.pathname.split('/').pop());
-
   if (!patientId) {
     throw new ValidationError('Patient ID is required for deletion');
   }
