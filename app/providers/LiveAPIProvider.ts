@@ -9,12 +9,12 @@ export class LiveAPIProvider extends APIProvider {
       } else {
         throw new Error('Error fetching patients');
       }
-    } catch (error) {
+    } catch (error: any) {
       throw new Error('Error fetching patients: ' + error.message);
     }
   }
 
-  async savePatient(patient) {
+  async savePatient(patient: any) {
     try {
       const response = await fetch('/api/patients', {
         method: 'POST',
@@ -29,12 +29,12 @@ export class LiveAPIProvider extends APIProvider {
       } else {
         return { success: false };
       }
-    } catch (error) {
+    } catch (error: any) {
       throw error;
     }
   }
 
-  async removePatient(patientId) {
+  async removePatient(patientId: any) {
     try {
       const response = await fetch(`/api/patients/${patientId}`, {
         method: 'DELETE',
@@ -45,7 +45,7 @@ export class LiveAPIProvider extends APIProvider {
       } else {
         return { success: false };
       }
-    } catch (error) {
+    } catch (error: any) {
       throw error;
     }
   }
@@ -58,12 +58,12 @@ export class LiveAPIProvider extends APIProvider {
       } else {
         throw new Error('Error fetching medical reports');
       }
-    } catch (error) {
+    } catch (error: any) {
       throw new Error('Error fetching medical reports: ' + error.message);
     }
   }
 
-  async fetchMedicalReport(reportId) {
+  async fetchMedicalReport(reportId: any) {
     try {
       const response = await fetch(`/api/medicalReports/${reportId}`);
       if (response.ok) {
@@ -71,12 +71,12 @@ export class LiveAPIProvider extends APIProvider {
       } else {
         throw new Error('Error fetching medical report');
       }
-    } catch (error) {
+    } catch (error: any) {
       throw new Error('Error fetching medical report: ' + error.message);
     }
   }
 
-  async saveMedicalReport(report) {
+  async saveMedicalReport(report: any) {
     try {
       const response = await fetch('/api/medicalReports', {
         method: 'POST',
@@ -91,12 +91,12 @@ export class LiveAPIProvider extends APIProvider {
       } else {
         return { success: false };
       }
-    } catch (error) {
+    } catch (error: any) {
       throw error;
     }
   }
 
-  async removeMedicalReport(reportId) {
+  async removeMedicalReport(reportId: any) {
     try {
       const response = await fetch(`/api/medicalReports/${reportId}`, {
         method: 'DELETE',
@@ -107,7 +107,7 @@ export class LiveAPIProvider extends APIProvider {
       } else {
         return { success: false };
       }
-    } catch (error) {
+    } catch (error: any) {
       throw error;
     }
   }
@@ -120,12 +120,12 @@ export class LiveAPIProvider extends APIProvider {
       } else {
         throw new Error('Error fetching categories');
       }
-    } catch (error) {
+    } catch (error: any) {
       throw new Error('Error fetching categories: ' + error.message);
     }
   }
 
-  async saveCategory(category) {
+  async saveCategory(category: any) {
     try {
       const response = await fetch('/api/categories', {
         method: 'POST',
@@ -140,7 +140,7 @@ export class LiveAPIProvider extends APIProvider {
       } else {
         return { success: false };
       }
-    } catch (error) {
+    } catch (error: any) {
       throw error;
     }
   }
@@ -153,12 +153,12 @@ export class LiveAPIProvider extends APIProvider {
       } else {
         throw new Error('Error fetching study types');
       }
-    } catch (error) {
+    } catch (error: any) {
       throw new Error('Error fetching study types: ' + error.message);
     }
   }
 
-  async saveStudyType(studyType) {
+  async saveStudyType(studyType: any) {
     try {
       const response = await fetch('/api/study-types', {
         method: 'POST',
@@ -173,12 +173,12 @@ export class LiveAPIProvider extends APIProvider {
       } else {
         return { success: false };
       }
-    } catch (error) {
+    } catch (error: any) {
       throw error;
     }
   }
 
-  async saveStudy(study) {
+  async saveStudy(study: any) {
     try {
       const response = await fetch('/api/studies', {
         method: 'POST',
@@ -193,12 +193,12 @@ export class LiveAPIProvider extends APIProvider {
       } else {
         return { success: false };
       }
-    } catch (error) {
+    } catch (error: any) {
       throw error;
     }
   }
 
-  async removeStudy(studyId) {
+  async removeStudy(studyId: any) {
     try {
       const response = await fetch(`/api/studies/${studyId}`, {
         method: 'DELETE',
@@ -209,12 +209,12 @@ export class LiveAPIProvider extends APIProvider {
       } else {
         return { success: false };
       }
-    } catch (error) {
+    } catch (error: any) {
       throw error;
     }
   }
 
-  async sendTokenByEmail(emailData) {
+  async sendTokenByEmail(emailData: any) {
     try {
       const response = await fetch('/api/mailerHelper', {
         method: 'POST',
@@ -229,12 +229,12 @@ export class LiveAPIProvider extends APIProvider {
       } else {
         return { success: false };
       }
-    } catch (error) {
+    } catch (error: any) {
       throw error;
     }
   }
 
-  async mergePdfs(pdfData) {
+  async mergePdfs(pdfData: any) {
     try {
       const response = await fetch('/api/mergePdfs', {
         method: 'POST',
@@ -249,7 +249,7 @@ export class LiveAPIProvider extends APIProvider {
       } else {
         return { success: false };
       }
-    } catch (error) {
+    } catch (error: any) {
       throw error;
     }
   }

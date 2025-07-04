@@ -21,10 +21,10 @@ const DemoLoginModal = ({ isOpen, onClose, onLogin }: DemoLoginModalProps) => {
   useEffect(() => {
     if (isOpen) {
       setVisible(true)
-    } else {
-      const timeout = setTimeout(() => setVisible(false), ANIMATION_DURATION)
-      return () => clearTimeout(timeout)
+      return
     }
+    const timeout = setTimeout(() => setVisible(false), ANIMATION_DURATION)
+    return () => clearTimeout(timeout)
   }, [isOpen])
 
   useEffect(() => {
