@@ -13,6 +13,7 @@ import LanguageToggle from '../../components/LanguageToggle';
 import MedicalBrainIcon from '../components/MedicalBrainIcon';
 import { useMockPatient } from '../hooks/useMockPatient';
 import { I18nProvider, useTranslation } from '../../app/providers/I18nProvider';
+import { ThemeProvider } from '../../app/providers/ThemeProvider';
 
 const LandingPageContent = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -172,13 +173,15 @@ const LandingPageContent = () => {
 };
 
 const LandingPage = () => (
-  <I18nProvider>
-    <PatientContextProvider>
-      <AppModeProvider>
-        <LandingPageContent />
-      </AppModeProvider>
-    </PatientContextProvider>
-  </I18nProvider>
+  <ThemeProvider>
+    <I18nProvider>
+      <PatientContextProvider>
+        <AppModeProvider>
+          <LandingPageContent />
+        </AppModeProvider>
+      </PatientContextProvider>
+    </I18nProvider>
+  </ThemeProvider>
 );
 
 export default LandingPage;
