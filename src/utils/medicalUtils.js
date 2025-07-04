@@ -398,7 +398,7 @@ export const mockMedicalAI = {
       }
     },
 
-  _fallbackResponse: (message) => {
+  _fallbackResponse: (_message) => {
     const defaultResponses = [
       "I understand you're looking for medical guidance. Could you provide more specific details about the patient's condition?",
       "Based on the information provided, I'd recommend a comprehensive evaluation. What specific aspect would you like me to focus on?",

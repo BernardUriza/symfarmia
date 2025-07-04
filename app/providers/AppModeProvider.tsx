@@ -38,7 +38,7 @@ export function AppModeProvider({ children }: { children: React.ReactNode }) {
       return 'live';
     };
     setAppMode(detectMode());
-  }, []);
+  }, [setAppMode]);
 
   useEffect(() => {
     if (appMode === 'demo') {

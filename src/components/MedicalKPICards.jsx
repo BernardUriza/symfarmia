@@ -7,8 +7,8 @@ import {
   ClipboardDocumentCheckIcon,
   FaceSmileIcon,
   ClockIcon,
-  TrendingUpIcon,
-  TrendingDownIcon,
+  ArrowTrendingUpIcon,
+  ArrowTrendingDownIcon,
   CurrencyDollarIcon,
   ChartBarIcon,
   ShieldCheckIcon,
@@ -76,7 +76,7 @@ const MedicalKPICards = ({ section = 'overview' }) => {
             value: '87.3%',
             change: '+3.4%',
             changeType: 'increase',
-            icon: TrendingUpIcon,
+            icon: ArrowTrendingUpIcon,
             color: 'blue',
             description: 'Patient recovery rate'
           },
@@ -94,7 +94,7 @@ const MedicalKPICards = ({ section = 'overview' }) => {
             value: '4.2%',
             change: '-1.8%',
             changeType: 'decrease',
-            icon: TrendingDownIcon,
+            icon: ArrowTrendingDownIcon,
             color: 'red',
             description: '30-day readmission rate'
           }
@@ -209,9 +209,9 @@ const MedicalKPICards = ({ section = 'overview' }) => {
                 : 'text-red-600 dark:text-red-400'
             }`}>
               {kpi.changeType === 'increase' ? (
-                <TrendingUpIcon className="w-4 h-4 mr-1" />
+                <ArrowTrendingUpIcon className="w-4 h-4 mr-1" />
               ) : (
-                <TrendingDownIcon className="w-4 h-4 mr-1" />
+                <ArrowTrendingDownIcon className="w-4 h-4 mr-1" />
               )}
               {kpi.change}
             </div>
