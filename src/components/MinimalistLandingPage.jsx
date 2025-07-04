@@ -17,12 +17,30 @@ const MinimalistLandingPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isDemoMode, setIsDemoMode] = useState(false);
   
-  // Check if we're in demo mode
+  // Initialize demo mode from URL immediately
+  const [isDemoMode, setIsDemoMode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get('demo') === 'true';
+    }
+    return false;
+  });
+  
+  // Keep checking URL changes
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    setIsDemoMode(urlParams.get('demo') === 'true');
+    const checkDemoMode = () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const demoParam = urlParams.get('demo') === 'true';
+      setIsDemoMode(demoParam);
+    };
+    
+    // Listen for URL changes
+    window.addEventListener('popstate', checkDemoMode);
+    
+    return () => {
+      window.removeEventListener('popstate', checkDemoMode);
+    };
   }, []);
 
   const handleSubmit = async (e) => {
