@@ -24,6 +24,6 @@ describe('RootLayout', () => {
   it('applies correct styling to body', () => {
     const { container } = render(<RootLayout>{mockChildren}</RootLayout>)
     const body = container.querySelector('body')
-    expect(body).toHaveStyle('background-color: #F9FAFB')
+    expect(body.className).toContain('bg-gray-50')
   })
 })

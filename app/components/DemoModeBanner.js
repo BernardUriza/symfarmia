@@ -11,7 +11,7 @@ export default function DemoModeBanner() {
   }
 
   return (
-    <div className="bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 text-white px-4 py-3 shadow-md">
+    <div className="bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 dark:from-yellow-600 dark:via-orange-600 dark:to-red-600 text-white px-4 py-3 shadow-md">
       <div className="max-w-7xl mx-auto flex items-center justify-between flex-wrap">
         <div className="flex items-center">
           <div className="flex-shrink-0">
