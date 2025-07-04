@@ -1,9 +1,25 @@
-import { APIProvider } from './APIProvider.js';
+import { APIProvider } from './APIProvider';
 
 export class DemoAPIProvider extends APIProvider {
   constructor() {
     super();
     this.demoData = this.initializeDemoData();
+    if (process.env.NEXT_PUBLIC_DEMO_SYNC === 'true') {
+      this.synchronizeWithLive();
+    }
+  }
+
+  async synchronizeWithLive(): Promise<void> {
+    try {
+      const { LiveAPIProvider } = await import('./LiveAPIProvider');
+      const live = new LiveAPIProvider();
+      const patients = await live.fetchPatients();
+      if (Array.isArray(patients)) {
+        this.demoData.patients = patients as unknown[];
+      }
+    } catch (error) {
+      console.warn('[DEMO MODE] Live sync failed:', error);
+    }
   }
 
   initializeDemoData() {

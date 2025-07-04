@@ -16,7 +16,7 @@ interface UseApiState<T> {
   isSuccess: boolean;
 }
 
-interface UseApiOptions {
+export interface UseApiOptions {
   immediate?: boolean;
   retries?: number;
   retryDelay?: number;
