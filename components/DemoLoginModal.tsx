@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from '../app/providers/I18nProvider'
 
 interface DemoLoginModalProps {
   isOpen: boolean
@@ -17,6 +18,7 @@ const DemoLoginModal = ({ isOpen, onClose, onLogin }: DemoLoginModalProps) => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
+  const { t } = useTranslation()
 
   useEffect(() => {
     if (isOpen) {
@@ -89,16 +91,16 @@ const DemoLoginModal = ({ isOpen, onClose, onLogin }: DemoLoginModalProps) => {
         </button>
 
         <div className="text-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Demo Login</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">{t('demo_login')}</h2>
           <p className="text-gray-600 dark:text-gray-300 text-sm">
-            Watch as we automatically fill in demo credentials
+            {t('auto_fill_demo')}
           </p>
         </div>
 
         <div className="space-y-4">
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Email
+              {t('email')}
             </label>
             <input
               type="email"
@@ -111,7 +113,7 @@ const DemoLoginModal = ({ isOpen, onClose, onLogin }: DemoLoginModalProps) => {
 
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Password
+              {t('password')}
             </label>
             <input
               type="password"
@@ -126,13 +128,13 @@ const DemoLoginModal = ({ isOpen, onClose, onLogin }: DemoLoginModalProps) => {
             onClick={onLogin}
             className="w-full py-3 px-4 rounded-md font-semibold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 transition-all duration-200"
           >
-            Login to Demo
+            {t('login_demo')}
           </button>
         </div>
 
         <div className="mt-4 text-center">
           <p className="text-xs text-gray-500 dark:text-gray-400">
-            Demo mode provides full access with sample data
+            {t('demo_mode_full_access')}
           </p>
         </div>
       </div>

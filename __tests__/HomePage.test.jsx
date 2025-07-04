@@ -18,7 +18,7 @@ describe('HomePage', () => {
         </I18nProvider>
       </ThemeProvider>
     )
-    expect(screen.getByText('The Future of Medicine Is Here')).toBeInTheDocument()
+    expect(screen.getByText('El Futuro de la Medicina Está Aquí')).toBeInTheDocument()
   })
 
   it('contains the main SYMFARMIA branding', () => {
@@ -33,7 +33,7 @@ describe('HomePage', () => {
         </I18nProvider>
       </ThemeProvider>
     )
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('The Future of Medicine Is Here')
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('El Futuro de la Medicina Está Aquí')
   })
 
   it('displays the platform description', () => {
@@ -48,6 +48,6 @@ describe('HomePage', () => {
         </I18nProvider>
       </ThemeProvider>
     )
-    expect(screen.getByText('Liberate 70% of your time, restore hope to your medical practice')).toBeInTheDocument()
+    expect(screen.getByText('Libera el 70% de tu tiempo y restaura la esperanza en tu práctica médica')).toBeInTheDocument()
   })
 })

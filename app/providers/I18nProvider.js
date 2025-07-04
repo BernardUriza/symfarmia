@@ -1,29 +1,34 @@
 "use client";
-import { createContext, useContext, useState } from 'react';
-import en from '../../locales/en.json';
-import es from '../../locales/es.json';
-
-const resources = { en, es };
+import { createContext, useContext, useEffect, useState } from 'react';
+import { useTranslation as nextUseTranslation, i18n } from 'next-i18next';
+import { detectUserLanguage } from '../../utils/detectUserLanguage';
 
 const I18nContext = createContext();
 
 export function I18nProvider({ children }) {
-  const [locale, setLocale] = useState('en');
-  const t = (key) => {
-    const dict = resources[locale] || {};
-    return dict[key] || key;
-  };
+  const [locale, setLocale] = useState(detectUserLanguage());
+
+  useEffect(() => {
+    if (i18n.language !== locale) {
+      i18n.changeLanguage(locale);
+    }
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('preferredLanguage', locale);
+    }
+  }, [locale]);
+
   return (
-    <I18nContext.Provider value={{ locale, setLocale, t }}>
+    <I18nContext.Provider value={{ locale, setLocale }}>
       {children}
     </I18nContext.Provider>
   );
 }
 
-export function useTranslation() {
+export function useTranslation(ns) {
   const context = useContext(I18nContext);
   if (!context) {
     throw new Error('useTranslation must be used within I18nProvider');
   }
-  return { t: context.t, locale: context.locale, setLocale: context.setLocale };
+  const translation = nextUseTranslation(ns);
+  return { t: translation.t, locale: context.locale, setLocale: context.setLocale };
 }
