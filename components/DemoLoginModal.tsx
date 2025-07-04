@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import type React from 'react'
 
 interface DemoLoginModalProps {
   isOpen: boolean
@@ -11,7 +10,7 @@ interface DemoLoginModalProps {
 
 const DEMO_EMAIL = 'demo@symfarmia.com'
 const DEMO_PASSWORD = 'demo123'
-const ANIMATION_DURATION = 250 // milliseconds
+const ANIMATION_DURATION = 250
 
 const DemoLoginModal = ({ isOpen, onClose, onLogin }: DemoLoginModalProps) => {
   const [visible, setVisible] = useState(isOpen)
@@ -19,18 +18,15 @@ const DemoLoginModal = ({ isOpen, onClose, onLogin }: DemoLoginModalProps) => {
   const [password, setPassword] = useState('')
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
-  // Handle mount/unmount for fade transitions
   useEffect(() => {
     if (isOpen) {
       setVisible(true)
-      return
+    } else {
+      const timeout = setTimeout(() => setVisible(false), ANIMATION_DURATION)
+      return () => clearTimeout(timeout)
     }
-
-    const timeout = setTimeout(() => setVisible(false), ANIMATION_DURATION)
-    return () => clearTimeout(timeout)
   }, [isOpen])
 
-  // Auto type demo credentials when the modal opens
   useEffect(() => {
     if (!isOpen) {
       if (intervalRef.current) clearInterval(intervalRef.current)
@@ -45,10 +41,10 @@ const DemoLoginModal = ({ isOpen, onClose, onLogin }: DemoLoginModalProps) => {
     intervalRef.current = setInterval(() => {
       if (emailIndex < DEMO_EMAIL.length) {
         setEmail(DEMO_EMAIL.slice(0, emailIndex + 1))
-        emailIndex += 1
+        emailIndex++
       } else if (passIndex < DEMO_PASSWORD.length) {
         setPassword(DEMO_PASSWORD.slice(0, passIndex + 1))
-        passIndex += 1
+        passIndex++
       } else if (intervalRef.current) {
         clearInterval(intervalRef.current)
       }
@@ -59,7 +55,6 @@ const DemoLoginModal = ({ isOpen, onClose, onLogin }: DemoLoginModalProps) => {
     }
   }, [isOpen])
 
-  // Close modal on Escape key
   useEffect(() => {
     if (!isOpen) return
     const handleKey = (e: KeyboardEvent) => {
@@ -69,7 +64,7 @@ const DemoLoginModal = ({ isOpen, onClose, onLogin }: DemoLoginModalProps) => {
     return () => window.removeEventListener('keydown', handleKey)
   }, [isOpen, onClose])
 
-  const handleBackdrop = (e: any) => {
+  const handleBackdrop = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) onClose()
   }
 
@@ -82,56 +77,63 @@ const DemoLoginModal = ({ isOpen, onClose, onLogin }: DemoLoginModalProps) => {
         isOpen ? 'opacity-100' : 'opacity-0'
       }`}
     >
-      <div
-        className={`relative w-full max-w-md transform rounded-lg bg-white p-6 shadow-lg transition-all duration-200 ${
-          isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
-        }`}
-      >
+      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl max-w-md w-full p-6 relative animate-scale-in">
         <button
-          aria-label="Close"
           onClick={onClose}
-          className="absolute right-4 top-4 text-gray-400 transition-colors hover:text-gray-600"
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+          aria-label="Close modal"
         >
-          <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
 
-        <h2 className="mb-4 text-center text-2xl font-bold text-gray-900">Demo Login</h2>
+        <div className="text-center mb-6">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Demo Login</h2>
+          <p className="text-gray-600 dark:text-gray-300 text-sm">
+            Watch as we automatically fill in demo credentials
+          </p>
+        </div>
 
         <div className="space-y-4">
           <div>
-            <label htmlFor="email" className="mb-1 block text-sm font-medium text-gray-700">
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Email
             </label>
             <input
-              id="email"
               type="email"
+              id="email"
               value={email}
-              onChange={e => setEmail(e.target.value)}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              readOnly
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="mb-1 block text-sm font-medium text-gray-700">
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Password
             </label>
             <input
-              id="password"
               type="password"
+              id="password"
               value={password}
-              onChange={e => setPassword(e.target.value)}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              readOnly
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
 
           <button
             onClick={onLogin}
-            className="w-full rounded-md bg-blue-600 py-2 font-semibold text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 active:scale-95"
+            className="w-full py-3 px-4 rounded-md font-semibold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 transition-all duration-200"
           >
             Login to Demo
           </button>
+        </div>
+
+        <div className="mt-4 text-center">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            Demo mode provides full access with sample data
+          </p>
         </div>
       </div>
     </div>
@@ -139,4 +141,3 @@ const DemoLoginModal = ({ isOpen, onClose, onLogin }: DemoLoginModalProps) => {
 }
 
 export default DemoLoginModal
-
