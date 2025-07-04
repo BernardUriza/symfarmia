@@ -9,8 +9,15 @@ import type {
   StudyType,
   APIResponse
 } from '@/types/providers';
+import type { Database } from '@/app/infrastructure/database';
 
 export abstract class APIProvider {
+  protected readonly db?: Database;
+
+  constructor(db?: Database) {
+    this.db = db;
+  }
+
   async fetchPatients(): Promise<Patient[]> {
     throw new Error('fetchPatients must be implemented');
   }

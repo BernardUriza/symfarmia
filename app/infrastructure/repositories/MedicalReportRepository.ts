@@ -1,9 +1,8 @@
-import prisma from '../prisma';
-import { Prisma } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import { BaseRepository } from './BaseRepository';
 
 export class MedicalReportRepository extends BaseRepository<Prisma.MedicalReportDelegate<Prisma.DefaultArgs>> {
-  constructor() {
+  constructor(prisma: PrismaClient) {
     super(prisma.medicalReport);
   }
 
