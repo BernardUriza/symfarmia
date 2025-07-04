@@ -1,16 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useTranslation } from '../../app/providers/I18nProvider';
-import { 
-  HeartIcon, 
-  BrainIcon, 
-  SunIcon, 
+import {
+  HeartIcon,
+  SunIcon,
   ChartBarIcon,
   DocumentTextIcon,
-  BeakerIcon,
   ClipboardDocumentCheckIcon,
   ExclamationTriangleIcon,
-  TrendingUpIcon,
   ClockIcon,
   CurrencyDollarIcon,
   UserGroupIcon,
@@ -22,6 +19,7 @@ import {
   ArrowTrendingUpIcon,
   EyeIcon
 } from '@heroicons/react/24/outline';
+import MedicalBrainIcon from './MedicalBrainIcon';
 import LanguageToggle from '../../components/LanguageToggle';
 
 const CinematicLandingPage = () => {
@@ -30,7 +28,6 @@ const CinematicLandingPage = () => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   
   // Parallax effects
-  const heroY = useTransform(scrollYProgress, [0, 1], ['0%', '50%']);
   const textY = useTransform(scrollYProgress, [0, 1], ['0%', '100%']);
   const particleY = useTransform(scrollYProgress, [0, 1], ['0%', '200%']);
   
@@ -109,7 +106,7 @@ const CinematicLandingPage = () => {
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="relative">
               <HeartIcon className="w-16 h-16 text-red-400 absolute -top-4 -left-4" />
-              <BrainIcon className="w-16 h-16 text-blue-400 absolute -top-4 -right-4" />
+              <MedicalBrainIcon className="w-16 h-16 text-blue-400 absolute -top-4 -right-4" />
               <div className="w-12 h-12 bg-teal-400 rounded-full opacity-80 animate-pulse" />
             </div>
           </div>
@@ -354,7 +351,7 @@ const CinematicLandingPage = () => {
             {
               title: t('assisted_diagnosis'),
               description: t('assisted_diagnosis_desc'),
-              icon: BrainIcon,
+              icon: MedicalBrainIcon,
               color: 'from-blue-400 to-purple-500',
               delay: 0.4
             },
@@ -444,7 +441,7 @@ const CinematicLandingPage = () => {
           viewport={{ once: true }}
         >
           <div className="inline-flex items-center bg-gradient-to-r from-teal-500/20 to-blue-500/20 backdrop-blur-sm px-6 py-3 rounded-full border border-teal-400/30">
-            <TrendingUpIcon className="w-5 h-5 text-teal-400 mr-2" />
+            <ArrowTrendingUpIcon className="w-5 h-5 text-teal-400 mr-2" />
             <span className="text-white font-medium">
               {t('journey_progress')}
             </span>
@@ -933,7 +930,7 @@ const CinematicLandingPage = () => {
             
             <div className="relative z-10">
               <div className="w-16 h-16 mb-6 bg-gradient-to-r from-teal-400 to-blue-500 p-3 rounded-xl">
-                <BrainIcon className="w-full h-full text-white" />
+                <MedicalBrainIcon className="w-full h-full text-white" />
               </div>
               
               <h3 className="text-2xl font-bold text-white mb-4">
@@ -1056,7 +1053,6 @@ const CinematicLandingPage = () => {
 
   // Pricing Section - "PLANES DE TRANSFORMACIÓN"
   const PricingSection = () => {
-    const [selectedPlan, setSelectedPlan] = useState('profesional');
     
     const plans = [
       {
