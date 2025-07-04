@@ -1,4 +1,14 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
+import { useAnimations } from '../hooks/useAnimations';
+
+// Lazy load motion for performance
+const MotionButton = lazy(() => 
+  import('framer-motion').then(module => ({ 
+    default: module.motion.button 
+  })).catch(() => ({ 
+    default: ({ children, ...props }) => <button {...props}>{children}</button>
+  }))
+);
 
 const Button = ({ 
   children, 
@@ -7,8 +17,10 @@ const Button = ({
   onClick,
   disabled = false,
   className = '',
+  animated = true,
   ...props 
 }) => {
+  const { animationsEnabled, safeAnimate } = useAnimations(animated);
   const baseClasses = 'font-semibold rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2';
   
   const variants = {
@@ -25,16 +37,52 @@ const Button = ({
   };
   
   const disabledClasses = disabled ? 'opacity-50 cursor-not-allowed' : '';
+  const fullClassName = `${baseClasses} ${variants[variant]} ${sizes[size]} ${disabledClasses} ${className}`;
+
+  // Animation properties
+  const animationProps = safeAnimate({
+    whileHover: disabled ? {} : { scale: 1.05, y: -2 },
+    whileTap: disabled ? {} : { scale: 0.95 },
+    transition: { duration: 0.2, ease: "easeOut" }
+  });
+
+  // Return animated or static button based on support
+  if (!animationsEnabled) {
+    return (
+      <button
+        className={fullClassName}
+        onClick={onClick}
+        disabled={disabled}
+        {...props}
+      >
+        {children}
+      </button>
+    );
+  }
 
   return (
-    <button
-      className={`${baseClasses} ${variants[variant]} ${sizes[size]} ${disabledClasses} ${className}`}
-      onClick={onClick}
-      disabled={disabled}
-      {...props}
+    <Suspense 
+      fallback={
+        <button
+          className={fullClassName}
+          onClick={onClick}
+          disabled={disabled}
+          {...props}
+        >
+          {children}
+        </button>
+      }
     >
-      {children}
-    </button>
+      <MotionButton
+        className={fullClassName}
+        onClick={onClick}
+        disabled={disabled}
+        {...animationProps}
+        {...props}
+      >
+        {children}
+      </MotionButton>
+    </Suspense>
   );
 };
 
