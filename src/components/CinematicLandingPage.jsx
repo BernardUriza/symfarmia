@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useTranslation } from '../../app/providers/I18nProvider';
@@ -217,7 +218,7 @@ const CinematicLandingPage = () => {
     </section>
   );
 
-  // Problem Section - "LA CRISIS MÉDICA"
+  // Problem Section - "LA CRISIS MÉDICA" (Currently unused)
   const ProblemSection = () => (
     <section className="relative min-h-screen flex items-center justify-center py-20 overflow-hidden">
       {/* Dark to Light Transition Background */}
