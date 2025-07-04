@@ -5,11 +5,10 @@ import { Heading, Text } from '../atoms/Typography';
 import LanguageToggle from '../../../components/LanguageToggle';
 import AnimatedWrapper from '../atoms/AnimatedWrapper';
 import SafeParticles from '../atoms/SafeParticles';
-import { useScrollTransforms, useMouseTracking } from '../hooks/useAnimations';
+import { useScrollTransforms } from '../hooks/useAnimations';
 
 const HeroSection = ({ t }) => {
   const { particleY } = useScrollTransforms();
-  const mousePosition = useMouseTracking();
 
   return (
     <section className="relative min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-teal-600 text-white overflow-hidden">
