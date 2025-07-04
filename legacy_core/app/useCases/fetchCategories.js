@@ -1,5 +1,5 @@
 // useCases/fetchCategories.js
-import Category from '../entities/Category';
+import Category from '../../app/domain/entities/Category';
 
 export async function fetchCategories() {
   try {

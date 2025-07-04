@@ -1,4 +1,4 @@
-import Patient from '@/legacy_core/app/entities/Patient';
+import Patient from '@/app/domain/entities/Patient';
 import { useAppApi } from './useAppApi';
 
 export function usePatients() {
