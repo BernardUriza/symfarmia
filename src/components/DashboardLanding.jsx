@@ -13,6 +13,7 @@ import {
   UserIcon
 } from '@heroicons/react/24/outline';
 import { mockMedicalAI } from '../utils/medicalUtils';
+import ConsultationWorkspace from './ConsultationWorkspace';
 
 const DashboardLanding = () => {
   const [activeFlow, setActiveFlow] = useState(null);
@@ -64,7 +65,7 @@ const DashboardLanding = () => {
 
   const handleTranscribirConsulta = () => {
     trackEvent('button_click', { button: 'transcribir_consulta' });
-    setActiveFlow('transcription');
+    setActiveFlow('consultation_workspace');
   };
 
   const handleVerAnalisis = () => {
@@ -515,6 +516,9 @@ Auscultación cardiopulmonar normal. No edemas en miembros inferiores.
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       {activeFlow === null && renderMainDashboard()}
       {activeFlow === 'transcription' && renderTranscriptionFlow()}
+      {activeFlow === 'consultation_workspace' && (
+        <ConsultationWorkspace onExit={() => setActiveFlow(null)} />
+      )}
       {activeFlow === 'assistant' && (
         <div className="max-w-4xl mx-auto p-8">
           <button
