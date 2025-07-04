@@ -5,12 +5,16 @@ import { UserProvider } from '@auth0/nextjs-auth0/client'
 import { AppModeProvider } from './providers/AppModeProvider'
 import DemoModeBanner from './components/DemoModeBanner'
 import { ThemeProvider } from './providers/ThemeProvider'
+import { I18nProvider } from './providers/I18nProvider'
 
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata = {
   title: 'SYMFARMIA',
   description: 'Intelligent platform for independent doctors',
+  icons: {
+    icon: '/symfarmia.ico',
+  },
 }
 
 export default function RootLayout({ children }) {
@@ -20,10 +24,12 @@ export default function RootLayout({ children }) {
         <ThemeProvider>
           <ErrorBoundary>
             <UserProvider>
+            <I18nProvider>
               <AppModeProvider>
                 <DemoModeBanner />
                 {children}
               </AppModeProvider>
+            </I18nProvider>
             </UserProvider>
           </ErrorBoundary>
         </ThemeProvider>
