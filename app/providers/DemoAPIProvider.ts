@@ -1,6 +1,8 @@
 import { APIProvider } from './APIProvider';
 
 export class DemoAPIProvider extends APIProvider {
+  private demoData: any;
+
   constructor() {
     super();
     this.demoData = this.initializeDemoData();
@@ -17,12 +19,12 @@ export class DemoAPIProvider extends APIProvider {
       if (Array.isArray(patients)) {
         this.demoData.patients = patients as unknown[];
       }
-    } catch (error) {
+    } catch (error: any) {
       console.warn('[DEMO MODE] Live sync failed:', error);
     }
   }
 
-  initializeDemoData() {
+  initializeDemoData(): any {
     return {
       patients: [
         {
@@ -134,18 +136,18 @@ export class DemoAPIProvider extends APIProvider {
     });
   }
 
-  async savePatient(patient) {
+  async savePatient(patient: any) {
     return new Promise((resolve) => {
       setTimeout(() => {
         if (patient.id) {
-          const index = this.demoData.patients.findIndex(p => p.id === patient.id);
+          const index = this.demoData.patients.findIndex((p: any) => p.id === patient.id);
           if (index !== -1) {
             this.demoData.patients[index] = { ...patient, updatedAt: new Date().toISOString() };
           }
         } else {
           const newPatient = {
             ...patient,
-            id: Math.max(...this.demoData.patients.map(p => p.id)) + 1,
+            id: Math.max(...this.demoData.patients.map((p: any) => p.id)) + 1,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
           };
@@ -156,11 +158,11 @@ export class DemoAPIProvider extends APIProvider {
     });
   }
 
-  async removePatient(patientId) {
+  async removePatient(patientId: any) {
     return new Promise((resolve) => {
       setTimeout(() => {
-        this.demoData.patients = this.demoData.patients.filter(p => p.id !== patientId);
-        this.demoData.medicalReports = this.demoData.medicalReports.filter(r => r.patientId !== patientId);
+        this.demoData.patients = this.demoData.patients.filter((p: any) => p.id !== patientId);
+        this.demoData.medicalReports = this.demoData.medicalReports.filter((r: any) => r.patientId !== patientId);
         resolve({ success: true });
       }, 300);
     });
@@ -174,27 +176,27 @@ export class DemoAPIProvider extends APIProvider {
     });
   }
 
-  async fetchMedicalReport(reportId) {
+  async fetchMedicalReport(reportId: any) {
     return new Promise((resolve) => {
       setTimeout(() => {
-        const report = this.demoData.medicalReports.find(r => r.id === parseInt(reportId));
+        const report = this.demoData.medicalReports.find((r: any) => r.id === parseInt(reportId));
         resolve(report || null);
       }, 300);
     });
   }
 
-  async saveMedicalReport(report) {
+  async saveMedicalReport(report: any) {
     return new Promise((resolve) => {
       setTimeout(() => {
         if (report.id) {
-          const index = this.demoData.medicalReports.findIndex(r => r.id === report.id);
+          const index = this.demoData.medicalReports.findIndex((r: any) => r.id === report.id);
           if (index !== -1) {
             this.demoData.medicalReports[index] = { ...report, updatedAt: new Date().toISOString() };
           }
         } else {
           const newReport = {
             ...report,
-            id: Math.max(...this.demoData.medicalReports.map(r => r.id)) + 1,
+            id: Math.max(...this.demoData.medicalReports.map((r: any) => r.id)) + 1,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
           };
@@ -205,11 +207,11 @@ export class DemoAPIProvider extends APIProvider {
     });
   }
 
-  async removeMedicalReport(reportId) {
+  async removeMedicalReport(reportId: any) {
     return new Promise((resolve) => {
       setTimeout(() => {
-        this.demoData.medicalReports = this.demoData.medicalReports.filter(r => r.id !== reportId);
-        this.demoData.studies = this.demoData.studies.filter(s => s.medicalReportId !== reportId);
+        this.demoData.medicalReports = this.demoData.medicalReports.filter((r: any) => r.id !== reportId);
+        this.demoData.studies = this.demoData.studies.filter((s: any) => s.medicalReportId !== reportId);
         resolve({ success: true });
       }, 300);
     });
@@ -223,18 +225,18 @@ export class DemoAPIProvider extends APIProvider {
     });
   }
 
-  async saveCategory(category) {
+  async saveCategory(category: any) {
     return new Promise((resolve) => {
       setTimeout(() => {
         if (category.id) {
-          const index = this.demoData.categories.findIndex(c => c.id === category.id);
+          const index = this.demoData.categories.findIndex((c: any) => c.id === category.id);
           if (index !== -1) {
             this.demoData.categories[index] = category;
           }
         } else {
           const newCategory = {
             ...category,
-            id: Math.max(...this.demoData.categories.map(c => c.id)) + 1
+            id: Math.max(...this.demoData.categories.map((c: any) => c.id)) + 1
           };
           this.demoData.categories.push(newCategory);
         }
@@ -251,18 +253,18 @@ export class DemoAPIProvider extends APIProvider {
     });
   }
 
-  async saveStudyType(studyType) {
+  async saveStudyType(studyType: any) {
     return new Promise((resolve) => {
       setTimeout(() => {
         if (studyType.id) {
-          const index = this.demoData.studyTypes.findIndex(st => st.id === studyType.id);
+        const index = this.demoData.studyTypes.findIndex((st: any) => st.id === studyType.id);
           if (index !== -1) {
             this.demoData.studyTypes[index] = studyType;
           }
         } else {
           const newStudyType = {
             ...studyType,
-            id: Math.max(...this.demoData.studyTypes.map(st => st.id)) + 1
+            id: Math.max(...this.demoData.studyTypes.map((st: any) => st.id)) + 1
           };
           this.demoData.studyTypes.push(newStudyType);
         }
@@ -271,18 +273,18 @@ export class DemoAPIProvider extends APIProvider {
     });
   }
 
-  async saveStudy(study) {
+  async saveStudy(study: any) {
     return new Promise((resolve) => {
       setTimeout(() => {
         if (study.id) {
-          const index = this.demoData.studies.findIndex(s => s.id === study.id);
+          const index = this.demoData.studies.findIndex((s: any) => s.id === study.id);
           if (index !== -1) {
             this.demoData.studies[index] = study;
           }
         } else {
           const newStudy = {
             ...study,
-            id: Math.max(...this.demoData.studies.map(s => s.id)) + 1
+            id: Math.max(...this.demoData.studies.map((s: any) => s.id)) + 1
           };
           this.demoData.studies.push(newStudy);
         }
@@ -291,16 +293,16 @@ export class DemoAPIProvider extends APIProvider {
     });
   }
 
-  async removeStudy(studyId) {
+  async removeStudy(studyId: any) {
     return new Promise((resolve) => {
       setTimeout(() => {
-        this.demoData.studies = this.demoData.studies.filter(s => s.id !== studyId);
+        this.demoData.studies = this.demoData.studies.filter((s: any) => s.id !== studyId);
         resolve({ success: true });
       }, 300);
     });
   }
 
-  async sendTokenByEmail(emailData) {
+  async sendTokenByEmail(emailData: any) {
     return new Promise((resolve) => {
       setTimeout(() => {
         console.log('[DEMO MODE] Email would be sent:', emailData);
@@ -309,7 +311,7 @@ export class DemoAPIProvider extends APIProvider {
     });
   }
 
-  async mergePdfs(pdfData) {
+  async mergePdfs(pdfData: any) {
     return new Promise((resolve) => {
       setTimeout(() => {
         console.log('[DEMO MODE] PDFs would be merged:', pdfData);
