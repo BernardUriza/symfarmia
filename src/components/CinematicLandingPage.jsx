@@ -1054,6 +1054,453 @@ const CinematicLandingPage = () => {
     </section>
   );
 
+  // Pricing Section - "PLANES DE TRANSFORMACIÓN"
+  const PricingSection = () => {
+    const [selectedPlan, setSelectedPlan] = useState('profesional');
+    
+    const plans = [
+      {
+        name: t('plan_free'),
+        price: 'GRATUITO',
+        period: '',
+        features: [
+          t('feature_5_consultations'),
+          t('feature_basic_transcription'),
+          t('feature_email_support'),
+          t('feature_basic_reports')
+        ],
+        color: 'from-slate-600 to-slate-700',
+        borderColor: 'border-slate-500/50',
+        ctaText: t('start_free'),
+        ctaStyle: 'bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-500 hover:to-slate-600',
+        popular: false
+      },
+      {
+        name: t('plan_professional'),
+        price: '$299',
+        period: 'MXN/mes',
+        features: [
+          t('feature_unlimited_consultations'),
+          t('feature_ai_diagnosis'),
+          t('feature_automated_prescriptions'),
+          t('feature_priority_support'),
+          t('feature_advanced_analytics'),
+          t('feature_pdf_merger'),
+          t('feature_custom_templates')
+        ],
+        color: 'from-teal-500 to-blue-600',
+        borderColor: 'border-teal-500',
+        ctaText: t('transform_now'),
+        ctaStyle: 'bg-gradient-to-r from-teal-500 to-blue-600 hover:from-teal-400 hover:to-blue-500',
+        popular: true
+      },
+      {
+        name: t('plan_clinic'),
+        price: t('custom_pricing'),
+        period: '',
+        features: [
+          t('feature_multi_doctor'),
+          t('feature_clinic_management'),
+          t('feature_dedicated_support'),
+          t('feature_custom_integration'),
+          t('feature_training_included'),
+          t('feature_white_label')
+        ],
+        color: 'from-purple-600 to-pink-600',
+        borderColor: 'border-purple-500/50',
+        ctaText: t('contact_sales'),
+        ctaStyle: 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500',
+        popular: false
+      }
+    ];
+
+    return (
+      <section className="relative min-h-screen flex items-center justify-center py-20 overflow-hidden">
+        {/* Transformation Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-800 via-slate-700 to-slate-600">
+          <div className="absolute inset-0 bg-gradient-to-t from-teal-900/30 via-transparent to-transparent" />
+        </div>
+        
+        {/* Pricing Energy Particles */}
+        <motion.div className="absolute inset-0">
+          <ParticleField count={45} />
+        </motion.div>
+        
+        <div className="relative z-10 max-w-7xl mx-auto px-4">
+          <motion.div
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="text-4xl md:text-6xl font-bold text-white mb-6 flex items-center justify-center">
+              <CurrencyDollarIcon className="w-12 h-12 text-teal-400 mr-4" />
+              {t('transformation_plans')}
+            </h2>
+            <p className="text-xl text-teal-100 mb-4">
+              {t('choose_transformation_level')}
+            </p>
+            <div className="w-24 h-1 bg-gradient-to-r from-teal-400 to-blue-400 mx-auto" />
+          </motion.div>
+          
+          {/* Pricing Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {plans.map((plan, index) => (
+              <motion.div
+                key={index}
+                className={`group relative bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-xl p-8 rounded-2xl border ${plan.borderColor} shadow-2xl overflow-hidden ${plan.popular ? 'ring-2 ring-teal-500 transform scale-105' : ''}`}
+                initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                whileInView={{ opacity: 1, y: 0, scale: plan.popular ? 1.05 : 1 }}
+                transition={{ duration: 0.8, delay: index * 0.2 }}
+                viewport={{ once: true }}
+                whileHover={{ scale: plan.popular ? 1.08 : 1.02, y: -5 }}
+              >
+                {/* Popular Badge */}
+                {plan.popular && (
+                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                    <div className="bg-gradient-to-r from-teal-500 to-blue-600 text-white px-6 py-2 rounded-full text-sm font-bold">
+                      {t('most_popular')}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Glow Effect */}
+                <div className={`absolute inset-0 bg-gradient-to-r ${plan.color} opacity-0 group-hover:opacity-10 transition-opacity duration-500 rounded-2xl`} />
+                
+                <div className="relative z-10">
+                  {/* Plan Header */}
+                  <div className="text-center mb-8">
+                    <h3 className="text-2xl font-bold text-white mb-4">
+                      {plan.name}
+                    </h3>
+                    <div className="mb-4">
+                      <span className="text-5xl font-black text-teal-400">
+                        {plan.price}
+                      </span>
+                      {plan.period && (
+                        <span className="text-teal-200 ml-2">
+                          {plan.period}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* Features */}
+                  <div className="space-y-3 mb-8">
+                    {plan.features.map((feature, featureIndex) => (
+                      <div key={featureIndex} className="flex items-center">
+                        <div className="w-5 h-5 bg-teal-500 rounded-full flex items-center justify-center mr-3">
+                          <div className="w-2 h-2 bg-white rounded-full" />
+                        </div>
+                        <span className="text-base text-white">
+                          {feature}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {/* CTA Button */}
+                  <motion.button
+                    className={`w-full py-4 ${plan.ctaStyle} text-white font-semibold rounded-full text-lg shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105`}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    {plan.ctaText}
+                  </motion.button>
+                </div>
+                
+                {/* Pulse Animation */}
+                <motion.div
+                  className="absolute bottom-4 right-4 w-3 h-3 bg-teal-400 rounded-full"
+                  animate={{
+                    scale: [1, 1.3, 1],
+                    opacity: [0.5, 1, 0.5]
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                />
+              </motion.div>
+            ))}
+          </div>
+          
+          {/* Trust Guarantee */}
+          <motion.div
+            className="text-center mt-16"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.8 }}
+            viewport={{ once: true }}
+          >
+            <div className="inline-flex items-center bg-gradient-to-r from-teal-500/20 to-blue-500/20 backdrop-blur-sm px-8 py-4 rounded-full border border-teal-400/30">
+              <ShieldCheckIcon className="w-6 h-6 text-teal-400 mr-3" />
+              <span className="text-white font-medium text-lg">
+                {t('money_back_guarantee')}
+              </span>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+    );
+  };
+
+  // Final CTA Section - "ÚNETE A LA REVOLUCIÓN"
+  const FinalCTASection = () => {
+    const [formData, setFormData] = useState({
+      name: '',
+      email: '',
+      specialty: '',
+      phone: ''
+    });
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isSubmitted, setIsSubmitted] = useState(false);
+
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      setIsSubmitting(true);
+      
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      setIsSubmitted(true);
+      setIsSubmitting(false);
+      
+      // Reset form after success
+      setTimeout(() => {
+        setIsSubmitted(false);
+        setFormData({ name: '', email: '', specialty: '', phone: '' });
+      }, 3000);
+    };
+
+    const handleChange = (e) => {
+      setFormData({
+        ...formData,
+        [e.target.name]: e.target.value
+      });
+    };
+
+    return (
+      <section className="relative min-h-screen flex items-center justify-center py-20 overflow-hidden">
+        {/* Revolutionary Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-teal-900 to-blue-900">
+          <div className="absolute inset-0 bg-gradient-radial from-transparent via-teal-500/10 to-transparent" />
+        </div>
+        
+        {/* Revolution Particles */}
+        <motion.div className="absolute inset-0">
+          <ParticleField count={80} />
+        </motion.div>
+        
+        <div className="relative z-10 max-w-7xl mx-auto px-4">
+          <motion.div
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="text-5xl md:text-6xl lg:text-7xl font-black text-white mb-6">
+              {t('join_revolution')}
+            </h2>
+            <p className="text-xl md:text-2xl text-teal-100 mb-8 max-w-4xl mx-auto">
+              {t('revolution_subtitle')}
+            </p>
+          </motion.div>
+          
+          {/* Demo Form */}
+          <motion.div
+            className="max-w-2xl mx-auto"
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.3 }}
+            viewport={{ once: true }}
+          >
+            <div className="bg-white/10 backdrop-blur-xl p-8 rounded-2xl border border-teal-500/30 shadow-2xl">
+              <h3 className="text-2xl font-bold text-white mb-6 text-center">
+                {t('start_transformation')}
+              </h3>
+              
+              {!isSubmitted ? (
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <input
+                        type="text"
+                        name="name"
+                        placeholder={t('full_name')}
+                        value={formData.name}
+                        onChange={handleChange}
+                        required
+                        className="w-full px-4 py-3 bg-white/10 border border-teal-500/30 rounded-lg text-white placeholder-teal-200 focus:border-teal-400 focus:ring-2 focus:ring-teal-500 focus:outline-none transition-all duration-300"
+                      />
+                    </div>
+                    <div>
+                      <input
+                        type="email"
+                        name="email"
+                        placeholder={t('email_address')}
+                        value={formData.email}
+                        onChange={handleChange}
+                        required
+                        className="w-full px-4 py-3 bg-white/10 border border-teal-500/30 rounded-lg text-white placeholder-teal-200 focus:border-teal-400 focus:ring-2 focus:ring-teal-500 focus:outline-none transition-all duration-300"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <select
+                        name="specialty"
+                        value={formData.specialty}
+                        onChange={handleChange}
+                        required
+                        className="w-full px-4 py-3 bg-white/10 border border-teal-500/30 rounded-lg text-white focus:border-teal-400 focus:ring-2 focus:ring-teal-500 focus:outline-none transition-all duration-300"
+                      >
+                        <option value="" className="text-slate-800">{t('select_specialty')}</option>
+                        <option value="general" className="text-slate-800">{t('general_medicine')}</option>
+                        <option value="cardiology" className="text-slate-800">{t('cardiology')}</option>
+                        <option value="dermatology" className="text-slate-800">{t('dermatology')}</option>
+                        <option value="pediatrics" className="text-slate-800">{t('pediatrics')}</option>
+                        <option value="other" className="text-slate-800">{t('other_specialty')}</option>
+                      </select>
+                    </div>
+                    <div>
+                      <input
+                        type="tel"
+                        name="phone"
+                        placeholder={t('phone_number')}
+                        value={formData.phone}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 bg-white/10 border border-teal-500/30 rounded-lg text-white placeholder-teal-200 focus:border-teal-400 focus:ring-2 focus:ring-teal-500 focus:outline-none transition-all duration-300"
+                      />
+                    </div>
+                  </div>
+                  
+                  <motion.button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full py-4 bg-gradient-to-r from-teal-500 to-blue-600 hover:from-teal-400 hover:to-blue-500 text-white font-bold rounded-lg text-lg shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                    whileHover={{ scale: isSubmitting ? 1 : 1.05 }}
+                    whileTap={{ scale: isSubmitting ? 1 : 0.95 }}
+                  >
+                    {isSubmitting ? (
+                      <div className="flex items-center justify-center">
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-3" />
+                        {t('transforming')}
+                      </div>
+                    ) : (
+                      t('start_free_trial')
+                    )}
+                  </motion.button>
+                </form>
+              ) : (
+                <motion.div
+                  className="text-center py-8"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <div className="w-16 h-16 bg-teal-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-white mb-2">
+                    {t('transformation_initiated')}
+                  </h3>
+                  <p className="text-teal-100">
+                    {t('check_email_next_steps')}
+                  </p>
+                </motion.div>
+              )}
+            </div>
+          </motion.div>
+          
+          {/* Social Proof */}
+          <motion.div
+            className="text-center mt-16"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.8 }}
+            viewport={{ once: true }}
+          >
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+              <div className="text-center">
+                <div className="text-3xl font-bold text-teal-400 mb-2">1,247+</div>
+                <div className="text-white">{t('doctors_transformed')}</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-teal-400 mb-2">89%</div>
+                <div className="text-white">{t('time_savings')}</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-teal-400 mb-2">4.9/5</div>
+                <div className="text-white">{t('satisfaction_rating')}</div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+    );
+  };
+
+  // Footer Section
+  const FooterSection = () => (
+    <footer className="relative bg-slate-900 border-t border-slate-800 py-16">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          {/* Brand */}
+          <div className="md:col-span-2">
+            <h3 className="text-2xl font-bold text-white mb-4">
+              SYMFARMIA
+            </h3>
+            <p className="text-slate-400 mb-6 max-w-md">
+              {t('footer_description')}
+            </p>
+            <div className="flex space-x-4">
+              <div className="w-8 h-8 bg-teal-500 rounded-full flex items-center justify-center">
+                <ShieldCheckIcon className="w-4 h-4 text-white" />
+              </div>
+              <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                <LockClosedIcon className="w-4 h-4 text-white" />
+              </div>
+              <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                <ServerIcon className="w-4 h-4 text-white" />
+              </div>
+            </div>
+          </div>
+          
+          {/* Links */}
+          <div>
+            <h4 className="text-white font-semibold mb-4">{t('product')}</h4>
+            <div className="space-y-2">
+              <a href="#" className="text-slate-400 hover:text-teal-400 transition-colors">{t('features')}</a>
+              <a href="#" className="text-slate-400 hover:text-teal-400 transition-colors">{t('pricing')}</a>
+              <a href="#" className="text-slate-400 hover:text-teal-400 transition-colors">{t('security')}</a>
+            </div>
+          </div>
+          
+          {/* Support */}
+          <div>
+            <h4 className="text-white font-semibold mb-4">{t('support')}</h4>
+            <div className="space-y-2">
+              <a href="#" className="text-slate-400 hover:text-teal-400 transition-colors">{t('documentation')}</a>
+              <a href="#" className="text-slate-400 hover:text-teal-400 transition-colors">{t('contact')}</a>
+              <a href="#" className="text-slate-400 hover:text-teal-400 transition-colors">{t('privacy')}</a>
+            </div>
+          </div>
+        </div>
+        
+        <div className="border-t border-slate-800 mt-12 pt-8 text-center">
+          <p className="text-slate-400">
+            © 2024 SYMFARMIA. {t('all_rights_reserved')}
+          </p>
+        </div>
+      </div>
+    </footer>
+  );
+
   return (
     <div className="relative bg-slate-900 text-white overflow-hidden">
       <HeroSection />
@@ -1062,6 +1509,9 @@ const CinematicLandingPage = () => {
       <TrustSection />
       <TestimonialsSection />
       <RevolutionaryVisionSection />
+      <PricingSection />
+      <FinalCTASection />
+      <FooterSection />
     </div>
   );
 };
