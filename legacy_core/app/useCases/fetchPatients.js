@@ -1,5 +1,5 @@
 // useCases/fetchPatients.js
-import Patient from '../entities/Patient';
+import Patient from '../../app/domain/entities/Patient';
 
 export async function fetchPatients() {
     try {
