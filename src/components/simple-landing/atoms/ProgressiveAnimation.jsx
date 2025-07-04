@@ -33,7 +33,6 @@ const ProgressiveAnimation = ({
   const { animationsEnabled } = useAnimations();
   const { hasError, shouldDisableAnimations, wrapAnimation, handleError } = useAnimationErrorBoundary();
   const [useCSSFallback, setUseCSSFallback] = useState(false);
-  const [isLoaded, setIsLoaded] = useState(false);
 
   // CSS fallback animations
   const cssAnimations = {
@@ -78,7 +77,6 @@ const ProgressiveAnimation = ({
     return {
       ...animations[animation],
       viewport: { once: true, margin: "-10%" },
-      onAnimationComplete: () => setIsLoaded(true),
       onError: (error) => {
         handleError(error, 'ProgressiveAnimation');
         setUseCSSFallback(true);

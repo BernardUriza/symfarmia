@@ -184,10 +184,11 @@ export const withAnimationErrorBoundary = (Component) => {
     } catch (error) {
       console.warn('Animation component error:', error);
       // Return static version
-      return React.createElement('div', { 
-        className: props.className,
-        children: props.children 
-      });
+      return React.createElement(
+        'div',
+        { className: props.className },
+        props.children
+      );
     }
   };
 };

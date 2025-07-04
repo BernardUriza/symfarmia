@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useScroll, useTransform } from 'framer-motion';
 import { isAnimationSupported } from '../utils/animations';
 
 /**
@@ -104,40 +105,18 @@ export const useMouseTracking = (throttleMs = 100, enabled = true) => {
  */
 export const useScrollTransforms = (enabled = true) => {
   const { animationsEnabled } = useAnimations(enabled);
-  
-  const transforms = useMemo(() => {
-    if (!animationsEnabled) {
-      return {
-        textY: 0,
-        particleY: 0,
-        heroScale: 1,
-        heroOpacity: 1
-      };
-    }
+  const { scrollYProgress } = useScroll();
 
-    try {
-      // Only import framer-motion if animations are enabled
-      const { useScroll, useTransform } = require('framer-motion');
-      const { scrollYProgress } = useScroll();
-      
-      return {
-        textY: useTransform(scrollYProgress, [0, 1], ['0%', '30%']),
-        particleY: useTransform(scrollYProgress, [0, 1], ['0%', '50%']),
-        heroScale: useTransform(scrollYProgress, [0, 0.5], [1, 0.8]),
-        heroOpacity: useTransform(scrollYProgress, [0, 0.3], [1, 0])
-      };
-    } catch (error) {
-      console.warn('Scroll transforms error:', error);
-      return {
-        textY: 0,
-        particleY: 0,
-        heroScale: 1,
-        heroOpacity: 1
-      };
-    }
-  }, [animationsEnabled]);
+  const textY = useTransform(scrollYProgress, [0, 1], ['0%', '30%']);
+  const particleY = useTransform(scrollYProgress, [0, 1], ['0%', '50%']);
+  const heroScale = useTransform(scrollYProgress, [0, 0.5], [1, 0.8]);
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0]);
 
-  return transforms;
+  if (!animationsEnabled) {
+    return { textY: 0, particleY: 0, heroScale: 1, heroOpacity: 1 };
+  }
+
+  return { textY, particleY, heroScale, heroOpacity };
 };
 
 /**
