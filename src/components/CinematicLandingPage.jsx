@@ -1,0 +1,1069 @@
+import React, { useState, useEffect } from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
+import { useTranslation } from '../../app/providers/I18nProvider';
+import { 
+  HeartIcon, 
+  BrainIcon, 
+  SunIcon, 
+  ChartBarIcon,
+  DocumentTextIcon,
+  BeakerIcon,
+  ClipboardDocumentCheckIcon,
+  ExclamationTriangleIcon,
+  TrendingUpIcon,
+  ClockIcon,
+  CurrencyDollarIcon,
+  UserGroupIcon,
+  ShieldCheckIcon,
+  LockClosedIcon,
+  ServerIcon,
+  StarIcon,
+  UserCircleIcon,
+  ArrowTrendingUpIcon,
+  EyeIcon
+} from '@heroicons/react/24/outline';
+import LanguageToggle from '../../components/LanguageToggle';
+
+const CinematicLandingPage = () => {
+  const { t } = useTranslation();
+  const { scrollYProgress } = useScroll();
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  
+  // Parallax effects
+  const heroY = useTransform(scrollYProgress, [0, 1], ['0%', '50%']);
+  const textY = useTransform(scrollYProgress, [0, 1], ['0%', '100%']);
+  const particleY = useTransform(scrollYProgress, [0, 1], ['0%', '200%']);
+  
+  // Mouse tracking for interactive elements
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      setMousePosition({
+        x: (e.clientX / window.innerWidth) * 100,
+        y: (e.clientY / window.innerHeight) * 100
+      });
+    };
+    
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
+  // Floating particles animation
+  const ParticleField = ({ count = 50 }) => {
+    return (
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {[...Array(count)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-1 h-1 bg-teal-400 rounded-full opacity-30"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+            }}
+            animate={{
+              y: [0, -20, 0],
+              opacity: [0.3, 0.8, 0.3],
+              scale: [1, 1.2, 1],
+            }}
+            transition={{
+              duration: 3 + Math.random() * 4,
+              repeat: Infinity,
+              delay: Math.random() * 5,
+            }}
+          />
+        ))}
+      </div>
+    );
+  };
+
+  // Hero Section - "EL AMANECER MÉDICO"
+  const HeroSection = () => (
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      {/* Cinematic Background Gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-900 to-teal-600">
+        <div className="absolute inset-0 bg-gradient-to-t from-transparent via-transparent to-slate-900/30" />
+      </div>
+      
+      {/* Floating Particles */}
+      <motion.div style={{ y: particleY }}>
+        <ParticleField count={80} />
+      </motion.div>
+      
+      {/* Medical Sunrise Icon */}
+      <motion.div
+        className="absolute top-1/4 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+        style={{
+          x: mousePosition.x * 0.1,
+          y: mousePosition.y * 0.1,
+        }}
+        animate={{
+          rotate: [0, 360],
+        }}
+        transition={{
+          duration: 60,
+          repeat: Infinity,
+          ease: "linear",
+        }}
+      >
+        <div className="relative">
+          <SunIcon className="w-32 h-32 text-yellow-400 opacity-60" />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="relative">
+              <HeartIcon className="w-16 h-16 text-red-400 absolute -top-4 -left-4" />
+              <BrainIcon className="w-16 h-16 text-blue-400 absolute -top-4 -right-4" />
+              <div className="w-12 h-12 bg-teal-400 rounded-full opacity-80 animate-pulse" />
+            </div>
+          </div>
+        </div>
+      </motion.div>
+      
+      {/* Main Content */}
+      <motion.div 
+        className="relative z-10 text-center px-4 max-w-6xl mx-auto"
+        style={{ y: textY }}
+      >
+        <motion.h1
+          className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 bg-gradient-to-r from-white via-teal-100 to-yellow-200 bg-clip-text text-transparent"
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1.5, delay: 0.5 }}
+        >
+          {t('hero_title')}
+        </motion.h1>
+        
+        <motion.p
+          className="text-xl md:text-2xl lg:text-3xl text-teal-100 mb-12 max-w-4xl mx-auto font-light"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1.2, delay: 1 }}
+        >
+          {t('hero_subtitle')}
+        </motion.p>
+        
+        <motion.div
+          className="flex flex-col sm:flex-row gap-6 justify-center items-center"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, delay: 1.5 }}
+        >
+          <motion.button
+            className="group relative px-12 py-4 bg-gradient-to-r from-teal-500 to-blue-600 text-white font-semibold rounded-full text-lg shadow-2xl border-2 border-teal-400/50 overflow-hidden"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            animate={{
+              boxShadow: [
+                "0 0 20px rgba(79, 209, 197, 0.3)",
+                "0 0 40px rgba(79, 209, 197, 0.5)",
+                "0 0 20px rgba(79, 209, 197, 0.3)",
+              ],
+            }}
+            transition={{
+              boxShadow: {
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut",
+              },
+            }}
+          >
+            <span className="relative z-10">{t('hero_cta')}</span>
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+          </motion.button>
+          
+          <div className="text-teal-200 text-sm font-medium flex items-center">
+            <div className="w-3 h-3 bg-teal-400 rounded-full mr-2 animate-pulse" />
+            {t('journey_progress')}
+          </div>
+        </motion.div>
+      </motion.div>
+      
+      {/* Language Toggle */}
+      <div className="absolute top-6 right-6 z-20">
+        <LanguageToggle variant="prominent" />
+      </div>
+      
+      {/* Scroll Indicator */}
+      <motion.div
+        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-teal-300"
+        animate={{ y: [0, 10, 0] }}
+        transition={{ duration: 2, repeat: Infinity }}
+      >
+        <div className="flex flex-col items-center">
+          <div className="w-px h-12 bg-gradient-to-b from-teal-300 to-transparent mb-2" />
+          <div className="text-sm font-medium">Scroll for transformation</div>
+        </div>
+      </motion.div>
+    </section>
+  );
+
+  // Problem Section - "LA CRISIS MÉDICA"
+  const ProblemSection = () => (
+    <section className="relative min-h-screen flex items-center justify-center py-20 overflow-hidden">
+      {/* Dark to Light Transition Background */}
+      <div className="absolute inset-0 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-700">
+        <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-teal-900/20 to-transparent" />
+      </div>
+      
+      {/* Healing Particles */}
+      <motion.div className="absolute inset-0">
+        <ParticleField count={30} />
+      </motion.div>
+      
+      <div className="relative z-10 max-w-6xl mx-auto px-4">
+        <motion.div
+          className="text-center mb-16"
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1 }}
+          viewport={{ once: true }}
+        >
+          <h2 className="text-4xl md:text-6xl font-bold text-white mb-6 flex items-center justify-center">
+            <ExclamationTriangleIcon className="w-12 h-12 text-red-400 mr-4" />
+            {t('medical_crisis')}
+          </h2>
+          <div className="w-24 h-1 bg-gradient-to-r from-red-500 to-orange-500 mx-auto" />
+        </motion.div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {[
+            {
+              icon: ClockIcon,
+              stat: t('medical_time_lost'),
+              color: 'from-red-500 to-orange-500',
+              delay: 0.2
+            },
+            {
+              icon: ExclamationTriangleIcon,
+              stat: t('burnout_rate'),
+              color: 'from-orange-500 to-yellow-500',
+              delay: 0.4
+            },
+            {
+              icon: CurrencyDollarIcon,
+              stat: t('annual_inefficiency'),
+              color: 'from-yellow-500 to-red-500',
+              delay: 0.6
+            },
+            {
+              icon: UserGroupIcon,
+              stat: t('human_contact_crisis'),
+              color: 'from-red-500 to-pink-500',
+              delay: 0.8
+            }
+          ].map((item, index) => (
+            <motion.div
+              key={index}
+              className="group relative bg-gradient-to-br from-slate-800 to-slate-900 p-8 rounded-2xl border border-slate-700 shadow-2xl overflow-hidden"
+              initial={{ opacity: 0, y: 50, scale: 0.9 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.8, delay: item.delay }}
+              viewport={{ once: true }}
+              whileHover={{ scale: 1.02 }}
+            >
+              {/* Healing Light Effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-teal-500/5 to-transparent transform translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+              
+              <div className="relative z-10">
+                <item.icon className={`w-16 h-16 mb-4 bg-gradient-to-r ${item.color} bg-clip-text text-transparent`} />
+                <p className="text-lg font-semibold text-white leading-relaxed">
+                  {item.stat}
+                </p>
+              </div>
+              
+              {/* Hope Glow */}
+              <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-teal-400 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            </motion.div>
+          ))}
+        </div>
+        
+        {/* Transition to Hope */}
+        <motion.div
+          className="text-center mt-16"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ duration: 1.5, delay: 1 }}
+          viewport={{ once: true }}
+        >
+          <p className="text-xl text-teal-200 font-light italic">
+            "{t('finding_hope_again')}"
+          </p>
+          <div className="mt-4 w-32 h-px bg-gradient-to-r from-transparent via-teal-400 to-transparent mx-auto" />
+        </motion.div>
+      </div>
+    </section>
+  );
+
+  // Solution Section - "EL ECOSISTEMA DE ESPERANZA"
+  const SolutionSection = () => (
+    <section className="relative min-h-screen flex items-center justify-center py-20 overflow-hidden">
+      {/* Hope Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-800 via-teal-900 to-blue-900">
+        <div className="absolute inset-0 bg-gradient-to-t from-transparent via-teal-500/10 to-transparent" />
+      </div>
+      
+      {/* Healing Energy Particles */}
+      <motion.div className="absolute inset-0">
+        <ParticleField count={60} />
+      </motion.div>
+      
+      <div className="relative z-10 max-w-7xl mx-auto px-4">
+        <motion.div
+          className="text-center mb-16"
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1 }}
+          viewport={{ once: true }}
+        >
+          <h2 className="text-4xl md:text-6xl font-bold text-white mb-6 flex items-center justify-center">
+            <SunIcon className="w-12 h-12 text-yellow-400 mr-4" />
+            {t('hope_ecosystem')}
+          </h2>
+          <div className="w-24 h-1 bg-gradient-to-r from-teal-400 to-blue-400 mx-auto" />
+        </motion.div>
+        
+        {/* Connected Hope Nodes */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative">
+          {/* Connection Lines */}
+          <svg className="absolute inset-0 w-full h-full pointer-events-none hidden md:block">
+            <motion.path
+              d="M 25% 25% Q 50% 10% 75% 25% Q 90% 50% 75% 75% Q 50% 90% 25% 75% Q 10% 50% 25% 25%"
+              stroke="url(#hopeLine)"
+              strokeWidth="2"
+              fill="none"
+              strokeDasharray="10,5"
+              initial={{ pathLength: 0 }}
+              whileInView={{ pathLength: 1 }}
+              transition={{ duration: 3, delay: 0.5 }}
+              viewport={{ once: true }}
+            />
+            <defs>
+              <linearGradient id="hopeLine" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#4ECDC4" stopOpacity="0.6" />
+                <stop offset="50%" stopColor="#45B7D1" stopOpacity="0.8" />
+                <stop offset="100%" stopColor="#96CEB4" stopOpacity="0.6" />
+              </linearGradient>
+            </defs>
+          </svg>
+          
+          {[
+            {
+              title: t('intelligent_transcription'),
+              description: t('intelligent_transcription_desc'),
+              icon: DocumentTextIcon,
+              color: 'from-teal-400 to-blue-500',
+              delay: 0.2
+            },
+            {
+              title: t('assisted_diagnosis'),
+              description: t('assisted_diagnosis_desc'),
+              icon: BrainIcon,
+              color: 'from-blue-400 to-purple-500',
+              delay: 0.4
+            },
+            {
+              title: t('automated_prescriptions'),
+              description: t('automated_prescriptions_desc'),
+              icon: ClipboardDocumentCheckIcon,
+              color: 'from-purple-400 to-pink-500',
+              delay: 0.6
+            },
+            {
+              title: t('medical_analytics'),
+              description: t('medical_analytics_desc'),
+              icon: ChartBarIcon,
+              color: 'from-pink-400 to-teal-500',
+              delay: 0.8
+            }
+          ].map((node, index) => (
+            <motion.div
+              key={index}
+              className="group relative bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-sm p-8 rounded-2xl border border-teal-500/30 shadow-2xl overflow-hidden"
+              initial={{ opacity: 0, scale: 0.8, y: 50 }}
+              whileInView={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: node.delay }}
+              viewport={{ once: true }}
+              whileHover={{ scale: 1.05, y: -5 }}
+            >
+              {/* Hope Glow */}
+              <div className={`absolute inset-0 bg-gradient-to-r ${node.color} opacity-0 group-hover:opacity-10 transition-opacity duration-500 rounded-2xl`} />
+              
+              {/* Healing Energy Flow */}
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-teal-400 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              
+              <div className="relative z-10">
+                <motion.div
+                  className={`w-16 h-16 mb-6 bg-gradient-to-r ${node.color} p-3 rounded-xl`}
+                  animate={{
+                    boxShadow: [
+                      "0 0 20px rgba(79, 209, 197, 0.3)",
+                      "0 0 40px rgba(79, 209, 197, 0.5)",
+                      "0 0 20px rgba(79, 209, 197, 0.3)",
+                    ],
+                  }}
+                  transition={{
+                    boxShadow: {
+                      duration: 3,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    },
+                  }}
+                >
+                  <node.icon className="w-full h-full text-white" />
+                </motion.div>
+                
+                <h3 className="text-2xl font-bold text-white mb-4">
+                  {node.title}
+                </h3>
+                
+                <p className="text-teal-100 text-lg leading-relaxed">
+                  {node.description}
+                </p>
+              </div>
+              
+              {/* Interactive Hotspot */}
+              <motion.div
+                className="absolute bottom-4 right-4 w-3 h-3 bg-teal-400 rounded-full"
+                animate={{
+                  scale: [1, 1.2, 1],
+                  opacity: [0.5, 1, 0.5],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              />
+            </motion.div>
+          ))}
+        </div>
+        
+        {/* Transformation Promise */}
+        <motion.div
+          className="text-center mt-16"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, delay: 1.2 }}
+          viewport={{ once: true }}
+        >
+          <div className="inline-flex items-center bg-gradient-to-r from-teal-500/20 to-blue-500/20 backdrop-blur-sm px-6 py-3 rounded-full border border-teal-400/30">
+            <TrendingUpIcon className="w-5 h-5 text-teal-400 mr-2" />
+            <span className="text-white font-medium">
+              {t('journey_progress')}
+            </span>
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  );
+
+  // Trust Section - "SANTUARIO SAGRADO"
+  const TrustSection = () => (
+    <section className="relative min-h-screen flex items-center justify-center py-20 overflow-hidden">
+      {/* Sanctuary Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-800 via-slate-700 to-slate-600">
+        <div className="absolute inset-0 bg-gradient-to-t from-teal-900/30 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-900/20 to-transparent" />
+      </div>
+      
+      {/* Protective Light Emanation */}
+      <motion.div 
+        className="absolute inset-0"
+        animate={{
+          background: [
+            "radial-gradient(circle at 50% 50%, rgba(79, 209, 197, 0.1) 0%, transparent 50%)",
+            "radial-gradient(circle at 50% 50%, rgba(79, 209, 197, 0.2) 0%, transparent 60%)",
+            "radial-gradient(circle at 50% 50%, rgba(79, 209, 197, 0.1) 0%, transparent 50%)"
+          ]
+        }}
+        transition={{
+          duration: 4,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
+      />
+      
+      {/* Security Particles */}
+      <motion.div className="absolute inset-0">
+        <ParticleField count={40} />
+      </motion.div>
+      
+      <div className="relative z-10 max-w-6xl mx-auto px-4">
+        <motion.div
+          className="text-center mb-16"
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1 }}
+          viewport={{ once: true }}
+        >
+          <h2 className="text-4xl md:text-6xl font-bold text-white mb-6 flex items-center justify-center">
+            <ShieldCheckIcon className="w-12 h-12 text-teal-400 mr-4" />
+            {t('sanctuary_title')}
+          </h2>
+          <p className="text-xl md:text-2xl text-teal-100 mb-4">
+            {t('sanctuary_subtitle')}
+          </p>
+          <div className="w-24 h-1 bg-gradient-to-r from-teal-400 to-blue-400 mx-auto" />
+        </motion.div>
+        
+        {/* Security Features Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+          {[
+            {
+              icon: LockClosedIcon,
+              title: t('military_encryption'),
+              description: t('military_encryption_desc'),
+              color: 'from-teal-400 to-blue-500',
+              delay: 0.2
+            },
+            {
+              icon: ShieldCheckIcon,
+              title: t('cofepris_compliance'),
+              description: t('cofepris_compliance_desc'),
+              color: 'from-blue-400 to-indigo-500',
+              delay: 0.4
+            },
+            {
+              icon: ServerIcon,
+              title: t('mexican_servers'),
+              description: t('mexican_servers_desc'),
+              color: 'from-green-400 to-teal-500',
+              delay: 0.6
+            },
+            {
+              icon: HeartIcon,
+              title: t('trust_promise'),
+              description: t('trust_promise_desc'),
+              color: 'from-pink-400 to-red-500',
+              delay: 0.8
+            }
+          ].map((feature, index) => (
+            <motion.div
+              key={index}
+              className="group relative bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-sm p-8 rounded-2xl border border-teal-500/30 shadow-2xl overflow-hidden"
+              initial={{ opacity: 0, scale: 0.9, y: 30 }}
+              whileInView={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: feature.delay }}
+              viewport={{ once: true }}
+              whileHover={{ scale: 1.02, y: -5 }}
+            >
+              {/* Protective Aura */}
+              <div className={`absolute inset-0 bg-gradient-to-r ${feature.color} opacity-0 group-hover:opacity-10 transition-opacity duration-500 rounded-2xl`} />
+              
+              {/* Security Shield Formation */}
+              <motion.div
+                className="absolute inset-0 border-2 border-teal-400/0 group-hover:border-teal-400/30 rounded-2xl transition-all duration-500"
+                whileHover={{
+                  boxShadow: "0 0 30px rgba(79, 209, 197, 0.3)"
+                }}
+              />
+              
+              <div className="relative z-10">
+                <motion.div
+                  className={`w-16 h-16 mb-6 bg-gradient-to-r ${feature.color} p-3 rounded-xl`}
+                  animate={{
+                    boxShadow: [
+                      "0 0 20px rgba(79, 209, 197, 0.2)",
+                      "0 0 30px rgba(79, 209, 197, 0.4)",
+                      "0 0 20px rgba(79, 209, 197, 0.2)"
+                    ]
+                  }}
+                  transition={{
+                    boxShadow: {
+                      duration: 3,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }
+                  }}
+                >
+                  <feature.icon className="w-full h-full text-white" />
+                </motion.div>
+                
+                <h3 className="text-xl font-bold text-white mb-4">
+                  {feature.title}
+                </h3>
+                
+                <p className="text-teal-100 leading-relaxed">
+                  {feature.description}
+                </p>
+              </div>
+              
+              {/* Peace of Mind Indicator */}
+              <motion.div
+                className="absolute bottom-4 right-4 w-3 h-3 bg-teal-400 rounded-full"
+                animate={{
+                  scale: [1, 1.3, 1],
+                  opacity: [0.6, 1, 0.6]
+                }}
+                transition={{
+                  duration: 2.5,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              />
+            </motion.div>
+          ))}
+        </div>
+        
+        {/* Trust Restoration Promise */}
+        <motion.div
+          className="text-center"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, delay: 1.2 }}
+          viewport={{ once: true }}
+        >
+          <div className="inline-flex items-center bg-gradient-to-r from-teal-500/20 to-blue-500/20 backdrop-blur-sm px-8 py-4 rounded-full border border-teal-400/30">
+            <ShieldCheckIcon className="w-6 h-6 text-teal-400 mr-3" />
+            <span className="text-white font-medium text-lg">
+              {t('peace_of_mind_restored')}
+            </span>
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  );
+
+  // Testimonials Section - "VOCES DE TRANSFORMACIÓN"
+  const TestimonialsSection = () => (
+    <section className="relative min-h-screen flex items-center justify-center py-20 overflow-hidden">
+      {/* Transformation Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-700 via-slate-600 to-slate-500">
+        <div className="absolute inset-0 bg-gradient-to-t from-teal-800/40 via-transparent to-transparent" />
+      </div>
+      
+      {/* Hope Threads */}
+      <svg className="absolute inset-0 w-full h-full pointer-events-none">
+        <motion.path
+          d="M 10% 20% Q 50% 5% 90% 20% M 10% 50% Q 50% 35% 90% 50% M 10% 80% Q 50% 65% 90% 80%"
+          stroke="url(#hopeThread)"
+          strokeWidth="1"
+          fill="none"
+          strokeDasharray="5,3"
+          initial={{ pathLength: 0, opacity: 0 }}
+          whileInView={{ pathLength: 1, opacity: 0.6 }}
+          transition={{ duration: 3, delay: 0.5 }}
+          viewport={{ once: true }}
+        />
+        <defs>
+          <linearGradient id="hopeThread" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#4ECDC4" stopOpacity="0.4" />
+            <stop offset="50%" stopColor="#96CEB4" stopOpacity="0.8" />
+            <stop offset="100%" stopColor="#4ECDC4" stopOpacity="0.4" />
+          </linearGradient>
+        </defs>
+      </svg>
+      
+      {/* Renewal Particles */}
+      <motion.div className="absolute inset-0">
+        <ParticleField count={35} />
+      </motion.div>
+      
+      <div className="relative z-10 max-w-7xl mx-auto px-4">
+        <motion.div
+          className="text-center mb-16"
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1 }}
+          viewport={{ once: true }}
+        >
+          <h2 className="text-4xl md:text-6xl font-bold text-white mb-6 flex items-center justify-center">
+            <UserCircleIcon className="w-12 h-12 text-teal-400 mr-4" />
+            {t('transformation_voices')}
+          </h2>
+          <p className="text-xl text-teal-100 mb-4">
+            {t('real_doctor_stories')}
+          </p>
+          <div className="w-24 h-1 bg-gradient-to-r from-teal-400 to-yellow-400 mx-auto" />
+        </motion.div>
+        
+        {/* Testimonial Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {[
+            {
+              name: t('dr_maria_name'),
+              specialty: t('dr_maria_specialty'),
+              location: t('dr_maria_location'),
+              quote: t('dr_maria_quote'),
+              transformation: t('dr_maria_transformation'),
+              hopeIndicator: t('renewed_eye_contact'),
+              avatar: "👩‍⚕️",
+              delay: 0.2
+            },
+            {
+              name: t('dr_carlos_name'),
+              specialty: t('dr_carlos_specialty'),
+              location: t('dr_carlos_location'),
+              quote: t('dr_carlos_quote'),
+              transformation: t('dr_carlos_transformation'),
+              hopeIndicator: t('work_life_balance'),
+              avatar: "👨‍⚕️",
+              delay: 0.4
+            },
+            {
+              name: t('dr_ana_name'),
+              specialty: t('dr_ana_specialty'),
+              location: t('dr_ana_location'),
+              quote: t('dr_ana_quote'),
+              transformation: t('dr_ana_transformation'),
+              hopeIndicator: t('professional_confidence'),
+              avatar: "👩‍⚕️",
+              delay: 0.6
+            }
+          ].map((testimonial, index) => (
+            <motion.div
+              key={index}
+              className="group relative bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-sm p-8 rounded-2xl border border-teal-500/30 shadow-2xl overflow-hidden"
+              initial={{ opacity: 0, y: 50, scale: 0.95 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.8, delay: testimonial.delay }}
+              viewport={{ once: true }}
+              whileHover={{ scale: 1.02, y: -8 }}
+            >
+              {/* Transformation Glow */}
+              <div className="absolute inset-0 bg-gradient-to-r from-teal-500/10 via-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" />
+              
+              {/* Hope Threads */}
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-teal-400 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              
+              <div className="relative z-10">
+                {/* Doctor Avatar */}
+                <div className="flex items-center mb-6">
+                  <div className="text-4xl mr-4">{testimonial.avatar}</div>
+                  <div>
+                    <h3 className="text-xl font-bold text-white">
+                      {testimonial.name}
+                    </h3>
+                    <p className="text-teal-300">
+                      {testimonial.specialty}
+                    </p>
+                    <p className="text-teal-400 text-sm">
+                      {testimonial.location}
+                    </p>
+                  </div>
+                </div>
+                
+                {/* Quote */}
+                <blockquote className="text-white text-lg mb-6 italic leading-relaxed">
+                  "{testimonial.quote}"
+                </blockquote>
+                
+                {/* Transformation */}
+                <p className="text-teal-200 mb-4 leading-relaxed">
+                  {testimonial.transformation}
+                </p>
+                
+                {/* Hope Indicator */}
+                <div className="flex items-center bg-gradient-to-r from-teal-500/20 to-blue-500/20 px-4 py-2 rounded-full">
+                  <StarIcon className="w-4 h-4 text-yellow-400 mr-2" />
+                  <span className="text-white text-sm font-medium">
+                    {testimonial.hopeIndicator}
+                  </span>
+                </div>
+              </div>
+              
+              {/* Renewal Pulse */}
+              <motion.div
+                className="absolute bottom-4 right-4 w-3 h-3 bg-yellow-400 rounded-full"
+                animate={{
+                  scale: [1, 1.4, 1],
+                  opacity: [0.7, 1, 0.7]
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              />
+            </motion.div>
+          ))}
+        </div>
+        
+        {/* Collective Transformation */}
+        <motion.div
+          className="text-center mt-16"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, delay: 1 }}
+          viewport={{ once: true }}
+        >
+          <p className="text-xl text-teal-200 font-light italic mb-4">
+            "{t('collective_transformation')}"
+          </p>
+          <div className="inline-flex items-center bg-gradient-to-r from-teal-500/20 to-yellow-500/20 backdrop-blur-sm px-6 py-3 rounded-full border border-teal-400/30">
+            <UserGroupIcon className="w-5 h-5 text-teal-400 mr-2" />
+            <span className="text-white font-medium">
+              {t('join_transformation')}
+            </span>
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  );
+
+  // Revolutionary Vision Section - "EL RENACIMIENTO MÉDICO"
+  const RevolutionaryVisionSection = () => (
+    <section className="relative min-h-screen flex items-center justify-center py-20 overflow-hidden">
+      {/* Renaissance Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-600 via-slate-500 to-slate-400">
+        <div className="absolute inset-0 bg-gradient-to-t from-yellow-900/30 via-teal-800/20 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-yellow-800/10 to-transparent" />
+      </div>
+      
+      {/* Rising Sun Culmination */}
+      <motion.div
+        className="absolute top-10 left-1/2 transform -translate-x-1/2"
+        animate={{
+          y: [0, -10, 0],
+          scale: [1, 1.05, 1]
+        }}
+        transition={{
+          duration: 4,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
+      >
+        <SunIcon className="w-24 h-24 text-yellow-400 opacity-80" />
+        <div className="absolute inset-0 animate-spin-slow">
+          <div className="w-full h-full border-2 border-yellow-400/30 rounded-full" />
+        </div>
+      </motion.div>
+      
+      {/* Global Hope Network */}
+      <svg className="absolute inset-0 w-full h-full pointer-events-none">
+        <motion.circle
+          cx="50%"
+          cy="50%"
+          r="40%"
+          stroke="url(#globalHope)"
+          strokeWidth="2"
+          fill="none"
+          strokeDasharray="20,10"
+          initial={{ pathLength: 0, rotate: 0 }}
+          whileInView={{ pathLength: 1, rotate: 360 }}
+          transition={{ duration: 6, delay: 0.5 }}
+          viewport={{ once: true }}
+        />
+        <defs>
+          <linearGradient id="globalHope" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#F59E0B" stopOpacity="0.6" />
+            <stop offset="50%" stopColor="#4ECDC4" stopOpacity="0.8" />
+            <stop offset="100%" stopColor="#F59E0B" stopOpacity="0.6" />
+          </linearGradient>
+        </defs>
+      </svg>
+      
+      {/* Renaissance Particles */}
+      <motion.div className="absolute inset-0">
+        <ParticleField count={70} />
+      </motion.div>
+      
+      <div className="relative z-10 max-w-7xl mx-auto px-4">
+        <motion.div
+          className="text-center mb-16"
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1 }}
+          viewport={{ once: true }}
+        >
+          <h2 className="text-4xl md:text-6xl font-bold text-white mb-6 flex items-center justify-center">
+            <ArrowTrendingUpIcon className="w-12 h-12 text-yellow-400 mr-4" />
+            {t('medical_renaissance')}
+          </h2>
+          <p className="text-xl md:text-2xl text-yellow-100 mb-4">
+            {t('hopeful_future_tagline')}
+          </p>
+          <div className="w-24 h-1 bg-gradient-to-r from-yellow-400 to-teal-400 mx-auto" />
+        </motion.div>
+        
+        {/* Vision Trilogy */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
+          {/* Personal Transformation */}
+          <motion.div
+            className="group relative bg-gradient-to-br from-slate-700/90 to-slate-800/90 backdrop-blur-sm p-8 rounded-2xl border border-yellow-500/30 shadow-2xl overflow-hidden"
+            initial={{ opacity: 0, x: -50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            viewport={{ once: true }}
+            whileHover={{ scale: 1.02, y: -5 }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/10 to-teal-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" />
+            
+            <div className="relative z-10">
+              <div className="w-16 h-16 mb-6 bg-gradient-to-r from-yellow-400 to-orange-500 p-3 rounded-xl">
+                <EyeIcon className="w-full h-full text-white" />
+              </div>
+              
+              <h3 className="text-2xl font-bold text-white mb-4">
+                {t('personal_transformation')}
+              </h3>
+              
+              <p className="text-yellow-100 mb-4 leading-relaxed">
+                {t('reclaim_life_days')}
+              </p>
+              
+              <p className="text-teal-200 leading-relaxed">
+                {t('restore_human_contact')}
+              </p>
+            </div>
+            
+            {/* Transformation Visualization */}
+            <motion.div
+              className="absolute bottom-4 right-4 flex space-x-1"
+              animate={{
+                opacity: [0.5, 1, 0.5]
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity
+              }}
+            >
+              <div className="w-2 h-2 bg-yellow-400 rounded-full" />
+              <div className="w-2 h-2 bg-teal-400 rounded-full" />
+            </motion.div>
+          </motion.div>
+          
+          {/* Professional Renaissance */}
+          <motion.div
+            className="group relative bg-gradient-to-br from-slate-700/90 to-slate-800/90 backdrop-blur-sm p-8 rounded-2xl border border-teal-500/30 shadow-2xl overflow-hidden"
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            viewport={{ once: true }}
+            whileHover={{ scale: 1.02, y: -5 }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-teal-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" />
+            
+            <div className="relative z-10">
+              <div className="w-16 h-16 mb-6 bg-gradient-to-r from-teal-400 to-blue-500 p-3 rounded-xl">
+                <BrainIcon className="w-full h-full text-white" />
+              </div>
+              
+              <h3 className="text-2xl font-bold text-white mb-4">
+                {t('professional_renaissance')}
+              </h3>
+              
+              <p className="text-teal-100 mb-4 leading-relaxed">
+                {t('admin_to_artistry')}
+              </p>
+              
+              <p className="text-blue-200 leading-relaxed">
+                {t('fatigue_to_brilliance')}
+              </p>
+            </div>
+            
+            {/* Renaissance Glow */}
+            <motion.div
+              className="absolute bottom-4 right-4 w-4 h-4 bg-teal-400 rounded-full"
+              animate={{
+                scale: [1, 1.5, 1],
+                opacity: [0.6, 1, 0.6]
+              }}
+              transition={{
+                duration: 2.5,
+                repeat: Infinity
+              }}
+            />
+          </motion.div>
+          
+          {/* Global Leadership */}
+          <motion.div
+            className="group relative bg-gradient-to-br from-slate-700/90 to-slate-800/90 backdrop-blur-sm p-8 rounded-2xl border border-green-500/30 shadow-2xl overflow-hidden"
+            initial={{ opacity: 0, x: 50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
+            viewport={{ once: true }}
+            whileHover={{ scale: 1.02, y: -5 }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-green-500/10 to-yellow-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" />
+            
+            <div className="relative z-10">
+              <div className="w-16 h-16 mb-6 bg-gradient-to-r from-green-400 to-yellow-500 p-3 rounded-xl">
+                <div className="w-full h-full flex items-center justify-center text-white text-2xl font-bold">
+                  🇲🇽
+                </div>
+              </div>
+              
+              <h3 className="text-2xl font-bold text-white mb-4">
+                {t('mexican_leadership')}
+              </h3>
+              
+              <p className="text-green-100 mb-4 leading-relaxed">
+                {t('mexico_ai_revolution')}
+              </p>
+              
+              <p className="text-yellow-200 leading-relaxed">
+                {t('guadalajara_to_world')}
+              </p>
+            </div>
+            
+            {/* Global Pulse */}
+            <motion.div
+              className="absolute bottom-4 right-4 w-4 h-4 bg-yellow-400 rounded-full"
+              animate={{
+                scale: [1, 2, 1],
+                opacity: [0.8, 0.2, 0.8]
+              }}
+              transition={{
+                duration: 3,
+                repeat: Infinity
+              }}
+            />
+          </motion.div>
+        </div>
+        
+        {/* Ultimate Vision */}
+        <motion.div
+          className="text-center"
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, delay: 1 }}
+          viewport={{ once: true }}
+        >
+          <div className="bg-gradient-to-r from-yellow-500/20 via-teal-500/20 to-blue-500/20 backdrop-blur-sm p-8 rounded-3xl border border-yellow-400/30 max-w-4xl mx-auto">
+            <h3 className="text-3xl md:text-4xl font-bold text-white mb-6">
+              {t('future_is_bright')}
+            </h3>
+            
+            <p className="text-xl text-yellow-100 mb-8 leading-relaxed">
+              {t('transformation_within_reach')}
+            </p>
+            
+            <motion.button
+              className="group relative px-12 py-4 bg-gradient-to-r from-yellow-500 to-teal-500 text-white font-bold rounded-full text-xl shadow-2xl border-2 border-yellow-400/50 overflow-hidden"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              animate={{
+                boxShadow: [
+                  "0 0 30px rgba(245, 158, 11, 0.3)",
+                  "0 0 60px rgba(245, 158, 11, 0.5)",
+                  "0 0 30px rgba(245, 158, 11, 0.3)"
+                ]
+              }}
+              transition={{
+                boxShadow: {
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }
+              }}
+            >
+              <span className="relative z-10">{t('join_renaissance')}</span>
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+            </motion.button>
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  );
+
+  return (
+    <div className="relative bg-slate-900 text-white overflow-hidden">
+      <HeroSection />
+      <ProblemSection />
+      <SolutionSection />
+      <TrustSection />
+      <TestimonialsSection />
+      <RevolutionaryVisionSection />
+    </div>
+  );
+};
+
+export default CinematicLandingPage;
