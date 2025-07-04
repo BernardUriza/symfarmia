@@ -289,59 +289,124 @@ export const medicalUtils = {
 };
 
 // Mock AI responses for medical assistant
+// HuggingFace-powered medical AI integration
 export const mockMedicalAI = {
-  generateResponse: async (message) => {
-    // Simulate AI processing delay
-    await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
-    
-    const responses = {
-      'chest pain': [
-        "Based on the patient's presentation of chest pain, I recommend immediate evaluation for acute coronary syndrome. Consider obtaining an ECG, troponin levels, and chest X-ray.",
-        "The differential diagnosis for chest pain includes ACS, PE, aortic dissection, and GERD. Given the patient's age and risk factors, prioritize cardiac workup.",
-        "For chest pain evaluation, consider the HEART score to risk stratify. High-risk patients need immediate cardiology consultation."
-      ],
-      'drug interaction': [
-        "I've identified a potential drug interaction between the patient's current medications. The combination of warfarin and aspirin increases bleeding risk significantly.",
-        "This drug interaction requires close monitoring. Consider reducing the warfarin dose and monitoring INR more frequently.",
-        "Alternative medications should be considered to avoid this interaction. Would you like me to suggest safer alternatives?"
-      ],
-      'diagnosis': [
-        "Based on the clinical presentation, the most likely diagnosis is Type 2 Diabetes Mellitus. I recommend confirming with HbA1c and fasting glucose.",
-        "The symptoms and findings suggest hypertension. Consider 24-hour ambulatory blood pressure monitoring for confirmation.",
-        "This constellation of symptoms is consistent with chronic kidney disease. Recommend comprehensive metabolic panel and urinalysis."
-      ],
-      'medication': [
-        "For this patient's condition, I recommend starting with metformin 500mg twice daily, titrating based on tolerance and glycemic control.",
-        "The appropriate starting dose for lisinopril in this patient would be 10mg daily, with monitoring of renal function and potassium.",
-        "Consider prescribing atorvastatin 20mg daily for cardiovascular risk reduction, with baseline liver function tests."
-      ],
-      'lab results': [
-        "The lab results show elevated creatinine at 2.1 mg/dL, suggesting acute kidney injury. Recommend nephrology consultation and medication review.",
-        "The HbA1c of 9.2% indicates poor glycemic control. Consider intensifying diabetes management with additional medications.",
-        "The potassium level of 5.8 mEq/L is dangerously high. Consider immediate treatment with calcium, insulin, and glucose."
-      ]
-    };
-    
-    // Simple keyword matching for demo
-    const keywords = Object.keys(responses);
-    const matchedKeyword = keywords.find(keyword => 
-      message.toLowerCase().includes(keyword)
-    );
-    
-    if (matchedKeyword) {
-      const responseOptions = responses[matchedKeyword];
-      return responseOptions[Math.floor(Math.random() * responseOptions.length)];
-    }
-    
-    // Default responses
+  /**
+   * Query HuggingFace medical models and return a structured response.
+   * Falls back to the legacy mock replies on error.
+   * @param {string} query - user question or transcript text
+   * @param {object} context - additional patient context
+   * @param {('diagnosis'|'prescription'|'soap'|'analytics')} type - response type
+   * @returns {Promise<MedicalAIResponse>}
+   */
+    generateResponse: async (query, context = {}, type = 'diagnosis') => {
+      const HF_TOKEN = process.env.HUGGINGFACE_TOKEN;
+      const HF_API_URL = 'https://api-inference.huggingface.co/models';
+
+      const CACHE_TTL = 60 * 60 * 1000; // 1 hour
+      const patientId = context?.patient?.id || 'global';
+      const now = Date.now();
+
+      if (!mockMedicalAI._requestLog) mockMedicalAI._requestLog = new Map();
+      const recent = (mockMedicalAI._requestLog.get(patientId) || []).filter(ts => now - ts < CACHE_TTL);
+      if (recent.length >= 60) {
+        return {
+          response: 'Lo siento, se alcanzó el límite de consultas por hora.',
+          confidence: 0,
+          reasoning: ['Límite de uso superado'],
+          suggestions: [],
+          disclaimer: 'AVISO MÉDICO: Esta información es generada por IA y debe ser validada por un médico certificado. No reemplaza el criterio médico profesional.',
+          sources: []
+        };
+      }
+      recent.push(now);
+      mockMedicalAI._requestLog.set(patientId, recent);
+
+      const cacheKey = JSON.stringify({ query, context, type });
+      if (!mockMedicalAI._cache) mockMedicalAI._cache = new Map();
+      const cached = mockMedicalAI._cache.get(cacheKey);
+      if (cached && now - cached.timestamp < CACHE_TTL) {
+        return cached.result;
+      }
+
+      const modelMap = {
+        diagnosis: 'jiviai/medX_v2',
+        prescription: 'raidium/MQG',
+        soap: 'emilyalsentzer/Bio_ClinicalBERT',
+        analytics: 'raidium/MQG'
+      };
+      const params = {
+        'raidium/MQG': { max_length: 500, temperature: 0.7, do_sample: true },
+        'jiviai/medX_v2': { max_length: 300, temperature: 0.5 },
+        'emilyalsentzer/Bio_ClinicalBERT': { return_all_scores: true },
+        'openai/whisper-medium': { language: 'es', task: 'transcribe' }
+      };
+
+      const model = modelMap[type] || modelMap.diagnosis;
+
+      const headers = {
+        'Content-Type': 'application/json',
+        'User-Agent': 'SYMFARMIA-Medical-Assistant/1.0'
+      };
+      if (HF_TOKEN) headers['Authorization'] = `Bearer ${HF_TOKEN}`;
+
+      const body = {
+        inputs: query,
+        parameters: params[model]
+      };
+
+      const disclaimer =
+        'AVISO MÉDICO: Esta información es generada por IA y debe ser validada por un médico certificado. No reemplaza el criterio médico profesional.';
+
+      try {
+        const response = await fetch(`${HF_API_URL}/${model}`, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(body)
+        });
+
+        if (!response.ok) {
+          throw new Error(`HuggingFace API error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const text = data.generated_text || data[0]?.generated_text || '';
+
+        const result = {
+          response: text,
+          confidence: typeof data[0]?.score === 'number' ? data[0].score : 0.7,
+          reasoning: [],
+          suggestions: [],
+          disclaimer,
+          sources: [model]
+        };
+
+        mockMedicalAI._cache.set(cacheKey, { result, timestamp: now });
+        return result;
+      } catch (err) {
+        console.error('Medical AI error:', err);
+        const fallback = {
+          response: mockMedicalAI._fallbackResponse(query),
+          confidence: 0.4,
+          reasoning: [],
+          suggestions: [],
+          disclaimer,
+          sources: []
+        };
+        mockMedicalAI._cache.set(cacheKey, { result: fallback, timestamp: now });
+        return fallback;
+      }
+    },
+
+  _fallbackResponse: (message) => {
     const defaultResponses = [
       "I understand you're looking for medical guidance. Could you provide more specific details about the patient's condition?",
       "Based on the information provided, I'd recommend a comprehensive evaluation. What specific aspect would you like me to focus on?",
       "For this clinical scenario, let me suggest some evidence-based approaches. Would you like me to elaborate on any particular aspect?",
-      "I can help you with clinical decision support. Please share more details about the patient's presentation or your specific question.",
-      "This is an interesting case. Let me provide some clinical insights based on current medical guidelines."
+      "Puedo ayudarle con soporte clínico. Comparta más detalles sobre la presentación del paciente.",
+      "Este es un caso interesante. Permítame brindarle algunas ideas basadas en guías médicas actuales."
     ];
-    
+
     return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
   },
 

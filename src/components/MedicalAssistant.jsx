@@ -68,15 +68,22 @@ const MedicalAssistant = () => {
     
     try {
       // Get AI response
-      const aiResponse = await mockMedicalAI.generateResponse(userMessage, {
-        patient: activePatient,
-        mode: assistantMode
-      });
-      
+      const aiResponse = await mockMedicalAI.generateResponse(
+        userMessage,
+        { patient: activePatient, mode: assistantMode },
+        assistantMode === 'prescription'
+          ? 'prescription'
+          : assistantMode === 'diagnosis'
+            ? 'diagnosis'
+            : assistantMode === 'patient-specific'
+              ? 'soap'
+              : 'analytics'
+      );
+
       // Add AI response
       addChatMessage({
         type: 'assistant',
-        content: aiResponse,
+        content: aiResponse.response,
         sender: 'ai',
         mode: assistantMode
       });
