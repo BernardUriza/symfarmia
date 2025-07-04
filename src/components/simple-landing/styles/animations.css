@@ -1,0 +1,188 @@
+/* CSS Fallback Animations for Progressive Enhancement */
+
+/* Keyframes */
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes floatSoft {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Animation Classes */
+.animate-slide-up {
+  animation: slideUpFade 0.6s ease-out forwards;
+}
+
+.animate-slide-down {
+  animation: slideDownFade 0.6s ease-out forwards;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.6s ease-out forwards;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.5s ease-out forwards;
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 3s ease-in-out infinite;
+}
+
+.animate-float-soft {
+  animation: floatSoft 4s ease-in-out infinite;
+}
+
+/* Hover Effects */
+.hover-lift {
+  transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.hover-button {
+  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+}
+
+.hover-button:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 8px 20px rgba(79, 209, 197, 0.3);
+}
+
+.hover-button:active {
+  transform: translateY(0) scale(0.95);
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .animate-slide-up,
+  .animate-slide-down,
+  .animate-fade-in,
+  .animate-scale-in {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  
+  .animate-pulse-glow,
+  .animate-float-soft {
+    animation: none;
+  }
+  
+  .hover-lift:hover,
+  .hover-button:hover {
+    transform: none;
+  }
+}
+
+/* Loading States */
+.animation-loading {
+  opacity: 0;
+}
+
+.animation-loaded {
+  opacity: 1;
+  transition: opacity 0.3s ease-out;
+}
+
+/* Error States */
+.animation-error {
+  opacity: 1;
+  transform: none;
+  animation: none;
+}
+
+/* Performance Mode */
+.low-performance-mode .animate-slide-up,
+.low-performance-mode .animate-slide-down {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+.low-performance-mode .animate-pulse-glow,
+.low-performance-mode .animate-float-soft {
+  animation: none;
+}
+
+/* Particle Fallbacks */
+.css-particles {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: currentColor;
+  border-radius: 50%;
+  opacity: 0.2;
+  animation: floatSoft 6s ease-in-out infinite;
+}
+
+.css-particles:nth-child(2n) {
+  animation-delay: -2s;
+  animation-duration: 8s;
+}
+
+.css-particles:nth-child(3n) {
+  animation-delay: -4s;
+  animation-duration: 7s;
+}
+
+.css-particles:nth-child(4n) {
+  animation-delay: -1s;
+  animation-duration: 9s;
+}
