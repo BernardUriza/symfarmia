@@ -122,36 +122,36 @@ const LandingPageContent = () => {
           
           {/* Medical AI Demo Section */}
           <div className="mt-16 p-8 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-700 rounded-xl">
-            <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-gray-100 mb-4">
-              🧠 Medical AI Assistant Demo
+          <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-gray-100 mb-4">
+              {t('ai_demo_title')}
             </h2>
             <p className="text-center text-gray-600 dark:text-gray-400 mb-6">
-              Test our AI assistant with realistic patient scenarios. Press Ctrl+Shift+A to toggle the assistant.
+              {t('ai_demo_desc')}
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <button
                 onClick={() => loadMockPatient('p001')}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors font-medium"
               >
-                Load Sarah Johnson (Diabetes)
+                {t('load_patient_one')}
               </button>
               <button
                 onClick={() => loadMockPatient('p002')}
                 className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors font-medium"
               >
-                Load Robert Chen (Heart Failure)
+                {t('load_patient_two')}
               </button>
               <button
                 onClick={() => loadMockPatient('p003')}
                 className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors font-medium"
               >
-                Load Maria Rodriguez (Asthma)
+                {t('load_patient_three')}
               </button>
               <button
                 onClick={clearMockPatient}
                 className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors font-medium"
               >
-                Clear Patient
+                {t('clear_patient')}
               </button>
             </div>
           </div>
