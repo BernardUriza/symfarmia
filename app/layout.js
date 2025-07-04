@@ -15,7 +15,7 @@ export const metadata = {
   title: 'SYMFARMIA',
   description: 'Intelligent platform for independent doctors',
   icons: {
-    icon: '/symfarmia.ico',
+    icon: '/favicon.ico',
   },
 }
 

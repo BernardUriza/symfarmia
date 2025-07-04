@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useTranslation } from '../../app/providers/I18nProvider';
 import {
@@ -25,46 +25,68 @@ import LanguageToggle from '../../components/LanguageToggle';
 const CinematicLandingPage = () => {
   const { t } = useTranslation();
   const { scrollYProgress } = useScroll();
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [mousePosition, setMousePosition] = useState({ x: 50, y: 50 });
   
-  // Parallax effects
-  const textY = useTransform(scrollYProgress, [0, 1], ['0%', '100%']);
-  const particleY = useTransform(scrollYProgress, [0, 1], ['0%', '200%']);
+  // Parallax effects with reduced intensity
+  const textY = useTransform(scrollYProgress, [0, 1], ['0%', '30%']);
+  const particleY = useTransform(scrollYProgress, [0, 1], ['0%', '50%']);
   
-  // Mouse tracking for interactive elements
+  // Throttled mouse tracking to reduce re-renders
+  const handleMouseMove = useCallback((e) => {
+    setMousePosition({
+      x: (e.clientX / window.innerWidth) * 100,
+      y: (e.clientY / window.innerHeight) * 100
+    });
+  }, []);
+  
   useEffect(() => {
-    const handleMouseMove = (e) => {
-      setMousePosition({
-        x: (e.clientX / window.innerWidth) * 100,
-        y: (e.clientY / window.innerHeight) * 100
-      });
+    let timeoutId;
+    const throttledMouseMove = (e) => {
+      if (timeoutId) return;
+      timeoutId = setTimeout(() => {
+        handleMouseMove(e);
+        timeoutId = null;
+      }, 100); // Throttle to 10fps
     };
     
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
+    window.addEventListener('mousemove', throttledMouseMove);
+    return () => {
+      window.removeEventListener('mousemove', throttledMouseMove);
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [handleMouseMove]);
 
-  // Floating particles animation
-  const ParticleField = ({ count = 50 }) => {
+  // Optimized floating particles with reduced count and simpler animations
+  const ParticleField = ({ count = 15 }) => {
+    const particles = useMemo(() => {
+      return [...Array(count)].map((_, i) => ({
+        id: i,
+        left: Math.random() * 100,
+        top: Math.random() * 100,
+        delay: Math.random() * 3,
+        duration: 4 + Math.random() * 2
+      }));
+    }, [count]);
+    
     return (
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(count)].map((_, i) => (
+        {particles.map((particle) => (
           <motion.div
-            key={i}
-            className="absolute w-1 h-1 bg-teal-400 rounded-full opacity-30"
+            key={particle.id}
+            className="absolute w-1 h-1 bg-teal-400 rounded-full opacity-20"
             style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
+              left: `${particle.left}%`,
+              top: `${particle.top}%`,
             }}
             animate={{
-              y: [0, -20, 0],
-              opacity: [0.3, 0.8, 0.3],
-              scale: [1, 1.2, 1],
+              y: [0, -15, 0],
+              opacity: [0.2, 0.4, 0.2],
             }}
             transition={{
-              duration: 3 + Math.random() * 4,
+              duration: particle.duration,
               repeat: Infinity,
-              delay: Math.random() * 5,
+              delay: particle.delay,
+              ease: "easeInOut"
             }}
           />
         ))}
@@ -82,21 +104,21 @@ const CinematicLandingPage = () => {
       
       {/* Floating Particles */}
       <motion.div style={{ y: particleY }}>
-        <ParticleField count={80} />
+        <ParticleField count={20} />
       </motion.div>
       
       {/* Medical Sunrise Icon */}
       <motion.div
         className="absolute top-1/4 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
         style={{
-          x: mousePosition.x * 0.1,
-          y: mousePosition.y * 0.1,
+          x: (mousePosition.x - 50) * 0.05,
+          y: (mousePosition.y - 50) * 0.05,
         }}
         animate={{
           rotate: [0, 360],
         }}
         transition={{
-          duration: 60,
+          duration: 120,
           repeat: Infinity,
           ease: "linear",
         }}
@@ -148,14 +170,14 @@ const CinematicLandingPage = () => {
             whileTap={{ scale: 0.95 }}
             animate={{
               boxShadow: [
-                "0 0 20px rgba(79, 209, 197, 0.3)",
-                "0 0 40px rgba(79, 209, 197, 0.5)",
-                "0 0 20px rgba(79, 209, 197, 0.3)",
+                "0 0 20px rgba(79, 209, 197, 0.2)",
+                "0 0 30px rgba(79, 209, 197, 0.3)",
+                "0 0 20px rgba(79, 209, 197, 0.2)",
               ],
             }}
             transition={{
               boxShadow: {
-                duration: 2,
+                duration: 4,
                 repeat: Infinity,
                 ease: "easeInOut",
               },
@@ -201,7 +223,7 @@ const CinematicLandingPage = () => {
       
       {/* Healing Particles */}
       <motion.div className="absolute inset-0">
-        <ParticleField count={30} />
+        <ParticleField count={10} />
       </motion.div>
       
       <div className="relative z-10 max-w-6xl mx-auto px-4">
@@ -298,7 +320,7 @@ const CinematicLandingPage = () => {
       
       {/* Healing Energy Particles */}
       <motion.div className="absolute inset-0">
-        <ParticleField count={60} />
+        <ParticleField count={15} />
       </motion.div>
       
       <div className="relative z-10 max-w-7xl mx-auto px-4">
@@ -393,14 +415,14 @@ const CinematicLandingPage = () => {
                   className={`w-16 h-16 mb-6 bg-gradient-to-r ${node.color} p-3 rounded-xl`}
                   animate={{
                     boxShadow: [
-                      "0 0 20px rgba(79, 209, 197, 0.3)",
-                      "0 0 40px rgba(79, 209, 197, 0.5)",
-                      "0 0 20px rgba(79, 209, 197, 0.3)",
+                      "0 0 15px rgba(79, 209, 197, 0.2)",
+                      "0 0 25px rgba(79, 209, 197, 0.3)",
+                      "0 0 15px rgba(79, 209, 197, 0.2)",
                     ],
                   }}
                   transition={{
                     boxShadow: {
-                      duration: 3,
+                      duration: 6,
                       repeat: Infinity,
                       ease: "easeInOut",
                     },
@@ -419,18 +441,7 @@ const CinematicLandingPage = () => {
               </div>
               
               {/* Interactive Hotspot */}
-              <motion.div
-                className="absolute bottom-4 right-4 w-3 h-3 bg-teal-400 rounded-full"
-                animate={{
-                  scale: [1, 1.2, 1],
-                  opacity: [0.5, 1, 0.5],
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              />
+              <div className="absolute bottom-4 right-4 w-3 h-3 bg-teal-400 rounded-full opacity-60" />
             </motion.div>
           ))}
         </div>
@@ -464,25 +475,11 @@ const CinematicLandingPage = () => {
       </div>
       
       {/* Protective Light Emanation */}
-      <motion.div 
-        className="absolute inset-0"
-        animate={{
-          background: [
-            "radial-gradient(circle at 50% 50%, rgba(79, 209, 197, 0.1) 0%, transparent 50%)",
-            "radial-gradient(circle at 50% 50%, rgba(79, 209, 197, 0.2) 0%, transparent 60%)",
-            "radial-gradient(circle at 50% 50%, rgba(79, 209, 197, 0.1) 0%, transparent 50%)"
-          ]
-        }}
-        transition={{
-          duration: 4,
-          repeat: Infinity,
-          ease: "easeInOut"
-        }}
-      />
+      <div className="absolute inset-0 bg-gradient-radial from-teal-500/10 via-transparent to-transparent opacity-60" />
       
       {/* Security Particles */}
       <motion.div className="absolute inset-0">
-        <ParticleField count={40} />
+        <ParticleField count={12} />
       </motion.div>
       
       <div className="relative z-10 max-w-6xl mx-auto px-4">
@@ -586,18 +583,7 @@ const CinematicLandingPage = () => {
               </div>
               
               {/* Peace of Mind Indicator */}
-              <motion.div
-                className="absolute bottom-4 right-4 w-3 h-3 bg-teal-400 rounded-full"
-                animate={{
-                  scale: [1, 1.3, 1],
-                  opacity: [0.6, 1, 0.6]
-                }}
-                transition={{
-                  duration: 2.5,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-              />
+              <div className="absolute bottom-4 right-4 w-3 h-3 bg-teal-400 rounded-full opacity-50" />
             </motion.div>
           ))}
         </div>
@@ -656,7 +642,7 @@ const CinematicLandingPage = () => {
       
       {/* Renewal Particles */}
       <motion.div className="absolute inset-0">
-        <ParticleField count={35} />
+        <ParticleField count={12} />
       </motion.div>
       
       <div className="relative z-10 max-w-7xl mx-auto px-4">
@@ -763,18 +749,7 @@ const CinematicLandingPage = () => {
               </div>
               
               {/* Renewal Pulse */}
-              <motion.div
-                className="absolute bottom-4 right-4 w-3 h-3 bg-yellow-400 rounded-full"
-                animate={{
-                  scale: [1, 1.4, 1],
-                  opacity: [0.7, 1, 0.7]
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-              />
+              <div className="absolute bottom-4 right-4 w-3 h-3 bg-yellow-400 rounded-full opacity-60" />
             </motion.div>
           ))}
         </div>
@@ -814,11 +789,11 @@ const CinematicLandingPage = () => {
       <motion.div
         className="absolute top-10 left-1/2 transform -translate-x-1/2"
         animate={{
-          y: [0, -10, 0],
-          scale: [1, 1.05, 1]
+          y: [0, -5, 0],
+          scale: [1, 1.02, 1]
         }}
         transition={{
-          duration: 4,
+          duration: 8,
           repeat: Infinity,
           ease: "easeInOut"
         }}
@@ -855,7 +830,7 @@ const CinematicLandingPage = () => {
       
       {/* Renaissance Particles */}
       <motion.div className="absolute inset-0">
-        <ParticleField count={70} />
+        <ParticleField count={18} />
       </motion.div>
       
       <div className="relative z-10 max-w-7xl mx-auto px-4">
@@ -908,19 +883,10 @@ const CinematicLandingPage = () => {
             </div>
             
             {/* Transformation Visualization */}
-            <motion.div
-              className="absolute bottom-4 right-4 flex space-x-1"
-              animate={{
-                opacity: [0.5, 1, 0.5]
-              }}
-              transition={{
-                duration: 2,
-                repeat: Infinity
-              }}
-            >
+            <div className="absolute bottom-4 right-4 flex space-x-1 opacity-50">
               <div className="w-2 h-2 bg-yellow-400 rounded-full" />
               <div className="w-2 h-2 bg-teal-400 rounded-full" />
-            </motion.div>
+            </div>
           </motion.div>
           
           {/* Professional Renaissance */}
@@ -953,17 +919,7 @@ const CinematicLandingPage = () => {
             </div>
             
             {/* Renaissance Glow */}
-            <motion.div
-              className="absolute bottom-4 right-4 w-4 h-4 bg-teal-400 rounded-full"
-              animate={{
-                scale: [1, 1.5, 1],
-                opacity: [0.6, 1, 0.6]
-              }}
-              transition={{
-                duration: 2.5,
-                repeat: Infinity
-              }}
-            />
+            <div className="absolute bottom-4 right-4 w-4 h-4 bg-teal-400 rounded-full opacity-60" />
           </motion.div>
           
           {/* Global Leadership */}
@@ -998,17 +954,7 @@ const CinematicLandingPage = () => {
             </div>
             
             {/* Global Pulse */}
-            <motion.div
-              className="absolute bottom-4 right-4 w-4 h-4 bg-yellow-400 rounded-full"
-              animate={{
-                scale: [1, 2, 1],
-                opacity: [0.8, 0.2, 0.8]
-              }}
-              transition={{
-                duration: 3,
-                repeat: Infinity
-              }}
-            />
+            <div className="absolute bottom-4 right-4 w-4 h-4 bg-yellow-400 rounded-full opacity-50" />
           </motion.div>
         </div>
         
@@ -1035,14 +981,14 @@ const CinematicLandingPage = () => {
               whileTap={{ scale: 0.95 }}
               animate={{
                 boxShadow: [
-                  "0 0 30px rgba(245, 158, 11, 0.3)",
-                  "0 0 60px rgba(245, 158, 11, 0.5)",
-                  "0 0 30px rgba(245, 158, 11, 0.3)"
+                  "0 0 20px rgba(245, 158, 11, 0.2)",
+                  "0 0 40px rgba(245, 158, 11, 0.3)",
+                  "0 0 20px rgba(245, 158, 11, 0.2)"
                 ]
               }}
               transition={{
                 boxShadow: {
-                  duration: 2,
+                  duration: 4,
                   repeat: Infinity,
                   ease: "easeInOut"
                 }
@@ -1125,7 +1071,7 @@ const CinematicLandingPage = () => {
         
         {/* Pricing Energy Particles */}
         <motion.div className="absolute inset-0">
-          <ParticleField count={45} />
+          <ParticleField count={15} />
         </motion.div>
         
         <div className="relative z-10 max-w-7xl mx-auto px-4">
@@ -1213,18 +1159,7 @@ const CinematicLandingPage = () => {
                 </div>
                 
                 {/* Pulse Animation */}
-                <motion.div
-                  className="absolute bottom-4 right-4 w-3 h-3 bg-teal-400 rounded-full"
-                  animate={{
-                    scale: [1, 1.3, 1],
-                    opacity: [0.5, 1, 0.5]
-                  }}
-                  transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
-                />
+                <div className="absolute bottom-4 right-4 w-3 h-3 bg-teal-400 rounded-full opacity-50" />
               </motion.div>
             ))}
           </div>
@@ -1293,7 +1228,7 @@ const CinematicLandingPage = () => {
         
         {/* Revolution Particles */}
         <motion.div className="absolute inset-0">
-          <ParticleField count={80} />
+          <ParticleField count={20} />
         </motion.div>
         
         <div className="relative z-10 max-w-7xl mx-auto px-4">
