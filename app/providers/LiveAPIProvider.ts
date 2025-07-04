@@ -1,4 +1,5 @@
 import { APIProvider } from './APIProvider';
+import type { Database } from '@/app/infrastructure/database';
 import type {
   APIResponse,
   Category,
@@ -12,6 +13,10 @@ import type {
 } from '@/types/providers';
 
 export class LiveAPIProvider extends APIProvider {
+  constructor(db?: Database) {
+    super(db);
+  }
+
   async fetchPatients(): Promise<Patient[]> {
     try {
       const response = await fetch('/api/patients');

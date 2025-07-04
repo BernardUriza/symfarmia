@@ -2,6 +2,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { DemoAPIProvider } from './DemoAPIProvider';
 import { LiveAPIProvider } from './LiveAPIProvider';
+import { createDatabase } from '../infrastructure/database';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 
 interface AppModeContextValue {
@@ -38,18 +39,19 @@ export function AppModeProvider({ children }: { children: React.ReactNode }) {
       return 'live';
     };
     setAppMode(detectMode());
-  }, [setAppMode]);
+  }, []);
 
   useEffect(() => {
+    const db = typeof window === 'undefined' ? createDatabase() : undefined;
     if (appMode === 'demo') {
-      setApiProvider(new DemoAPIProvider());
+      setApiProvider(new DemoAPIProvider(db));
       if (typeof window !== 'undefined') {
         const url = new URL(window.location.toString());
         url.searchParams.set('demo', 'true');
         window.history.replaceState({}, '', url);
       }
     } else {
-      setApiProvider(new LiveAPIProvider());
+      setApiProvider(new LiveAPIProvider(db));
       if (typeof window !== 'undefined') {
         const url = new URL(window.location.toString());
         url.searchParams.delete('demo');
