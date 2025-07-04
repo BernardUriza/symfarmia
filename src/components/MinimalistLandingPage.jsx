@@ -1,18 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   MicrophoneIcon, 
   DocumentTextIcon, 
   ArrowPathIcon,
   CheckCircleIcon,
   UserIcon,
-  StarIcon
+  StarIcon,
+  HeartIcon
 } from '@heroicons/react/24/outline';
 import LanguageToggle from '../../components/LanguageToggle';
+import DemoLoginModal from '../../components/DemoLoginModal';
+import DashboardLanding from './DashboardLanding';
 
 const MinimalistLandingPage = () => {
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDemoMode, setIsDemoMode] = useState(false);
+  
+  // Check if we're in demo mode
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    setIsDemoMode(urlParams.get('demo') === 'true');
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -30,72 +41,120 @@ const MinimalistLandingPage = () => {
       setEmail('');
     }, 3000);
   };
+  
+  const handleDemoClick = () => setIsModalOpen(true);
+  const handleModalClose = () => setIsModalOpen(false);
+  const handleDemoLogin = () => {
+    setIsModalOpen(false);
+    window.location.href = '?demo=true';
+  };
+
+  // If in demo mode, render the dashboard instead
+  if (isDemoMode) {
+    return <DashboardLanding />;
+  }
 
   return (
-    <div className="min-h-screen bg-white text-gray-900 font-sans">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 text-gray-900 font-sans">
       {/* Header */}
       <header className="fixed top-0 right-0 p-6 z-50">
         <LanguageToggle variant="minimal" />
       </header>
+      
+      {/* Demo Mode Banner */}
+      {isDemoMode && (
+        <div className="fixed top-0 left-0 right-0 bg-gradient-to-r from-green-500 to-teal-500 text-white py-3 px-6 z-40">
+          <div className="max-w-4xl mx-auto flex items-center justify-center">
+            <HeartIcon className="w-5 h-5 mr-2" />
+            <span className="font-semibold">Modo Demo Activo</span>
+            <span className="ml-2 text-green-100">• Explora todas las funcionalidades</span>
+          </div>
+        </div>
+      )}
 
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-6 py-20">
+      <main className={`max-w-4xl mx-auto px-6 ${isDemoMode ? 'pt-32' : 'pt-20'}`}>
         
         {/* Hero Section */}
         <section className="text-center mb-20">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 text-gray-900 leading-tight">
-            Convierte consultas médicas en reportes clínicos automáticamente
-          </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
-            Habla durante tu consulta y obtén un reporte médico estructurado en segundos. 
-            Sin interrupciones, sin formularios, sin perder tiempo.
-          </p>
+          <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-8 shadow-lg border border-white/50">
+            <h1 className="text-5xl md:text-6xl font-bold mb-6 text-gray-900 leading-tight">
+              Convierte 666consultas médicas en reportes clínicos automáticamente
+            </h1>
+            <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
+              Habla durante tu consulta y obtén un reporte médico estructurado en segundos. 
+              Sin interrupciones, sin formularios, sin perder tiempo.
+            </p>
           
-          {/* CTA Button */}
-          <div className="mb-12">
-            {!isSubmitted ? (
-              <form onSubmit={handleSubmit} className="max-w-md mx-auto">
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="tu-email@ejemplo.com"
-                    required
-                    className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
-                  >
-                    {isSubmitting ? 'Enviando...' : 'Quiero ahorrar tiempo'}
-                  </button>
+            {/* CTA Buttons */}
+            <div className="mb-12">
+              {!isDemoMode && !isSubmitted ? (
+                <div className="space-y-6">
+                  <form onSubmit={handleSubmit} className="max-w-md mx-auto">
+                    <div className="flex flex-col sm:flex-row gap-4">
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="tu-email@ejemplo.com"
+                        required
+                        className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
+                      />
+                      <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap shadow-lg hover:shadow-xl transform hover:scale-105"
+                      >
+                        {isSubmitting ? 'Enviando...' : 'Quiero ahorrar tiempo'}
+                      </button>
+                    </div>
+                    <p className="text-sm text-gray-500 mt-2">
+                      Acceso beta gratuito • Sin compromiso
+                    </p>
+                  </form>
+                  
+                  <div className="flex justify-center">
+                    <button
+                      onClick={handleDemoClick}
+                      className="bg-white/80 hover:bg-white border-2 border-blue-200 hover:border-blue-300 text-blue-600 font-semibold px-8 py-3 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 backdrop-blur-sm"
+                    >
+                      🎯 Prueba el Demo Interactivo
+                    </button>
+                  </div>
                 </div>
-                <p className="text-sm text-gray-500 mt-2">
-                  Acceso beta gratuito • Sin compromiso
-                </p>
-              </form>
-            ) : (
-              <div className="text-center py-8">
-                <CheckCircleIcon className="w-16 h-16 text-green-500 mx-auto mb-4" />
-                <h3 className="text-2xl font-semibold text-gray-900 mb-2">
-                  ¡Perfecto! Te contactaremos pronto
-                </h3>
-                <p className="text-gray-600">
-                  Revisa tu email para los próximos pasos
-                </p>
-              </div>
-            )}
+              ) : isDemoMode ? (
+                <div className="text-center py-8">
+                  <div className="bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-2xl p-6 shadow-lg">
+                    <HeartIcon className="w-12 h-12 mx-auto mb-4" />
+                    <h3 className="text-2xl font-semibold mb-2">
+                      ¡Bienvenido al Demo de SYMFARMIA!
+                    </h3>
+                    <p className="text-green-100">
+                      Explora todas las funcionalidades con datos de ejemplo
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <CheckCircleIcon className="w-16 h-16 text-green-500 mx-auto mb-4" />
+                  <h3 className="text-2xl font-semibold text-gray-900 mb-2">
+                    ¡Perfecto! Te contactaremos pronto
+                  </h3>
+                  <p className="text-gray-600">
+                    Revisa tu email para los próximos pasos
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         </section>
 
         {/* Three Key Benefits */}
         <section className="mb-20">
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <MicrophoneIcon className="w-8 h-8 text-blue-600" />
+            <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/50 text-center hover:shadow-xl transition-all duration-200 transform hover:scale-105">
+              <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <MicrophoneIcon className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-xl font-semibold mb-3 text-gray-900">
                 Habla naturalmente
@@ -105,9 +164,9 @@ const MinimalistLandingPage = () => {
               </p>
             </div>
             
-            <div className="text-center">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <ArrowPathIcon className="w-8 h-8 text-green-600" />
+            <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/50 text-center hover:shadow-xl transition-all duration-200 transform hover:scale-105">
+              <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <ArrowPathIcon className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-xl font-semibold mb-3 text-gray-900">
                 Procesamiento inteligente
@@ -117,9 +176,9 @@ const MinimalistLandingPage = () => {
               </p>
             </div>
             
-            <div className="text-center">
-              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <DocumentTextIcon className="w-8 h-8 text-purple-600" />
+            <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/50 text-center hover:shadow-xl transition-all duration-200 transform hover:scale-105">
+              <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <DocumentTextIcon className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-xl font-semibold mb-3 text-gray-900">
                 Reporte instantáneo
@@ -137,10 +196,10 @@ const MinimalistLandingPage = () => {
             Así de simple funciona
           </h2>
           
-          <div className="bg-gray-50 rounded-lg p-8">
+          <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-8 shadow-lg border border-white/50">
             <div className="grid md:grid-cols-3 gap-8 items-center">
               <div className="text-center">
-                <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-4 font-bold text-lg">
+                <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-2xl flex items-center justify-center mx-auto mb-4 font-bold text-xl shadow-lg">
                   1
                 </div>
                 <h3 className="font-semibold mb-2 text-gray-900">Consulta normal</h3>
@@ -150,7 +209,7 @@ const MinimalistLandingPage = () => {
               </div>
               
               <div className="text-center">
-                <div className="w-12 h-12 bg-green-600 text-white rounded-full flex items-center justify-center mx-auto mb-4 font-bold text-lg">
+                <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-2xl flex items-center justify-center mx-auto mb-4 font-bold text-xl shadow-lg">
                   2
                 </div>
                 <h3 className="font-semibold mb-2 text-gray-900">Procesamiento IA</h3>
@@ -160,7 +219,7 @@ const MinimalistLandingPage = () => {
               </div>
               
               <div className="text-center">
-                <div className="w-12 h-12 bg-purple-600 text-white rounded-full flex items-center justify-center mx-auto mb-4 font-bold text-lg">
+                <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-2xl flex items-center justify-center mx-auto mb-4 font-bold text-xl shadow-lg">
                   3
                 </div>
                 <h3 className="font-semibold mb-2 text-gray-900">Reporte listo</h3>
@@ -174,10 +233,10 @@ const MinimalistLandingPage = () => {
 
         {/* Simple Testimonial */}
         <section className="mb-20">
-          <div className="bg-white border border-gray-200 rounded-lg p-8 max-w-2xl mx-auto">
+          <div className="bg-white/70 backdrop-blur-sm border border-white/50 rounded-3xl p-8 max-w-2xl mx-auto shadow-lg">
             <div className="flex items-center mb-4">
-              <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mr-4">
-                <UserIcon className="w-6 h-6 text-gray-600" />
+              <div className="w-12 h-12 bg-gradient-to-r from-gray-400 to-gray-500 rounded-2xl flex items-center justify-center mr-4 shadow-lg">
+                <UserIcon className="w-6 h-6 text-white" />
               </div>
               <div>
                 <h3 className="font-semibold text-gray-900">Dr. María González</h3>
@@ -201,38 +260,51 @@ const MinimalistLandingPage = () => {
 
         {/* Final CTA */}
         <section className="text-center mb-20">
-          <h2 className="text-3xl font-bold mb-4 text-gray-900">
-            ¿Listo para recuperar tu tiempo?
-          </h2>
-          <p className="text-xl text-gray-600 mb-8">
-            Únete al beta y descubre cómo la IA puede simplificar tu práctica médica.
-          </p>
-          
-          {!isSubmitted && (
-            <button
-              onClick={() => document.querySelector('input[type="email"]').scrollIntoView()}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-lg transition-colors"
-            >
-              Solicita acceso beta
-            </button>
-          )}
+          <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-8 shadow-lg border border-white/50">
+            <h2 className="text-3xl font-bold mb-4 text-gray-900">
+              ¿Listo para recuperar tu tiempo?
+            </h2>
+            <p className="text-xl text-gray-600 mb-8">
+              Únete al beta y descubre cómo la IA puede simplificar tu práctica médica.
+            </p>
+            
+            {!isSubmitted && !isDemoMode && (
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <button
+                  onClick={() => document.querySelector('input[type="email"]').scrollIntoView()}
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                >
+                  Solicita acceso beta
+                </button>
+                <button
+                  onClick={handleDemoClick}
+                  className="bg-white/80 hover:bg-white border-2 border-blue-200 hover:border-blue-300 text-blue-600 font-semibold px-8 py-3 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                >
+                  O prueba el demo
+                </button>
+              </div>
+            )}
+          </div>
         </section>
 
       </main>
 
       {/* Simple Footer */}
-      <footer className="border-t border-gray-200 py-8">
+      <footer className="border-t border-white/30 py-8">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <p className="text-gray-600 text-sm">
             © 2024 SYMFARMIA • Hecho con 💙 para médicos en México
           </p>
           <div className="mt-4 flex justify-center space-x-6 text-sm">
-            <a href="#" className="text-gray-500 hover:text-blue-600">Privacidad</a>
-            <a href="#" className="text-gray-500 hover:text-blue-600">Términos</a>
-            <a href="#" className="text-gray-500 hover:text-blue-600">Contacto</a>
+            <a href="#" className="text-gray-500 hover:text-blue-600 transition-colors">Privacidad</a>
+            <a href="#" className="text-gray-500 hover:text-blue-600 transition-colors">Términos</a>
+            <a href="#" className="text-gray-500 hover:text-blue-600 transition-colors">Contacto</a>
           </div>
         </div>
       </footer>
+      
+      {/* Demo Login Modal */}
+      <DemoLoginModal isOpen={isModalOpen} onClose={handleModalClose} onLogin={handleDemoLogin} />
     </div>
   );
 };
