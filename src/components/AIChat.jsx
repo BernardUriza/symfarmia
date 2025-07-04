@@ -147,7 +147,7 @@ const AIChat = () => {
         </div>
         <div className="flex items-center space-x-2">
           <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-          <span className="text-sm text-gray-600 dark:text-gray-400">Online</span>
+          <span className="text-sm text-gray-600 dark:text-gray-400">{t('online')}</span>
         </div>
       </div>
 
@@ -242,21 +242,21 @@ const AIChat = () => {
             className="flex items-center px-3 py-1 text-xs bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 rounded-full hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors"
           >
             <ChartBarIcon className="w-3 h-3 mr-1" />
-            Demographics
+            {t('demographics')}
           </button>
           <button
             onClick={() => handleSuggestionClick('Analyze treatment outcomes')}
             className="flex items-center px-3 py-1 text-xs bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 rounded-full hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors"
           >
             <HeartIcon className="w-3 h-3 mr-1" />
-            Outcomes
+            {t('outcomes')}
           </button>
           <button
             onClick={() => handleSuggestionClick('Review revenue trends')}
             className="flex items-center px-3 py-1 text-xs bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 rounded-full hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors"
           >
             <ClipboardDocumentListIcon className="w-3 h-3 mr-1" />
-            Revenue
+            {t('revenue')}
           </button>
         </div>
       </div>
