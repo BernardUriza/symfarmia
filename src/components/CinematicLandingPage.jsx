@@ -319,9 +319,12 @@ const CinematicLandingPage = () => {
         {/* Connected Hope Nodes */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative">
           {/* Connection Lines */}
-          <svg className="absolute inset-0 w-full h-full pointer-events-none hidden md:block">
+          <svg
+            className="absolute inset-0 w-full h-full pointer-events-none hidden md:block"
+            viewBox="0 0 100 100"
+          >
             <motion.path
-              d="M 25% 25% Q 50% 10% 75% 25% Q 90% 50% 75% 75% Q 50% 90% 25% 75% Q 10% 50% 25% 25%"
+              d="M 25 25 Q 50 10 75 25 Q 90 50 75 75 Q 50 90 25 75 Q 10 50 25 25"
               stroke="url(#hopeLine)"
               strokeWidth="2"
               fill="none"
@@ -627,9 +630,12 @@ const CinematicLandingPage = () => {
       </div>
       
       {/* Hope Threads */}
-      <svg className="absolute inset-0 w-full h-full pointer-events-none">
+      <svg
+        className="absolute inset-0 w-full h-full pointer-events-none"
+        viewBox="0 0 100 100"
+      >
         <motion.path
-          d="M 10% 20% Q 50% 5% 90% 20% M 10% 50% Q 50% 35% 90% 50% M 10% 80% Q 50% 65% 90% 80%"
+          d="M 10 20 Q 50 5 90 20 M 10 50 Q 50 35 90 50 M 10 80 Q 50 65 90 80"
           stroke="url(#hopeThread)"
           strokeWidth="1"
           fill="none"
