@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   MicrophoneIcon, 
@@ -17,7 +17,13 @@ import { mockMedicalAI } from '../utils/medicalUtils';
 const DashboardLanding = () => {
   const [activeFlow, setActiveFlow] = useState(null);
   
+  // Debug: Log when dashboard mounts
+  useEffect(() => {
+    console.log('DashboardLanding: Component mounted, current URL:', window.location.href);
+  }, []);
+  
   const exitDemoMode = () => {
+    console.log('DashboardLanding: Exit demo mode clicked');
     window.location.href = window.location.pathname; // Remove query params
   };
   const [recording, setRecording] = useState(false);

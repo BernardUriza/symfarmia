@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import dynamic from 'next/dynamic';
 import { 
   MicrophoneIcon, 
   DocumentTextIcon, 
@@ -12,19 +11,7 @@ import {
 import LanguageToggle from '../../components/LanguageToggle';
 import DemoLoginModal from '../../components/DemoLoginModal';
 import TailwindTest from './TailwindTest';
-
-// Dynamically import DashboardLanding to prevent hydration issues
-const DashboardLanding = dynamic(() => import('./DashboardLanding'), {
-  ssr: false,
-  loading: () => (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
-        <p className="text-gray-600">Cargando dashboard...</p>
-      </div>
-    </div>
-  )
-});
+import DashboardLanding from './DashboardLanding';
 
 const MinimalistLandingPage = () => {
   const [email, setEmail] = useState('');
@@ -34,15 +21,18 @@ const MinimalistLandingPage = () => {
   
   const [isDemoMode, setIsDemoMode] = useState(false);
   
-  // Check if we're in demo mode
+  // Check if we're in demo mode - simplified approach
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    setIsDemoMode(urlParams.get('demo') === 'true');
-    
     const checkDemoMode = () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      setIsDemoMode(urlParams.get('demo') === 'true');
+      if (typeof window !== 'undefined') {
+        const urlParams = new URLSearchParams(window.location.search);
+        const isDemo = urlParams.get('demo') === 'true';
+        console.log('MinimalistLandingPage: Checking demo mode:', isDemo, window.location.search);
+        setIsDemoMode(isDemo);
+      }
     };
+    
+    checkDemoMode();
     
     // Listen for URL changes
     window.addEventListener('popstate', checkDemoMode);
@@ -78,8 +68,11 @@ const MinimalistLandingPage = () => {
 
   // If in demo mode, render the dashboard instead
   if (isDemoMode) {
+    console.log('MinimalistLandingPage: Rendering DashboardLanding');
     return <DashboardLanding />;
   }
+  
+  console.log('MinimalistLandingPage: Rendering normal landing page');
 
   // Temporary Tailwind test - remove this once styling is confirmed
   if (typeof window !== 'undefined' && window.location.search.includes('test=tailwind')) {
