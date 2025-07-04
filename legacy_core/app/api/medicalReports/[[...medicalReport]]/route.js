@@ -1,86 +1,41 @@
 import { NextResponse } from 'next/server';
 import {
-  getAllMedicalReports,
-  createMedicalReport,
-  updateMedicalReport,
-  getMedicalReportById,
-  deleteMedicalReport
-} from '../../../../prisma/medicalReportsClient';
+  fetchMedicalReports,
+  fetchMedicalReport,
+  saveMedicalReport,
+  removeMedicalReport,
+} from '../useCases/medicalReports';
+import { withErrorHandling, validateBody } from '../middlewares';
 
-export async function GET(req) {
+export const GET = withErrorHandling(async (req) => {
   const reportId = parseInt(req.nextUrl.pathname.split('/').pop());
-
   if (reportId > 0) {
-    const report = await getMedicalReportById(reportId);
+    const report = await fetchMedicalReport(reportId);
     return report
       ? NextResponse.json(report, { status: 200 })
       : NextResponse.json({ error: 'Medical report not found: ' + reportId }, { status: 404 });
   }
-  const medicalReports = await getAllMedicalReports();
+  const medicalReports = await fetchMedicalReports();
   return NextResponse.json(medicalReports, { status: 200 });
-}
+});
 
-export const POST = async (req) => {
-  const body = await req.json();
-  const { id, name, date, status, expirationDate, patient, studies } = body;
+export const POST = withErrorHandling(
+  validateBody(['name', 'date', 'status'], async (req) => {
+    const { report, created } = await saveMedicalReport(req.validatedBody);
+    return NextResponse.json(report, { status: created ? 201 : 200 });
+  })
+);
 
-  let existingReport = parseInt(id) > 0 ? await getMedicalReportById(id) : false;
-
-  if (existingReport) {
-    const updatedReport = await updateMedicalReport(id, {
-      name,
-      date,
-      status,
-      expirationDate: expirationDate !== null ? expirationDate : existingReport.expirationDate
-    });
-    return NextResponse.json(updatedReport, { status: 200 });
-  } else {
-    const newReport = await createMedicalReport({
-      name,
-      date,
-      status,
-      diagnosis: 'Default Diagnosis',
-      patient: {
-        create: patient
-      },
-      studies: {
-        create: studies.map((study) => ({
-          name: study.name,
-          title: study.title,
-          studyTypeId: study.type.id,
-          createdAt: study.createdAt,
-          // add other properties as needed
-        }))
-      }
-    });
-    return NextResponse.json(newReport, { status: 201 });
-  }
-};
-
-export const DELETE = async (request) => {
-  // Extract the pathname from the URL
-  const pathname = request.nextUrl.pathname;
-
-  // Split the pathname into segments and extract the medicalReport ID
-  // Assuming the URL format is /api/medicalReports/[id]
-  const segments = pathname.split('/');
+export const DELETE = withErrorHandling(async (request) => {
+  const segments = request.nextUrl.pathname.split('/');
   const medicalReport = segments[segments.length - 1];
-
   if (!medicalReport) {
     return new NextResponse(JSON.stringify({ error: 'ID is required for deletion' }), { status: 400 });
   }
-
-  // Assuming medicalReport is a single value and not an array
   const reportIdToDelete = parseInt(medicalReport);
   if (isNaN(reportIdToDelete)) {
     return new NextResponse(JSON.stringify({ error: 'Invalid ID format' }), { status: 400 });
   }
-
-  try {
-    const result = await deleteMedicalReport(reportIdToDelete);
-    return new NextResponse(JSON.stringify(result), { status: 200 }); // Successful DELETE operation
-  } catch (error) {
-    // Handle potential errors from deleteMedicalReport
-    return new NextResponse(JSON.stringify({ error: error.message }), { status: 500 });
-  }
-};
+  await removeMedicalReport(reportIdToDelete);
+  return new NextResponse(JSON.stringify({ success: true }), { status: 200 });
+});
