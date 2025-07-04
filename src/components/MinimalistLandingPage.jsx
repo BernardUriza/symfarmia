@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { 
   MicrophoneIcon, 
   DocumentTextIcon, 
@@ -10,7 +11,19 @@ import {
 } from '@heroicons/react/24/outline';
 import LanguageToggle from '../../components/LanguageToggle';
 import DemoLoginModal from '../../components/DemoLoginModal';
-import DashboardLanding from './DashboardLanding';
+
+// Dynamically import DashboardLanding to prevent hydration issues
+const DashboardLanding = dynamic(() => import('./DashboardLanding'), {
+  ssr: false,
+  loading: () => (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
+        <p className="text-gray-600">Cargando dashboard...</p>
+      </div>
+    </div>
+  )
+});
 
 const MinimalistLandingPage = () => {
   const [email, setEmail] = useState('');
@@ -18,21 +31,16 @@ const MinimalistLandingPage = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   
-  // Initialize demo mode from URL immediately
-  const [isDemoMode, setIsDemoMode] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const urlParams = new URLSearchParams(window.location.search);
-      return urlParams.get('demo') === 'true';
-    }
-    return false;
-  });
+  const [isDemoMode, setIsDemoMode] = useState(false);
   
-  // Keep checking URL changes
+  // Check if we're in demo mode
   useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    setIsDemoMode(urlParams.get('demo') === 'true');
+    
     const checkDemoMode = () => {
       const urlParams = new URLSearchParams(window.location.search);
-      const demoParam = urlParams.get('demo') === 'true';
-      setIsDemoMode(demoParam);
+      setIsDemoMode(urlParams.get('demo') === 'true');
     };
     
     // Listen for URL changes
