@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { mockPatients } from '../data/mockPatients';
+import { useTranslation } from '../../app/providers/I18nProvider';
 
 const PatientManagementPreview = ({ isOpen, onClose }) => {
   const [patients] = useState(mockPatients);
+  const { t } = useTranslation();
 
   if (!isOpen) return null;
 
@@ -29,8 +31,8 @@ const PatientManagementPreview = ({ isOpen, onClose }) => {
         {/* Header */}
         <div className="p-6 border-b border-gray-200 flex justify-between items-center">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Patient Management</h2>
-            <p className="text-gray-600 mt-1">Vista previa de la gestión de pacientes</p>
+            <h2 className="text-2xl font-bold text-gray-900">{t('patient_management')}</h2>
+            <p className="text-gray-600 mt-1">{t('patient_management_preview_description')}</p>
           </div>
           <button
             onClick={onClose}
@@ -46,13 +48,13 @@ const PatientManagementPreview = ({ isOpen, onClose }) => {
         <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
           <div className="mb-6">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Lista de Pacientes</h3>
+              <h3 className="text-lg font-semibold text-gray-900">{t('patient_list')}</h3>
               <div className="flex gap-2">
                 <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                  Nuevo Paciente
+                  {t('new_patient')}
                 </button>
                 <button className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                  Exportar
+                  {t('export')}
                 </button>
               </div>
             </div>
@@ -60,17 +62,17 @@ const PatientManagementPreview = ({ isOpen, onClose }) => {
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               <div className="bg-blue-50 p-4 rounded-lg">
-                <h4 className="text-sm font-medium text-blue-600">Total Pacientes</h4>
+                <h4 className="text-sm font-medium text-blue-600">{t('total_patients')}</h4>
                 <p className="text-2xl font-bold text-blue-900">{patients.length}</p>
               </div>
               <div className="bg-green-50 p-4 rounded-lg">
-                <h4 className="text-sm font-medium text-green-600">Pacientes Activos</h4>
+                <h4 className="text-sm font-medium text-green-600">{t('active_patients')}</h4>
                 <p className="text-2xl font-bold text-green-900">
                   {patients.filter(p => p.status === 'Activo').length}
                 </p>
               </div>
               <div className="bg-red-50 p-4 rounded-lg">
-                <h4 className="text-sm font-medium text-red-600">Pacientes Inactivos</h4>
+                <h4 className="text-sm font-medium text-red-600">{t('inactive_patients')}</h4>
                 <p className="text-2xl font-bold text-red-900">
                   {patients.filter(p => p.status === 'Inactivo').length}
                 </p>
@@ -84,22 +86,22 @@ const PatientManagementPreview = ({ isOpen, onClose }) => {
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Paciente
+                        {t('patient')}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Contacto
+                        {t('contact')}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Edad
+                        {t('age')}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Género
+                        {t('gender')}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Estado
+                        {t('status')}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Acciones
+                        {t('actions')}
                       </th>
                     </tr>
                   </thead>
@@ -128,7 +130,7 @@ const PatientManagementPreview = ({ isOpen, onClose }) => {
                           <div className="text-sm text-gray-500">{patient.phone}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {calculateAge(patient.dateOfBirth)} años
+                          {calculateAge(patient.dateOfBirth)} {t('years')}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           {patient.gender}
@@ -141,13 +143,13 @@ const PatientManagementPreview = ({ isOpen, onClose }) => {
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <div className="flex gap-2">
                             <button className="text-blue-600 hover:text-blue-900 transition-colors">
-                              Ver
+                              {t('view')}
                             </button>
                             <button className="text-indigo-600 hover:text-indigo-900 transition-colors">
-                              Editar
+                              {t('edit')}
                             </button>
                             <button className="text-red-600 hover:text-red-900 transition-colors">
-                              Eliminar
+                              {t('delete')}
                             </button>
                           </div>
                         </td>
@@ -164,13 +166,13 @@ const PatientManagementPreview = ({ isOpen, onClose }) => {
         <div className="p-6 border-t border-gray-200 bg-gray-50">
           <div className="flex justify-between items-center">
             <div className="text-sm text-gray-600">
-              Vista previa del sistema de gestión de pacientes
+              {t('preview_footer')}
             </div>
             <button
               onClick={onClose}
               className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
             >
-              Cerrar
+              {t('close')}
             </button>
           </div>
         </div>
