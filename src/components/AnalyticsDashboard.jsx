@@ -13,7 +13,6 @@ import {
   UserGroupIcon, 
   DocumentTextIcon,
   SparklesIcon,
-  ChatBubbleLeftRightIcon,
   HomeIcon,
   ArrowLeftIcon
 } from '@heroicons/react/24/outline';
