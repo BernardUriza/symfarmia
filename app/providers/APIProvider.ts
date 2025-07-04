@@ -15,7 +15,9 @@ export abstract class APIProvider {
   protected readonly db?: Database;
 
   constructor(db?: Database) {
-    this.db = db;
+    if (db !== undefined) {
+      this.db = db;
+    }
   }
 
   async fetchPatients(): Promise<Patient[]> {

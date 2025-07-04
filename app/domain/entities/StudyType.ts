@@ -12,6 +12,8 @@ export default class StudyType {
     this.name = name;
     this.description = description;
     this.categoryId = categoryId;
-    this.category = category;
+    if (category !== undefined) {
+      this.category = category;
+    }
   }
 }

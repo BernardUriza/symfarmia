@@ -17,8 +17,10 @@ export default class Patient {
     dateOfBirth: Date;
     gender: string;
     status: string;
-  }) {
-    this.id = id;
+    }) {
+    if (id !== undefined) {
+      this.id = id;
+    }
     this.name = name;
     this.email = email;
     this.phone = phone;

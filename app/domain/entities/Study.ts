@@ -21,14 +21,22 @@ export default class Study {
     medicalReport?: MedicalReport;
     status?: string;
   }) {
-    this.id = id;
+    if (id !== undefined) {
+      this.id = id;
+    }
     this.name = name;
     this.title = title;
     this.medicalReportId = medicalReportId;
     this.studyTypeId = studyTypeId;
-    this.type = type;
-    this.medicalReport = medicalReport;
-    this.status = status;
+    if (type !== undefined) {
+      this.type = type;
+    }
+    if (medicalReport !== undefined) {
+      this.medicalReport = medicalReport;
+    }
+    if (status !== undefined) {
+      this.status = status;
+    }
   }
 
   validate(): boolean {
