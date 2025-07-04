@@ -1,7 +1,19 @@
 import { APIProvider } from './APIProvider';
+import type {
+  APIResponse,
+  Category,
+  DemoData,
+  EmailData,
+  MedicalReport,
+  Patient,
+  Study,
+  StudyType,
+  MergePdfData,
+  MergePdfResult
+} from '@/types/providers';
 
 export class DemoAPIProvider extends APIProvider {
-  private demoData: any;
+  private demoData: DemoData;
 
   constructor() {
     super();
@@ -17,14 +29,14 @@ export class DemoAPIProvider extends APIProvider {
       const live = new LiveAPIProvider();
       const patients = await live.fetchPatients();
       if (Array.isArray(patients)) {
-        this.demoData.patients = patients as unknown[];
+        this.demoData.patients = patients;
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.warn('[DEMO MODE] Live sync failed:', error);
     }
   }
 
-  initializeDemoData(): any {
+  initializeDemoData(): DemoData {
     return {
       patients: [
         {
@@ -128,195 +140,203 @@ export class DemoAPIProvider extends APIProvider {
     };
   }
 
-  async fetchPatients() {
-    return new Promise((resolve) => {
+  async fetchPatients(): Promise<Patient[]> {
+    return new Promise<Patient[]>((resolve) => {
       setTimeout(() => {
         resolve(this.demoData.patients);
       }, 500);
     });
   }
 
-  async savePatient(patient: any) {
-    return new Promise((resolve) => {
+  async savePatient(patient: Partial<Patient>): Promise<APIResponse<boolean>> {
+    return new Promise<APIResponse<boolean>>((resolve) => {
       setTimeout(() => {
         if (patient.id) {
-          const index = this.demoData.patients.findIndex((p: any) => p.id === patient.id);
+          const index = this.demoData.patients.findIndex((p) => p.id === patient.id);
           if (index !== -1) {
-            this.demoData.patients[index] = { ...patient, updatedAt: new Date().toISOString() };
+            this.demoData.patients[index] = {
+              ...this.demoData.patients[index],
+              ...patient,
+              updatedAt: new Date().toISOString()
+            } as Patient;
           }
         } else {
-          const newPatient = {
-            ...patient,
-            id: Math.max(...this.demoData.patients.map((p: any) => p.id)) + 1,
+          const newPatient: Patient = {
+            ...(patient as Patient),
+            id: Math.max(...this.demoData.patients.map((p) => p.id)) + 1,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
           };
           this.demoData.patients.push(newPatient);
         }
-        resolve({ success: true });
+        resolve({ success: true, data: true });
       }, 300);
     });
   }
 
-  async removePatient(patientId: any) {
-    return new Promise((resolve) => {
+  async removePatient(patientId: number): Promise<APIResponse<boolean>> {
+    return new Promise<APIResponse<boolean>>((resolve) => {
       setTimeout(() => {
-        this.demoData.patients = this.demoData.patients.filter((p: any) => p.id !== patientId);
-        this.demoData.medicalReports = this.demoData.medicalReports.filter((r: any) => r.patientId !== patientId);
-        resolve({ success: true });
+        this.demoData.patients = this.demoData.patients.filter((p) => p.id !== patientId);
+        this.demoData.medicalReports = this.demoData.medicalReports.filter((r) => r.patientId !== patientId);
+        resolve({ success: true, data: true });
       }, 300);
     });
   }
 
-  async fetchMedicalReports() {
-    return new Promise((resolve) => {
+  async fetchMedicalReports(): Promise<MedicalReport[]> {
+    return new Promise<MedicalReport[]>((resolve) => {
       setTimeout(() => {
         resolve(this.demoData.medicalReports);
       }, 500);
     });
   }
 
-  async fetchMedicalReport(reportId: any) {
-    return new Promise((resolve) => {
+  async fetchMedicalReport(reportId: number): Promise<MedicalReport | null> {
+    return new Promise<MedicalReport | null>((resolve) => {
       setTimeout(() => {
-        const report = this.demoData.medicalReports.find((r: any) => r.id === parseInt(reportId));
+        const report = this.demoData.medicalReports.find((r) => r.id === reportId);
         resolve(report || null);
       }, 300);
     });
   }
 
-  async saveMedicalReport(report: any) {
-    return new Promise((resolve) => {
+  async saveMedicalReport(report: Partial<MedicalReport>): Promise<APIResponse<boolean>> {
+    return new Promise<APIResponse<boolean>>((resolve) => {
       setTimeout(() => {
         if (report.id) {
-          const index = this.demoData.medicalReports.findIndex((r: any) => r.id === report.id);
+          const index = this.demoData.medicalReports.findIndex((r) => r.id === report.id);
           if (index !== -1) {
-            this.demoData.medicalReports[index] = { ...report, updatedAt: new Date().toISOString() };
+            this.demoData.medicalReports[index] = {
+              ...this.demoData.medicalReports[index],
+              ...report,
+              updatedAt: new Date().toISOString()
+            } as MedicalReport;
           }
         } else {
-          const newReport = {
-            ...report,
-            id: Math.max(...this.demoData.medicalReports.map((r: any) => r.id)) + 1,
+          const newReport: MedicalReport = {
+            ...(report as MedicalReport),
+            id: Math.max(...this.demoData.medicalReports.map((r) => r.id)) + 1,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
           };
           this.demoData.medicalReports.push(newReport);
         }
-        resolve({ success: true });
+        resolve({ success: true, data: true });
       }, 300);
     });
   }
 
-  async removeMedicalReport(reportId: any) {
-    return new Promise((resolve) => {
+  async removeMedicalReport(reportId: number): Promise<APIResponse<boolean>> {
+    return new Promise<APIResponse<boolean>>((resolve) => {
       setTimeout(() => {
-        this.demoData.medicalReports = this.demoData.medicalReports.filter((r: any) => r.id !== reportId);
-        this.demoData.studies = this.demoData.studies.filter((s: any) => s.medicalReportId !== reportId);
-        resolve({ success: true });
+        this.demoData.medicalReports = this.demoData.medicalReports.filter((r) => r.id !== reportId);
+        this.demoData.studies = this.demoData.studies.filter((s) => s.medicalReportId !== reportId);
+        resolve({ success: true, data: true });
       }, 300);
     });
   }
 
-  async fetchCategories() {
-    return new Promise((resolve) => {
+  async fetchCategories(): Promise<Category[]> {
+    return new Promise<Category[]>((resolve) => {
       setTimeout(() => {
         resolve(this.demoData.categories);
       }, 300);
     });
   }
 
-  async saveCategory(category: any) {
-    return new Promise((resolve) => {
+  async saveCategory(category: Partial<Category>): Promise<APIResponse<boolean>> {
+    return new Promise<APIResponse<boolean>>((resolve) => {
       setTimeout(() => {
         if (category.id) {
-          const index = this.demoData.categories.findIndex((c: any) => c.id === category.id);
+          const index = this.demoData.categories.findIndex((c) => c.id === category.id);
           if (index !== -1) {
-            this.demoData.categories[index] = category;
+            this.demoData.categories[index] = { ...this.demoData.categories[index], ...category } as Category;
           }
         } else {
-          const newCategory = {
-            ...category,
-            id: Math.max(...this.demoData.categories.map((c: any) => c.id)) + 1
+          const newCategory: Category = {
+            ...(category as Category),
+            id: Math.max(...this.demoData.categories.map((c) => c.id)) + 1
           };
           this.demoData.categories.push(newCategory);
         }
-        resolve({ success: true });
+        resolve({ success: true, data: true });
       }, 300);
     });
   }
 
-  async fetchStudyTypes() {
-    return new Promise((resolve) => {
+  async fetchStudyTypes(): Promise<StudyType[]> {
+    return new Promise<StudyType[]>((resolve) => {
       setTimeout(() => {
         resolve(this.demoData.studyTypes);
       }, 300);
     });
   }
 
-  async saveStudyType(studyType: any) {
-    return new Promise((resolve) => {
+  async saveStudyType(studyType: Partial<StudyType>): Promise<APIResponse<boolean>> {
+    return new Promise<APIResponse<boolean>>((resolve) => {
       setTimeout(() => {
         if (studyType.id) {
-        const index = this.demoData.studyTypes.findIndex((st: any) => st.id === studyType.id);
+        const index = this.demoData.studyTypes.findIndex((st) => st.id === studyType.id);
           if (index !== -1) {
-            this.demoData.studyTypes[index] = studyType;
+            this.demoData.studyTypes[index] = { ...this.demoData.studyTypes[index], ...studyType } as StudyType;
           }
         } else {
-          const newStudyType = {
-            ...studyType,
-            id: Math.max(...this.demoData.studyTypes.map((st: any) => st.id)) + 1
+          const newStudyType: StudyType = {
+            ...(studyType as StudyType),
+            id: Math.max(...this.demoData.studyTypes.map((st) => st.id)) + 1
           };
           this.demoData.studyTypes.push(newStudyType);
         }
-        resolve({ success: true });
+        resolve({ success: true, data: true });
       }, 300);
     });
   }
 
-  async saveStudy(study: any) {
-    return new Promise((resolve) => {
+  async saveStudy(study: Partial<Study>): Promise<APIResponse<boolean>> {
+    return new Promise<APIResponse<boolean>>((resolve) => {
       setTimeout(() => {
         if (study.id) {
-          const index = this.demoData.studies.findIndex((s: any) => s.id === study.id);
+          const index = this.demoData.studies.findIndex((s) => s.id === study.id);
           if (index !== -1) {
-            this.demoData.studies[index] = study;
+            this.demoData.studies[index] = { ...this.demoData.studies[index], ...study } as Study;
           }
         } else {
-          const newStudy = {
-            ...study,
-            id: Math.max(...this.demoData.studies.map((s: any) => s.id)) + 1
+          const newStudy: Study = {
+            ...(study as Study),
+            id: Math.max(...this.demoData.studies.map((s) => s.id)) + 1
           };
           this.demoData.studies.push(newStudy);
         }
-        resolve({ success: true });
+        resolve({ success: true, data: true });
       }, 300);
     });
   }
 
-  async removeStudy(studyId: any) {
-    return new Promise((resolve) => {
+  async removeStudy(studyId: number): Promise<APIResponse<boolean>> {
+    return new Promise<APIResponse<boolean>>((resolve) => {
       setTimeout(() => {
-        this.demoData.studies = this.demoData.studies.filter((s: any) => s.id !== studyId);
-        resolve({ success: true });
+        this.demoData.studies = this.demoData.studies.filter((s) => s.id !== studyId);
+        resolve({ success: true, data: true });
       }, 300);
     });
   }
 
-  async sendTokenByEmail(emailData: any) {
-    return new Promise((resolve) => {
+  async sendTokenByEmail(emailData: EmailData): Promise<APIResponse<boolean>> {
+    return new Promise<APIResponse<boolean>>((resolve) => {
       setTimeout(() => {
         console.log('[DEMO MODE] Email would be sent:', emailData);
-        resolve({ success: true, message: 'Demo: Email sent successfully' });
+        resolve({ success: true, data: true, message: 'Demo: Email sent successfully' });
       }, 1000);
     });
   }
 
-  async mergePdfs(pdfData: any) {
-    return new Promise((resolve) => {
+  async mergePdfs(pdfData: MergePdfData): Promise<MergePdfResult> {
+    return new Promise<MergePdfResult>((resolve) => {
       setTimeout(() => {
         console.log('[DEMO MODE] PDFs would be merged:', pdfData);
-        resolve({ 
-          success: true, 
+        resolve({
+          success: true,
           url: 'demo-merged-document.pdf',
           message: 'Demo: PDFs merged successfully'
         });
