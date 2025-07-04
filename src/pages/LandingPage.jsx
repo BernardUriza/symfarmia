@@ -6,6 +6,7 @@ import DemoLoginModal from '../../components/DemoLoginModal';
 import PatientManagementPreview from '../components/PatientManagementPreview';
 import MedicalReportsPreview from '../components/MedicalReportsPreview';
 import { AppModeProvider } from '../../app/providers/AppModeProvider';
+import { PatientContextProvider } from '../../app/providers/PatientContextProvider';
 import { useDemoHighlight } from '../../hooks/useDemoHighlight';
 import ThemeToggle from '../../components/ThemeToggle';
 import LanguageToggle from '../../components/LanguageToggle';
@@ -172,9 +173,11 @@ const LandingPageContent = () => {
 
 const LandingPage = () => (
   <I18nProvider>
-    <AppModeProvider>
-      <LandingPageContent />
-    </AppModeProvider>
+    <PatientContextProvider>
+      <AppModeProvider>
+        <LandingPageContent />
+      </AppModeProvider>
+    </PatientContextProvider>
   </I18nProvider>
 );
 
