@@ -1,61 +1,73 @@
+import type {
+  Category,
+  EmailData,
+  MedicalReport,
+  MergePdfData,
+  MergePdfResult,
+  Patient,
+  Study,
+  StudyType,
+  APIResponse
+} from '@/types/providers';
+
 export abstract class APIProvider {
-  async fetchPatients(): Promise<unknown> {
+  async fetchPatients(): Promise<Patient[]> {
     throw new Error('fetchPatients must be implemented');
   }
 
-  async savePatient(_patient: unknown): Promise<unknown> {
+  async savePatient(_patient: Partial<Patient>): Promise<APIResponse<boolean>> {
     throw new Error('savePatient must be implemented');
   }
 
-  async removePatient(_patientId: number | string): Promise<unknown> {
+  async removePatient(_patientId: number): Promise<APIResponse<boolean>> {
     throw new Error('removePatient must be implemented');
   }
 
-  async fetchMedicalReports(): Promise<unknown> {
+  async fetchMedicalReports(): Promise<MedicalReport[]> {
     throw new Error('fetchMedicalReports must be implemented');
   }
 
-  async fetchMedicalReport(_reportId: number | string): Promise<unknown> {
+  async fetchMedicalReport(_reportId: number): Promise<MedicalReport | null> {
     throw new Error('fetchMedicalReport must be implemented');
   }
 
-  async saveMedicalReport(_report: unknown): Promise<unknown> {
+  async saveMedicalReport(_report: Partial<MedicalReport>): Promise<APIResponse<boolean>> {
     throw new Error('saveMedicalReport must be implemented');
   }
 
-  async removeMedicalReport(_reportId: number | string): Promise<unknown> {
+  async removeMedicalReport(_reportId: number): Promise<APIResponse<boolean>> {
     throw new Error('removeMedicalReport must be implemented');
   }
 
-  async fetchCategories(): Promise<unknown> {
+  async fetchCategories(): Promise<Category[]> {
     throw new Error('fetchCategories must be implemented');
   }
 
-  async saveCategory(_category: unknown): Promise<unknown> {
+  async saveCategory(_category: Partial<Category>): Promise<APIResponse<boolean>> {
     throw new Error('saveCategory must be implemented');
   }
 
-  async fetchStudyTypes(): Promise<unknown> {
+  async fetchStudyTypes(): Promise<StudyType[]> {
     throw new Error('fetchStudyTypes must be implemented');
   }
 
-  async saveStudyType(_studyType: unknown): Promise<unknown> {
+  async saveStudyType(_studyType: Partial<StudyType>): Promise<APIResponse<boolean>> {
     throw new Error('saveStudyType must be implemented');
   }
 
-  async saveStudy(_study: unknown): Promise<unknown> {
+  async saveStudy(_study: Partial<Study>): Promise<APIResponse<boolean>> {
     throw new Error('saveStudy must be implemented');
   }
 
-  async removeStudy(_studyId: number | string): Promise<unknown> {
+  async removeStudy(_studyId: number): Promise<APIResponse<boolean>> {
     throw new Error('removeStudy must be implemented');
   }
 
-  async sendTokenByEmail(_emailData: unknown): Promise<unknown> {
+  async sendTokenByEmail(_emailData: EmailData): Promise<APIResponse<boolean>> {
     throw new Error('sendTokenByEmail must be implemented');
   }
 
-  async mergePdfs(_pdfData: unknown): Promise<unknown> {
+  async mergePdfs(_pdfData: MergePdfData): Promise<MergePdfResult> {
     throw new Error('mergePdfs must be implemented');
   }
 }
