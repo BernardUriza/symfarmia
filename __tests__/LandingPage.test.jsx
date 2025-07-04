@@ -22,7 +22,7 @@ describe('LandingPage', () => {
         </I18nProvider>
       </ThemeProvider>
     )
-    expect(screen.getByText('Welcome to')).toBeInTheDocument()
+    expect(screen.getByText('Bienvenido a')).toBeInTheDocument()
     expect(screen.getAllByText('SYMFARMIA').length).toBeGreaterThan(0)
   })
 
@@ -36,7 +36,7 @@ describe('LandingPage', () => {
         </I18nProvider>
       </ThemeProvider>
     )
-    expect(screen.getByText('Intelligent platform for independent doctors')).toBeInTheDocument()
+    expect(screen.getByText('Plataforma inteligente para médicos independientes')).toBeInTheDocument()
   })
 
   it('renders Login and Register buttons', () => {
@@ -49,8 +49,8 @@ describe('LandingPage', () => {
         </I18nProvider>
       </ThemeProvider>
     )
-    expect(screen.getByRole('link', { name: /login/i })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /register/i })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /iniciar sesión/i })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /registrarse/i })).toBeInTheDocument()
   })
 
   it('renders Try Demo Mode button', () => {
@@ -63,7 +63,7 @@ describe('LandingPage', () => {
         </I18nProvider>
       </ThemeProvider>
     )
-    expect(screen.getByRole('button', { name: /try demo mode/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /probar modo demo/i })).toBeInTheDocument()
   })
 
   it('opens the demo modal when Try Demo Mode is clicked', () => {
@@ -76,9 +76,9 @@ describe('LandingPage', () => {
         </I18nProvider>
       </ThemeProvider>
     )
-    const demoButton = screen.getByRole('button', { name: /try demo mode/i })
+    const demoButton = screen.getByRole('button', { name: /probar modo demo/i })
     fireEvent.click(demoButton)
-    expect(screen.getByText('Demo Login')).toBeInTheDocument()
+    expect(screen.getByText('Ingreso Demo')).toBeInTheDocument()
   })
 
   it('renders feature cards', () => {
@@ -106,7 +106,7 @@ describe('LandingPage', () => {
         </I18nProvider>
       </ThemeProvider>
     )
-    const loginLink = screen.getByRole('link', { name: /login/i })
+    const loginLink = screen.getByRole('link', { name: /iniciar sesión/i })
     expect(loginLink).toHaveAttribute('href', '/api/auth/login?returnTo=/legacy')
   })
 
@@ -120,7 +120,7 @@ describe('LandingPage', () => {
         </I18nProvider>
       </ThemeProvider>
     )
-    const registerLink = screen.getByRole('link', { name: /register/i })
+    const registerLink = screen.getByRole('link', { name: /registrarse/i })
     expect(registerLink).toHaveAttribute('href', '/api/auth/login?returnTo=/legacy')
   })
 

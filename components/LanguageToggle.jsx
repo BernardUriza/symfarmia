@@ -19,7 +19,7 @@ export default function LanguageToggle({ className = '', variant = 'default' }) 
                 : 'bg-transparent text-teal-100 hover:bg-teal-600/20'
             }`}
           >
-            English
+            {t('english')}
           </button>
           <button
             onClick={() => setLocale('es')}
@@ -29,7 +29,7 @@ export default function LanguageToggle({ className = '', variant = 'default' }) 
                 : 'bg-transparent text-teal-100 hover:bg-teal-600/20'
             }`}
           >
-            Español
+            {t('spanish')}
           </button>
         </div>
       </div>
@@ -49,7 +49,7 @@ export default function LanguageToggle({ className = '', variant = 'default' }) 
                 : 'text-blue-700 hover:bg-blue-100'
             }`}
           >
-            EN
+            {t('english_abbr')}
           </button>
           <div className="w-px h-6 bg-blue-200"></div>
           <button
@@ -60,7 +60,7 @@ export default function LanguageToggle({ className = '', variant = 'default' }) 
                 : 'text-blue-700 hover:bg-blue-100'
             }`}
           >
-            ES
+            {t('spanish_abbr')}
           </button>
         </div>
       </div>
@@ -72,7 +72,7 @@ export default function LanguageToggle({ className = '', variant = 'default' }) 
       onClick={toggle}
       className={`ml-2 px-2 py-1 border rounded text-sm ${className}`}
     >
-      {locale === 'en' ? 'ES' : 'EN'}
+      {locale === 'en' ? t('spanish_abbr') : t('english_abbr')}
     </button>
   );
 }
