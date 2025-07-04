@@ -129,13 +129,15 @@ SYMFARMIA includes a comprehensive demo mode using the Strategy pattern for seam
 - **Safe Operations**: Destructive actions work but only affect mock data
 - **Email/PDF Operations**: Console logging instead of real operations
 - **Session Storage**: Optional persistence using browser storage
+- **Optional Real Sync**: If `NEXT_PUBLIC_DEMO_SYNC=true`, demo data will try to
+  synchronize with the live backend when available
 
 #### Developer Extension
 
 To extend demo functionality:
 
 ```javascript
-// Add new mock data to DemoAPIProvider.js
+// Add new mock data to DemoAPIProvider.ts
 initializeDemoData() {
   return {
     // Add your new entities here
