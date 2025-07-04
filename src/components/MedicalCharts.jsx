@@ -3,8 +3,8 @@ import React, { useState } from 'react';
 import { useTranslation } from '../../app/providers/I18nProvider';
 import { 
   ChartBarIcon, 
-  ChartPieIcon, 
-  TrendingUpIcon,
+  ChartPieIcon,
+  ArrowTrendingUpIcon,
   CalendarDaysIcon,
   UsersIcon,
   HeartIcon
@@ -17,7 +17,7 @@ const MedicalCharts = ({ section = 'overview' }) => {
   const chartOptions = {
     overview: [
       { id: 'diagnoses', name: t('common_diagnoses'), icon: ChartPieIcon },
-      { id: 'outcomes', name: t('treatment_outcomes'), icon: TrendingUpIcon },
+      { id: 'outcomes', name: t('treatment_outcomes'), icon: ArrowTrendingUpIcon },
       { id: 'demographics', name: t('patient_demographics'), icon: UsersIcon },
       { id: 'trends', name: t('seasonal_trends'), icon: CalendarDaysIcon }
     ],
@@ -28,12 +28,12 @@ const MedicalCharts = ({ section = 'overview' }) => {
     ],
     clinical: [
       { id: 'diagnoses', name: t('common_diagnoses'), icon: ChartPieIcon },
-      { id: 'outcomes', name: t('treatment_outcomes'), icon: TrendingUpIcon },
+      { id: 'outcomes', name: t('treatment_outcomes'), icon: ArrowTrendingUpIcon },
       { id: 'adherence', name: t('medication_adherence'), icon: ChartBarIcon }
     ],
     reports: [
       { id: 'revenue', name: t('revenue_this_month'), icon: ChartBarIcon },
-      { id: 'costs', name: t('cost_per_patient'), icon: TrendingUpIcon },
+      { id: 'costs', name: t('cost_per_patient'), icon: ArrowTrendingUpIcon },
       { id: 'efficiency', name: t('operational_efficiency'), icon: ChartPieIcon }
     ]
   };
