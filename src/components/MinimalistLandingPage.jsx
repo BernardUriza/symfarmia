@@ -11,6 +11,7 @@ import {
 } from '@heroicons/react/24/outline';
 import LanguageToggle from '../../components/LanguageToggle';
 import DemoLoginModal from '../../components/DemoLoginModal';
+import TailwindTest from './TailwindTest';
 
 // Dynamically import DashboardLanding to prevent hydration issues
 const DashboardLanding = dynamic(() => import('./DashboardLanding'), {
@@ -78,6 +79,11 @@ const MinimalistLandingPage = () => {
   // If in demo mode, render the dashboard instead
   if (isDemoMode) {
     return <DashboardLanding />;
+  }
+
+  // Temporary Tailwind test - remove this once styling is confirmed
+  if (typeof window !== 'undefined' && window.location.search.includes('test=tailwind')) {
+    return <TailwindTest />;
   }
 
   return (
