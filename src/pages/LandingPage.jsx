@@ -5,7 +5,8 @@ import Logger from '../utils/logger';
 import DemoLoginModal from '../../components/DemoLoginModal';
 import PatientManagementPreview from '../components/PatientManagementPreview';
 import MedicalReportsPreview from '../components/MedicalReportsPreview';
-import { AppModeProvider, useAppMode } from '../../app/providers/AppModeProvider';
+import { AppModeProvider } from '../../app/providers/AppModeProvider';
+import { useDemoHighlight } from '../../hooks/useDemoHighlight';
 import ThemeToggle from '../../components/ThemeToggle';
 import LanguageToggle from '../../components/LanguageToggle';
 import { I18nProvider, useTranslation } from '../../app/providers/I18nProvider';
@@ -14,7 +15,7 @@ const LandingPageContent = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPatientPreviewOpen, setIsPatientPreviewOpen] = useState(false);
   const [isMedicalReportsPreviewOpen, setIsMedicalReportsPreviewOpen] = useState(false);
-  const { isDemoMode } = useAppMode();
+  const { isDemoMode, highlight } = useDemoHighlight();
   const { t } = useTranslation();
 
   React.useEffect(() => {
@@ -74,7 +75,7 @@ const LandingPageContent = () => {
           )}
 
           <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div onClick={() => setIsPatientPreviewOpen(true)} className={`p-6 bg-white dark:bg-slate-800 rounded-lg shadow-md cursor-pointer transition-all duration-200 hover:shadow-lg ${isDemoMode ? 'animate-pulse border-2 border-blue-200 dark:border-blue-400' : ''}`}>
+            <div onClick={() => setIsPatientPreviewOpen(true)} className={`p-6 bg-white dark:bg-slate-800 rounded-lg shadow-md cursor-pointer transition-all duration-200 hover:shadow-lg ${highlight('animate-pulse border-2 border-blue-200 dark:border-blue-400')}`}>
               <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/40 rounded-lg flex items-center justify-center mx-auto mb-4">
                 <svg className="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
@@ -85,7 +86,7 @@ const LandingPageContent = () => {
               {isDemoMode && <div className="mt-3 text-xs text-blue-600 font-medium">{t('click_for_demo')}</div>}
             </div>
 
-            <div onClick={() => setIsMedicalReportsPreviewOpen(true)} className={`p-6 bg-white dark:bg-slate-800 rounded-lg shadow-md cursor-pointer transition-all duration-200 hover:shadow-lg ${isDemoMode ? 'animate-pulse border-2 border-green-200 dark:border-green-400' : ''}`}>
+            <div onClick={() => setIsMedicalReportsPreviewOpen(true)} className={`p-6 bg-white dark:bg-slate-800 rounded-lg shadow-md cursor-pointer transition-all duration-200 hover:shadow-lg ${highlight('animate-pulse border-2 border-green-200 dark:border-green-400')}`}>
               <div className="w-12 h-12 bg-green-100 dark:bg-green-900/40 rounded-lg flex items-center justify-center mx-auto mb-4">
                 <svg className="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -96,7 +97,12 @@ const LandingPageContent = () => {
               {isDemoMode && <div className="mt-3 text-xs text-green-600 font-medium">{t('click_for_demo')}</div>}
             </div>
 
-            <div onClick={() => window.location.href = '/analytics'} className={`p-6 bg-white dark:bg-slate-800 rounded-lg shadow-md cursor-pointer transition-all duration-200 hover:shadow-lg ${isDemoMode ? 'animate-pulse border-2 border-purple-200 dark:border-purple-400' : ''}`}>
+            <div
+              onClick={() => window.location.href = '/analytics'}
+              className={`p-6 bg-white dark:bg-slate-800 rounded-lg shadow-md cursor-pointer transition-all duration-200 hover:shadow-lg ${
+                isDemoMode ? 'animate-pulse border-2 border-purple-200 dark:border-purple-400' : ''
+              }`}
+            >
               <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/40 rounded-lg flex items-center justify-center mx-auto mb-4">
                 <svg className="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 00-2-2z" />
