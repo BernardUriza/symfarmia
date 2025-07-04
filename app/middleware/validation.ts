@@ -8,7 +8,9 @@ export class ValidationError extends Error {
     super(message)
     this.name = 'ValidationError'
     this.status = 400
-    this.errors = errors
+    if (errors !== undefined) {
+      this.errors = errors
+    }
   }
 }
 
