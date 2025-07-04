@@ -1,18 +1,43 @@
 import { NextResponse } from 'next/server';
-import { fetchPatients, savePatient, removePatient } from '../useCases/patients';
-import { withErrorHandling, validateBody } from '../middlewares';
+import { z } from 'zod';
+import {
+  getAllPatients,
+  createPatient,
+  updatePatient,
+  getPatientById,
+  deletePatient
+} from '../../../../prisma/patientsClient';
+import {
+  validate,
+  ValidationError
+} from '../../../../../../app/middleware/validation';
+import { withErrorHandling } from '../../../../../../app/middleware/errorHandler';
 
-export const GET = withErrorHandling(async () => {
-  const patients = await fetchPatients();
+const patientSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  email: z.string().email(),
+  phone: z.string()
+});
+
+export const GET = withErrorHandling(async (_req) => {
+  const patients = await getAllPatients();
   return NextResponse.json(patients, { status: 200 });
 });
 
-export const POST = withErrorHandling(
-  validateBody(['id', 'name', 'email', 'phone'], async (req) => {
-    const { patient, created } = await savePatient(req.validatedBody);
-    return NextResponse.json(patient, { status: created ? 201 : 200 });
-  })
-);
+export const POST = withErrorHandling(async (req) => {
+  const { id, name, email, phone } = await validate(req, patientSchema);
+
+  const existingPatient = await getPatientById(id);
+
+  if (existingPatient) {
+    const updatedPatient = await updatePatient(id, { name, email, phone });
+    return NextResponse.json(updatedPatient, { status: 200 });
+  } else {
+    const newPatient = await createPatient({ id, name, email, phone });
+    return NextResponse.json(newPatient, { status: 201 });
+  }
+});
 
 /**
  * DELETE method to remove a patient.
@@ -23,8 +48,14 @@ export const POST = withErrorHandling(
 export const DELETE = withErrorHandling(async (req) => {
   const patientId = parseInt(req.nextUrl.pathname.split('/').pop());
   if (!patientId) {
-    return NextResponse.json({ error: 'Patient ID is required for deletion' }, { status: 400 });
+    throw new ValidationError('Patient ID is required for deletion');
   }
-  await removePatient(patientId);
-  return NextResponse.json({ success: true }, { status: 200 });
+
+  const existingPatient = await getPatientById(patientId);
+  if (!existingPatient) {
+    return NextResponse.json({ error: 'Patient not found' }, { status: 404 });
+  }
+
+  const result = await deletePatient(patientId);
+  return NextResponse.json({ message: 'Patient successfully deleted', result }, { status: 200 });
 });
