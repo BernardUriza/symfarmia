@@ -6,7 +6,7 @@ import DemoLoginModal from '../../components/DemoLoginModal';
 import PatientManagementPreview from '../components/PatientManagementPreview';
 import { AppModeProvider, useAppMode } from '../../app/providers/AppModeProvider';
 import LanguageToggle from '../../components/LanguageToggle';
-import { useTranslation } from '../../app/providers/I18nProvider';
+import { I18nProvider, useTranslation } from '../../app/providers/I18nProvider';
 
 const LandingPageContent = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -173,9 +173,11 @@ const LandingPageContent = () => {
 };
 
 const LandingPage = () => (
-  <AppModeProvider>
-    <LandingPageContent />
-  </AppModeProvider>
+  <I18nProvider>
+    <AppModeProvider>
+      <LandingPageContent />
+    </AppModeProvider>
+  </I18nProvider>
 );
 
 export default LandingPage;
