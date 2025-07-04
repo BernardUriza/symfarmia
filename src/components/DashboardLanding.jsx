@@ -16,6 +16,10 @@ import { mockMedicalAI } from '../utils/medicalUtils';
 
 const DashboardLanding = () => {
   const [activeFlow, setActiveFlow] = useState(null);
+  
+  const exitDemoMode = () => {
+    window.location.href = window.location.pathname; // Remove query params
+  };
   const [recording, setRecording] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
   const [generating, setGenerating] = useState(false);
@@ -279,14 +283,22 @@ Auscultación cardiopulmonar normal. No edemas en miembros inferiores.
       
       {/* Demo info */}
       <div className="mt-12 bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-        <div className="flex items-center">
-          <UserIcon className="w-6 h-6 text-yellow-600 mr-3" />
-          <div>
-            <h4 className="text-lg font-semibold text-yellow-800">Modo Demo</h4>
-            <p className="text-yellow-700">
-              Estás explorando SYMFARMIA en modo demo. Todas las funcionalidades están disponibles con datos de ejemplo.
-            </p>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <UserIcon className="w-6 h-6 text-yellow-600 mr-3" />
+            <div>
+              <h4 className="text-lg font-semibold text-yellow-800">Modo Demo</h4>
+              <p className="text-yellow-700">
+                Estás explorando SYMFARMIA en modo demo. Todas las funcionalidades están disponibles con datos de ejemplo.
+              </p>
+            </div>
           </div>
+          <button
+            onClick={exitDemoMode}
+            className="bg-yellow-600 hover:bg-yellow-700 text-white font-semibold px-4 py-2 rounded-lg transition-colors text-sm"
+          >
+            Salir del Demo
+          </button>
         </div>
       </div>
     </div>
