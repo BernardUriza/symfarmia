@@ -39,6 +39,8 @@ export function AppModeProvider({ children }: { children: React.ReactNode }) {
       return 'live';
     };
     setAppMode(detectMode());
+    // run once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
