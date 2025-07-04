@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { mockMedicalReports } from '../data/mockMedicalReports';
+import { useTranslation } from '../../app/providers/I18nProvider';
 
 const MedicalReportsPreview = ({ isOpen, onClose }) => {
+  const { t } = useTranslation();
   const [medicalReports] = useState(mockMedicalReports);
   const [selectedReport, setSelectedReport] = useState(null);
   const [activeTab, setActiveTab] = useState('list');
@@ -309,18 +311,18 @@ const MedicalReportsPreview = ({ isOpen, onClose }) => {
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <span className="text-sm font-medium text-gray-700">Resultado:</span>
+                      <span className="text-sm font-medium text-gray-700">{t('result')}:</span>
                       <p className="text-sm text-gray-900 mt-1">{study.result}</p>
                     </div>
                     <div>
-                      <span className="text-sm font-medium text-gray-700">Rango Normal:</span>
+                      <span className="text-sm font-medium text-gray-700">{t('normal_range')}:</span>
                       <p className="text-sm text-gray-900 mt-1">{study.normalRange}</p>
                     </div>
                   </div>
                   
                   {study.notes && (
                     <div className="mt-3 pt-3 border-t border-gray-200">
-                      <span className="text-sm font-medium text-gray-700">Notas:</span>
+                      <span className="text-sm font-medium text-gray-700">{t('notes')}:</span>
                       <p className="text-sm text-gray-600 mt-1">{study.notes}</p>
                     </div>
                   )}
@@ -340,12 +342,12 @@ const MedicalReportsPreview = ({ isOpen, onClose }) => {
         <div className="p-6 border-b border-gray-200 flex justify-between items-center">
           <div>
             <h2 className="text-2xl font-bold text-gray-900">
-              {activeTab === 'list' ? 'Medical Reports Management' : 'Detalle del Reporte Médico'}
+              {activeTab === 'list' ? t('medical_reports_management') : t('report_details')}
             </h2>
             <p className="text-gray-600 mt-1">
               {activeTab === 'list' 
-                ? 'Vista previa de la gestión de reportes médicos' 
-                : `Información completa del reporte médico #${selectedReport?.id}`
+                ? t('medical_reports_desc') 
+                : `${t('report_details')} #${selectedReport?.id}`
               }
             </p>
           </div>
@@ -365,18 +367,18 @@ const MedicalReportsPreview = ({ isOpen, onClose }) => {
             <div className="flex justify-between items-center">
               <div className="flex gap-2">
                 <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                  Nuevo Reporte
+                  {t('new_report')}
                 </button>
                 <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                  Importar Estudios
+                  {t('import_studies')}
                 </button>
               </div>
               <div className="flex gap-2">
                 <button className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                  Filtros
+                  {t('filters')}
                 </button>
                 <button className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                  Exportar
+                  {t('export')}
                 </button>
               </div>
             </div>
