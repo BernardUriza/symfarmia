@@ -63,7 +63,8 @@ const MinimalistLandingPage = () => {
   const handleModalClose = () => setIsModalOpen(false);
   const handleDemoLogin = () => {
     setIsModalOpen(false);
-    window.location.href = '?demo=true';
+    console.log('handleDemoLogin: Redirecting to demo mode');
+    window.location.href = window.location.pathname + '?demo=true';
   };
 
   // If in demo mode, render the dashboard instead
