@@ -117,7 +117,7 @@ const MedicalCharts = ({ section = 'overview' }) => {
         <svg width="200" height="200" viewBox="0 0 200 200">
           {data.data.map((item, index) => {
             const total = data.data.reduce((sum, d) => sum + d.value, 0);
-            const percentage = (item.value / total) * 100;
+            // const percentage = (item.value / total) * 100;
             const angle = (item.value / total) * 360;
             const previousAngles = data.data.slice(0, index).reduce((sum, d) => sum + (d.value / total) * 360, 0);
             

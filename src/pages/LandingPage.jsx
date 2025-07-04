@@ -9,6 +9,8 @@ import { AppModeProvider } from '../../app/providers/AppModeProvider';
 import { useDemoHighlight } from '../../hooks/useDemoHighlight';
 import ThemeToggle from '../../components/ThemeToggle';
 import LanguageToggle from '../../components/LanguageToggle';
+import MedicalBrainIcon from '../components/MedicalBrainIcon';
+import { useMockPatient } from '../hooks/useMockPatient';
 import { I18nProvider, useTranslation } from '../../app/providers/I18nProvider';
 
 const LandingPageContent = () => {
@@ -16,6 +18,7 @@ const LandingPageContent = () => {
   const [isPatientPreviewOpen, setIsPatientPreviewOpen] = useState(false);
   const [isMedicalReportsPreviewOpen, setIsMedicalReportsPreviewOpen] = useState(false);
   const { isDemoMode, highlight } = useDemoHighlight();
+  const { loadMockPatient, clearMockPatient } = useMockPatient();
   const { t } = useTranslation();
 
   React.useEffect(() => {
@@ -34,7 +37,8 @@ const LandingPageContent = () => {
       <header className="w-full px-6 py-4">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
           <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">SYMFARMIA</div>
-          <div className="flex gap-4">
+          <div className="flex gap-4 items-center">
+            <MedicalBrainIcon />
             <ThemeToggle className="text-blue-600 dark:text-blue-400" />
             <LanguageToggle />
           </div>
@@ -111,6 +115,42 @@ const LandingPageContent = () => {
               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">{t('analytics')}</h3>
               <p className="text-gray-600 dark:text-gray-300">{t('analytics_desc')}</p>
               {isDemoMode && <div className="mt-3 text-xs text-purple-600 font-medium">{t('click_for_demo')}</div>}
+            </div>
+          </div>
+          
+          {/* Medical AI Demo Section */}
+          <div className="mt-16 p-8 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-700 rounded-xl">
+            <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-gray-100 mb-4">
+              🧠 Medical AI Assistant Demo
+            </h2>
+            <p className="text-center text-gray-600 dark:text-gray-400 mb-6">
+              Test our AI assistant with realistic patient scenarios. Press Ctrl+Shift+A to toggle the assistant.
+            </p>
+            <div className="flex flex-wrap justify-center gap-4">
+              <button
+                onClick={() => loadMockPatient('p001')}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors font-medium"
+              >
+                Load Sarah Johnson (Diabetes)
+              </button>
+              <button
+                onClick={() => loadMockPatient('p002')}
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors font-medium"
+              >
+                Load Robert Chen (Heart Failure)
+              </button>
+              <button
+                onClick={() => loadMockPatient('p003')}
+                className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors font-medium"
+              >
+                Load Maria Rodriguez (Asthma)
+              </button>
+              <button
+                onClick={clearMockPatient}
+                className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors font-medium"
+              >
+                Clear Patient
+              </button>
             </div>
           </div>
         </div>

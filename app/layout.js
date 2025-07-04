@@ -6,6 +6,8 @@ import { AppModeProvider } from './providers/AppModeProvider'
 import DemoModeBanner from './components/DemoModeBanner'
 import { ThemeProvider } from './providers/ThemeProvider'
 import { I18nProvider } from './providers/I18nProvider'
+import { PatientContextProvider } from './providers/PatientContextProvider'
+import MedicalAssistant from '../src/components/MedicalAssistant'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -25,10 +27,13 @@ export default function RootLayout({ children }) {
           <ErrorBoundary>
             <UserProvider>
             <I18nProvider>
-              <AppModeProvider>
-                <DemoModeBanner />
-                {children}
-              </AppModeProvider>
+              <PatientContextProvider>
+                <AppModeProvider>
+                  <DemoModeBanner />
+                  {children}
+                  <MedicalAssistant />
+                </AppModeProvider>
+              </PatientContextProvider>
             </I18nProvider>
             </UserProvider>
           </ErrorBoundary>

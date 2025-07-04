@@ -5,7 +5,6 @@ import {
   PaperAirplaneIcon,
   SparklesIcon,
   UserIcon,
-  ComputerDesktopIcon,
   ClipboardDocumentListIcon,
   ChartBarIcon,
   HeartIcon
