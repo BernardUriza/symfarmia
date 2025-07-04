@@ -1,20 +1,33 @@
 import { APIProvider } from './APIProvider';
+import type {
+  APIResponse,
+  Category,
+  EmailData,
+  MedicalReport,
+  MergePdfData,
+  MergePdfResult,
+  Patient,
+  Study,
+  StudyType
+} from '@/types/providers';
 
 export class LiveAPIProvider extends APIProvider {
-  async fetchPatients() {
+  async fetchPatients(): Promise<Patient[]> {
     try {
       const response = await fetch('/api/patients');
       if (response.ok) {
-        return await response.json();
-      } else {
-        throw new Error('Error fetching patients');
+        return (await response.json()) as Patient[];
       }
-    } catch (error: any) {
-      throw new Error('Error fetching patients: ' + error.message);
+      throw new Error('Error fetching patients');
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        throw new Error('Error fetching patients: ' + error.message);
+      }
+      throw error;
     }
   }
 
-  async savePatient(patient: any) {
+  async savePatient(patient: Partial<Patient>): Promise<APIResponse<boolean>> {
     try {
       const response = await fetch('/api/patients', {
         method: 'POST',
@@ -25,58 +38,60 @@ export class LiveAPIProvider extends APIProvider {
       });
 
       if (response.ok) {
-        return { success: true };
-      } else {
-        return { success: false };
+        return { success: true, data: true };
       }
-    } catch (error: any) {
+      return { success: false, data: false };
+    } catch (error: unknown) {
       throw error;
     }
   }
 
-  async removePatient(patientId: any) {
+  async removePatient(patientId: number): Promise<APIResponse<boolean>> {
     try {
       const response = await fetch(`/api/patients/${patientId}`, {
         method: 'DELETE',
       });
 
       if (response.ok) {
-        return { success: true };
-      } else {
-        return { success: false };
+        return { success: true, data: true };
       }
-    } catch (error: any) {
+      return { success: false, data: false };
+    } catch (error: unknown) {
       throw error;
     }
   }
 
-  async fetchMedicalReports() {
+  async fetchMedicalReports(): Promise<MedicalReport[]> {
     try {
       const response = await fetch('/api/medicalReports');
       if (response.ok) {
-        return await response.json();
-      } else {
-        throw new Error('Error fetching medical reports');
+        return (await response.json()) as MedicalReport[];
       }
-    } catch (error: any) {
-      throw new Error('Error fetching medical reports: ' + error.message);
+      throw new Error('Error fetching medical reports');
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        throw new Error('Error fetching medical reports: ' + error.message);
+      }
+      throw error;
     }
   }
 
-  async fetchMedicalReport(reportId: any) {
+  async fetchMedicalReport(reportId: number): Promise<MedicalReport> {
     try {
       const response = await fetch(`/api/medicalReports/${reportId}`);
       if (response.ok) {
-        return await response.json();
-      } else {
-        throw new Error('Error fetching medical report');
+        return (await response.json()) as MedicalReport;
       }
-    } catch (error: any) {
-      throw new Error('Error fetching medical report: ' + error.message);
+      throw new Error('Error fetching medical report');
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        throw new Error('Error fetching medical report: ' + error.message);
+      }
+      throw error;
     }
   }
 
-  async saveMedicalReport(report: any) {
+  async saveMedicalReport(report: Partial<MedicalReport>): Promise<APIResponse<boolean>> {
     try {
       const response = await fetch('/api/medicalReports', {
         method: 'POST',
@@ -87,45 +102,45 @@ export class LiveAPIProvider extends APIProvider {
       });
 
       if (response.ok) {
-        return { success: true };
-      } else {
-        return { success: false };
+        return { success: true, data: true };
       }
-    } catch (error: any) {
+      return { success: false, data: false };
+    } catch (error: unknown) {
       throw error;
     }
   }
 
-  async removeMedicalReport(reportId: any) {
+  async removeMedicalReport(reportId: number): Promise<APIResponse<boolean>> {
     try {
       const response = await fetch(`/api/medicalReports/${reportId}`, {
         method: 'DELETE',
       });
 
       if (response.ok) {
-        return { success: true };
-      } else {
-        return { success: false };
+        return { success: true, data: true };
       }
-    } catch (error: any) {
+      return { success: false, data: false };
+    } catch (error: unknown) {
       throw error;
     }
   }
 
-  async fetchCategories() {
+  async fetchCategories(): Promise<Category[]> {
     try {
       const response = await fetch('/api/categories');
       if (response.ok) {
-        return await response.json();
-      } else {
-        throw new Error('Error fetching categories');
+        return (await response.json()) as Category[];
       }
-    } catch (error: any) {
-      throw new Error('Error fetching categories: ' + error.message);
+      throw new Error('Error fetching categories');
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        throw new Error('Error fetching categories: ' + error.message);
+      }
+      throw error;
     }
   }
 
-  async saveCategory(category: any) {
+  async saveCategory(category: Partial<Category>): Promise<APIResponse<boolean>> {
     try {
       const response = await fetch('/api/categories', {
         method: 'POST',
@@ -136,29 +151,30 @@ export class LiveAPIProvider extends APIProvider {
       });
 
       if (response.ok) {
-        return { success: true };
-      } else {
-        return { success: false };
+        return { success: true, data: true };
       }
-    } catch (error: any) {
+      return { success: false, data: false };
+    } catch (error: unknown) {
       throw error;
     }
   }
 
-  async fetchStudyTypes() {
+  async fetchStudyTypes(): Promise<StudyType[]> {
     try {
       const response = await fetch('/api/study-types');
       if (response.ok) {
-        return await response.json();
-      } else {
-        throw new Error('Error fetching study types');
+        return (await response.json()) as StudyType[];
       }
-    } catch (error: any) {
-      throw new Error('Error fetching study types: ' + error.message);
+      throw new Error('Error fetching study types');
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        throw new Error('Error fetching study types: ' + error.message);
+      }
+      throw error;
     }
   }
 
-  async saveStudyType(studyType: any) {
+  async saveStudyType(studyType: Partial<StudyType>): Promise<APIResponse<boolean>> {
     try {
       const response = await fetch('/api/study-types', {
         method: 'POST',
@@ -169,16 +185,15 @@ export class LiveAPIProvider extends APIProvider {
       });
 
       if (response.ok) {
-        return { success: true };
-      } else {
-        return { success: false };
+        return { success: true, data: true };
       }
-    } catch (error: any) {
+      return { success: false, data: false };
+    } catch (error: unknown) {
       throw error;
     }
   }
 
-  async saveStudy(study: any) {
+  async saveStudy(study: Partial<Study>): Promise<APIResponse<boolean>> {
     try {
       const response = await fetch('/api/studies', {
         method: 'POST',
@@ -189,32 +204,30 @@ export class LiveAPIProvider extends APIProvider {
       });
 
       if (response.ok) {
-        return { success: true };
-      } else {
-        return { success: false };
+        return { success: true, data: true };
       }
-    } catch (error: any) {
+      return { success: false, data: false };
+    } catch (error: unknown) {
       throw error;
     }
   }
 
-  async removeStudy(studyId: any) {
+  async removeStudy(studyId: number): Promise<APIResponse<boolean>> {
     try {
       const response = await fetch(`/api/studies/${studyId}`, {
         method: 'DELETE',
       });
 
       if (response.ok) {
-        return { success: true };
-      } else {
-        return { success: false };
+        return { success: true, data: true };
       }
-    } catch (error: any) {
+      return { success: false, data: false };
+    } catch (error: unknown) {
       throw error;
     }
   }
 
-  async sendTokenByEmail(emailData: any) {
+  async sendTokenByEmail(emailData: EmailData): Promise<APIResponse<boolean>> {
     try {
       const response = await fetch('/api/mailerHelper', {
         method: 'POST',
@@ -225,16 +238,15 @@ export class LiveAPIProvider extends APIProvider {
       });
 
       if (response.ok) {
-        return { success: true };
-      } else {
-        return { success: false };
+        return { success: true, data: true };
       }
-    } catch (error: any) {
+      return { success: false, data: false };
+    } catch (error: unknown) {
       throw error;
     }
   }
 
-  async mergePdfs(pdfData: any) {
+  async mergePdfs(pdfData: MergePdfData): Promise<MergePdfResult> {
     try {
       const response = await fetch('/api/mergePdfs', {
         method: 'POST',
@@ -245,11 +257,10 @@ export class LiveAPIProvider extends APIProvider {
       });
 
       if (response.ok) {
-        return await response.json();
-      } else {
-        return { success: false };
+        return (await response.json()) as MergePdfResult;
       }
-    } catch (error: any) {
+      return { success: false, url: '', message: 'Error merging PDFs' };
+    } catch (error: unknown) {
       throw error;
     }
   }
