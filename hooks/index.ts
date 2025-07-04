@@ -8,6 +8,9 @@ export { useConfirmation } from './useConfirmation';
 export { useForm, useFormArray, useFormField } from './useForm';
 export { useLocalStorage } from './useLocalStorage';
 export { useDebounce, useDebouncedCallback, useThrottledCallback } from './useDebounce';
+export { useDemoHighlight } from './useDemoHighlight';
+export { useAppApi } from './useAppApi';
+export { usePatients } from './usePatients';
 
 // API hooks
 export {
@@ -19,6 +22,7 @@ export {
   useUpload,
   usePagination,
   useInfiniteScroll,
+  type UseApiOptions,
 } from './useApi';
 
 // Additional utility hooks

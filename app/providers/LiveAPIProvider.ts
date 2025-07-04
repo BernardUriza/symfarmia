@@ -1,4 +1,4 @@
-import { APIProvider } from './APIProvider.js';
+import { APIProvider } from './APIProvider';
 
 export class LiveAPIProvider extends APIProvider {
   async fetchPatients() {
