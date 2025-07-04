@@ -6,6 +6,8 @@ export default class Category {
   constructor(id: number, name: string, studyTypes?: unknown[]) {
     this.id = id;
     this.name = name;
-    this.studyTypes = studyTypes;
+    if (studyTypes !== undefined) {
+      this.studyTypes = studyTypes;
+    }
   }
 }
