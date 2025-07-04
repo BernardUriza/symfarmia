@@ -1,5 +1,5 @@
 // useCases/fetchMedicalReport.js
-import MedicalReport from '../../app/domain/entities/MedicalReport';
+import MedicalReport from '../../../app/domain/entities/MedicalReport';
 
 export async function fetchMedicalReport(reportId) {
   try {
