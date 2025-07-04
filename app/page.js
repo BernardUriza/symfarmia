@@ -1,6 +1,6 @@
 "use client"
-import CinematicLandingPage from '../src/components/CinematicLandingPage'
+import LandingPageStrategy from '../src/components/LandingPageStrategy'
 
 export default function HomePage() {
-  return <CinematicLandingPage />
+  return <LandingPageStrategy />
 }
