@@ -1,4 +1,4 @@
-const MedicalReport = require('../entities/MedicalReport');
+const MedicalReport = require('../../app/domain/entities/MedicalReport').default;
 import { sendEmail } from '../lib/mailer';
 import { format } from 'date-fns';
 
