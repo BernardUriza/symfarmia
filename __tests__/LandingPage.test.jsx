@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import LandingPage from '../src/pages/LandingPage'
 import { ThemeProvider } from '../app/providers/ThemeProvider'
-import { I18nProvider } from '../app/providers/I18nProvider'
+import { I18nProvider } from 'app/providers/I18nProvider'
 
 // Mock window.alert
 window.alert = jest.fn()
@@ -15,7 +15,9 @@ describe('LandingPage', () => {
     render(
       <ThemeProvider>
         <I18nProvider>
-          <LandingPage />
+          <AppModeProvider>
+            <LandingPage />
+          </AppModeProvider
         </I18nProvider>
       </ThemeProvider>
     )
@@ -27,8 +29,9 @@ describe('LandingPage', () => {
     render(
       <ThemeProvider>
         <I18nProvider>
-          <LandingPage />
-        </I18nProvider>
+          <AppModeProvider>
+            <LandingPage />
+          </AppModeProvider>
       </ThemeProvider>
     )
     expect(screen.getByText('Intelligent platform for independent doctors')).toBeInTheDocument()
@@ -38,7 +41,9 @@ describe('LandingPage', () => {
     render(
       <ThemeProvider>
         <I18nProvider>
-          <LandingPage />
+          <AppModeProvider>
+            <LandingPage />
+          </AppModeProvider>
         </I18nProvider>
       </ThemeProvider>
     )
@@ -50,7 +55,9 @@ describe('LandingPage', () => {
     render(
       <ThemeProvider>
         <I18nProvider>
-          <LandingPage />
+          <AppModeProvider>
+            <LandingPage />
+          </AppModeProvider>
         </I18nProvider>
       </ThemeProvider>
     )
@@ -61,7 +68,9 @@ describe('LandingPage', () => {
     render(
       <ThemeProvider>
         <I18nProvider>
-          <LandingPage />
+          <AppModeProvider>
+            <LandingPage />
+          </AppModeProvider>
         </I18nProvider>
       </ThemeProvider>
     )
@@ -74,7 +83,9 @@ describe('LandingPage', () => {
     render(
       <ThemeProvider>
         <I18nProvider>
-          <LandingPage />
+          <AppModeProvider>
+            <LandingPage />
+          </AppModeProvider>
         </I18nProvider>
       </ThemeProvider>
     )
@@ -87,7 +98,9 @@ describe('LandingPage', () => {
     render(
       <ThemeProvider>
         <I18nProvider>
-          <LandingPage />
+          <AppModeProvider>
+            <LandingPage />
+          </AppModeProvider>
         </I18nProvider>
       </ThemeProvider>
     )
@@ -99,7 +112,9 @@ describe('LandingPage', () => {
     render(
       <ThemeProvider>
         <I18nProvider>
-          <LandingPage />
+          <AppModeProvider>
+            <LandingPage />
+          </AppModeProvider>
         </I18nProvider>
       </ThemeProvider>
     )
@@ -111,7 +126,9 @@ describe('LandingPage', () => {
     render(
       <ThemeProvider>
         <I18nProvider>
-          <LandingPage />
+          <AppModeProvider>
+            <LandingPage />
+          </AppModeProvider>
         </I18nProvider>
       </ThemeProvider>
     )
