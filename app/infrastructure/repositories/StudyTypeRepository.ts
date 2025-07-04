@@ -1,9 +1,8 @@
-import prisma from '../prisma';
-import { Prisma } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import { BaseRepository } from './BaseRepository';
 
 export class StudyTypeRepository extends BaseRepository<Prisma.StudyTypeDelegate<Prisma.DefaultArgs>> {
-  constructor() {
+  constructor(prisma: PrismaClient) {
     super(prisma.studyType);
   }
 

@@ -1,4 +1,5 @@
 import { APIProvider } from './APIProvider';
+import type { Database } from '@/app/infrastructure/database';
 import type {
   APIResponse,
   Category,
@@ -15,8 +16,8 @@ import type {
 export class DemoAPIProvider extends APIProvider {
   private demoData: DemoData;
 
-  constructor() {
-    super();
+  constructor(db?: Database) {
+    super(db);
     this.demoData = this.initializeDemoData();
     if (process.env.NEXT_PUBLIC_DEMO_SYNC === 'true') {
       this.synchronizeWithLive();
@@ -26,7 +27,7 @@ export class DemoAPIProvider extends APIProvider {
   async synchronizeWithLive(): Promise<void> {
     try {
       const { LiveAPIProvider } = await import('./LiveAPIProvider');
-      const live = new LiveAPIProvider();
+      const live = new LiveAPIProvider(this.db);
       const patients = await live.fetchPatients();
       if (Array.isArray(patients)) {
         this.demoData.patients = patients;
