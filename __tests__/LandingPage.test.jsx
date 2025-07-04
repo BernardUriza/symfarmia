@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import LandingPage from '../src/pages/LandingPage'
-import { AppModeProvider } from '../app/providers/AppModeProvider'
 import { ThemeProvider } from '../app/providers/ThemeProvider'
+import { I18nProvider } from '../app/providers/I18nProvider'
 
 // Mock window.alert
 window.alert = jest.fn()
@@ -14,9 +14,9 @@ describe('LandingPage', () => {
   it('renders the main heading', () => {
     render(
       <ThemeProvider>
-        <AppModeProvider>
+        <I18nProvider>
           <LandingPage />
-        </AppModeProvider>
+        </I18nProvider>
       </ThemeProvider>
     )
     expect(screen.getByText('Welcome to')).toBeInTheDocument()
@@ -26,9 +26,9 @@ describe('LandingPage', () => {
   it('renders the subtitle', () => {
     render(
       <ThemeProvider>
-        <AppModeProvider>
+        <I18nProvider>
           <LandingPage />
-        </AppModeProvider>
+        </I18nProvider>
       </ThemeProvider>
     )
     expect(screen.getByText('Intelligent platform for independent doctors')).toBeInTheDocument()
@@ -37,9 +37,9 @@ describe('LandingPage', () => {
   it('renders Login and Register buttons', () => {
     render(
       <ThemeProvider>
-        <AppModeProvider>
+        <I18nProvider>
           <LandingPage />
-        </AppModeProvider>
+        </I18nProvider>
       </ThemeProvider>
     )
     expect(screen.getByRole('link', { name: /login/i })).toBeInTheDocument()
@@ -49,9 +49,9 @@ describe('LandingPage', () => {
   it('renders Try Demo Mode button', () => {
     render(
       <ThemeProvider>
-        <AppModeProvider>
+        <I18nProvider>
           <LandingPage />
-        </AppModeProvider>
+        </I18nProvider>
       </ThemeProvider>
     )
     expect(screen.getByRole('button', { name: /try demo mode/i })).toBeInTheDocument()
@@ -60,9 +60,9 @@ describe('LandingPage', () => {
   it('opens the demo modal when Try Demo Mode is clicked', () => {
     render(
       <ThemeProvider>
-        <AppModeProvider>
+        <I18nProvider>
           <LandingPage />
-        </AppModeProvider>
+        </I18nProvider>
       </ThemeProvider>
     )
     const demoButton = screen.getByRole('button', { name: /try demo mode/i })
@@ -73,9 +73,9 @@ describe('LandingPage', () => {
   it('renders feature cards', () => {
     render(
       <ThemeProvider>
-        <AppModeProvider>
+        <I18nProvider>
           <LandingPage />
-        </AppModeProvider>
+        </I18nProvider>
       </ThemeProvider>
     )
     expect(screen.getByText('Patient Management')).toBeInTheDocument()
@@ -86,9 +86,9 @@ describe('LandingPage', () => {
   it('has correct Login link href', () => {
     render(
       <ThemeProvider>
-        <AppModeProvider>
+        <I18nProvider>
           <LandingPage />
-        </AppModeProvider>
+        </I18nProvider>
       </ThemeProvider>
     )
     const loginLink = screen.getByRole('link', { name: /login/i })
@@ -98,9 +98,9 @@ describe('LandingPage', () => {
   it('has correct Register link href', () => {
     render(
       <ThemeProvider>
-        <AppModeProvider>
+        <I18nProvider>
           <LandingPage />
-        </AppModeProvider>
+        </I18nProvider>
       </ThemeProvider>
     )
     const registerLink = screen.getByRole('link', { name: /register/i })
@@ -110,9 +110,9 @@ describe('LandingPage', () => {
   it('renders footer copyright', () => {
     render(
       <ThemeProvider>
-        <AppModeProvider>
+        <I18nProvider>
           <LandingPage />
-        </AppModeProvider>
+        </I18nProvider>
       </ThemeProvider>
     )
     expect(screen.getByText(/© 2024 SYMFARMIA/)).toBeInTheDocument()
