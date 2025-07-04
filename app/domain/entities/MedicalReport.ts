@@ -22,13 +22,24 @@ export default class MedicalReport {
     studies?: Study[];
     patientId: number;
   }) {
-    this.id = id;
-    this.name = patient?.name;
+    if (id !== undefined) {
+      this.id = id;
+    }
+    const patientName = patient?.name;
+    if (patientName !== undefined) {
+      this.name = patientName;
+    }
     this.date = date;
     this.status = status;
-    this.diagnosis = diagnosis ?? undefined;
-    this.patient = patient;
-    this.studies = studies;
+    if (diagnosis !== undefined) {
+      this.diagnosis = diagnosis;
+    }
+    if (patient !== undefined) {
+      this.patient = patient;
+    }
+    if (studies !== undefined) {
+      this.studies = studies;
+    }
     this.patientId = patientId;
   }
 
