@@ -1,5 +1,5 @@
 import { useAppMode } from '../providers/AppModeProvider';
-import Patient from '../../legacy_core/app/entities/Patient';
+import Patient from '../domain/entities/Patient';
 
 export function useUseCases() {
   const { apiProvider } = useAppMode();

@@ -1,5 +1,5 @@
 // useCases/fetchStudyTypes.js
-import StudyType from '../entities/StudyType';
+import StudyType from '../../app/domain/entities/StudyType';
 
 export async function fetchStudyTypes() {
   try {
