@@ -198,37 +198,30 @@ This project has been fully migrated to a modern TypeScript architecture followi
 
 ```
 symfarmia/
-├── app/                    # Next.js App Router (legacy .js files)
-│   ├── api/auth/          # Auth0 authentication
-│   ├── legacy/            # Legacy system access
+├── app/                    # Next.js App Router
+│   ├── api/               # API routes and actions
+│   ├── legacy/            # Wrapper to load legacy core
+│   ├── providers/         # React context providers
+│   ├── components/        # App Router components
 │   ├── layout.js          # Root layout
-│   └── page.js            # Landing page entry point
-├── components/            # ✨ NEW: Modern TypeScript Components
-│   ├── LandingPage/       # Component folders with index.tsx
-│   └── [ComponentName]/   # Colocated components with types
-├── hooks/                 # ✨ NEW: Custom React Hooks (TypeScript)
-│   ├── useApi.ts          # API operations with typing
-│   ├── useConfirmation.ts # Modal confirmations
-│   ├── useForm.ts         # Form management with validation
-│   ├── useLocalStorage.ts # Type-safe local storage
-│   ├── useDebounce.ts     # Performance optimization hooks
-│   └── index.ts           # Convenience exports
-├── types/                 # ✨ NEW: TypeScript Definitions
-│   ├── index.ts           # Core entity types and interfaces
-│   ├── api.ts             # API request/response types
-│   └── constants.ts       # Typed constants and enums
-├── utils/                 # ✨ NEW: Pure Utility Functions (TypeScript)
-│   ├── logger.ts          # Enhanced logging with TypeScript
-│   ├── date.ts            # Date manipulation utilities
-│   ├── validation.ts      # Input validation functions
-│   ├── api.ts             # API client and utilities
-│   └── index.ts           # Re-exports all utilities
-├── legacy_core/          # Original medical system (JavaScript)
-│   ├── app/              # Legacy Next.js application
-│   ├── prisma/           # Database schema and clients
-│   └── README.md         # Legacy system documentation
-├── __tests__/            # Jest test suite
-└── tsconfig.json         # ✨ Strict TypeScript configuration
+│   └── page.js            # Landing page
+├── src/                    # Transitional /pages directory
+│   ├── pages/             # Classic Next.js pages
+│   ├── components/        # Older JS components
+│   ├── hooks/             # Utility hooks
+│   └── utils/             # Helpers for legacy pages
+├── components/             # ✨ Modern TypeScript components
+├── hooks/                  # ✨ Custom React hooks (TS)
+├── types/                  # ✨ Global TypeScript types
+├── utils/                  # ✨ Pure utility functions
+├── legacy_core/            # Original JavaScript system
+│   ├── app/               # Legacy Next.js application
+│   ├── prisma/            # Prisma clients per entity
+│   └── README.md          # Legacy documentation
+├── prisma/                 # Central Prisma schema
+├── scripts/                # Deployment and utility scripts
+├── __tests__/             # Jest test suite
+└── tsconfig.json          # ✨ Strict TypeScript config
 ```
 
 ### 2025 Architecture Principles
@@ -327,6 +320,17 @@ The TypeScript migration maintains full backward compatibility:
 - **Gradual Migration**: Components migrated incrementally
 - **Data Compatibility**: Same database schema and APIs
 
+### Transitioning from Legacy Clients
+
+Existing installations can continue running the legacy `legacy_core` app while new
+features are developed in TypeScript. To migrate a clinic or customer:
+
+1. Deploy the new application alongside the existing one.
+2. Use the `/legacy` route to access the original interface when needed.
+3. Gradually replace legacy pages with their counterparts under `app/` or `src/`.
+4. Migrate data models to the shared `prisma/schema.prisma` file.
+5. Replace direct Prisma client calls with repository classes (see below) for new entities.
+
 ## 🚀 Deployment
 
 ### Demo Deployment
@@ -372,10 +376,19 @@ npm start
 ## 📝 Development Notes
 
 - **Clean Architecture**: Entity-use case-API pattern maintained
+- **Repository Pattern**: Add new entities by creating a repository in `legacy_core/prisma` and exposing methods through `APIProvider`
 - **Error Handling**: Comprehensive error boundaries and logging
 - **Mock Development**: Full functionality without external dependencies  
 - **Test Coverage**: Comprehensive test suite for all components
 - **TypeScript**: Mixed JS/TS codebase with gradual migration support
+
+### Adding New Entities with the Repository Pattern
+
+1. Define the new model in `prisma/schema.prisma` and run `npx prisma generate`.
+2. Create a `<entity>Client.js` file under `legacy_core/prisma` that implements CRUD operations using Prisma.
+3. Extend `app/providers/APIProvider.ts` with abstract methods for the entity.
+4. Implement the methods in both `DemoAPIProvider` and `LiveAPIProvider` to call your new client.
+5. Expose the operations in `app/useCases/useCases.ts` so components can access them.
 
 ## 🤝 Contributing
 
