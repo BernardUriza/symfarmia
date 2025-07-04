@@ -1,54 +1,41 @@
-import { render, screen } from '@testing-library/react'
-import HomePage from '../app/page'
-import { AppModeProvider } from '../app/providers/AppModeProvider'
-import { ThemeProvider } from '../app/providers/ThemeProvider'
-import { I18nProvider } from '../app/providers/I18nProvider'
-import { PatientContextProvider } from '../app/providers/PatientContextProvider'
+import { render, screen } from "@testing-library/react";
+import HomePage from "../app/page";
+import TestProviders from "./utils/TestProviders";
 
-describe('HomePage', () => {
-  it('renders the LandingPage component', () => {
+describe("HomePage", () => {
+  it("renders the CinematicLandingPage component", () => {
     render(
-      <ThemeProvider>
-        <I18nProvider>
-          <PatientContextProvider>
-            <AppModeProvider>
-              <HomePage />
-            </AppModeProvider>
-          </PatientContextProvider>
-        </I18nProvider>
-      </ThemeProvider>
-    )
-    expect(screen.getByText('Welcome to')).toBeInTheDocument()
-    expect(screen.getAllByText('SYMFARMIA').length).toBeGreaterThan(0)
-  })
+      <TestProviders>
+        <HomePage />
+      </TestProviders>,
+    );
+    expect(
+      screen.getByText("The Future of Medicine Is Here"),
+    ).toBeInTheDocument();
+    expect(screen.getAllByText("SYMFARMIA").length).toBeGreaterThan(0);
+  });
 
-  it('contains the main SYMFARMIA branding', () => {
+  it("contains the main SYMFARMIA branding", () => {
     render(
-      <ThemeProvider>
-        <I18nProvider>
-          <PatientContextProvider>
-            <AppModeProvider>
-              <HomePage />
-            </AppModeProvider>
-          </PatientContextProvider>
-        </I18nProvider>
-      </ThemeProvider>
-    )
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Welcome to SYMFARMIA')
-  })
+      <TestProviders>
+        <HomePage />
+      </TestProviders>,
+    );
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
+      "The Future of Medicine Is Here",
+    );
+  });
 
-  it('displays the platform description', () => {
+  it("displays the platform description", () => {
     render(
-      <ThemeProvider>
-        <I18nProvider>
-          <PatientContextProvider>
-            <AppModeProvider>
-              <HomePage />
-            </AppModeProvider>
-          </PatientContextProvider>
-        </I18nProvider>
-      </ThemeProvider>
-    )
-    expect(screen.getByText('Intelligent platform for independent doctors')).toBeInTheDocument()
-  })
-})
+      <TestProviders>
+        <HomePage />
+      </TestProviders>,
+    );
+    expect(
+      screen.getByText(
+        "Liberate 70% of your time, restore hope to your medical practice",
+      ),
+    ).toBeInTheDocument();
+  });
+});

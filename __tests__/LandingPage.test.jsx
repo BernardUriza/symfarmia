@@ -1,120 +1,111 @@
-import { render, screen, fireEvent } from '@testing-library/react'
-import LandingPage from '../src/pages/LandingPage'
-import { AppModeProvider } from '../app/providers/AppModeProvider'
-import { ThemeProvider } from '../app/providers/ThemeProvider'
+import { render, screen, fireEvent } from "@testing-library/react";
+import LandingPage from "../src/pages/LandingPage";
+import TestProviders from "./utils/TestProviders";
 
 // Mock window.alert
-window.alert = jest.fn()
+window.alert = jest.fn();
 
-describe('LandingPage', () => {
+describe("LandingPage", () => {
   beforeEach(() => {
-    jest.clearAllMocks()
-  })
+    jest.clearAllMocks();
+  });
 
-  it('renders the main heading', () => {
+  it("renders the main heading", () => {
     render(
-      <ThemeProvider>
-        <AppModeProvider>
-          <LandingPage />
-        </AppModeProvider>
-      </ThemeProvider>
-    )
-    expect(screen.getByText('Welcome to')).toBeInTheDocument()
-    expect(screen.getAllByText('SYMFARMIA').length).toBeGreaterThan(0)
-  })
+      <TestProviders>
+        <LandingPage />
+      </TestProviders>,
+    );
+    expect(screen.getByText("Welcome to")).toBeInTheDocument();
+    expect(screen.getAllByText("SYMFARMIA").length).toBeGreaterThan(0);
+  });
 
-  it('renders the subtitle', () => {
+  it("renders the subtitle", () => {
     render(
-      <ThemeProvider>
-        <AppModeProvider>
-          <LandingPage />
-        </AppModeProvider>
-      </ThemeProvider>
-    )
-    expect(screen.getByText('Intelligent platform for independent doctors')).toBeInTheDocument()
-  })
+      <TestProviders>
+        <LandingPage />
+      </TestProviders>,
+    );
+    expect(
+      screen.getByText("Intelligent platform for independent doctors"),
+    ).toBeInTheDocument();
+  });
 
-  it('renders Login and Register buttons', () => {
+  it("renders Login and Register buttons", () => {
     render(
-      <ThemeProvider>
-        <AppModeProvider>
-          <LandingPage />
-        </AppModeProvider>
-      </ThemeProvider>
-    )
-    expect(screen.getByRole('link', { name: /login/i })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /register/i })).toBeInTheDocument()
-  })
+      <TestProviders>
+        <LandingPage />
+      </TestProviders>,
+    );
+    expect(screen.getByRole("link", { name: /login/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /register/i })).toBeInTheDocument();
+  });
 
-  it('renders Try Demo Mode button', () => {
+  it("renders Try Demo Mode button", () => {
     render(
-      <ThemeProvider>
-        <AppModeProvider>
-          <LandingPage />
-        </AppModeProvider>
-      </ThemeProvider>
-    )
-    expect(screen.getByRole('button', { name: /try demo mode/i })).toBeInTheDocument()
-  })
+      <TestProviders>
+        <LandingPage />
+      </TestProviders>,
+    );
+    expect(
+      screen.getByRole("button", { name: /try demo mode/i }),
+    ).toBeInTheDocument();
+  });
 
-  it('opens the demo modal when Try Demo Mode is clicked', () => {
+  it("opens the demo modal when Try Demo Mode is clicked", () => {
     render(
-      <ThemeProvider>
-        <AppModeProvider>
-          <LandingPage />
-        </AppModeProvider>
-      </ThemeProvider>
-    )
-    const demoButton = screen.getByRole('button', { name: /try demo mode/i })
-    fireEvent.click(demoButton)
-    expect(screen.getByText('Demo Login')).toBeInTheDocument()
-  })
+      <TestProviders>
+        <LandingPage />
+      </TestProviders>,
+    );
+    const demoButton = screen.getByRole("button", { name: /try demo mode/i });
+    fireEvent.click(demoButton);
+    expect(screen.getByText("Demo Login")).toBeInTheDocument();
+  });
 
-  it('renders feature cards', () => {
+  it("renders feature cards", () => {
     render(
-      <ThemeProvider>
-        <AppModeProvider>
-          <LandingPage />
-        </AppModeProvider>
-      </ThemeProvider>
-    )
-    expect(screen.getByText('Patient Management')).toBeInTheDocument()
-    expect(screen.getByText('Medical Reports')).toBeInTheDocument()
-    expect(screen.getByText('Analytics')).toBeInTheDocument()
-  })
+      <TestProviders>
+        <LandingPage />
+      </TestProviders>,
+    );
+    expect(screen.getByText("Patient Management")).toBeInTheDocument();
+    expect(screen.getByText("Medical Reports")).toBeInTheDocument();
+    expect(screen.getByText("Analytics")).toBeInTheDocument();
+  });
 
-  it('has correct Login link href', () => {
+  it("has correct Login link href", () => {
     render(
-      <ThemeProvider>
-        <AppModeProvider>
-          <LandingPage />
-        </AppModeProvider>
-      </ThemeProvider>
-    )
-    const loginLink = screen.getByRole('link', { name: /login/i })
-    expect(loginLink).toHaveAttribute('href', '/api/auth/login?returnTo=/legacy')
-  })
+      <TestProviders>
+        <LandingPage />
+      </TestProviders>,
+    );
+    const loginLink = screen.getByRole("link", { name: /login/i });
+    expect(loginLink).toHaveAttribute(
+      "href",
+      "/api/auth/login?returnTo=/legacy",
+    );
+  });
 
-  it('has correct Register link href', () => {
+  it("has correct Register link href", () => {
     render(
-      <ThemeProvider>
-        <AppModeProvider>
-          <LandingPage />
-        </AppModeProvider>
-      </ThemeProvider>
-    )
-    const registerLink = screen.getByRole('link', { name: /register/i })
-    expect(registerLink).toHaveAttribute('href', '/api/auth/login?returnTo=/legacy')
-  })
+      <TestProviders>
+        <LandingPage />
+      </TestProviders>,
+    );
+    const registerLink = screen.getByRole("link", { name: /register/i });
+    expect(registerLink).toHaveAttribute(
+      "href",
+      "/api/auth/login?returnTo=/legacy",
+    );
+  });
 
-  it('renders footer copyright', () => {
+  it("renders footer copyright", () => {
     render(
-      <ThemeProvider>
-        <AppModeProvider>
-          <LandingPage />
-        </AppModeProvider>
-      </ThemeProvider>
-    )
-    expect(screen.getByText(/© 2024 SYMFARMIA/)).toBeInTheDocument()
-  })
-})
+      <TestProviders>
+        <LandingPage />
+      </TestProviders>,
+    );
+    expect(screen.getByText(/© 2024 SYMFARMIA/)).toBeInTheDocument();
+  });
+});
