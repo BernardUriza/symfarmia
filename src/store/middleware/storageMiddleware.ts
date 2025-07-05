@@ -1,5 +1,11 @@
 // Storage middleware for state persistence between sessions
-import type { AppState, MedicalStateAction } from '../types';
+import type {
+  AppState,
+  MedicalStateAction,
+  MedicalError,
+  ConsultationState
+} from '../types';
+import type { AIMessage, ClinicalAlert, MedicalTranscription } from '../../types/medical';
 
 export interface StorageConfig {
   key: string;
@@ -16,6 +22,8 @@ export interface StorageMetadata {
   checksum: string;
   size: number;
 }
+
+type Stored<T> = Omit<T, 'timestamp'> & { timestamp: string };
 
 export class StorageMiddleware {
   private config: StorageConfig;
@@ -308,17 +316,21 @@ export class StorageMiddleware {
     
     // Hydrate system dates
     if (hydrated.system?.notifications) {
-      hydrated.system.notifications = (hydrated.system.notifications as any[]).map((notification) => ({
-        ...notification,
-        timestamp: new Date((notification as any).timestamp as string)
-      })) as any;
+      hydrated.system.notifications = (hydrated.system.notifications as unknown as Array<Stored<AppState['system']['notifications'][number]>>).map(
+        (notification): AppState['system']['notifications'][number] => ({
+          ...notification,
+          timestamp: new Date(notification.timestamp)
+        })
+      );
     }
     
     if (hydrated.system?.errors) {
-      hydrated.system.errors = (hydrated.system.errors as any[]).map((error) => ({
-        ...error,
-        timestamp: new Date((error as any).timestamp as string)
-      })) as any;
+      hydrated.system.errors = (hydrated.system.errors as unknown as Array<Stored<MedicalError>>).map(
+        (error): MedicalError => ({
+          ...error,
+          timestamp: new Date(error.timestamp)
+        })
+      );
     }
     
     // Hydrate user statistics
@@ -327,7 +339,7 @@ export class StorageMiddleware {
     }
     
     // Hydrate consultation dates
-    const consultations = hydrated.consultations as any;
+    const consultations = hydrated.consultations as AppState['consultations'] | undefined;
     if (consultations?.active) {
       Object.keys(consultations.active).forEach(id => {
         const consultation = consultations.active[id];
@@ -350,26 +362,38 @@ export class StorageMiddleware {
         
         // Transcription dates
         if (consultation.transcription.transcriptions) {
-          consultation.transcription.transcriptions = (consultation.transcription.transcriptions as any[]).map((t) => ({
-            ...t,
-            timestamp: new Date((t as any).timestamp as string)
-          })) as any;
+          consultation.transcription.transcriptions = (
+            consultation.transcription.transcriptions as unknown as Array<Stored<MedicalTranscription>>
+          ).map(
+            (t): MedicalTranscription => ({
+              ...t,
+              timestamp: new Date(t.timestamp) as unknown as number
+            })
+          );
         }
         
         // AI message dates
         if (consultation.ai.messages) {
-          consultation.ai.messages = (consultation.ai.messages as any[]).map((msg) => ({
-            ...msg,
-            timestamp: new Date((msg as any).timestamp as string)
-          })) as any;
+          consultation.ai.messages = (
+            consultation.ai.messages as unknown as Array<Stored<AIMessage>>
+          ).map(
+            (msg): AIMessage => ({
+              ...msg,
+              timestamp: new Date(msg.timestamp)
+            })
+          );
         }
         
         // Clinical alert dates
         if (consultation.ai.clinicalAlerts) {
-          consultation.ai.clinicalAlerts = (consultation.ai.clinicalAlerts as any[]).map((alert) => ({
-            ...alert,
-            timestamp: new Date((alert as any).timestamp as string)
-          })) as any;
+          consultation.ai.clinicalAlerts = (
+            consultation.ai.clinicalAlerts as unknown as Array<Stored<ClinicalAlert>>
+          ).map(
+            (alert): ClinicalAlert => ({
+              ...alert,
+              timestamp: new Date(alert.timestamp)
+            })
+          );
         }
         
         // Documentation dates
@@ -378,10 +402,14 @@ export class StorageMiddleware {
         }
         
         if (consultation.documentation.editHistory) {
-          consultation.documentation.editHistory = (consultation.documentation.editHistory as any[]).map((edit) => ({
-            ...edit,
-            timestamp: new Date((edit as any).timestamp as string)
-          })) as any;
+          consultation.documentation.editHistory = (
+            consultation.documentation.editHistory as unknown as Array<Stored<ConsultationState['documentation']['editHistory'][number]>>
+          ).map(
+            (edit): ConsultationState['documentation']['editHistory'][number] => ({
+              ...edit,
+              timestamp: new Date(edit.timestamp)
+            })
+          );
         }
       });
     }
