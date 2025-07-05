@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Cog6ToothIcon,
   DocumentTextIcon,
-  MicrophoneIcon,
   SparklesIcon,
   ArrowLeftIcon,
   AdjustmentsHorizontalIcon
