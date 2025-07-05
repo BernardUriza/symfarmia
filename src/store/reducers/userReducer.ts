@@ -1,5 +1,5 @@
 // User-specific reducer for preferences and statistics
-import type { AppState, MedicalStateAction, AnalyticsEvent } from '../types';
+import type { AppState, MedicalStateAction } from '../types';
 
 export function userReducer(
   state: AppState['user'],

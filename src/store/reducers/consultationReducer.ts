@@ -1,16 +1,7 @@
 // Consultation-specific reducer with optimized updates
 import type { 
   AppState, 
-  MedicalStateAction, 
-  ConsultationState,
-  MedicalTranscription,
-  AIMessage,
-  SOAPNotes,
-  MedicalSymptom,
-  VitalSigns,
-  DiagnosisCandidate,
-  TreatmentPlan,
-  ClinicalAlert
+  MedicalStateAction
 } from '../types';
 import { createInitialConsultation } from '../utils/consultationUtils';
 
@@ -59,7 +50,8 @@ export function consultationReducer(
         }
       };
       
-      const { [consultationId]: removed, ...remainingActive } = state.active;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { [consultationId]: _, ...remainingActive } = state.active;
       
       return {
         ...state,
