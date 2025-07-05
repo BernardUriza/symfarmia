@@ -239,8 +239,8 @@ const AIAssistantPanel = () => {
   return (
     <div className="bg-white rounded-xl shadow-lg border border-gray-200 h-full flex flex-col">
       {/* Header */}
-      <div className="p-4 border-b border-gray-100">
-        <div className="flex items-center justify-between">
+      <div className="p-4 border-b border-gray-100 min-h-[60px] mobile-large:min-h-[80px]">
+        <div className="flex flex-col mobile-large:flex-row mobile-large:items-center mobile-large:justify-between gap-4">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-xl flex items-center justify-center">
               <SparklesIcon className="w-6 h-6 text-white" />
@@ -292,7 +292,7 @@ const AIAssistantPanel = () => {
       </div>
       
       {/* Content Area */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden chat-area">
         <AnimatePresence mode="wait">
           {activeTab === 'chat' && (
             <motion.div
@@ -300,7 +300,7 @@ const AIAssistantPanel = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="h-full flex flex-col"
+              className="h-full flex flex-col max-h-[calc(100vh-160px)]"
             >
               {/* Messages */}
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -388,7 +388,7 @@ const AIAssistantPanel = () => {
               </div>
               
               {/* Input */}
-              <div className="border-t border-gray-100 p-4">
+              <div className="border-t border-gray-100 p-4 sticky bottom-0 bg-white shadow-md">
                 <div className="flex items-end space-x-2">
                   <div className="flex-1">
                     <textarea
@@ -410,7 +410,7 @@ const AIAssistantPanel = () => {
                 </div>
                 
                 {/* Quick Actions */}
-                <div className="mt-3 flex flex-wrap gap-2">
+                <div className="mt-3 flex flex-row flex-wrap gap-2 action-buttons">
                   <button
                     onClick={() => handleSuggestionClick('Analizar síntomas principales')}
                     className="flex items-center px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition-colors"

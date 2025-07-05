@@ -59,9 +59,9 @@ function ConsultationWorkspaceInner({ onExit }) {
   };
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    <div className="medical-assistant-container">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-white/50 px-6 py-4">
+      <header className="header bg-white/80 backdrop-blur-sm border-b border-white/50 px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <button

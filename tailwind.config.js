@@ -12,6 +12,12 @@ module.exports = {
   theme: {
     transparent: "transparent",
     current: "currentColor",
+    screens: {
+      "mobile-small": "320px",
+      "mobile-standard": "375px",
+      "mobile-large": "414px",
+      "tablet-medical": "768px",
+    },
     extend: {
       colors: {
         tremor: {
