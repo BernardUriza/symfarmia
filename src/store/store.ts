@@ -1,23 +1,23 @@
 // Unified state management store with performance optimizations
-import { useMemo, useReducer, useCallback, useEffect, useRef } from 'react';
+import { useMemo, useReducer, useCallback, useEffect, useRef, useState } from 'react';
 import type { 
   AppState, 
   MedicalStateAction, 
   StoreConfig, 
-  ConsultationState,
-  MedicalError,
   PerformanceMetrics
 } from './types';
 import { consultationReducer } from './reducers/consultationReducer';
 import { systemReducer } from './reducers/systemReducer';
 import { userReducer } from './reducers/userReducer';
-import { createAuditMiddleware } from './middleware/auditMiddleware';
-import { createErrorMiddleware } from './middleware/errorMiddleware';
-import { createPerformanceMiddleware } from './middleware/performanceMiddleware';
-import { createPersistenceMiddleware } from './middleware/persistenceMiddleware';
-import { StorageManager } from './utils/storageManager';
+import { 
+  createAuditMiddleware,
+  createErrorMiddleware, 
+  createPerformanceMiddleware,
+  createPersistenceMiddleware
+} from './middleware/index';
 import { PerformanceManager } from './utils/performanceManager';
 import { ErrorRecoveryManager } from './utils/errorRecoveryManager';
+import { StorageManager } from './utils/storageManager';
 
 // Default store configuration
 const DEFAULT_CONFIG: StoreConfig = {
@@ -233,6 +233,7 @@ export function useMedicalStore(config: Partial<StoreConfig> = {}) {
   // Load persisted state on mount
   useEffect(() => {
     let mounted = true;
+    const perfManager = performanceManager.current;
     
     const initializeStore = async () => {
       try {
@@ -247,7 +248,7 @@ export function useMedicalStore(config: Partial<StoreConfig> = {}) {
         }
         
         // Initialize performance monitoring
-        performanceManager.current.startMonitoring();
+        perfManager.startMonitoring();
         
         if (mounted) {
           setInitialized(true);
@@ -285,7 +286,7 @@ export function useMedicalStore(config: Partial<StoreConfig> = {}) {
     
     return () => {
       mounted = false;
-      performanceManager.current.stopMonitoring();
+      perfManager.stopMonitoring();
     };
   }, [loadPersistedState]);
   
@@ -431,39 +432,36 @@ export function useMedicalStore(config: Partial<StoreConfig> = {}) {
 // Selector hooks for optimized component updates
 export function useConsultationSelector<T>(
   selector: (consultations: AppState['consultations']) => T,
-  equalityFn?: (a: T, b: T) => boolean
+  _equalityFn?: (a: T, b: T) => boolean
 ): T {
   const { state } = useMedicalStore();
   
   return useMemo(() => selector(state.consultations), [
     state.consultations,
-    selector,
-    equalityFn
+    selector
   ]);
 }
 
 export function useSystemSelector<T>(
   selector: (system: AppState['system']) => T,
-  equalityFn?: (a: T, b: T) => boolean
+  _equalityFn?: (a: T, b: T) => boolean
 ): T {
   const { state } = useMedicalStore();
   
   return useMemo(() => selector(state.system), [
     state.system,
-    selector,
-    equalityFn
+    selector
   ]);
 }
 
 export function useUserSelector<T>(
   selector: (user: AppState['user']) => T,
-  equalityFn?: (a: T, b: T) => boolean
+  _equalityFn?: (a: T, b: T) => boolean
 ): T {
   const { state } = useMedicalStore();
   
   return useMemo(() => selector(state.user), [
     state.user,
-    selector,
-    equalityFn
+    selector
   ]);
 }

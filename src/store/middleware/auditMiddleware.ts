@@ -1,5 +1,5 @@
 // Audit logging middleware for medical compliance and security
-import type { AppState, MedicalStateAction, AnalyticsEvent } from '../types';
+import type { AppState, MedicalStateAction } from '../types';
 
 export interface AuditEvent {
   id: string;
@@ -44,7 +44,7 @@ export class AuditMiddleware {
   private auditBuffer: AuditEvent[] = [];
   private flushTimer?: number;
   private sessionId: string;
-  private deviceInfo: any;
+  private deviceInfo: Record<string, unknown>;
   
   constructor(config: Partial<AuditConfig> = {}) {
     this.config = {
@@ -168,7 +168,7 @@ export class AuditMiddleware {
     return 'system';
   }
   
-  private determineSeverity(actionType: string, payload: any): AuditEvent['severity'] {
+  private determineSeverity(actionType: string, _payload: unknown): AuditEvent['severity'] {
     // Critical actions
     const criticalActions = [
       'DELETE_USER_DATA',
@@ -208,8 +208,8 @@ export class AuditMiddleware {
   
   private extractConsultationId(action: MedicalStateAction): string | undefined {
     if (action.payload && typeof action.payload === 'object') {
-      const payload = action.payload as any;
-      return payload.consultationId || payload.consultation?.id;
+      const payload = action.payload as Record<string, unknown>;
+      return (payload.consultationId as string) || ((payload.consultation as Record<string, unknown>)?.id as string);
     }
     return undefined;
   }
@@ -221,19 +221,19 @@ export class AuditMiddleware {
     }
     
     if (action.payload && typeof action.payload === 'object') {
-      const payload = action.payload as any;
-      return payload.patientId || payload.patient?.id;
+      const payload = action.payload as Record<string, unknown>;
+      return (payload.patientId as string) || ((payload.patient as Record<string, unknown>)?.id as string);
     }
     
     return undefined;
   }
   
-  private sanitizeActionPayload(payload: any, category: AuditEvent['category']): Record<string, unknown> {
-    if (!payload || typeof payload !== 'object') {
+  private sanitizeActionPayload(payload: unknown, category: AuditEvent['category']): Record<string, unknown> {
+    if (!payload || typeof payload !== 'object' || payload === null) {
       return { payload };
     }
     
-    const sanitized = { ...payload };
+    const sanitized = { ...(payload as Record<string, unknown>) };
     
     // Remove sensitive data based on category
     if (category === 'medical') {
@@ -427,7 +427,7 @@ export class AuditMiddleware {
     };
   }
   
-  private detectDeviceInfo(): any {
+  private detectDeviceInfo(): Record<string, unknown> {
     const userAgent = navigator.userAgent;
     
     let deviceType: 'desktop' | 'mobile' | 'tablet' = 'desktop';
@@ -558,7 +558,7 @@ export class AuditMiddleware {
     }
   }
   
-  private async encryptLogs(events: AuditEvent[]): Promise<any> {
+  private async encryptLogs(events: AuditEvent[]): Promise<unknown> {
     // Simple encryption for demonstration
     // In production, use proper encryption libraries
     if ('crypto' in window && 'subtle' in crypto) {

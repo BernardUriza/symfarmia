@@ -1,5 +1,5 @@
 // System-specific reducer for global application state
-import type { AppState, MedicalStateAction, MedicalError, PerformanceMetrics } from '../types';
+import type { AppState, MedicalStateAction, MedicalError } from '../types';
 
 export function systemReducer(
   state: AppState['system'],
@@ -289,12 +289,12 @@ export function systemReducer(
           loading: false,
           initializing: false,
           // Clear old errors and notifications
-          errors: payload.system.errors?.filter((error: MedicalError) => 
+          errors: (payload.system.errors as MedicalError[])?.filter((error: MedicalError) => 
             new Date().getTime() - error.timestamp.getTime() < 24 * 60 * 60 * 1000
           ) || [],
-          notifications: payload.system.notifications?.filter((notification: any) =>
+          notifications: (payload.system.notifications as Array<{ persistent?: boolean; timestamp: string }>)?.filter((notification) =>
             notification.persistent || 
-            new Date().getTime() - notification.timestamp.getTime() < 60 * 60 * 1000
+            new Date().getTime() - new Date(notification.timestamp).getTime() < 60 * 60 * 1000
           ) || []
         };
       }

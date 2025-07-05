@@ -1,5 +1,5 @@
 // Performance monitoring and optimization for mobile devices
-import type { PerformanceMetrics, StoreConfig } from '../types';
+import type { PerformanceMetrics } from '../types';
 
 export interface PerformanceThresholds {
   memoryWarning: number;
@@ -110,7 +110,7 @@ export class PerformanceManager {
   
   private updateMemoryUsage(): void {
     if ('memory' in performance) {
-      const memory = (performance as any).memory;
+      const memory = (performance as { memory: { usedJSHeapSize: number } }).memory;
       this.metrics.memoryUsage = memory.usedJSHeapSize;
     } else {
       // Fallback estimation for browsers without memory API

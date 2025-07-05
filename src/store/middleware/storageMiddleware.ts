@@ -220,11 +220,11 @@ export class StorageMiddleware {
     // Remove excluded keys
     this.config.excludeKeys.forEach(keyPath => {
       const keys = keyPath.split('.');
-      let current = sanitized as any;
+      let current = sanitized as Record<string, unknown>;
       
       for (let i = 0; i < keys.length - 1; i++) {
         if (current[keys[i]]) {
-          current = current[keys[i]];
+          current = current[keys[i]] as Record<string, unknown>;
         } else {
           return; // Key path doesn't exist
         }
@@ -300,22 +300,22 @@ export class StorageMiddleware {
     return cleaned;
   }
   
-  private hydrateState(state: any): AppState {
+  private hydrateState(state: Record<string, unknown>): AppState {
     // Convert date strings back to Date objects
     const hydrated = { ...state };
     
     // Hydrate system dates
     if (hydrated.system?.notifications) {
-      hydrated.system.notifications = hydrated.system.notifications.map((notification: any) => ({
+      hydrated.system.notifications = (hydrated.system.notifications as Array<Record<string, unknown>>).map((notification) => ({
         ...notification,
-        timestamp: new Date(notification.timestamp)
+        timestamp: new Date(notification.timestamp as string)
       }));
     }
     
     if (hydrated.system?.errors) {
-      hydrated.system.errors = hydrated.system.errors.map((error: any) => ({
+      hydrated.system.errors = (hydrated.system.errors as Array<Record<string, unknown>>).map((error) => ({
         ...error,
-        timestamp: new Date(error.timestamp)
+        timestamp: new Date(error.timestamp as string)
       }));
     }
     
@@ -347,25 +347,25 @@ export class StorageMiddleware {
         
         // Transcription dates
         if (consultation.transcription.transcriptions) {
-          consultation.transcription.transcriptions = consultation.transcription.transcriptions.map((t: any) => ({
+          consultation.transcription.transcriptions = (consultation.transcription.transcriptions as Array<Record<string, unknown>>).map((t) => ({
             ...t,
-            timestamp: new Date(t.timestamp)
+            timestamp: new Date(t.timestamp as string)
           }));
         }
         
         // AI message dates
         if (consultation.ai.messages) {
-          consultation.ai.messages = consultation.ai.messages.map((msg: any) => ({
+          consultation.ai.messages = (consultation.ai.messages as Array<Record<string, unknown>>).map((msg) => ({
             ...msg,
-            timestamp: new Date(msg.timestamp)
+            timestamp: new Date(msg.timestamp as string)
           }));
         }
         
         // Clinical alert dates
         if (consultation.ai.clinicalAlerts) {
-          consultation.ai.clinicalAlerts = consultation.ai.clinicalAlerts.map((alert: any) => ({
+          consultation.ai.clinicalAlerts = (consultation.ai.clinicalAlerts as Array<Record<string, unknown>>).map((alert) => ({
             ...alert,
-            timestamp: new Date(alert.timestamp)
+            timestamp: new Date(alert.timestamp as string)
           }));
         }
         
@@ -375,9 +375,9 @@ export class StorageMiddleware {
         }
         
         if (consultation.documentation.editHistory) {
-          consultation.documentation.editHistory = consultation.documentation.editHistory.map((edit: any) => ({
+          consultation.documentation.editHistory = (consultation.documentation.editHistory as Array<Record<string, unknown>>).map((edit) => ({
             ...edit,
-            timestamp: new Date(edit.timestamp)
+            timestamp: new Date(edit.timestamp as string)
           }));
         }
       });
@@ -514,7 +514,7 @@ export class StorageMiddleware {
   }
   
   private async loadFromIndexedDB(): Promise<string | null> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       const request = indexedDB.open('SymfarmiaStorage', 1);
       
       request.onerror = () => resolve(null); // Fallback to localStorage
@@ -544,7 +544,7 @@ export class StorageMiddleware {
   private async migrateState(data: string, fromVersion: number, toVersion: number): Promise<string> {
     console.log(`Migrating state from version ${fromVersion} to ${toVersion}`);
     
-    let migrated = JSON.parse(data);
+    const migrated = JSON.parse(data);
     
     // Add migration logic here for future versions
     // Example:
