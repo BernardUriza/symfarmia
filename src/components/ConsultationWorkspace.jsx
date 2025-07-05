@@ -48,16 +48,6 @@ function ConsultationWorkspaceInner({ onExit }) {
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
   
-  const getLayoutClasses = () => {
-    switch (layout) {
-      case 'vertical':
-        return 'flex-col';
-      case 'focused':
-        return 'flex-col lg:flex-row';
-      default:
-        return 'flex-col xl:flex-row';
-    }
-  };
   
   return (
     <div className="medical-assistant-container">
