@@ -329,7 +329,6 @@ const TranscriptionPanel = () => {
             }`} />
           </div>
         </div>
-      </div>
       
       {/* Recording Controls */}
       <div className="transcription-content">
