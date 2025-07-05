@@ -2,7 +2,7 @@
 import { motion } from "framer-motion";
 import { medicalLoadingStates } from "../utils/medicalLoadingStates";
 
-const iconMap: Record<string, React.ElementType> = {
+const iconMap: Record<string, () => JSX.Element> = {
   "brain-circuit": () => <span className="nav-icon">🧠</span>,
   stethoscope: () => <span className="nav-icon">🩺</span>,
   "file-medical": () => <span className="nav-icon">📄</span>,
