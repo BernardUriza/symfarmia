@@ -237,62 +237,46 @@ const AIAssistantPanel = () => {
   };
   
   return (
-    <div className="bg-white rounded-xl shadow-lg border border-gray-200 h-full flex flex-col">
+    <div className="ai-assistant-section">
       {/* Header */}
-      <div className="p-4 border-b border-gray-100">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-xl flex items-center justify-center">
-              <SparklesIcon className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900">Asistente IA Médico</h2>
-              <p className="text-sm text-gray-600">Análisis en tiempo real</p>
+      <div className="ai-header">
+        <div className="ai-info">
+          <div className="ai-avatar" />
+          <div className="ai-details">
+            <div className="ai-title">Asistente IA Médico</div>
+            <div className="ai-subtitle">Análisis en tiempo real</div>
+          </div>
+          <div className="ai-status">
+            <div className="status-indicator">
+              {isAiThinking ? 'Analizando…' : 'Activo'}
             </div>
           </div>
-          <div className="flex items-center space-x-2">
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-            <span className="text-xs text-gray-600">Activo</span>
-          </div>
         </div>
-        
-        {/* Tabs */}
-        <div className="flex space-x-1 mt-4 bg-gray-100 rounded-lg p-1">
-          <button
-            onClick={() => setActiveTab('chat')}
-            className={`flex-1 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-              activeTab === 'chat'
-                ? 'bg-white text-gray-900 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            Chat
-          </button>
-          <button
-            onClick={() => setActiveTab('suggestions')}
-            className={`flex-1 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-              activeTab === 'suggestions'
-                ? 'bg-white text-gray-900 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            Sugerencias
-          </button>
-          <button
-            onClick={() => setActiveTab('analysis')}
-            className={`flex-1 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-              activeTab === 'analysis'
-                ? 'bg-white text-gray-900 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            Análisis
-          </button>
-        </div>
+      </div>
+
+      <div className="ai-tabs">
+        <button
+          onClick={() => setActiveTab('chat')}
+          className={`tab ${activeTab === 'chat' ? 'active' : ''}`}
+        >
+          Chat
+        </button>
+        <button
+          onClick={() => setActiveTab('suggestions')}
+          className={`tab ${activeTab === 'suggestions' ? 'active' : ''}`}
+        >
+          Sugerencias
+        </button>
+        <button
+          onClick={() => setActiveTab('analysis')}
+          className={`tab ${activeTab === 'analysis' ? 'active' : ''}`}
+        >
+          Análisis
+        </button>
       </div>
       
       {/* Content Area */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden chat-area">
         <AnimatePresence mode="wait">
           {activeTab === 'chat' && (
             <motion.div
@@ -300,7 +284,7 @@ const AIAssistantPanel = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="h-full flex flex-col"
+              className="h-full flex flex-col max-h-[calc(100vh-160px)]"
             >
               {/* Messages */}
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -388,7 +372,7 @@ const AIAssistantPanel = () => {
               </div>
               
               {/* Input */}
-              <div className="border-t border-gray-100 p-4">
+              <div className="border-t border-gray-100 p-4 sticky bottom-0 bg-white shadow-md">
                 <div className="flex items-end space-x-2">
                   <div className="flex-1">
                     <textarea
@@ -410,7 +394,7 @@ const AIAssistantPanel = () => {
                 </div>
                 
                 {/* Quick Actions */}
-                <div className="mt-3 flex flex-wrap gap-2">
+                <div className="mt-3 flex flex-row flex-wrap gap-2 action-buttons">
                   <button
                     onClick={() => handleSuggestionClick('Analizar síntomas principales')}
                     className="flex items-center px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition-colors"

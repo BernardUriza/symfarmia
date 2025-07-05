@@ -27,14 +27,7 @@ const DocumentationOutput = () => {
   const [showCopySuccess, setShowCopySuccess] = useState(false);
   const [autoGenerateEnabled, setAutoGenerateEnabled] = useState(true);
   const [generationProgress, setGenerationProgress] = useState(0);
-  
-  // Auto-generate SOAP notes when transcript is available  
-  useEffect(() => {
-    if (finalTranscript.length > 100 && autoGenerateEnabled && !isGeneratingSOAP) {
-      generateSOAPNotes();
-    }
-  }, [finalTranscript, autoGenerateEnabled, isGeneratingSOAP, generateSOAPNotes]);
-  
+
   const generateStructuredSOAP = useCallback(async (transcript) => {
     // Mock structured SOAP generation based on transcript analysis
     await new Promise(resolve => setTimeout(resolve, 3000)); // Simulate AI processing
@@ -87,7 +80,15 @@ const DocumentationOutput = () => {
       setGenerationProgress(0);
       logEvent('soap_generation_failed', { error: error.message });
     }
+
   }, [finalTranscript, updateSoapSection, logEvent, generateStructuredSOAP]);
+
+  // Auto-generate SOAP notes when transcript is available
+  useEffect(() => {
+    if (finalTranscript.length > 100 && autoGenerateEnabled && !isGeneratingSOAP) {
+      generateSOAPNotes();
+    }
+  }, [finalTranscript, autoGenerateEnabled, isGeneratingSOAP, generateSOAPNotes]);
   
   const extractPatientInfo = (transcript) => {
     // Mock extraction - in real implementation, this would use NLP
@@ -268,8 +269,8 @@ Generado con asistencia de IA médica - Revisar y validar contenido.`;
     <div className="p-6">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-3">
+        <div className="flex items-center justify-between mb-6 sticky top-0 bg-white z-10 py-4">
+          <div className="flex items-center space-x-3 flex-wrap gap-2">
             <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-blue-500 rounded-xl flex items-center justify-center">
               <DocumentTextIcon className="w-6 h-6 text-white" />
             </div>
@@ -281,28 +282,30 @@ Generado con asistencia de IA médica - Revisar y validar contenido.`;
             </div>
           </div>
           
-          <div className="flex items-center space-x-3">
-            {/* Auto-generate toggle */}
-            <label className="flex items-center space-x-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={autoGenerateEnabled}
-                onChange={(e) => setAutoGenerateEnabled(e.target.checked)}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-              />
-              <span className="text-sm text-gray-600">Auto-generar</span>
-            </label>
-            
-            {/* Manual generate button */}
-            <button
-              onClick={generateSOAPNotes}
-              disabled={!finalTranscript || isGeneratingSOAP}
-              className="flex items-center space-x-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 text-white rounded-lg transition-colors text-sm"
-            >
-              <SparklesIcon className="w-4 h-4" />
-              <span>Generar SOAP</span>
-            </button>
-            
+          <div className="flex items-center space-x-3 flex-wrap gap-2">
+            <div className="flex items-center space-x-3">
+              {/* Auto-generate toggle */}
+              <label className="flex items-center space-x-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={autoGenerateEnabled}
+                  onChange={(e) => setAutoGenerateEnabled(e.target.checked)}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span className="text-sm text-gray-600">Auto-generar</span>
+              </label>
+
+              {/* Manual generate button */}
+              <button
+                onClick={generateSOAPNotes}
+                disabled={!finalTranscript || isGeneratingSOAP}
+                className="flex items-center space-x-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 text-white rounded-lg transition-colors text-sm"
+              >
+                <SparklesIcon className="w-4 h-4" />
+                <span>Generar SOAP</span>
+              </button>
+            </div>
+
             {/* Export controls */}
             {hasContent && (
               <>
@@ -313,7 +316,7 @@ Generado con asistencia de IA médica - Revisar y validar contenido.`;
                   <DocumentDuplicateIcon className="w-4 h-4" />
                   <span>Copiar</span>
                 </button>
-                
+
                 <button
                   onClick={exportToPDF}
                   className="flex items-center space-x-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors text-sm"
@@ -359,26 +362,28 @@ Generado con asistencia de IA médica - Revisar y validar contenido.`;
               const isEditing = editingSection === section;
               
               return (
-                <div
+                <details
                   key={section}
                   className={`rounded-lg border-2 ${getSectionColor(section)} transition-all duration-200`}
+                  open
                 >
-                  {/* Section Header */}
-                  <div className="p-4 border-b border-current border-opacity-20">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <Icon className="w-5 h-5" />
-                        <h3 className="font-semibold">{getSectionTitle(section)}</h3>
-                      </div>
-                      <button
-                        onClick={() => setEditingSection(isEditing ? null : section)}
-                        className="p-1 hover:bg-white hover:bg-opacity-50 rounded transition-colors"
-                      >
-                        <PencilIcon className="w-4 h-4" />
-                      </button>
+                  <summary className="p-4 border-b border-current border-opacity-20 cursor-pointer flex items-center justify-between list-none">
+                    <div className="flex items-center space-x-2">
+                      <Icon className="w-5 h-5" />
+                      <h3 className="font-semibold">{getSectionTitle(section)}</h3>
                     </div>
-                  </div>
-                  
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setEditingSection(isEditing ? null : section);
+                      }}
+                      className="p-1 hover:bg-white hover:bg-opacity-50 rounded transition-colors"
+                    >
+                      <PencilIcon className="w-4 h-4" />
+                    </button>
+                  </summary>
+
                   {/* Section Content */}
                   <div className="p-4">
                     {isEditing ? (
@@ -413,7 +418,7 @@ Generado con asistencia de IA médica - Revisar y validar contenido.`;
                       </div>
                     )}
                   </div>
-                </div>
+                </details>
               );
             })}
           </div>
