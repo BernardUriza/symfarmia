@@ -27,14 +27,7 @@ const DocumentationOutput = () => {
   const [showCopySuccess, setShowCopySuccess] = useState(false);
   const [autoGenerateEnabled, setAutoGenerateEnabled] = useState(true);
   const [generationProgress, setGenerationProgress] = useState(0);
-  
-  // Auto-generate SOAP notes when transcript is available  
-  useEffect(() => {
-    if (finalTranscript.length > 100 && autoGenerateEnabled && !isGeneratingSOAP) {
-      generateSOAPNotes();
-    }
-  }, [finalTranscript, autoGenerateEnabled, isGeneratingSOAP, generateSOAPNotes]);
-  
+
   const generateStructuredSOAP = useCallback(async (transcript) => {
     // Mock structured SOAP generation based on transcript analysis
     await new Promise(resolve => setTimeout(resolve, 3000)); // Simulate AI processing
@@ -87,7 +80,15 @@ const DocumentationOutput = () => {
       setGenerationProgress(0);
       logEvent('soap_generation_failed', { error: error.message });
     }
+
   }, [finalTranscript, updateSoapSection, logEvent, generateStructuredSOAP]);
+
+  // Auto-generate SOAP notes when transcript is available
+  useEffect(() => {
+    if (finalTranscript.length > 100 && autoGenerateEnabled && !isGeneratingSOAP) {
+      generateSOAPNotes();
+    }
+  }, [finalTranscript, autoGenerateEnabled, isGeneratingSOAP, generateSOAPNotes]);
   
   const extractPatientInfo = (transcript) => {
     // Mock extraction - in real implementation, this would use NLP
