@@ -1,9 +1,9 @@
 // System-specific reducer for global application state
-import type { AppState, MedicalStateAction, MedicalError } from '../types';
+import type { AppState, MedicalError } from '../types';
 
 export function systemReducer(
   state: AppState['system'],
-  action: MedicalStateAction
+  action: any
 ): AppState['system'] {
   
   switch (action.type) {
