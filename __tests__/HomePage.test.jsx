@@ -6,6 +6,9 @@ import { I18nProvider } from 'app/providers/I18nProvider'
 import { PatientContextProvider } from '../app/providers/PatientContextProvider'
 
 describe('HomePage', () => {
+  beforeEach(() => {
+    localStorage.setItem('preferredLanguage', 'es')
+  })
   it('renders the LandingPage component', () => {
     render(
       <ThemeProvider>
@@ -18,7 +21,7 @@ describe('HomePage', () => {
         </I18nProvider>
       </ThemeProvider>
     )
-    expect(screen.getByText('El Futuro de la Medicina Está Aquí')).toBeInTheDocument()
+    expect(screen.getByText(/Convierte consultas médicas/i)).toBeInTheDocument()
   })
 
   it('contains the main SYMFARMIA branding', () => {
@@ -33,7 +36,7 @@ describe('HomePage', () => {
         </I18nProvider>
       </ThemeProvider>
     )
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('El Futuro de la Medicina Está Aquí')
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Convierte consultas médicas en reportes clínicos automáticamente')
   })
 
   it('displays the platform description', () => {
@@ -48,6 +51,6 @@ describe('HomePage', () => {
         </I18nProvider>
       </ThemeProvider>
     )
-    expect(screen.getByText('Libera el 70% de tu tiempo y restaura la esperanza en tu práctica médica')).toBeInTheDocument()
+    expect(screen.getByText(/Habla durante tu consulta/i)).toBeInTheDocument()
   })
 })
