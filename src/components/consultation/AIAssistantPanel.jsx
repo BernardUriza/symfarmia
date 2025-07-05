@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   SparklesIcon,
@@ -19,7 +19,6 @@ const AIAssistantPanel = () => {
     aiMessages,
     isAiThinking,
     finalTranscript,
-    liveTranscript,
     addAiMessage,
     logEvent
   } = useConsultation();
@@ -35,14 +34,28 @@ const AIAssistantPanel = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [aiMessages]);
   
-  // Analyze transcript in real-time for suggestions
-  useEffect(() => {
-    if (finalTranscript.length > 50) {
-      analyzeTranscriptForSuggestions(finalTranscript);
-    }
-  }, [finalTranscript]);
+  const generateClinicalAlerts = useCallback((transcript) => {
+    const alerts = [];
+    
+    // Red flags detection
+    const redFlags = [
+      { keyword: 'dolor torácico intenso', alert: 'Considerar síndrome coronario agudo', severity: 'high' },
+      { keyword: 'dificultad respiratoria severa', alert: 'Evaluar distress respiratorio', severity: 'high' },
+      { keyword: 'pérdida de conciencia', alert: 'Investigar causas neurológicas', severity: 'high' },
+      { keyword: 'sangrado abundante', alert: 'Controlar signos vitales', severity: 'high' }
+    ];
+    
+    redFlags.forEach(flag => {
+      if (transcript.toLowerCase().includes(flag.keyword.toLowerCase())) {
+        alerts.push(flag);
+      }
+    });
+    
+    setClinicalAlerts(alerts);
+    return alerts;
+  }, []);
   
-  const analyzeTranscriptForSuggestions = async (transcript) => {
+  const analyzeTranscriptForSuggestions = useCallback(async (transcript) => {
     // Mock AI analysis for medical suggestions
     const medicalKeywords = {
       'dolor': ['Escala de dolor', 'Localización específica', 'Factores agravantes'],
@@ -65,6 +78,9 @@ const AIAssistantPanel = () => {
     if (newSuggestions.length > 0) {
       setSuggestions(prev => [...new Set([...prev, ...newSuggestions])]);
       
+      // Check for clinical alerts
+      const alerts = generateClinicalAlerts(transcript);
+      
       // Add contextual AI message
       addAiMessage({
         type: 'ai',
@@ -73,33 +89,29 @@ const AIAssistantPanel = () => {
         context: 'symptom_analysis'
       });
       
+      // Add clinical alerts if any
+      if (alerts.length > 0) {
+        addAiMessage({
+          type: 'ai',
+          content: `⚠️ Alertas clínicas detectadas: ${alerts.map(a => a.alert).join(', ')}`,
+          context: 'alert'
+        });
+      }
+      
       logEvent('ai_suggestion_generated', { 
         symptoms: detectedSymptoms,
-        suggestions: newSuggestions.length
+        suggestions: newSuggestions.length,
+        alerts: alerts.length
       });
     }
-  };
+  }, [addAiMessage, logEvent, generateClinicalAlerts]);
   
-  const generateClinicalAlerts = (transcript) => {
-    const alerts = [];
-    
-    // Red flags detection
-    const redFlags = [
-      { keyword: 'dolor torácico intenso', alert: 'Considerar síndrome coronario agudo', severity: 'high' },
-      { keyword: 'dificultad respiratoria severa', alert: 'Evaluar distress respiratorio', severity: 'high' },
-      { keyword: 'pérdida de conciencia', alert: 'Investigar causas neurológicas', severity: 'high' },
-      { keyword: 'sangrado abundante', alert: 'Controlar signos vitales', severity: 'high' }
-    ];
-    
-    redFlags.forEach(flag => {
-      if (transcript.toLowerCase().includes(flag.keyword.toLowerCase())) {
-        alerts.push(flag);
-      }
-    });
-    
-    setClinicalAlerts(alerts);
-    return alerts;
-  };
+  // Analyze transcript in real-time for suggestions
+  useEffect(() => {
+    if (finalTranscript.length > 50) {
+      analyzeTranscriptForSuggestions(finalTranscript);
+    }
+  }, [finalTranscript, analyzeTranscriptForSuggestions]);
   
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   DocumentTextIcon,
@@ -11,7 +11,6 @@ import {
   UserIcon
 } from '@heroicons/react/24/outline';
 import { useConsultation } from '../../contexts/ConsultationContext';
-import { mockMedicalAI } from '../../utils/medicalUtils';
 
 const DocumentationOutput = () => {
   const {
@@ -24,20 +23,36 @@ const DocumentationOutput = () => {
     startTime
   } = useConsultation();
   
-  const [isEditing, setIsEditing] = useState(false);
   const [editingSection, setEditingSection] = useState(null);
   const [showCopySuccess, setShowCopySuccess] = useState(false);
   const [autoGenerateEnabled, setAutoGenerateEnabled] = useState(true);
   const [generationProgress, setGenerationProgress] = useState(0);
   
-  // Auto-generate SOAP notes when transcript is available
+  // Auto-generate SOAP notes when transcript is available  
   useEffect(() => {
     if (finalTranscript.length > 100 && autoGenerateEnabled && !isGeneratingSOAP) {
       generateSOAPNotes();
     }
-  }, [finalTranscript, autoGenerateEnabled]);
+  }, [finalTranscript, autoGenerateEnabled, isGeneratingSOAP, generateSOAPNotes]);
   
-  const generateSOAPNotes = async () => {
+  const generateStructuredSOAP = useCallback(async (transcript) => {
+    // Mock structured SOAP generation based on transcript analysis
+    await new Promise(resolve => setTimeout(resolve, 3000)); // Simulate AI processing
+    
+    // Extract key information from transcript
+    const patientInfo = extractPatientInfo(transcript);
+    const symptoms = extractSymptoms(transcript);
+    const examination = extractExaminationFindings(transcript);
+    
+    return {
+      subjective: generateSubjective(patientInfo, symptoms),
+      objective: generateObjective(examination),
+      assessment: generateAssessment(symptoms),
+      plan: generatePlan(symptoms)
+    };
+  }, []);
+  
+  const generateSOAPNotes = useCallback(async () => {
     if (!finalTranscript.trim()) return;
     
     setGenerationProgress(0);
@@ -72,24 +87,7 @@ const DocumentationOutput = () => {
       setGenerationProgress(0);
       logEvent('soap_generation_failed', { error: error.message });
     }
-  };
-  
-  const generateStructuredSOAP = async (transcript) => {
-    // Mock structured SOAP generation based on transcript analysis
-    await new Promise(resolve => setTimeout(resolve, 3000)); // Simulate AI processing
-    
-    // Extract key information from transcript
-    const patientInfo = extractPatientInfo(transcript);
-    const symptoms = extractSymptoms(transcript);
-    const examination = extractExaminationFindings(transcript);
-    
-    return {
-      subjective: generateSubjective(patientInfo, symptoms),
-      objective: generateObjective(examination, transcript),
-      assessment: generateAssessment(symptoms, examination),
-      plan: generatePlan(symptoms, examination)
-    };
-  };
+  }, [finalTranscript, updateSoapSection, logEvent, generateStructuredSOAP]);
   
   const extractPatientInfo = (transcript) => {
     // Mock extraction - in real implementation, this would use NLP
@@ -138,7 +136,7 @@ const DocumentationOutput = () => {
     return `Paciente de ${patientInfo.age} años, ${patientInfo.gender}. ${symptomsText} Consulta para evaluación médica y orientación terapéutica. Niega alergias medicamentosas conocidas.`;
   };
   
-  const generateObjective = (examination, transcript) => {
+  const generateObjective = (examination) => {
     let objective = 'Paciente consciente, orientado, colaborador. ';
     
     if (examination.length > 0) {
@@ -150,7 +148,7 @@ const DocumentationOutput = () => {
     return objective;
   };
   
-  const generateAssessment = (symptoms, examination) => {
+  const generateAssessment = (symptoms) => {
     if (symptoms.length === 0) {
       return 'Evaluación clínica en proceso. Se requiere completar historia clínica y exploración física para establecer diagnóstico definitivo.';
     }
@@ -166,7 +164,7 @@ const DocumentationOutput = () => {
     return assessments[primarySymptom] || 'Cuadro clínico en estudio. Requiere evaluación complementaria para diagnóstico diferencial.';
   };
   
-  const generatePlan = (symptoms, examination) => {
+  const generatePlan = (symptoms) => {
     let plan = '• Continuar con anamnesis dirigida\n';
     plan += '• Completar exploración física sistemática\n';
     

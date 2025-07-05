@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { 
   MicrophoneIcon,
   StopIcon,
@@ -31,7 +31,7 @@ const TranscriptionPanel = () => {
   const [recordingTime, setRecordingTime] = useState(0);
   const [micPermission, setMicPermission] = useState('prompt'); // 'granted' | 'denied' | 'prompt'
   const [audioLevel, setAudioLevel] = useState(0);
-  const [transcriptionService, setTranscriptionService] = useState('browser'); // 'browser' | 'whisper'
+  const [transcriptionService] = useState('browser'); // 'browser' | 'whisper'
   
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
@@ -105,7 +105,7 @@ const TranscriptionPanel = () => {
     updateAudioLevel();
   };
   
-  const setupBrowserTranscription = (stream) => {
+  const setupBrowserTranscription = () => {
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
       console.warn('Speech recognition not supported');
       return;
@@ -124,12 +124,17 @@ const TranscriptionPanel = () => {
       
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const transcript = event.results[i][0].transcript;
-        const confidence = event.results[i][0].confidence;
+        const confidence = event.results[i][0].confidence || 0.8;
         
         if (event.results[i].isFinal) {
           finalTranscriptUpdate += transcript;
         } else {
           interimTranscript += transcript;
+        }
+        
+        // Use confidence for quality indication
+        if (confidence < 0.5) {
+          console.warn('Low confidence transcription:', transcript, confidence);
         }
       }
       
@@ -170,7 +175,7 @@ const TranscriptionPanel = () => {
     setTimeout(() => {
       addAiMessage({
         type: 'ai',
-        content: `Análisis de la transcripción: Se detectan síntomas relacionados con ${getRandomMedicalSuggestion(transcript)}. ¿Deseas que profundice en algún aspecto específico?`,
+        content: `Análisis de la transcripción: Se detectan síntomas relacionados con ${getRandomMedicalSuggestion()}. ¿Deseas que profundice en algún aspecto específico?`,
         suggestions: [
           'Analizar síntomas principales',
           'Sugerir diagnósticos diferenciales',
@@ -180,7 +185,7 @@ const TranscriptionPanel = () => {
     }, 2000);
   };
   
-  const getRandomMedicalSuggestion = (transcript) => {
+  const getRandomMedicalSuggestion = () => {
     const suggestions = [
       'síntomas respiratorios',
       'manifestaciones cardiovasculares',
@@ -208,7 +213,7 @@ const TranscriptionPanel = () => {
       
       // Setup transcription
       if (transcriptionService === 'browser') {
-        setupBrowserTranscription(stream);
+        setupBrowserTranscription();
       }
       
       // Setup recording
@@ -223,8 +228,9 @@ const TranscriptionPanel = () => {
       };
       
       mediaRecorderRef.current.onstop = () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-        // Handle audio blob for potential server-side transcription
+        // Create audio blob for potential server-side transcription
+        new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        // Stop all tracks
         stream.getTracks().forEach(track => track.stop());
       };
       
