@@ -21,8 +21,7 @@ function ConsultationWorkspaceInner({ onExit }) {
     setAiMode,
     sessionDuration,
     startSession,
-    endSession,
-    logEvent
+    endSession
   } = useConsultation();
   
   const [showSettings, setShowSettings] = useState(false);
@@ -40,13 +39,7 @@ function ConsultationWorkspaceInner({ onExit }) {
         endSession();
       }
     };
-  }, []);
-  
-  const handleModeToggle = () => {
-    const newMode = aiMode === 'basic' ? 'advanced' : 'basic';
-    setAiMode(newMode);
-    logEvent('mode_toggled', { from: aiMode, to: newMode });
-  };
+  }, [isActive, startSession, endSession]);
   
   const formatDuration = (seconds) => {
     const minutes = Math.floor(seconds / 60);
