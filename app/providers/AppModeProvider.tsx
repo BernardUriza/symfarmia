@@ -26,8 +26,10 @@ export function useAppMode() {
 export function AppModeProvider({ children }: { children: React.ReactNode }) {
   const [appMode, setAppMode] = useLocalStorage<'live' | 'demo'>('appMode', 'live');
   const [apiProvider, setApiProvider] = useState<DemoAPIProvider | LiveAPIProvider | null>(null);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     const detectMode = () => {
       if (typeof window === 'undefined') return 'live';
       const urlParams = new URLSearchParams(window.location.search);
@@ -75,8 +77,8 @@ export function AppModeProvider({ children }: { children: React.ReactNode }) {
   const value = {
     appMode,
     apiProvider,
-    isDemoMode: appMode === 'demo',
-    isLiveMode: appMode === 'live',
+    isDemoMode: mounted && appMode === 'demo',
+    isLiveMode: mounted && appMode === 'live',
     toggleMode
   };
 

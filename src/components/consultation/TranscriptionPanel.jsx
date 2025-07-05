@@ -29,6 +29,8 @@ const TranscriptionPanel = () => {
   const [micPermission, setMicPermission] = useState('prompt'); // 'granted' | 'denied' | 'prompt' | 'checking'
   const [audioLevel, setAudioLevel] = useState(0);
   const [transcriptionService] = useState('browser'); // 'browser' | 'whisper'
+  const [micDiagnostics, setMicDiagnostics] = useState(null);
+  const [availableDevices, setAvailableDevices] = useState([]);
   
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
@@ -63,6 +65,154 @@ const TranscriptionPanel = () => {
     };
   }, [isRecording, isPaused]);
   
+  const runMicrophoneDiagnostics = async () => {
+    const diagnostics = {
+      timestamp: new Date().toISOString(),
+      browser: navigator.userAgent,
+      isHTTPS: location.protocol === 'https:',
+      hasMediaDevices: !!navigator.mediaDevices,
+      hasGetUserMedia: !!navigator.mediaDevices?.getUserMedia,
+      hasPermissionsAPI: !!navigator.permissions,
+      devices: [],
+      permissionState: 'unknown',
+      errors: [],
+      recommendations: []
+    };
+
+    try {
+      // Check for basic API availability
+      if (!navigator.mediaDevices) {
+        diagnostics.errors.push('MediaDevices API no disponible en este navegador');
+        diagnostics.recommendations.push('Actualiza tu navegador a una versión más reciente');
+      }
+
+      if (!navigator.mediaDevices?.getUserMedia) {
+        diagnostics.errors.push('getUserMedia API no disponible');
+        diagnostics.recommendations.push('Tu navegador no soporta acceso al micrófono');
+      }
+
+      // Check HTTPS requirement
+      if (!diagnostics.isHTTPS && location.hostname !== 'localhost') {
+        diagnostics.errors.push('Se requiere HTTPS para acceso al micrófono');
+        diagnostics.recommendations.push('Accede al sitio usando HTTPS://');
+      }
+
+      // Enumerate audio devices
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const audioInputs = devices.filter(device => device.kind === 'audioinput');
+        diagnostics.devices = audioInputs.map(device => ({
+          deviceId: device.deviceId,
+          label: device.label || 'Micrófono sin nombre',
+          groupId: device.groupId
+        }));
+        
+        if (audioInputs.length === 0) {
+          diagnostics.errors.push('No se encontraron dispositivos de audio de entrada');
+          diagnostics.recommendations.push('Conecta un micrófono o verifica que esté habilitado');
+        }
+        
+        setAvailableDevices(audioInputs);
+      } catch (deviceError) {
+        diagnostics.errors.push(`Error enumerando dispositivos: ${deviceError.message}`);
+      }
+
+      // Check permissions
+      if (navigator.permissions) {
+        try {
+          const permissionResult = await navigator.permissions.query({ name: 'microphone' });
+          diagnostics.permissionState = permissionResult.state;
+          
+          switch (permissionResult.state) {
+            case 'denied':
+              diagnostics.errors.push('Permisos de micrófono denegados explícitamente');
+              diagnostics.recommendations.push('Haz clic en el ícono de candado en la barra de direcciones y permite el micrófono');
+              break;
+            case 'prompt':
+              diagnostics.recommendations.push('Los permisos se solicitarán al intentar grabar');
+              break;
+            case 'granted':
+              diagnostics.recommendations.push('Permisos concedidos, el micrófono debería funcionar');
+              break;
+          }
+        } catch (permError) {
+          diagnostics.errors.push(`Error verificando permisos: ${permError.message}`);
+        }
+      }
+
+      // Test actual microphone access
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+          audio: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true
+          } 
+        });
+        
+        diagnostics.accessTest = 'success';
+        diagnostics.permissionState = 'granted';
+        setMicPermission('granted');
+        
+        // Test audio context
+        try {
+          const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+          diagnostics.audioContextSupport = audioContext.state;
+          audioContext.close();
+        } catch (audioError) {
+          diagnostics.errors.push(`Audio Context no disponible: ${audioError.message}`);
+        }
+        
+        // Stop test stream
+        stream.getTracks().forEach(track => track.stop());
+        
+      } catch (accessError) {
+        diagnostics.accessTest = 'failed';
+        diagnostics.accessError = {
+          name: accessError.name,
+          message: accessError.message
+        };
+
+        switch (accessError.name) {
+          case 'NotAllowedError':
+            setMicPermission('denied');
+            diagnostics.errors.push('Acceso al micrófono denegado por el usuario');
+            diagnostics.recommendations.push('Permite el acceso al micrófono en el navegador');
+            diagnostics.recommendations.push('Revisa la configuración de permisos del sitio');
+            break;
+          case 'NotFoundError':
+            setMicPermission('denied');
+            diagnostics.errors.push('No se encontró ningún dispositivo de micrófono');
+            diagnostics.recommendations.push('Verifica que el micrófono esté conectado y funcionando');
+            diagnostics.recommendations.push('Revisa la configuración de audio del sistema');
+            break;
+          case 'NotReadableError':
+            diagnostics.errors.push('Micrófono en uso por otra aplicación');
+            diagnostics.recommendations.push('Cierra otras aplicaciones que puedan estar usando el micrófono');
+            diagnostics.recommendations.push('Reinicia el navegador e intenta nuevamente');
+            break;
+          case 'OverconstrainedError':
+            diagnostics.errors.push('Configuración de audio no soportada');
+            diagnostics.recommendations.push('El micrófono no soporta la configuración requerida');
+            break;
+          case 'SecurityError':
+            diagnostics.errors.push('Error de seguridad al acceder al micrófono');
+            diagnostics.recommendations.push('Verifica que el sitio tenga permisos de micrófono');
+            break;
+          default:
+            diagnostics.errors.push(`Error desconocido: ${accessError.message}`);
+            diagnostics.recommendations.push('Intenta recargar la página o reiniciar el navegador');
+        }
+      }
+
+    } catch (error) {
+      diagnostics.errors.push(`Error general en diagnóstico: ${error.message}`);
+    }
+
+    setMicDiagnostics(diagnostics);
+    return diagnostics;
+  };
+
   const checkMicrophonePermission = async () => {
     try {
       // Only check permission status without requesting access
@@ -372,21 +522,83 @@ const TranscriptionPanel = () => {
         )}
         {/* Permission Status */}
         {micPermission === 'denied' && (
-          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-            <div className="flex items-center justify-between">
+          <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div className="flex items-center justify-between mb-3">
               <div className="flex items-center">
                 <ExclamationTriangleIcon className="w-5 h-5 text-red-500 mr-2" />
-                <span className="text-sm text-red-700">
-                  Acceso al micrófono denegado. Por favor, habilita los permisos en tu navegador.
+                <span className="text-sm font-medium text-red-700">
+                  Problema con el micrófono
                 </span>
               </div>
-              <button
-                onClick={checkMicrophonePermission}
-                className="ml-4 px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded transition-colors"
-              >
-                Reintentar
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={runMicrophoneDiagnostics}
+                  className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded transition-colors"
+                >
+                  Diagnosticar
+                </button>
+                <button
+                  onClick={checkMicrophonePermission}
+                  className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded transition-colors"
+                >
+                  Reintentar
+                </button>
+              </div>
             </div>
+            
+            {micDiagnostics && (
+              <div className="space-y-3 border-t border-red-200 pt-3">
+                {micDiagnostics.errors.length > 0 && (
+                  <div>
+                    <h4 className="text-xs font-medium text-red-800 mb-2">Problemas detectados:</h4>
+                    <ul className="space-y-1">
+                      {micDiagnostics.errors.map((error, index) => (
+                        <li key={index} className="text-xs text-red-700 flex items-start">
+                          <span className="w-1 h-1 bg-red-500 rounded-full mt-2 mr-2 flex-shrink-0"></span>
+                          {error}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                
+                {micDiagnostics.recommendations.length > 0 && (
+                  <div>
+                    <h4 className="text-xs font-medium text-blue-800 mb-2">Soluciones recomendadas:</h4>
+                    <ul className="space-y-1">
+                      {micDiagnostics.recommendations.map((rec, index) => (
+                        <li key={index} className="text-xs text-blue-700 flex items-start">
+                          <span className="w-1 h-1 bg-blue-500 rounded-full mt-2 mr-2 flex-shrink-0"></span>
+                          {rec}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                
+                {micDiagnostics.devices.length > 0 && (
+                  <div>
+                    <h4 className="text-xs font-medium text-gray-700 mb-2">Dispositivos detectados:</h4>
+                    <ul className="space-y-1">
+                      {micDiagnostics.devices.map((device, index) => (
+                        <li key={index} className="text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded">
+                          {device.label}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                
+                <details className="text-xs">
+                  <summary className="cursor-pointer text-gray-600 hover:text-gray-800">
+                    Ver detalles técnicos
+                  </summary>
+                  <div className="mt-2 p-2 bg-gray-100 rounded text-xs font-mono overflow-auto max-h-32">
+                    <pre>{JSON.stringify(micDiagnostics, null, 2)}</pre>
+                  </div>
+                </details>
+              </div>
+            )}
           </div>
         )}
         
@@ -401,19 +613,14 @@ const TranscriptionPanel = () => {
               </div>
               <button
                 onClick={async () => {
-                  try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    setMicPermission('granted');
-                    stream.getTracks().forEach(track => track.stop());
-                  } catch (error) {
-                    if (error.name === 'NotAllowedError') {
-                      setMicPermission('denied');
-                    }
+                  const diagnostics = await runMicrophoneDiagnostics();
+                  if (diagnostics.accessTest !== 'success') {
+                    setMicPermission('denied');
                   }
                 }}
                 className="ml-4 px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded transition-colors"
               >
-                Permitir acceso
+                Probar acceso
               </button>
             </div>
           </div>
