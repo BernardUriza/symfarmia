@@ -145,7 +145,7 @@ function ConsultationWorkspaceInner({ onExit }) {
                     opacity: { duration: 0.3 },
                     scale: { duration: 0.3 }
                   }}
-                  className="ai-assistant-section overflow-hidden"
+                  className="ai-assistant-section"
                 >
                   <AIAssistantPanel />
                 </motion.div>

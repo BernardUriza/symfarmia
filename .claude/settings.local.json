@@ -44,7 +44,8 @@
       "Bash(npx eslint:*)",
       "Bash(pkill:*)",
       "Bash(true)",
-      "Bash(npx tailwindcss:*)"
+      "Bash(npx tailwindcss:*)",
+      "Bash(touch:*)"
     ],
     "deny": []
   }

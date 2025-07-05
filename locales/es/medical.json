@@ -1,1 +1,245 @@
-{}
+{
+  "consultation": {
+    "title": "Consulta Médica",
+    "session_active": "Sesión activa",
+    "session_inactive": "Sesión inactiva",
+    "activate_advanced_ai": "Activar IA Avanzada",
+    "basic_mode": "Modo Básico",
+    "change_layout": "Cambiar disposición"
+  },
+  "microphone": {
+    "permissions": {
+      "media_devices_unavailable": "MediaDevices API no disponible en este navegador",
+      "update_browser": "Actualiza tu navegador a una versión más reciente",
+      "getusermedia_unavailable": "getUserMedia API no disponible",
+      "browser_not_supported": "Tu navegador no soporta acceso al micrófono",
+      "https_required": "Se requiere HTTPS para acceso al micrófono",
+      "access_https": "Accede al sitio usando HTTPS://",
+      "access_denied": "Acceso al micrófono denegado por el usuario",
+      "allow_microphone": "Permite el acceso al micrófono en el navegador",
+      "check_site_permissions": "Revisa la configuración de permisos del sitio",
+      "device_not_found": "No se encontró ningún dispositivo de micrófono",
+      "verify_connection": "Verifica que el micrófono esté conectado y funcionando",
+      "check_audio_settings": "Revisa la configuración de audio del sistema",
+      "device_in_use": "Micrófono en uso por otra aplicación",
+      "close_other_apps": "Cierra otras aplicaciones que puedan estar usando el micrófono",
+      "restart_browser": "Reinicia el navegador e intenta nuevamente",
+      "configuration_not_supported": "Configuración de audio no soportada",
+      "microphone_constraints": "El micrófono no soporta la configuración requerida",
+      "security_error": "Error de seguridad al acceder al micrófono",
+      "verify_site_permissions": "Verifica que el sitio tenga permisos de micrófono",
+      "unknown_error": "Error desconocido",
+      "reload_page": "Intenta recargar la página o reiniciar el navegador",
+      "general_diagnostic_error": "Error general en diagnóstico",
+      "permissions_denied_explicitly": "Permisos de micrófono denegados explícitamente",
+      "click_lock_icon": "Haz clic en el ícono de candado en la barra de direcciones y permite el micrófono",
+      "permissions_will_be_requested": "Los permisos se solicitarán al intentar grabar",
+      "permissions_granted": "Permisos concedidos, el micrófono debería funcionar",
+      "audio_context_unavailable": "Audio Context no disponible"
+    },
+    "devices": {
+      "unnamed_microphone": "Micrófono sin nombre",
+      "no_audio_devices": "No se encontraron dispositivos de audio de entrada",
+      "connect_microphone": "Conecta un micrófono o verifica que esté habilitado",
+      "device_enumeration_error": "Error enumerando dispositivos"
+    },
+    "actions": {
+      "diagnose": "Diagnosticar",
+      "retry": "Reintentar",
+      "test_access": "Probar acceso",
+      "allow_access": "Permitir acceso"
+    },
+    "status": {
+      "problem_with_microphone": "Problema con el micrófono",
+      "need_access": "Necesitamos acceso al micrófono para grabar tu consulta",
+      "problems_detected": "Problemas detectados:",
+      "recommended_solutions": "Soluciones recomendadas:",
+      "detected_devices": "Dispositivos detectados:",
+      "technical_details": "Ver detalles técnicos"
+    }
+  },
+  "transcription": {
+    "title": "Transcripción en Tiempo Real",
+    "recording": "Grabando",
+    "ready_to_record": "Listo para grabar",
+    "start_recording": "Iniciar Grabación",
+    "stop_recording": "Detener",
+    "final_transcript": "Transcripción Final",
+    "transcribing": "Transcribiendo...",
+    "no_transcript_available": "No hay transcripción disponible",
+    "no_transcript_description": "Presiona \"Iniciar Grabación\" para comenzar a transcribir tu consulta médica",
+    "service_browser": "Navegador",
+    "service_whisper": "Whisper",
+    "service_label": "Servicio",
+    "ai_active": "IA Activa",
+    "words_count": "palabras",
+    "transcript_received": "Transcripción recibida: "
+  },
+  "ai_assistant": {
+    "title": "Asistente IA Médico",
+    "subtitle": "Análisis en tiempo real",
+    "analyzing": "Analizando…",
+    "active": "Activo",
+    "ready": "Asistente IA Listo",
+    "help_description": "Te ayudo con análisis clínico, diagnósticos diferenciales y recomendaciones de tratamiento",
+    "confidence": "Confianza",
+    "placeholder": "Pregunta sobre síntomas, diagnósticos o tratamientos...",
+    "error_message": "Lo siento, hubo un error al procesar tu consulta. Por favor, intenta nuevamente.",
+    "tabs": {
+      "chat": "Chat",
+      "suggestions": "Sugerencias",
+      "analysis": "Análisis"
+    },
+    "suggestions": {
+      "active": "Sugerencias Activas",
+      "no_suggestions": "No hay sugerencias disponibles aún",
+      "suggestions_description": "Las sugerencias aparecerán conforme se analice la transcripción",
+      "analyze_symptoms": "Analizar síntomas principales",
+      "suggest_differential": "Sugerir diagnósticos diferenciales",
+      "review_treatments": "Revisar tratamientos recomendados",
+      "review_differentials": "Revisar diagnósticos diferenciales",
+      "request_studies": "Solicitar estudios complementarios",
+      "evaluate_criteria": "Evaluar criterios clínicos",
+      "verify_contraindications": "Verificar contraindicaciones",
+      "review_interactions": "Revisar interacciones medicamentosas",
+      "calculate_dose": "Calcular dosis según peso",
+      "expand_anamnesis": "Ampliar anamnesis",
+      "physical_exam": "Realizar examen físico dirigido",
+      "evaluate_chronology": "Evaluar cronología de síntomas",
+      "continue_anamnesis": "Continuar con anamnesis",
+      "review_history": "Revisar antecedentes",
+      "perform_physical_exam": "Realizar examen físico"
+    },
+    "analysis": {
+      "clinical_analysis": "Análisis Clínico",
+      "clinical_alerts": "Alertas Clínicas",
+      "transcript_analysis": "Análisis de Transcripción",
+      "total_words": "Palabras totales",
+      "estimated_duration": "Duración estimada",
+      "detected_symptoms": "Síntomas detectados",
+      "no_analysis": "No hay análisis disponible aún",
+      "analysis_description": "El análisis aparecerá conforme se desarrolle la consulta",
+      "symptoms_detected": "He detectado síntomas relacionados con:",
+      "clinical_alerts_detected": "⚠️ Alertas clínicas detectadas:"
+    },
+    "quick_actions": {
+      "symptoms": "Síntomas",
+      "diagnosis": "Diagnóstico",
+      "treatment": "Tratamiento"
+    },
+    "medical_conditions": {
+      "chest_pain": "dolor torácico intenso",
+      "chest_pain_suggestion": "Considerar síndrome coronario agudo",
+      "severe_dyspnea": "dificultad respiratoria severa",
+      "dyspnea_suggestion": "Evaluar distress respiratorio",
+      "loss_consciousness": "pérdida de conciencia",
+      "consciousness_suggestion": "Investigar causas neurológicas",
+      "heavy_bleeding": "sangrado abundante",
+      "bleeding_suggestion": "Controlar signos vitales"
+    },
+    "symptoms_analysis": {
+      "pain_scale": "Escala de dolor",
+      "specific_location": "Localización específica",
+      "aggravating_factors": "Factores agravantes",
+      "current_temperature": "Temperatura actual",
+      "duration": "Duración",
+      "associated_symptoms": "Síntomas asociados",
+      "headache_type": "Tipo de cefalea",
+      "intensity": "Intensidad",
+      "triggering_factors": "Factores desencadenantes",
+      "cough_type": "Tos seca/productiva",
+      "time_of_day": "Hora del día",
+      "activity_level": "Nivel de actividad",
+      "sleep": "Sueño",
+      "work_stress": "Stress laboral"
+    }
+  },
+  "documentation": {
+    "title": "Documentación Médica",
+    "subtitle": "Notas SOAP generadas automáticamente",
+    "soap_sections": {
+      "subjective": "SUBJETIVO",
+      "objective": "OBJETIVO",
+      "assessment": "EVALUACIÓN/ANÁLISIS",
+      "plan": "PLAN",
+      "analysis": "ANÁLISIS"
+    },
+    "actions": {
+      "auto_generate": "Auto-generar",
+      "generate_soap": "Generar SOAP",
+      "copy": "Copiar",
+      "pdf": "PDF",
+      "export_pdf": "Función de exportar PDF en desarrollo"
+    },
+    "status": {
+      "generating": "Generando notas SOAP...",
+      "will_generate": "se generará automáticamente...",
+      "no_documentation": "No hay documentación disponible",
+      "start_recording": "Inicia la grabación para generar notas SOAP automáticamente",
+      "soap_description": "Las notas SOAP se generarán cuando haya suficiente contenido transcrito",
+      "generate_soap_notes": "Generar Notas SOAP",
+      "duration": "Duración:",
+      "transcribed_words": "Palabras transcritas:",
+      "started": "Iniciado:",
+      "copied_clipboard": "Copiado al portapapeles"
+    },
+    "templates": {
+      "not_generated": "No generado",
+      "medical_note": "NOTA MÉDICA -",
+      "consultation_duration": "Duración de consulta:",
+      "minutes": "minutos",
+      "patient_reports": "Paciente refiere",
+      "patient_consultation": "Paciente acude a consulta por molestias.",
+      "patient_evaluation": "Consulta para evaluación médica y orientación terapéutica. Niega alergias medicamentosas conocidas.",
+      "patient_conscious": "Paciente consciente, orientado, colaborador.",
+      "physical_examination": "Exploración física:",
+      "vital_signs": "Signos vitales estables. Aspecto general conservado.",
+      "clinical_evaluation": "Evaluación clínica en proceso. Se requiere completar historia clínica y exploración física para establecer diagnóstico definitivo.",
+      "pain_syndrome": "Síndrome doloroso a determinar etiología. Considerar causas inflamatorias, mecánicas o neuropáticas.",
+      "febrile_syndrome": "Síndrome febril. Evaluar foco infeccioso. Considerar proceso viral vs bacteriano.",
+      "cough_syndrome": "Síndrome tusígeno. Investigar etiología respiratoria alta vs baja.",
+      "asthenia": "Astenia. Descartar causas metabólicas, infecciosas o hematológicas.",
+      "clinical_study": "Cuadro clínico en estudio. Requiere evaluación complementaria para diagnóstico diferencial.",
+      "continue_anamnesis": "• Continuar con anamnesis dirigida\\n",
+      "complete_physical": "• Completar exploración física sistemática\\n",
+      "pain_scale_plan": "• Escala de dolor y características\\n",
+      "consider_analgesia": "• Considerar analgesia según intensidad\\n",
+      "laboratory_studies": "• Laboratorios: BHC, QS, reactantes de fase aguda\\n",
+      "antipyretic": "• Antipirético según necesidad\\n",
+      "followup": "• Seguimiento en 24-48 horas\\n",
+      "return_if_worse": "• Regresar si empeoramiento o nuevos síntomas",
+      "transcript_note": "Transcripción original disponible por separado.\\nGenerado con asistencia de IA médica - Revisar y validar contenido."
+    }
+  },
+  "forms": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "loading": "Cargando",
+    "error_occurred": "Error ha sucedido:",
+    "changes_saved": "Cambios guardados con éxito",
+    "record_removed": "Registro removido con éxito.",
+    "cancelled": "Cancelado",
+    "confirm_delete": "¿Estás seguro de que quieres eliminar este registro?",
+    "manage_patient": "Administrar Paciente",
+    "patient_name": "Nombre",
+    "email": "Correo Electrónico",
+    "phone": "Teléfono",
+    "information": "Información",
+    "birth_date": "Fecha de Nacimiento",
+    "gender": "Género",
+    "male": "Masculino",
+    "female": "Femenino",
+    "other": "Otro"
+  },
+  "navigation": {
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "patients": "pacientes"
+  },
+  "status": {
+    "pending": "Pendiente",
+    "sent": "Enviado", 
+    "not_delivered": "No entregado",
+    "sending": "Enviando"
+  }
+}
