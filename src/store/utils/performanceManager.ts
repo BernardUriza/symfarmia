@@ -193,8 +193,8 @@ export class PerformanceManager {
   }
   
   // Public methods for updating metrics
-  updateMetric(metric: keyof PerformanceMetrics, value: number): void {
-    this.metrics[metric] = value;
+  updateMetric(metric: Exclude<keyof PerformanceMetrics, 'batteryImpact'>, value: number): void {
+    (this.metrics as unknown as Record<string, number | undefined>)[metric] = value;
   }
   
   recordTranscriptionLatency(startTime: number): void {
