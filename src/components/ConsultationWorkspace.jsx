@@ -6,6 +6,7 @@ import {
   AdjustmentsHorizontalIcon
 } from '@heroicons/react/24/outline';
 import { ConsultationProvider, useConsultation } from '../contexts/ConsultationContext';
+import { useTranslation } from '../../app/providers/I18nProvider';
 import TranscriptionPanel from './consultation/TranscriptionPanel';
 import AIAssistantPanel from './consultation/AIAssistantPanel';
 import DocumentationOutput from './consultation/DocumentationOutput';
@@ -21,6 +22,8 @@ function ConsultationWorkspaceInner({ onExit }) {
     startSession,
     endSession
   } = useConsultation();
+
+  const { t } = useTranslation();
   
   const [showSettings, setShowSettings] = useState(false);
   const [layout, setLayout] = useState('horizontal'); // 'horizontal' | 'vertical' | 'focused'
@@ -66,9 +69,9 @@ function ConsultationWorkspaceInner({ onExit }) {
           </button>
           <div className="medical-icon" />
           <div className="session-info">
-            <div className="title">Consulta Médica</div>
+            <div className="title">{t('consultation_title')}</div>
             <div className="session-time">
-              {isActive ? `Sesión activa: ${formatDuration(sessionDuration)}` : 'Sesión inactiva'}
+              {isActive ? `${t('session_active')}: ${formatDuration(sessionDuration)}` : t('session_inactive')}
             </div>
           </div>
           <div className="mode-toggle">
@@ -76,13 +79,13 @@ function ConsultationWorkspaceInner({ onExit }) {
               onClick={() => setAiMode(aiMode === 'basic' ? 'advanced' : 'basic')}
               className="toggle-button"
             >
-              {aiMode === 'basic' ? 'Activar IA Avanzada' : 'Modo Básico'}
+              {aiMode === 'basic' ? t('activate_advanced_ai') : t('basic_mode')}
             </button>
           </div>
           <button
             onClick={() => setLayout(layout === 'horizontal' ? 'vertical' : 'horizontal')}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            title="Cambiar disposición"
+            title={t('change_layout')}
           >
             <AdjustmentsHorizontalIcon className="w-5 h-5 text-gray-600" />
           </button>
