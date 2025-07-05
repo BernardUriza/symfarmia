@@ -61,72 +61,39 @@ function ConsultationWorkspaceInner({ onExit }) {
   return (
     <div className="medical-assistant-container">
       {/* Header */}
-      <header className="header bg-white/80 backdrop-blur-sm border-b border-white/50 px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <button
-              onClick={onExit}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <ArrowLeftIcon className="w-5 h-5 text-gray-600" />
-            </button>
-            
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-                <DocumentTextIcon className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-gray-900">Consulta Médica</h1>
-                <p className="text-sm text-gray-600">
-                  {isActive ? `Sesión activa: ${formatDuration(sessionDuration)}` : 'Sesión inactiva'}
-                </p>
-              </div>
+      <header className="medical-header">
+        <div className="header-content">
+          <button onClick={onExit} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+            <ArrowLeftIcon className="w-5 h-5 text-gray-600" />
+          </button>
+          <div className="medical-icon" />
+          <div className="session-info">
+            <div className="title">Consulta Médica</div>
+            <div className="session-time">
+              {isActive ? `Sesión activa: ${formatDuration(sessionDuration)}` : 'Sesión inactiva'}
             </div>
           </div>
-          
-          <div className="flex items-center space-x-3">
-            {/* AI Mode Toggle */}
-            <div className="flex items-center space-x-2 bg-white rounded-lg p-1 border border-gray-200">
-              <button
-                onClick={() => setAiMode('basic')}
-                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
-                  aiMode === 'basic'
-                    ? 'bg-blue-500 text-white'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                Básico
-              </button>
-              <button
-                onClick={() => setAiMode('advanced')}
-                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center space-x-1 ${
-                  aiMode === 'advanced'
-                    ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                <SparklesIcon className="w-4 h-4" />
-                <span>IA Avanzada</span>
-              </button>
-            </div>
-            
-            {/* Layout Toggle */}
+          <div className="mode-toggle">
             <button
-              onClick={() => setLayout(layout === 'horizontal' ? 'vertical' : 'horizontal')}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              title="Cambiar disposición"
+              onClick={() => setAiMode(aiMode === 'basic' ? 'advanced' : 'basic')}
+              className="toggle-button"
             >
-              <AdjustmentsHorizontalIcon className="w-5 h-5 text-gray-600" />
-            </button>
-            
-            {/* Settings */}
-            <button
-              onClick={() => setShowSettings(true)}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <Cog6ToothIcon className="w-5 h-5 text-gray-600" />
+              {aiMode === 'basic' ? 'Activar IA Avanzada' : 'Modo Básico'}
             </button>
           </div>
+          <button
+            onClick={() => setLayout(layout === 'horizontal' ? 'vertical' : 'horizontal')}
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            title="Cambiar disposición"
+          >
+            <AdjustmentsHorizontalIcon className="w-5 h-5 text-gray-600" />
+          </button>
+          <button
+            onClick={() => setShowSettings(true)}
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <Cog6ToothIcon className="w-5 h-5 text-gray-600" />
+          </button>
         </div>
       </header>
       
