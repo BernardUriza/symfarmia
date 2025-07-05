@@ -6,6 +6,9 @@ import { I18nProvider } from 'app/providers/I18nProvider'
 import { PatientContextProvider } from '../app/providers/PatientContextProvider'
 
 describe('HomePage', () => {
+  beforeEach(() => {
+    localStorage.setItem('preferredLanguage', 'es')
+  })
   it('renders the LandingPage component', () => {
     render(
       <ThemeProvider>
@@ -18,7 +21,7 @@ describe('HomePage', () => {
         </I18nProvider>
       </ThemeProvider>
     )
-    expect(screen.getByText(/Convierte 666consultas médicas/i)).toBeInTheDocument()
+    expect(screen.getByText(/Convierte consultas médicas/i)).toBeInTheDocument()
   })
 
   it('contains the main SYMFARMIA branding', () => {
@@ -33,7 +36,7 @@ describe('HomePage', () => {
         </I18nProvider>
       </ThemeProvider>
     )
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Convierte 666consultas médicas en reportes clínicos automáticamente')
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Convierte consultas médicas en reportes clínicos automáticamente')
   })
 
   it('displays the platform description', () => {
