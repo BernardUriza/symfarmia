@@ -215,7 +215,7 @@ export class StorageMiddleware {
   }
   
   private sanitizeStateForStorage(state: AppState): Partial<AppState> {
-    const sanitized = { ...state };
+    const sanitized: Partial<AppState> = { ...state };
     
     // Remove excluded keys
     this.config.excludeKeys.forEach(keyPath => {
@@ -259,15 +259,16 @@ export class StorageMiddleware {
   }
   
   private performStorageCleanup(state: Partial<AppState>): Partial<AppState> {
-    const cleaned = { ...state };
+    const cleaned: Partial<AppState> = { ...state };
     
     // Aggressive cleanup for storage size optimization
     if (cleaned.consultations) {
       // Keep only 3 most recent active consultations
       if (cleaned.consultations.active) {
         const sortedConsultations = Object.entries(cleaned.consultations.active)
-          .sort(([,a], [,b]) => 
-            new Date(b.metadata.lastActivity).getTime() - new Date(a.metadata.lastActivity).getTime()
+          .sort(([,a], [,b]) =>
+            new Date(b.metadata?.lastActivity ?? 0).getTime() -
+            new Date(a.metadata?.lastActivity ?? 0).getTime()
           )
           .slice(0, 3);
         
@@ -277,8 +278,9 @@ export class StorageMiddleware {
       // Keep only 10 most recent archived consultations
       if (cleaned.consultations.archived) {
         const sortedArchived = Object.entries(cleaned.consultations.archived)
-          .sort(([,a], [,b]) => 
-            new Date(b.metadata.lastActivity).getTime() - new Date(a.metadata.lastActivity).getTime()
+          .sort(([,a], [,b]) =>
+            new Date(b.metadata?.lastActivity ?? 0).getTime() -
+            new Date(a.metadata?.lastActivity ?? 0).getTime()
           )
           .slice(0, 10);
         
@@ -302,21 +304,21 @@ export class StorageMiddleware {
   
   private hydrateState(state: Record<string, unknown>): AppState {
     // Convert date strings back to Date objects
-    const hydrated = { ...state };
+    const hydrated: Partial<AppState> = { ...(state as Partial<AppState>) };
     
     // Hydrate system dates
     if (hydrated.system?.notifications) {
-      hydrated.system.notifications = (hydrated.system.notifications as Array<Record<string, unknown>>).map((notification) => ({
+      hydrated.system.notifications = (hydrated.system.notifications as any[]).map((notification) => ({
         ...notification,
-        timestamp: new Date(notification.timestamp as string)
-      }));
+        timestamp: new Date((notification as any).timestamp as string)
+      })) as any;
     }
     
     if (hydrated.system?.errors) {
-      hydrated.system.errors = (hydrated.system.errors as Array<Record<string, unknown>>).map((error) => ({
+      hydrated.system.errors = (hydrated.system.errors as any[]).map((error) => ({
         ...error,
-        timestamp: new Date(error.timestamp as string)
-      }));
+        timestamp: new Date((error as any).timestamp as string)
+      })) as any;
     }
     
     // Hydrate user statistics
@@ -325,9 +327,10 @@ export class StorageMiddleware {
     }
     
     // Hydrate consultation dates
-    if (hydrated.consultations?.active) {
-      Object.keys(hydrated.consultations.active).forEach(id => {
-        const consultation = hydrated.consultations.active[id];
+    const consultations = hydrated.consultations as any;
+    if (consultations?.active) {
+      Object.keys(consultations.active).forEach(id => {
+        const consultation = consultations.active[id];
         
         // Session dates
         if (consultation.session.startTime) {
@@ -347,26 +350,26 @@ export class StorageMiddleware {
         
         // Transcription dates
         if (consultation.transcription.transcriptions) {
-          consultation.transcription.transcriptions = (consultation.transcription.transcriptions as Array<Record<string, unknown>>).map((t) => ({
+          consultation.transcription.transcriptions = (consultation.transcription.transcriptions as any[]).map((t) => ({
             ...t,
-            timestamp: new Date(t.timestamp as string)
-          }));
+            timestamp: new Date((t as any).timestamp as string)
+          })) as any;
         }
         
         // AI message dates
         if (consultation.ai.messages) {
-          consultation.ai.messages = (consultation.ai.messages as Array<Record<string, unknown>>).map((msg) => ({
+          consultation.ai.messages = (consultation.ai.messages as any[]).map((msg) => ({
             ...msg,
-            timestamp: new Date(msg.timestamp as string)
-          }));
+            timestamp: new Date((msg as any).timestamp as string)
+          })) as any;
         }
         
         // Clinical alert dates
         if (consultation.ai.clinicalAlerts) {
-          consultation.ai.clinicalAlerts = (consultation.ai.clinicalAlerts as Array<Record<string, unknown>>).map((alert) => ({
+          consultation.ai.clinicalAlerts = (consultation.ai.clinicalAlerts as any[]).map((alert) => ({
             ...alert,
-            timestamp: new Date(alert.timestamp as string)
-          }));
+            timestamp: new Date((alert as any).timestamp as string)
+          })) as any;
         }
         
         // Documentation dates
@@ -375,15 +378,15 @@ export class StorageMiddleware {
         }
         
         if (consultation.documentation.editHistory) {
-          consultation.documentation.editHistory = (consultation.documentation.editHistory as Array<Record<string, unknown>>).map((edit) => ({
+          consultation.documentation.editHistory = (consultation.documentation.editHistory as any[]).map((edit) => ({
             ...edit,
-            timestamp: new Date(edit.timestamp as string)
-          }));
+            timestamp: new Date((edit as any).timestamp as string)
+          })) as any;
         }
       });
     }
     
-    return hydrated;
+    return hydrated as AppState;
   }
   
   private async compressData(data: string): Promise<string> {
