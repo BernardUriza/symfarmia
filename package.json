@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "npm run type-check && npx prisma generate && next build",
+    "build": "npm run version:generate && npm run type-check && npx prisma generate && next build",
     "start": "next start",
     "lint": "next lint && npm run type-check",
     "lint:fix": "next lint --fix",
@@ -17,7 +17,9 @@
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "clean": "rm -rf .next && rm -rf node_modules/.cache",
-    "deploy": "node generate-date.js && git-commit.bat",
+    "deploy": "npm run version:generate && npm run build",
+    "version:generate": "node scripts/generate-version.js",
+    "version:bump": "npm version patch && npm run version:generate",
     "analyze": "ANALYZE=true npm run build",
     "postinstall": "npx prisma generate"
   },

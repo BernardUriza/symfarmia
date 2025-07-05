@@ -1,0 +1,10 @@
+// Auto-generated version information
+// Generated at: 2025-07-05T22:24:44.950Z
+export const VERSION_INFO = {
+  "version": "0.1.0",
+  "gitHash": "3877261",
+  "gitBranch": "dev",
+  "gitDate": "2025-07-05 15:37:26 -0600",
+  "buildDate": "2025-07-05T22:24:44.950Z",
+  "buildTimestamp": 1751754284950
+};
