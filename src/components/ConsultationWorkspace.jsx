@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
+import {
   Cog6ToothIcon,
-  DocumentTextIcon,
-  SparklesIcon,
   ArrowLeftIcon,
   AdjustmentsHorizontalIcon
 } from '@heroicons/react/24/outline';
 import { ConsultationProvider, useConsultation } from '../contexts/ConsultationContext';
+import { useTranslation } from '../../app/providers/I18nProvider';
 import TranscriptionPanel from './consultation/TranscriptionPanel';
 import AIAssistantPanel from './consultation/AIAssistantPanel';
 import DocumentationOutput from './consultation/DocumentationOutput';
@@ -23,6 +22,8 @@ function ConsultationWorkspaceInner({ onExit }) {
     startSession,
     endSession
   } = useConsultation();
+
+  const { t } = useTranslation();
   
   const [showSettings, setShowSettings] = useState(false);
   const [layout, setLayout] = useState('horizontal'); // 'horizontal' | 'vertical' | 'focused'
@@ -47,110 +48,111 @@ function ConsultationWorkspaceInner({ onExit }) {
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
   
-  const getLayoutClasses = () => {
-    switch (layout) {
-      case 'vertical':
-        return 'flex-col';
-      case 'focused':
-        return 'flex-col lg:flex-row';
-      default:
-        return 'flex-col xl:flex-row';
-    }
-  };
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    <div className="medical-assistant-container">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-white/50 px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <button
-              onClick={onExit}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <ArrowLeftIcon className="w-5 h-5 text-gray-600" />
-            </button>
-            
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-                <DocumentTextIcon className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-gray-900">Consulta Médica</h1>
-                <p className="text-sm text-gray-600">
-                  {isActive ? `Sesión activa: ${formatDuration(sessionDuration)}` : 'Sesión inactiva'}
-                </p>
-              </div>
+      <header className="medical-header">
+        <div className="header-content">
+          <button onClick={onExit} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+            <ArrowLeftIcon className="w-5 h-5 text-gray-600" />
+          </button>
+          <div className="medical-icon" />
+          <div className="session-info">
+            <div className="title">{t('consultation_title')}</div>
+            <div className="session-time">
+              {isActive ? `${t('session_active')}: ${formatDuration(sessionDuration)}` : t('session_inactive')}
             </div>
           </div>
-          
-          <div className="flex items-center space-x-3">
-            {/* AI Mode Toggle */}
-            <div className="flex items-center space-x-2 bg-white rounded-lg p-1 border border-gray-200">
-              <button
-                onClick={() => setAiMode('basic')}
-                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
-                  aiMode === 'basic'
-                    ? 'bg-blue-500 text-white'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                Básico
-              </button>
-              <button
-                onClick={() => setAiMode('advanced')}
-                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center space-x-1 ${
-                  aiMode === 'advanced'
-                    ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                <SparklesIcon className="w-4 h-4" />
-                <span>IA Avanzada</span>
-              </button>
-            </div>
-            
-            {/* Layout Toggle */}
+          <div className="mode-toggle">
             <button
-              onClick={() => setLayout(layout === 'horizontal' ? 'vertical' : 'horizontal')}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              title="Cambiar disposición"
+              onClick={() => setAiMode(aiMode === 'basic' ? 'advanced' : 'basic')}
+              className="toggle-button"
             >
-              <AdjustmentsHorizontalIcon className="w-5 h-5 text-gray-600" />
-            </button>
-            
-            {/* Settings */}
-            <button
-              onClick={() => setShowSettings(true)}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <Cog6ToothIcon className="w-5 h-5 text-gray-600" />
+              {aiMode === 'basic' ? t('activate_advanced_ai') : t('basic_mode')}
             </button>
           </div>
+          <button
+            onClick={() => setLayout(layout === 'horizontal' ? 'vertical' : 'horizontal')}
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            title={t('change_layout')}
+          >
+            <AdjustmentsHorizontalIcon className="w-5 h-5 text-gray-600" />
+          </button>
+          <button
+            onClick={() => setShowSettings(true)}
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <Cog6ToothIcon className="w-5 h-5 text-gray-600" />
+          </button>
         </div>
       </header>
       
       {/* Main Content */}
-      <main className={`flex-1 p-6 flex gap-6 ${getLayoutClasses()}`}>
-        {/* Left Panel - Transcription */}
-        <div className={`${layout === 'vertical' ? 'w-full' : 'flex-1 min-w-0'}`}>
-          <TranscriptionPanel />
-        </div>
-        
-        {/* Right Panel - AI Assistant (only in advanced mode) */}
-        <AnimatePresence>
-          {aiMode === 'advanced' && (
-            <motion.div
-              initial={{ opacity: 0, x: 300 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 300 }}
+      <main className="flex-1 p-6">
+        {layout === 'vertical' ? (
+          // Vertical Layout - Stacked
+          <div className="flex flex-col gap-6 h-full">
+            <motion.div 
+              className="flex-1"
+              layout
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className={`${layout === 'vertical' ? 'w-full mt-6' : 'w-96 flex-shrink-0'}`}
             >
-              <AIAssistantPanel />
+              <TranscriptionPanel />
             </motion.div>
-          )}
-        </AnimatePresence>
+            <AnimatePresence>
+              {aiMode === 'advanced' && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                  className="overflow-hidden"
+                >
+                  <AIAssistantPanel />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        ) : (
+          // Horizontal Layout - Dynamic Grid
+          <motion.div 
+            className={`consultation-workspace-grid h-full ${aiMode === 'advanced' ? 'with-assistant' : ''}`}
+            layout
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+          >
+            {/* Main Transcription Area */}
+            <motion.div 
+              className="transcription-section"
+              layout
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            >
+              <TranscriptionPanel />
+            </motion.div>
+            
+            {/* AI Assistant Panel */}
+            <AnimatePresence>
+              {aiMode === 'advanced' && (
+                <motion.div
+                  initial={{ opacity: 0, width: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, width: 'auto', scale: 1 }}
+                  exit={{ opacity: 0, width: 0, scale: 0.9 }}
+                  transition={{ 
+                    type: 'spring', 
+                    damping: 20, 
+                    stiffness: 150,
+                    width: { duration: 0.4 },
+                    opacity: { duration: 0.3 },
+                    scale: { duration: 0.3 }
+                  }}
+                  className="ai-assistant-section overflow-hidden"
+                >
+                  <AIAssistantPanel />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        )}
       </main>
       
       {/* Bottom Panel - Documentation Output */}

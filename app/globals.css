@@ -45,3 +45,596 @@ html.dark {
 body {
   @apply bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-gray-100;
 }
+
+.medical-assistant-container {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+/* Consultation Workspace Grid System */
+.consultation-workspace-grid {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: 1fr;
+  transition: grid-template-columns 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* When AI assistant is present */
+.consultation-workspace-grid:has(.ai-assistant-section) {
+  grid-template-columns: 2fr auto;
+}
+
+/* Fallback for browsers without :has() support */
+.consultation-workspace-grid.with-assistant {
+  grid-template-columns: 2fr auto;
+}
+
+/* Transcription Section - No extra card wrapper */
+.consultation-workspace-grid .transcription-section {
+  display: flex;
+  flex-direction: column;
+  min-width: 0; /* Allows flexbox to shrink properly */
+}
+
+/* AI Assistant Section - No extra card wrapper */
+.consultation-workspace-grid .ai-assistant-section {
+  width: 400px;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* Responsive Grid Adjustments */
+@media (max-width: 1280px) {
+  .consultation-workspace-grid:has(.ai-assistant-section) {
+    grid-template-columns: 3fr auto;
+  }
+  
+  .consultation-workspace-grid .ai-assistant-section {
+    width: 350px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .consultation-workspace-grid {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: 1fr auto;
+    gap: 16px;
+  }
+  
+  .consultation-workspace-grid .ai-assistant-section {
+    width: 100%;
+    max-height: 400px;
+  }
+}
+
+@media (max-width: 768px) {
+  .medical-assistant-container {
+    padding: 0;
+    overflow-x: hidden;
+  }
+  .medical-assistant-container .header {
+    height: 60px;
+  }
+  .medical-assistant-container .chat-area {
+    padding: 1rem 0.75rem;
+  }
+  .medical-assistant-container .action-buttons {
+    flex-direction: row;
+    gap: 0.5rem;
+    padding: 0.75rem;
+  }
+  
+  .consultation-workspace-grid {
+    gap: 12px;
+  }
+}
+
+/* Tremor UI Dropdown/Select Contrast Fix - Enhanced */
+/* Fix for white text on white background issue in day mode */
+
+/* More aggressive selectors for Tremor UI components */
+[class*="tremor"] select,
+[class*="tremor"] option,
+[class*="Select"] div,
+[class*="SelectItem"] div,
+div[role="combobox"],
+div[role="listbox"],
+div[role="option"],
+button[role="combobox"],
+[data-tremor-id="select-button"],
+[data-tremor-id="select-option"],
+[data-tremor-id="searchselect-button"],
+[data-tremor-id="searchselect-option"] {
+  color: #1f2937 !important; /* gray-800 for good contrast */
+  background-color: white !important;
+}
+
+/* Hover states */
+[class*="tremor"] select:hover,
+[class*="tremor"] option:hover,
+div[role="option"]:hover,
+[data-tremor-id="select-button"]:hover,
+[data-tremor-id="select-option"]:hover,
+[data-tremor-id="searchselect-button"]:hover,
+[data-tremor-id="searchselect-option"]:hover {
+  color: #111827 !important; /* gray-900 for hover */
+  background-color: #f3f4f6 !important; /* gray-100 */
+}
+
+/* Tremor Select dropdown containers */
+[data-tremor-id="select-listbox"],
+[data-tremor-id="searchselect-listbox"],
+div[role="listbox"] {
+  background: white !important;
+  border: 1px solid #e5e7eb !important; /* gray-200 */
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Selected states */
+[data-tremor-id="select-option"][aria-selected="true"],
+[data-tremor-id="searchselect-option"][aria-selected="true"],
+div[role="option"][aria-selected="true"] {
+  background: #dbeafe !important; /* blue-100 */
+  color: #1e40af !important; /* blue-800 */
+}
+
+/* All text elements inside Tremor components */
+[data-tremor-id="select-option"] *,
+[data-tremor-id="searchselect-option"] *,
+[data-tremor-id="select-button"] *,
+[data-tremor-id="searchselect-button"] *,
+[class*="tremor"] *,
+div[role="combobox"] *,
+div[role="listbox"] *,
+div[role="option"] * {
+  color: inherit !important;
+}
+
+/* Override for StatusSelect specific background colors */
+[data-tremor-id="select-option"].bg-amber-100,
+[data-tremor-id="select-option"].bg-blue-100,
+[data-tremor-id="select-option"].bg-red-100,
+[data-tremor-id="select-option"].bg-green-100,
+[data-tremor-id="select-option"].bg-gray-100,
+.bg-amber-100[role="option"],
+.bg-blue-100[role="option"],
+.bg-red-100[role="option"],
+.bg-green-100[role="option"],
+.bg-gray-100[role="option"] {
+  color: #1f2937 !important; /* Ensure dark text on light backgrounds */
+}
+
+/* Icons in select items */
+[data-tremor-id="select-option"] svg,
+[data-tremor-id="searchselect-option"] svg,
+div[role="option"] svg {
+  color: #6b7280 !important; /* gray-500 for icons */
+}
+
+/* Additional fallback for any Tremor UI component */
+[class*="tremor-Select"],
+[class*="tremor-SearchSelect"] {
+  color: #1f2937 !important;
+}
+
+[class*="tremor-Select"] [class*="tremor"],
+[class*="tremor-SearchSelect"] [class*="tremor"] {
+  color: #1f2937 !important;
+}
+
+/* Universal fallback for dropdown menus */
+ul[role="listbox"],
+ul[role="menu"],
+div[role="menu"] {
+  background: white !important;
+}
+
+ul[role="listbox"] li,
+ul[role="menu"] li,
+div[role="menu"] div {
+  color: #1f2937 !important;
+  background: white !important;
+}
+
+ul[role="listbox"] li:hover,
+ul[role="menu"] li:hover,
+div[role="menu"] div:hover {
+  color: #111827 !important;
+  background: #f3f4f6 !important;
+}
+
+/* Version Info Component */
+.version-info-container {
+  position: relative;
+  z-index: 50;
+}
+
+.version-info-trigger {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.version-info-trigger:hover {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+.version-info-details {
+  animation: fadeInUp 0.15s ease-out;
+  backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.95);
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.medical-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid #e2e8f0;
+  z-index: 1000;
+}
+.medical-bottom-nav .nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  transition: all 0.3s ease;
+}
+.medical-bottom-nav .nav-item.active {
+  color: #3b82f6;
+  transform: translateY(-2px);
+}
+.medical-bottom-nav .nav-item.active .nav-icon {
+  transform: scale(1.1);
+}
+.medical-bottom-nav .nav-item .nav-icon {
+  font-size: 20px;
+  margin-bottom: 4px;
+  transition: all 0.2s ease;
+}
+.medical-bottom-nav .nav-item .nav-label {
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.medical-notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  max-width: 350px;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+  z-index: 9999;
+}
+.medical-notification.show { transform: translateX(0); }
+.medical-notification--critical {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  color: white;
+  border-left: 4px solid #7f1d1d;
+  animation: criticalPulse 1s infinite;
+}
+.medical-notification--warning {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+  border-left: 4px solid #92400e;
+}
+.medical-notification--success {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  border-left: 4px solid #047857;
+}
+.medical-notification--info {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  border-left: 4px solid #1d4ed8;
+}
+@keyframes criticalPulse {
+  0%,100%{transform:scale(1) translateX(0);}
+  50%{transform:scale(1.02) translateX(0);}
+}
+.demo-banner {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  background: rgba(102, 126, 234, 0.9);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+.demo-banner:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.2);
+}
+.demo-banner-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+}
+.demo-banner .demo-text {
+  color: white;
+  font-size: 12px;
+  font-weight: 500;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+.demo-banner .demo-buttons {
+  display: flex;
+}
+.demo-banner .demo-buttons button {
+  background: rgba(255,255,255,0.2);
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 6px;
+  padding: 4px 8px;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  line-height: 1;
+}
+.demo-banner .demo-buttons button:hover {
+  background: rgba(255,255,255,0.3);
+  transform: scale(1.1);
+}
+
+.medical-header {
+  background: white;
+  padding: 20px;
+  border-radius: 0 0 25px 25px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+.medical-header .header-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.medical-header .medical-icon {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.medical-header .medical-icon::before {
+  content: "\1FA7A"; /* 🩺 */
+  font-size: 24px;
+}
+.medical-header .session-info .title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 4px;
+}
+.medical-header .session-info .session-time {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #64748b;
+  font-size: 14px;
+}
+.medical-header .session-info .session-time::before {
+  content: "\1F534"; /* 🔴 */
+  animation: pulse 2s infinite;
+}
+.medical-header .mode-toggle {
+  margin-left: auto;
+}
+.medical-header .mode-toggle .toggle-button {
+  background: linear-gradient(135deg, #8b5cf6, #a855f7);
+  border: none;
+  border-radius: 12px;
+  padding: 10px 16px;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.transcription-area {
+  background: white;
+  margin: 20px;
+  border-radius: 20px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+.transcription-area .transcription-header {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  padding: 20px;
+  color: white;
+}
+.transcription-area .transcription-header .header-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.transcription-area .transcription-header .mic-icon {
+  width: 40px;
+  height: 40px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+}
+.transcription-area .transcription-header .mic-icon::before {
+  content: "\1F3A4"; /* 🎤 */
+  font-size: 20px;
+}
+.transcription-area .transcription-header .transcription-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.transcription-area .transcription-header .transcription-status {
+  font-size: 14px;
+  opacity: 0.9;
+}
+.transcription-area .transcription-content {
+  padding: 40px 20px;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.transcription-area .transcription-content .start-button {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  border: none;
+  border-radius: 15px;
+  padding: 16px 32px;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
+  margin-bottom: 30px;
+}
+.transcription-area .transcription-content .start-button::before {
+  content: "\25B6" " ";
+  margin-right: 8px;
+}
+.transcription-area .transcription-content .empty-state {
+  text-align: center;
+}
+.transcription-area .transcription-content .empty-state .empty-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.3;
+}
+.transcription-area .transcription-content .empty-state .empty-title {
+  font-size: 18px;
+  color: #64748b;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+.transcription-area .transcription-content .empty-state .empty-description {
+  color: #94a3b8;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.ai-assistant-section {
+  background: white;
+  margin: 0 20px 20px;
+  border-radius: 20px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+.ai-assistant-section .ai-header {
+  background: linear-gradient(135deg, #10b981, #059669);
+  padding: 20px;
+}
+.ai-assistant-section .ai-header .ai-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.ai-assistant-section .ai-header .ai-avatar {
+  width: 50px;
+  height: 50px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+}
+.ai-assistant-section .ai-header .ai-avatar::before {
+  content: "\1F916"; /* 🤖 */
+  font-size: 24px;
+}
+.ai-assistant-section .ai-header .ai-details {
+  color: white;
+}
+.ai-assistant-section .ai-header .ai-details .ai-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.ai-assistant-section .ai-header .ai-details .ai-subtitle {
+  font-size: 14px;
+  opacity: 0.9;
+}
+.ai-assistant-section .ai-header .ai-status {
+  margin-left: auto;
+}
+.ai-assistant-section .ai-header .ai-status .status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: white;
+  font-size: 12px;
+  font-weight: 500;
+}
+.ai-assistant-section .ai-header .ai-status .status-indicator::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  background: #34d399;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+.ai-assistant-section .ai-tabs {
+  display: flex;
+  background: #f8fafc;
+}
+.ai-assistant-section .ai-tabs .tab {
+  flex: 1;
+  padding: 16px;
+  text-align: center;
+  font-weight: 600;
+  color: #64748b;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s ease;
+}
+.ai-assistant-section .ai-tabs .tab.active {
+  color: #10b981;
+  background: white;
+  border-bottom-color: #10b981;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.05); }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-5px); }
+}
+.floating-element {
+  animation: float 3s ease-in-out infinite;
+}
+.pulse-element {
+  animation: pulse 2s infinite;
+}
