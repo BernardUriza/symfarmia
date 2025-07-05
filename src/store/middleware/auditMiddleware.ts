@@ -44,7 +44,7 @@ export class AuditMiddleware {
   private auditBuffer: AuditEvent[] = [];
   private flushTimer?: number;
   private sessionId: string;
-  private deviceInfo: Record<string, unknown>;
+  private deviceInfo: { type: 'desktop' | 'mobile' | 'tablet' } & Record<string, unknown>;
   
   constructor(config: Partial<AuditConfig> = {}) {
     this.config = {
@@ -114,7 +114,7 @@ export class AuditMiddleware {
       details: this.sanitizeActionPayload(action.payload, category),
       metadata: {
         userAgent: navigator.userAgent,
-        deviceType: this.deviceInfo.type,
+        deviceType: this.deviceInfo.type as 'desktop' | 'mobile' | 'tablet',
         version: '1.0.0', // App version
         ...this.deviceInfo
       },
@@ -217,7 +217,7 @@ export class AuditMiddleware {
   private extractPatientId(action: MedicalStateAction, state: AppState): string | undefined {
     const consultationId = this.extractConsultationId(action);
     if (consultationId && state.consultations.active[consultationId]) {
-      return state.consultations.active[consultationId].patient.id;
+      return state.consultations.active[consultationId].patient?.id;
     }
     
     if (action.payload && typeof action.payload === 'object') {
@@ -244,9 +244,9 @@ export class AuditMiddleware {
         delete sanitized.personalInfo;
         
         // Hash patient ID for tracking while maintaining anonymity
-        if (sanitized.patientId) {
-          sanitized.patientId = this.hashValue(sanitized.patientId);
-        }
+          if (sanitized.patientId) {
+            sanitized.patientId = this.hashValue(String(sanitized.patientId));
+          }
       }
     }
     
@@ -383,7 +383,9 @@ export class AuditMiddleware {
     // Check archived consultations for retention violations
     const archivedConsultations = Object.values(state.consultations.archived);
     for (const consultation of archivedConsultations) {
-      const daysSinceArchive = (now.getTime() - consultation.metadata.lastActivity.getTime()) / (1000 * 60 * 60 * 24);
+      const last = consultation.metadata?.lastActivity;
+      if (!last) continue;
+      const daysSinceArchive = (now.getTime() - last.getTime()) / (1000 * 60 * 60 * 24);
       if (daysSinceArchive > 2555) { // 7 years medical retention
         return true;
       }
@@ -421,13 +423,13 @@ export class AuditMiddleware {
   private createMetadata(): AuditEvent['metadata'] {
     return {
       userAgent: navigator.userAgent,
-      deviceType: this.deviceInfo.type,
+      deviceType: this.deviceInfo.type as 'desktop' | 'mobile' | 'tablet',
       version: '1.0.0',
       ...this.deviceInfo
     };
   }
   
-  private detectDeviceInfo(): Record<string, unknown> {
+  private detectDeviceInfo(): { type: 'desktop' | 'mobile' | 'tablet' } & Record<string, unknown> {
     const userAgent = navigator.userAgent;
     
     let deviceType: 'desktop' | 'mobile' | 'tablet' = 'desktop';
@@ -488,7 +490,7 @@ export class AuditMiddleware {
         : eventsToFlush;
       
       // Store locally
-      await this.storeLogsLocally(logsToStore);
+      await this.storeLogsLocally(logsToStore as AuditEvent[]);
       
       // Send to remote endpoint if configured
       if (this.config.remoteEndpoint) {

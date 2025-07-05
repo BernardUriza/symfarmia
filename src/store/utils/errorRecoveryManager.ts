@@ -384,7 +384,8 @@ export class ErrorRecoveryManager {
       'AI_ERROR': 'fallback',
       'PERMISSION_ERROR': 'user_action',
       'STORAGE_ERROR': 'fallback',
-      'MEDICAL_VALIDATION_ERROR': 'user_action'
+      'MEDICAL_VALIDATION_ERROR': 'user_action',
+      'SYSTEM_ERROR': 'retry'
     };
     
     return strategyMap[code] || 'retry';

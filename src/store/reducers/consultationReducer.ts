@@ -1,13 +1,10 @@
 // Consultation-specific reducer with optimized updates
-import type { 
-  AppState, 
-  MedicalStateAction
-} from '../types';
+import type { AppState } from '../types';
 import { createInitialConsultation } from '../utils/consultationUtils';
 
 export function consultationReducer(
-  state: AppState['consultations'], 
-  action: MedicalStateAction
+  state: AppState['consultations'],
+  action: any
 ): AppState['consultations'] {
   
   switch (action.type) {
