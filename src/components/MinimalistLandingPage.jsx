@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+"use client";
+import React, { useState } from 'react';
 import { 
   MicrophoneIcon, 
   DocumentTextIcon, 
@@ -13,34 +14,13 @@ import DemoLoginModal from '../../components/DemoLoginModal';
 import TailwindTest from './TailwindTest';
 import DashboardLanding from './DashboardLanding';
 
-const MinimalistLandingPage = () => {
+const MinimalistLandingPage = ({ isDemo = false }) => {
+  const isDemoMode = isDemo;
+
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  
-  const [isDemoMode, setIsDemoMode] = useState(false);
-  
-  // Check if we're in demo mode - simplified approach
-  useEffect(() => {
-    const checkDemoMode = () => {
-      if (typeof window !== 'undefined') {
-        const urlParams = new URLSearchParams(window.location.search);
-        const isDemo = urlParams.get('demo') === 'true';
-        console.log('MinimalistLandingPage: Checking demo mode:', isDemo, window.location.search);
-        setIsDemoMode(isDemo);
-      }
-    };
-    
-    checkDemoMode();
-    
-    // Listen for URL changes
-    window.addEventListener('popstate', checkDemoMode);
-    
-    return () => {
-      window.removeEventListener('popstate', checkDemoMode);
-    };
-  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

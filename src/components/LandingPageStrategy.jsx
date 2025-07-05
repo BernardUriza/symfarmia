@@ -1,3 +1,4 @@
+"use client";
 import React from 'react';
 import CinematicLandingPage from './CinematicLandingPage';
 import MinimalistLandingPage from './MinimalistLandingPage';
@@ -7,15 +8,15 @@ const LANDING_PAGE_TYPES = {
   MINIMALIST: 'minimalist'
 };
 
-const LandingPageStrategy = ({ type = LANDING_PAGE_TYPES.MINIMALIST }) => {
+const LandingPageStrategy = ({ type = LANDING_PAGE_TYPES.MINIMALIST, isDemo = false }) => {
   const renderLandingPage = () => {
     switch (type) {
       case LANDING_PAGE_TYPES.CINEMATIC:
         return <CinematicLandingPage />;
       case LANDING_PAGE_TYPES.MINIMALIST:
-        return <MinimalistLandingPage />;
+        return <MinimalistLandingPage isDemo={isDemo} />;
       default:
-        return <MinimalistLandingPage />;
+        return <MinimalistLandingPage isDemo={isDemo} />;
     }
   };
 
