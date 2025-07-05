@@ -54,6 +54,61 @@ body {
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
 }
 
+/* Consultation Tangram Grid System */
+.consultation-tangram-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  grid-template-rows: 1fr;
+  gap: 24px;
+  height: 100%;
+  min-height: 600px;
+}
+
+/* Transcription Area in Tangram */
+.consultation-tangram-grid .transcription-area {
+  display: flex;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+}
+
+/* AI Assistant Area in Tangram */
+.consultation-tangram-grid .ai-assistant-area {
+  display: flex;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+}
+
+/* Responsive Tangram Adjustments */
+@media (max-width: 1280px) {
+  .consultation-tangram-grid {
+    grid-template-columns: 3fr 2fr;
+    gap: 20px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .consultation-tangram-grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr auto;
+    gap: 16px;
+    min-height: auto;
+  }
+  
+  .consultation-tangram-grid .ai-assistant-area {
+    max-height: 400px;
+  }
+}
+
 @media (max-width: 768px) {
   .medical-assistant-container {
     padding: 0;
@@ -70,6 +125,81 @@ body {
     gap: 0.5rem;
     padding: 0.75rem;
   }
+  
+  .consultation-tangram-grid {
+    gap: 12px;
+  }
+  
+  .consultation-tangram-grid .transcription-area,
+  .consultation-tangram-grid .ai-assistant-area {
+    border-radius: 16px;
+  }
+}
+
+/* Tremor UI Dropdown/Select Contrast Fix */
+/* Fix for white text on white background issue in day mode */
+[data-tremor-id="select-button"],
+[data-tremor-id="select-option"],
+[data-tremor-id="searchselect-button"],
+[data-tremor-id="searchselect-option"] {
+  color: #1f2937 !important; /* gray-800 for good contrast */
+}
+
+[data-tremor-id="select-button"]:hover,
+[data-tremor-id="select-option"]:hover,
+[data-tremor-id="searchselect-button"]:hover,
+[data-tremor-id="searchselect-option"]:hover {
+  color: #374151 !important; /* gray-700 for hover */
+}
+
+/* Tremor Select dropdown container */
+[data-tremor-id="select-listbox"],
+[data-tremor-id="searchselect-listbox"] {
+  background: white !important;
+  border: 1px solid #e5e7eb !important; /* gray-200 */
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Tremor Select option items */
+[data-tremor-id="select-option"],
+[data-tremor-id="searchselect-option"] {
+  color: #1f2937 !important; /* gray-800 */
+  background: white !important;
+}
+
+[data-tremor-id="select-option"]:hover,
+[data-tremor-id="searchselect-option"]:hover {
+  background: #f3f4f6 !important; /* gray-100 */
+  color: #111827 !important; /* gray-900 */
+}
+
+[data-tremor-id="select-option"][aria-selected="true"],
+[data-tremor-id="searchselect-option"][aria-selected="true"] {
+  background: #dbeafe !important; /* blue-100 */
+  color: #1e40af !important; /* blue-800 */
+}
+
+/* Additional fix for any nested text elements */
+[data-tremor-id="select-option"] *,
+[data-tremor-id="searchselect-option"] *,
+[data-tremor-id="select-button"] *,
+[data-tremor-id="searchselect-button"] * {
+  color: inherit !important;
+}
+
+/* Override for StatusSelect specific background colors */
+[data-tremor-id="select-option"].bg-amber-100,
+[data-tremor-id="select-option"].bg-blue-100,
+[data-tremor-id="select-option"].bg-red-100,
+[data-tremor-id="select-option"].bg-green-100,
+[data-tremor-id="select-option"].bg-gray-100 {
+  color: #1f2937 !important; /* Ensure dark text on light backgrounds */
+}
+
+/* Ensure icons in select items are visible */
+[data-tremor-id="select-option"] svg,
+[data-tremor-id="searchselect-option"] svg {
+  color: #6b7280 !important; /* gray-500 for icons */
 }
 .medical-bottom-nav {
   position: fixed;
@@ -148,27 +278,51 @@ body {
   50%{transform:scale(1.02) translateX(0);}
 }
 .demo-banner {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 12px 20px;
-  border-radius: 0 0 20px 20px;
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  background: rgba(102, 126, 234, 0.9);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+.demo-banner:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.2);
+}
+.demo-banner-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
 }
 .demo-banner .demo-text {
   color: white;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 500;
   text-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 .demo-banner .demo-buttons {
-  gap: 12px;
+  display: flex;
 }
 .demo-banner .demo-buttons button {
   background: rgba(255,255,255,0.2);
   border: 1px solid rgba(255,255,255,0.3);
-  border-radius: 8px;
-  padding: 6px 12px;
+  border-radius: 6px;
+  padding: 4px 8px;
   color: white;
-  font-weight: 500;
-  backdrop-filter: blur(10px);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  line-height: 1;
+}
+.demo-banner .demo-buttons button:hover {
+  background: rgba(255,255,255,0.3);
+  transform: scale(1.1);
 }
 
 .medical-header {

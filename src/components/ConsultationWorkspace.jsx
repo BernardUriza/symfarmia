@@ -96,26 +96,51 @@ function ConsultationWorkspaceInner({ onExit }) {
       </header>
       
       {/* Main Content */}
-      <main className={`flex-1 p-6 flex gap-6 ${getLayoutClasses()}`}>
-        {/* Left Panel - Transcription */}
-        <div className={`${layout === 'vertical' ? 'w-full' : 'flex-1 min-w-0'}`}>
-          <TranscriptionPanel />
-        </div>
-        
-        {/* Right Panel - AI Assistant (only in advanced mode) */}
-        <AnimatePresence>
-          {aiMode === 'advanced' && (
-            <motion.div
-              initial={{ opacity: 0, x: 300 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 300 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className={`${layout === 'vertical' ? 'w-full mt-6' : 'w-96 flex-shrink-0'}`}
-            >
-              <AIAssistantPanel />
-            </motion.div>
-          )}
-        </AnimatePresence>
+      <main className={`flex-1 p-6 ${getLayoutClasses()}`}>
+        {layout === 'vertical' ? (
+          // Vertical Layout - Stacked
+          <div className="flex flex-col gap-6">
+            <div className="w-full">
+              <TranscriptionPanel />
+            </div>
+            <AnimatePresence>
+              {aiMode === 'advanced' && (
+                <motion.div
+                  initial={{ opacity: 0, y: 50 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 50 }}
+                  transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                  className="w-full"
+                >
+                  <AIAssistantPanel />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        ) : (
+          // Horizontal Layout - Tangram Grid
+          <div className="consultation-tangram-grid">
+            {/* Main Transcription Area */}
+            <div className="transcription-area">
+              <TranscriptionPanel />
+            </div>
+            
+            {/* AI Assistant Panel */}
+            <AnimatePresence>
+              {aiMode === 'advanced' && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                  className="ai-assistant-area"
+                >
+                  <AIAssistantPanel />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        )}
       </main>
       
       {/* Bottom Panel - Documentation Output */}

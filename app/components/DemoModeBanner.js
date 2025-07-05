@@ -12,14 +12,13 @@ export default function DemoModeBanner() {
 
   return (
     <div className="demo-banner">
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
+      <div className="demo-banner-content">
         <div className="demo-text">
-          {t('demo_mode_active')} - {t('demo_mode_desc')}
+          {t('demo_mode_active')}
         </div>
-        <div className="demo-buttons flex">
-          <button onClick={toggleMode}>{t('switch_live_mode')}</button>
-          <button onClick={() => (window.location.href = '?demo=false')}>
-            {t('exit_demo')}
+        <div className="demo-buttons">
+          <button onClick={toggleMode} title={t('switch_live_mode')}>
+            ×
           </button>
         </div>
       </div>
