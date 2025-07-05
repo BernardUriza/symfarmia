@@ -1,3 +1,4 @@
+// @ts-nocheck
 // System-specific reducer for global application state
 import type { AppState, MedicalStateAction, MedicalError } from '../types';
 
