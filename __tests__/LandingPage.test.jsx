@@ -10,6 +10,7 @@ window.alert = jest.fn()
 describe('LandingPage', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    localStorage.setItem('preferredLanguage', 'es')
   })
 
   it('renders the main heading', () => {
@@ -78,7 +79,7 @@ describe('LandingPage', () => {
     )
     const demoButton = screen.getByRole('button', { name: /probar modo demo/i })
     fireEvent.click(demoButton)
-    expect(screen.getByText('Ingreso Demo')).toBeInTheDocument()
+    expect(screen.getByText('Acceso Demo')).toBeInTheDocument()
   })
 
   it('renders feature cards', () => {
