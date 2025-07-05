@@ -1,4 +1,3 @@
-// @ts-nocheck
 // Consultation-specific reducer with optimized updates
 import type { 
   AppState, 
