@@ -1,4 +1,3 @@
-// @ts-nocheck
 // User-specific reducer for preferences and statistics
 import type { AppState, MedicalStateAction } from '../types';
 
