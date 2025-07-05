@@ -6,6 +6,7 @@ import {
   FaCalendarCheck,
   FaBell,
 } from "react-icons/fa6";
+type IconComponent = (props: { className?: string }) => JSX.Element;
 
 const actions: QuickAction[] = [
   {
@@ -13,36 +14,36 @@ const actions: QuickAction[] = [
     label: "Signos Vitales",
     icon: "heart-pulse",
     color: "#ef4444",
-    action: () => (window as any).openVitalSignsModal?.(),
+    action: () => window.openVitalSignsModal?.(),
   },
   {
     id: "prescription",
     label: "Nueva Receta",
     icon: "prescription",
     color: "#10b981",
-    action: () => (window as any).openPrescriptionForm?.(),
+    action: () => window.openPrescriptionForm?.(),
   },
   {
     id: "follow-up",
     label: "Seguimiento",
     icon: "calendar-check",
     color: "#f59e0b",
-    action: () => (window as any).scheduleFollowUp?.(),
+    action: () => window.scheduleFollowUp?.(),
   },
   {
     id: "emergency",
     label: "Emergencia",
     icon: "siren",
     color: "#dc2626",
-    action: () => (window as any).triggerEmergencyProtocol?.(),
+    action: () => window.triggerEmergencyProtocol?.(),
   },
 ];
 
-const iconMap: Record<string, any> = {
-  "heart-pulse": FaHeartPulse,
-  prescription: FaPrescriptionBottleMedical,
-  "calendar-check": FaCalendarCheck,
-  siren: FaBell,
+const iconMap: Record<string, IconComponent> = {
+  "heart-pulse": FaHeartPulse as IconComponent,
+  prescription: FaPrescriptionBottleMedical as IconComponent,
+  "calendar-check": FaCalendarCheck as IconComponent,
+  siren: FaBell as IconComponent,
 };
 
 export default function QuickMedicalActions() {
