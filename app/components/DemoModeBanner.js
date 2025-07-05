@@ -1,12 +1,18 @@
 "use client"
 import { useAppMode } from '../providers/AppModeProvider';
 import { useTranslation } from '../providers/I18nProvider';
+import { useEffect, useState } from 'react';
 
 export default function DemoModeBanner() {
   const { isDemoMode, toggleMode } = useAppMode();
   const { t } = useTranslation();
+  const [mounted, setMounted] = useState(false);
 
-  if (!isDemoMode) {
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted || !isDemoMode) {
     return null;
   }
 
