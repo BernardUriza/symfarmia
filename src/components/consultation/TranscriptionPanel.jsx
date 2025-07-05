@@ -4,11 +4,11 @@ import {
   MicrophoneIcon,
   StopIcon,
   PlayIcon,
-  PauseIcon,
   DocumentTextIcon,
   SignalIcon,
   ExclamationTriangleIcon,
-  CheckCircleIcon
+  CheckCircleIcon,
+  SparklesIcon
 } from '@heroicons/react/24/outline';
 import { useConsultation } from '../../contexts/ConsultationContext';
 
