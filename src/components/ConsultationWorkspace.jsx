@@ -96,21 +96,25 @@ function ConsultationWorkspaceInner({ onExit }) {
       </header>
       
       {/* Main Content */}
-      <main className={`flex-1 p-6 ${getLayoutClasses()}`}>
+      <main className="flex-1 p-6">
         {layout === 'vertical' ? (
           // Vertical Layout - Stacked
-          <div className="flex flex-col gap-6">
-            <div className="w-full">
+          <div className="flex flex-col gap-6 h-full">
+            <motion.div 
+              className="flex-1"
+              layout
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            >
               <TranscriptionPanel />
-            </div>
+            </motion.div>
             <AnimatePresence>
               {aiMode === 'advanced' && (
                 <motion.div
-                  initial={{ opacity: 0, y: 50 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 50 }}
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
                   transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                  className="w-full"
+                  className="overflow-hidden"
                 >
                   <AIAssistantPanel />
                 </motion.div>
@@ -118,28 +122,43 @@ function ConsultationWorkspaceInner({ onExit }) {
             </AnimatePresence>
           </div>
         ) : (
-          // Horizontal Layout - Tangram Grid
-          <div className="consultation-tangram-grid">
+          // Horizontal Layout - Dynamic Grid
+          <motion.div 
+            className={`consultation-workspace-grid h-full ${aiMode === 'advanced' ? 'with-assistant' : ''}`}
+            layout
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+          >
             {/* Main Transcription Area */}
-            <div className="transcription-area">
+            <motion.div 
+              className="transcription-section"
+              layout
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            >
               <TranscriptionPanel />
-            </div>
+            </motion.div>
             
             {/* AI Assistant Panel */}
             <AnimatePresence>
               {aiMode === 'advanced' && (
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                  className="ai-assistant-area"
+                  initial={{ opacity: 0, width: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, width: 'auto', scale: 1 }}
+                  exit={{ opacity: 0, width: 0, scale: 0.9 }}
+                  transition={{ 
+                    type: 'spring', 
+                    damping: 20, 
+                    stiffness: 150,
+                    width: { duration: 0.4 },
+                    opacity: { duration: 0.3 },
+                    scale: { duration: 0.3 }
+                  }}
+                  className="ai-assistant-section overflow-hidden"
                 >
                   <AIAssistantPanel />
                 </motion.div>
               )}
             </AnimatePresence>
-          </div>
+          </motion.div>
         )}
       </main>
       
