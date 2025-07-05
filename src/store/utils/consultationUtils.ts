@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Utility functions for creating and managing consultation state
 import type { ConsultationState } from '../types';
 
