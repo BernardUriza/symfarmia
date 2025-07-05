@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BottomNavItem } from "../types/medicalUI";
-import { FaUserMd, FaBrain, FaFolderOpen, FaGear } from "react-icons/fa6";
+import { FaUserDoctor, FaBrain, FaFolderOpen, FaGear } from "react-icons/fa6";
 
 const navItems: BottomNavItem[] = [
   {
@@ -36,7 +36,7 @@ const navItems: BottomNavItem[] = [
 ];
 
 const iconMap: Record<string, any> = {
-  "users-medical": FaUserMd,
+  "users-medical": FaUserDoctor,
   brain: FaBrain,
   "folder-medical": FaFolderOpen,
   "gear-medical": FaGear,
@@ -48,7 +48,7 @@ export default function MedicalBottomNav() {
     <nav className="medical-bottom-nav flex justify-around">
       {navItems.map((item) => {
         const active = pathname === item.route;
-        const Icon = iconMap[item.icon] || FaUserMd;
+        const Icon = iconMap[item.icon] || FaUserDoctor;
         return (
           <Link
             key={item.id}

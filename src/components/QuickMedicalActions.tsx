@@ -1,10 +1,10 @@
 "use client";
 import { QuickAction } from "../types/medicalUI";
 import {
-  FaHeartbeat,
-  FaPrescriptionBottleAlt,
+  FaHeartPulse,
+  FaPrescriptionBottleMedical,
   FaCalendarCheck,
-  FaSirenOn,
+  FaBell,
 } from "react-icons/fa6";
 
 const actions: QuickAction[] = [
@@ -39,10 +39,10 @@ const actions: QuickAction[] = [
 ];
 
 const iconMap: Record<string, any> = {
-  "heart-pulse": FaHeartbeat,
-  prescription: FaPrescriptionBottleAlt,
+  "heart-pulse": FaHeartPulse,
+  prescription: FaPrescriptionBottleMedical,
   "calendar-check": FaCalendarCheck,
-  siren: FaSirenOn,
+  siren: FaBell,
 };
 
 export default function QuickMedicalActions() {
