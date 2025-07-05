@@ -219,7 +219,7 @@ export function useMedicalStore(config: Partial<StoreConfig> = {}) {
   // Load persisted state
   const loadPersistedState = useCallback(async (): Promise<Partial<AppState>> => {
     try {
-      return await storageManager.current.loadState();
+      return await storageManager.current!.loadState();
     } catch (error) {
       console.warn('Failed to load persisted state:', error);
       return {};
@@ -248,7 +248,7 @@ export function useMedicalStore(config: Partial<StoreConfig> = {}) {
         }
         
         // Initialize performance monitoring
-        perfManager.startMonitoring();
+        perfManager!.startMonitoring();
         
         if (mounted) {
           setInitialized(true);
@@ -285,17 +285,17 @@ export function useMedicalStore(config: Partial<StoreConfig> = {}) {
     initializeStore();
     
     return () => {
-      mounted = false;
-      perfManager.stopMonitoring();
+        mounted = false;
+        perfManager!.stopMonitoring();
     };
   }, [loadPersistedState]);
   
   // Create middleware-enhanced dispatch
   const middlewares = useMemo(() => [
     createAuditMiddleware(storeConfig),
-    createErrorMiddleware(errorRecoveryManager.current),
-    createPerformanceMiddleware(performanceManager.current),
-    createPersistenceMiddleware(storageManager.current)
+    createErrorMiddleware(errorRecoveryManager.current!),
+    createPerformanceMiddleware(performanceManager.current!),
+    createPersistenceMiddleware(storageManager.current!)
   ], [storeConfig]);
   
   const enhancedDispatch = useCallback((action: MedicalStateAction) => {
@@ -311,11 +311,11 @@ export function useMedicalStore(config: Partial<StoreConfig> = {}) {
     const composed = chain.reduceRight((a, b) => (...args) => a(b(...args)));
     
     try {
-      result = composed(dispatch)(action);
+      result = composed(dispatch)(action) as unknown as MedicalStateAction;
     } catch (error) {
       console.error('Middleware error:', error);
       // Fallback to direct dispatch
-      result = dispatch(action);
+      result = dispatch(action) as unknown as MedicalStateAction;
     }
     
     return result;
@@ -324,7 +324,7 @@ export function useMedicalStore(config: Partial<StoreConfig> = {}) {
   // Memory management
   useEffect(() => {
     const memoryCleanup = setInterval(() => {
-      const memoryUsage = performanceManager.current.getMemoryUsage();
+      const memoryUsage = performanceManager.current!.getMemoryUsage();
       
       if (memoryUsage > storeConfig.performanceThresholds.memoryWarning) {
         dispatch({
@@ -367,7 +367,7 @@ export function useMedicalStore(config: Partial<StoreConfig> = {}) {
     if (!error) return;
     
     try {
-      await errorRecoveryManager.current.recoverFromError(error, enhancedDispatch);
+      await errorRecoveryManager.current!.recoverFromError(error, enhancedDispatch);
       
       dispatch({
         type: 'CLEAR_ERROR',
@@ -389,7 +389,7 @@ export function useMedicalStore(config: Partial<StoreConfig> = {}) {
   }, []);
   
   const getPerformanceMetrics = useCallback((): PerformanceMetrics => {
-    return performanceManager.current.getMetrics();
+    return performanceManager.current!.getMetrics();
   }, []);
   
   return {
@@ -403,8 +403,8 @@ export function useMedicalStore(config: Partial<StoreConfig> = {}) {
     getPerformanceMetrics,
     
     // Storage management
-    clearStorage: () => storageManager.current.clearStorage(),
-    exportState: () => storageManager.current.exportState(state),
+    clearStorage: () => storageManager.current!.clearStorage(),
+    exportState: () => storageManager.current!.exportState(state),
     importState: (importedState: Partial<AppState>) => dispatch({
       type: 'HYDRATE_STATE',
       timestamp: new Date(),
@@ -419,8 +419,8 @@ export function useMedicalStore(config: Partial<StoreConfig> = {}) {
     }),
     
     // Debug utilities
-    getStorageInfo: () => storageManager.current.getStorageInfo(),
-    getMemoryUsage: () => performanceManager.current.getMemoryUsage(),
+    getStorageInfo: () => storageManager.current!.getStorageInfo(),
+    getMemoryUsage: () => performanceManager.current!.getMemoryUsage(),
     getCacheStats: () => ({
       size: state.system.cache.size,
       hitRate: state.system.cache.hitRate,

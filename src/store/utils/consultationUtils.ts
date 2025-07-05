@@ -67,7 +67,6 @@ export function createInitialConsultation(
     metadata: {
       createdAt: new Date(),
       lastActivity: new Date(),
-      tags: [],
       version: 1
     }
   };

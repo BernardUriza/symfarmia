@@ -17,7 +17,7 @@ import type {
 // Enhanced error types with recovery strategies
 export interface MedicalError {
   id: string;
-  code: 'TRANSCRIPTION_ERROR' | 'AI_ERROR' | 'MEDICAL_VALIDATION_ERROR' | 'API_ERROR' | 'PERMISSION_ERROR' | 'NETWORK_ERROR' | 'STORAGE_ERROR';
+  code: 'TRANSCRIPTION_ERROR' | 'AI_ERROR' | 'MEDICAL_VALIDATION_ERROR' | 'API_ERROR' | 'PERMISSION_ERROR' | 'NETWORK_ERROR' | 'STORAGE_ERROR' | 'SYSTEM_ERROR';
   category: 'technical' | 'medical' | 'user' | 'system';
   severity: 'low' | 'medium' | 'high' | 'critical';
   message: string;
@@ -53,21 +53,21 @@ export interface ConsultationState {
     confidence: number;
     transcriptions: MedicalTranscription[];
     audioLevel: number;
-    quality: 'poor' | 'fair' | 'good' | 'excellent';
+    quality?: 'poor' | 'fair' | 'good' | 'excellent';
   };
   ai: {
     isThinking: boolean;
     mode: 'basic' | 'advanced' | 'expert';
     messages: AIMessage[];
-    suggestions: string[];
+    suggestions?: string[];
     clinicalAlerts: ClinicalAlert[];
-    analysisCache: Map<string, unknown>;
+    analysisCache?: Map<string, unknown>;
   };
   documentation: {
     soapNotes: SOAPNotes;
     isGenerating: boolean;
     generationProgress: number;
-    autoSave: boolean;
+    autoSave?: boolean;
     lastSaved?: Date;
     editHistory: Array<{
       section: keyof SOAPNotes;
@@ -82,13 +82,13 @@ export interface ConsultationState {
   symptoms: MedicalSymptom[];
   diagnoses: DiagnosisCandidate[];
   treatmentPlan?: TreatmentPlan;
-  settings: ConsultationSettings;
-  errors: MedicalError[];
-  performance: PerformanceMetrics;
+  settings?: ConsultationSettings;
+  errors?: MedicalError[];
+  performance?: PerformanceMetrics;
   metadata: {
     createdAt: Date;
     lastActivity: Date;
-    deviceInfo: {
+    deviceInfo?: {
       userAgent: string;
       platform: string;
       isMobile: boolean;
@@ -96,7 +96,7 @@ export interface ConsultationState {
       memoryLimit?: number;
     };
     userId?: string;
-    version: string;
+    version: string | number;
   };
 }
 
@@ -237,6 +237,18 @@ export interface SystemActions {
   CLEAN_CACHE: BaseAction & { payload: { force?: boolean } };
   UPDATE_STORAGE_INFO: BaseAction & { payload: { used: number; available: number } };
   SET_PERFORMANCE_MODE: BaseAction & { payload: { mode: 'high' | 'balanced' | 'battery_saver' } };
+  ADD_NOTIFICATION: BaseAction & { payload: { notification: {
+    id: string;
+    type: 'info' | 'warning' | 'error' | 'success';
+    title: string;
+    message: string;
+    timestamp: Date;
+    read: boolean;
+    persistent: boolean;
+  } } };
+  ARCHIVE_OLD_CONSULTATIONS: BaseAction & { payload: { maxAge: number } };
+  CLEAR_AI_CACHE: BaseAction & { payload: { consultationId: string } };
+  HYDRATE_STATE: BaseAction & { payload: Partial<AppState> };
 }
 
 // User actions

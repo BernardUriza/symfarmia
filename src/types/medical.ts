@@ -144,7 +144,7 @@ export interface ConsultationSession {
   treatmentPlan?: TreatmentPlan;
   soapNotes?: SOAPNotes;
   status: 'active' | 'completed' | 'cancelled' | 'paused';
-  metadata: {
+  metadata?: {
     userId?: string;
     deviceInfo?: string;
     audioQuality?: 'low' | 'medium' | 'high';
