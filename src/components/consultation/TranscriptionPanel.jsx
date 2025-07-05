@@ -1,10 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  MicrophoneIcon,
+import {
   StopIcon,
-  PlayIcon,
-  DocumentTextIcon,
   SignalIcon,
   ExclamationTriangleIcon,
   CheckCircleIcon,

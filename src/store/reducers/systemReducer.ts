@@ -3,12 +3,14 @@ import type { AppState, MedicalError } from '../types';
 
 export function systemReducer(
   state: AppState['system'],
-  action: any
+  action: unknown
 ): AppState['system'] {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const act = action as any;
   
-  switch (action.type) {
+  switch (act.type) {
     case 'SET_ONLINE_STATUS': {
-      const { online } = action.payload;
+      const { online } = act.payload;
       return {
         ...state,
         online,
@@ -28,7 +30,7 @@ export function systemReducer(
     }
     
     case 'SET_LOADING': {
-      const { loading } = action.payload;
+      const { loading } = act.payload;
       return {
         ...state,
         loading,
@@ -37,7 +39,7 @@ export function systemReducer(
     }
     
     case 'ADD_ERROR': {
-      const { error } = action.payload;
+      const { error } = act.payload;
       const updatedErrors = [...state.errors];
       
       // Avoid duplicate errors within 5 minutes
@@ -78,7 +80,7 @@ export function systemReducer(
     }
     
     case 'CLEAR_ERROR': {
-      const { errorId } = action.payload;
+      const { errorId } = act.payload;
       return {
         ...state,
         errors: state.errors.filter(error => error.id !== errorId)
@@ -86,7 +88,7 @@ export function systemReducer(
     }
     
     case 'UPDATE_PERFORMANCE': {
-      const { metrics } = action.payload;
+      const { metrics } = act.payload;
       const updatedMetrics = {
         ...state.performance.globalMetrics,
         ...metrics
@@ -142,7 +144,7 @@ export function systemReducer(
     }
     
     case 'CLEAN_CACHE': {
-      const { force } = action.payload;
+      const { force } = act.payload;
       const now = new Date();
       
       // Calculate cache cleanup effectiveness
@@ -173,7 +175,7 @@ export function systemReducer(
     }
     
     case 'UPDATE_STORAGE_INFO': {
-      const { used, available } = action.payload;
+      const { used, available } = act.payload;
       const quota = used + available;
       const usagePercent = (used / quota) * 100;
       
@@ -211,7 +213,7 @@ export function systemReducer(
     }
     
     case 'SET_PERFORMANCE_MODE': {
-      const { mode } = action.payload;
+      const { mode } = act.payload;
       
       // Adjust thresholds based on performance mode
       let memoryThreshold = state.performance.memoryThreshold;
@@ -252,7 +254,7 @@ export function systemReducer(
     }
     
     case 'DISMISS_NOTIFICATION': {
-      const { notificationId } = action.payload;
+      const { notificationId } = act.payload;
       return {
         ...state,
         notifications: state.notifications.map(notification =>
@@ -278,7 +280,7 @@ export function systemReducer(
     
     case 'HYDRATE_STATE': {
       // Handle state rehydration from persistence
-      const { payload } = action;
+      const { payload } = act;
       
       if (payload.system) {
         return {
