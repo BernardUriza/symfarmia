@@ -30,7 +30,6 @@ const TranscriptionPanel = () => {
   const [audioLevel, setAudioLevel] = useState(0);
   const [transcriptionService] = useState('browser'); // 'browser' | 'whisper'
   const [micDiagnostics, setMicDiagnostics] = useState(null);
-  const [availableDevices, setAvailableDevices] = useState([]);
   
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
@@ -112,7 +111,7 @@ const TranscriptionPanel = () => {
           diagnostics.recommendations.push('Conecta un micrófono o verifica que esté habilitado');
         }
         
-        setAvailableDevices(audioInputs);
+        // Store devices in diagnostics (setAvailableDevices removed to fix unused variable warning)
       } catch (deviceError) {
         diagnostics.errors.push(`Error enumerando dispositivos: ${deviceError.message}`);
       }
