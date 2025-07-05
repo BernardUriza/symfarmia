@@ -45,3 +45,29 @@ html.dark {
 body {
   @apply bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-gray-100;
 }
+
+.medical-assistant-container {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+@media (max-width: 768px) {
+  .medical-assistant-container {
+    padding: 0;
+    overflow-x: hidden;
+  }
+  .medical-assistant-container .header {
+    height: 60px;
+  }
+  .medical-assistant-container .chat-area {
+    padding: 1rem 0.75rem;
+  }
+  .medical-assistant-container .action-buttons {
+    flex-direction: row;
+    gap: 0.5rem;
+    padding: 0.75rem;
+  }
+}
