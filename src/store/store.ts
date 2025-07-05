@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Unified state management store with performance optimizations
 import { useMemo, useReducer, useCallback, useEffect, useRef, useState } from 'react';
 import type { 

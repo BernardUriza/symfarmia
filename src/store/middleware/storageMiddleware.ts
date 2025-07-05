@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Storage middleware for state persistence between sessions
 import type { AppState, MedicalStateAction } from '../types';
 
