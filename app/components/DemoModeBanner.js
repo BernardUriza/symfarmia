@@ -1,8 +1,10 @@
 "use client"
 import { useAppMode } from '../providers/AppModeProvider';
 import { useTranslation } from '../providers/I18nProvider';
+import { useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
 
-export default function DemoModeBanner() {
+function DemoBannerContent() {
   const { isDemoMode, toggleMode } = useAppMode();
   const { t } = useTranslation();
 
@@ -25,3 +27,10 @@ export default function DemoModeBanner() {
     </div>
   );
 }
+
+// Use dynamic import with SSR disabled to prevent hydration mismatch
+const DemoModeBanner = dynamic(() => Promise.resolve(DemoBannerContent), {
+  ssr: false
+});
+
+export default DemoModeBanner;
