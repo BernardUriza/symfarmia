@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
+import {
   Cog6ToothIcon,
-  DocumentTextIcon,
-  SparklesIcon,
   ArrowLeftIcon,
   AdjustmentsHorizontalIcon
 } from '@heroicons/react/24/outline';

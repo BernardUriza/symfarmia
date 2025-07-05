@@ -3,6 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BottomNavItem } from "../types/medicalUI";
 import { FaUserDoctor, FaBrain, FaFolderOpen, FaGear } from "react-icons/fa6";
+type IconComponent = (props: { className?: string }) => JSX.Element;
 
 const navItems: BottomNavItem[] = [
   {
@@ -35,11 +36,11 @@ const navItems: BottomNavItem[] = [
   },
 ];
 
-const iconMap: Record<string, any> = {
-  "users-medical": FaUserDoctor,
-  brain: FaBrain,
-  "folder-medical": FaFolderOpen,
-  "gear-medical": FaGear,
+const iconMap: Record<string, IconComponent> = {
+  "users-medical": FaUserDoctor as IconComponent,
+  brain: FaBrain as IconComponent,
+  "folder-medical": FaFolderOpen as IconComponent,
+  "gear-medical": FaGear as IconComponent,
 };
 
 export default function MedicalBottomNav() {
