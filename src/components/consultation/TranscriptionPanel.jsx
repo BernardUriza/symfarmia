@@ -304,21 +304,18 @@ const TranscriptionPanel = () => {
   };
   
   return (
-    <div className="bg-white rounded-xl shadow-lg border border-gray-200 h-full flex flex-col">
+    <div className="transcription-area">
       {/* Header */}
-      <div className="p-6 border-b border-gray-100">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center">
-              <MicrophoneIcon className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900">Transcripción en Tiempo Real</h2>
-              <p className="text-sm text-gray-600">
-                {isRecording ? `Grabando: ${formatTime(recordingTime)}` : 'Listo para grabar'}
-              </p>
+      <div className="transcription-header">
+        <div className="header-content">
+          <div className="mic-icon" />
+          <div>
+            <div className="transcription-title">Transcripción en Tiempo Real</div>
+            <div className="transcription-status">
+              {isRecording ? `Grabando: ${formatTime(recordingTime)}` : 'Listo para grabar'}
             </div>
           </div>
+        </div>
           
           {/* Audio Level Indicator */}
           <div className="flex items-center space-x-2">
@@ -335,32 +332,28 @@ const TranscriptionPanel = () => {
       </div>
       
       {/* Recording Controls */}
-      <div className="p-6 border-b border-gray-100">
-        <div className="flex items-center justify-center space-x-4">
-          {!isRecording ? (
-            <motion.button
-              onClick={handleStartRecording}
-              disabled={micPermission === 'denied'}
-              className="flex items-center space-x-2 bg-red-500 hover:bg-red-600 disabled:bg-gray-300 text-white font-semibold py-3 px-6 rounded-lg transition-colors disabled:cursor-not-allowed"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <PlayIcon className="w-5 h-5" />
-              <span>Iniciar Grabación</span>
-            </motion.button>
-          ) : (
-            <motion.button
-              onClick={handleStopRecording}
-              className="flex items-center space-x-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <StopIcon className="w-5 h-5" />
-              <span>Detener</span>
-            </motion.button>
-          )}
-        </div>
-        
+      <div className="transcription-content">
+        {!isRecording ? (
+          <motion.button
+            onClick={handleStartRecording}
+            disabled={micPermission === 'denied'}
+            className="start-button disabled:bg-gray-300 disabled:cursor-not-allowed"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            Iniciar Grabación
+          </motion.button>
+        ) : (
+          <motion.button
+            onClick={handleStopRecording}
+            className="flex items-center space-x-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <StopIcon className="w-5 h-5" />
+            <span>Detener</span>
+          </motion.button>
+        )}
         {/* Permission Status */}
         {micPermission === 'denied' && (
           <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
@@ -372,11 +365,8 @@ const TranscriptionPanel = () => {
             </div>
           </div>
         )}
-      </div>
-      
-      {/* Transcription Display */}
-      <div className="flex-1 p-6 overflow-y-auto">
-        <div className="space-y-4">
+
+        <div className="space-y-4 w-full">
           {/* Final Transcript */}
           {finalTranscript && (
             <div className="bg-gray-50 rounded-lg p-4">
@@ -412,14 +402,12 @@ const TranscriptionPanel = () => {
           
           {/* Empty State */}
           {!finalTranscript && !liveTranscript && !isRecording && (
-            <div className="text-center py-12">
-              <DocumentTextIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-500 mb-2">
-                No hay transcripción disponible
-              </h3>
-              <p className="text-gray-400">
+            <div className="empty-state">
+              <div className="empty-icon">📝</div>
+              <div className="empty-title">No hay transcripción disponible</div>
+              <div className="empty-description">
                 Presiona "Iniciar Grabación" para comenzar a transcribir tu consulta médica
-              </p>
+              </div>
             </div>
           )}
         </div>
