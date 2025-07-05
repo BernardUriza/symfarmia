@@ -12,8 +12,8 @@ export const medicalGestures = {
   longPress: (element: HTMLElement, duration = 800) => {
     setTimeout(() => {
       medicalHaptics.processing();
-      if (typeof (window as any).showAdvancedOptions === "function") {
-        (window as any).showAdvancedOptions(element);
+      if (typeof window.showAdvancedOptions === "function") {
+        window.showAdvancedOptions(element);
       }
     }, duration);
   },
