@@ -133,54 +133,64 @@ body {
   }
 }
 
-/* Tremor UI Dropdown/Select Contrast Fix */
+/* Tremor UI Dropdown/Select Contrast Fix - Enhanced */
 /* Fix for white text on white background issue in day mode */
+
+/* More aggressive selectors for Tremor UI components */
+[class*="tremor"] select,
+[class*="tremor"] option,
+[class*="Select"] div,
+[class*="SelectItem"] div,
+div[role="combobox"],
+div[role="listbox"],
+div[role="option"],
+button[role="combobox"],
 [data-tremor-id="select-button"],
 [data-tremor-id="select-option"],
 [data-tremor-id="searchselect-button"],
 [data-tremor-id="searchselect-option"] {
   color: #1f2937 !important; /* gray-800 for good contrast */
+  background-color: white !important;
 }
 
+/* Hover states */
+[class*="tremor"] select:hover,
+[class*="tremor"] option:hover,
+div[role="option"]:hover,
 [data-tremor-id="select-button"]:hover,
 [data-tremor-id="select-option"]:hover,
 [data-tremor-id="searchselect-button"]:hover,
 [data-tremor-id="searchselect-option"]:hover {
-  color: #374151 !important; /* gray-700 for hover */
+  color: #111827 !important; /* gray-900 for hover */
+  background-color: #f3f4f6 !important; /* gray-100 */
 }
 
-/* Tremor Select dropdown container */
+/* Tremor Select dropdown containers */
 [data-tremor-id="select-listbox"],
-[data-tremor-id="searchselect-listbox"] {
+[data-tremor-id="searchselect-listbox"],
+div[role="listbox"] {
   background: white !important;
   border: 1px solid #e5e7eb !important; /* gray-200 */
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
 }
 
-/* Tremor Select option items */
-[data-tremor-id="select-option"],
-[data-tremor-id="searchselect-option"] {
-  color: #1f2937 !important; /* gray-800 */
-  background: white !important;
-}
-
-[data-tremor-id="select-option"]:hover,
-[data-tremor-id="searchselect-option"]:hover {
-  background: #f3f4f6 !important; /* gray-100 */
-  color: #111827 !important; /* gray-900 */
-}
-
+/* Selected states */
 [data-tremor-id="select-option"][aria-selected="true"],
-[data-tremor-id="searchselect-option"][aria-selected="true"] {
+[data-tremor-id="searchselect-option"][aria-selected="true"],
+div[role="option"][aria-selected="true"] {
   background: #dbeafe !important; /* blue-100 */
   color: #1e40af !important; /* blue-800 */
 }
 
-/* Additional fix for any nested text elements */
+/* All text elements inside Tremor components */
 [data-tremor-id="select-option"] *,
 [data-tremor-id="searchselect-option"] *,
 [data-tremor-id="select-button"] *,
-[data-tremor-id="searchselect-button"] * {
+[data-tremor-id="searchselect-button"] *,
+[class*="tremor"] *,
+div[role="combobox"] *,
+div[role="listbox"] *,
+div[role="option"] * {
   color: inherit !important;
 }
 
@@ -189,14 +199,88 @@ body {
 [data-tremor-id="select-option"].bg-blue-100,
 [data-tremor-id="select-option"].bg-red-100,
 [data-tremor-id="select-option"].bg-green-100,
-[data-tremor-id="select-option"].bg-gray-100 {
+[data-tremor-id="select-option"].bg-gray-100,
+.bg-amber-100[role="option"],
+.bg-blue-100[role="option"],
+.bg-red-100[role="option"],
+.bg-green-100[role="option"],
+.bg-gray-100[role="option"] {
   color: #1f2937 !important; /* Ensure dark text on light backgrounds */
 }
 
-/* Ensure icons in select items are visible */
+/* Icons in select items */
 [data-tremor-id="select-option"] svg,
-[data-tremor-id="searchselect-option"] svg {
+[data-tremor-id="searchselect-option"] svg,
+div[role="option"] svg {
   color: #6b7280 !important; /* gray-500 for icons */
+}
+
+/* Additional fallback for any Tremor UI component */
+[class*="tremor-Select"],
+[class*="tremor-SearchSelect"] {
+  color: #1f2937 !important;
+}
+
+[class*="tremor-Select"] [class*="tremor"],
+[class*="tremor-SearchSelect"] [class*="tremor"] {
+  color: #1f2937 !important;
+}
+
+/* Universal fallback for dropdown menus */
+ul[role="listbox"],
+ul[role="menu"],
+div[role="menu"] {
+  background: white !important;
+}
+
+ul[role="listbox"] li,
+ul[role="menu"] li,
+div[role="menu"] div {
+  color: #1f2937 !important;
+  background: white !important;
+}
+
+ul[role="listbox"] li:hover,
+ul[role="menu"] li:hover,
+div[role="menu"] div:hover {
+  color: #111827 !important;
+  background: #f3f4f6 !important;
+}
+
+/* Version Info Component */
+.version-info-container {
+  position: relative;
+  z-index: 50;
+}
+
+.version-info-trigger {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.version-info-trigger:hover {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+.version-info-details {
+  animation: fadeInUp 0.15s ease-out;
+  backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.95);
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 .medical-bottom-nav {
   position: fixed;

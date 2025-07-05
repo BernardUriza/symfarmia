@@ -26,7 +26,7 @@ const TranscriptionPanel = () => {
   } = useConsultation();
   
   const [recordingTime, setRecordingTime] = useState(0);
-  const [micPermission, setMicPermission] = useState('checking'); // 'granted' | 'denied' | 'prompt' | 'checking'
+  const [micPermission, setMicPermission] = useState('prompt'); // 'granted' | 'denied' | 'prompt' | 'checking'
   const [audioLevel, setAudioLevel] = useState(0);
   const [transcriptionService] = useState('browser'); // 'browser' | 'whisper'
   
@@ -65,34 +65,23 @@ const TranscriptionPanel = () => {
   
   const checkMicrophonePermission = async () => {
     try {
-      // First, try to get user media to actually test access
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      // If successful, we have permission
-      setMicPermission('granted');
-      // Stop the stream immediately since this is just a permission check
-      stream.getTracks().forEach(track => track.stop());
-      
-      // Also try to set up permission change listener if supported
-      try {
+      // Only check permission status without requesting access
+      if ('permissions' in navigator) {
         const result = await navigator.permissions.query({ name: 'microphone' });
+        setMicPermission(result.state);
+        
+        // Listen for permission changes
         result.addEventListener('change', () => {
           setMicPermission(result.state);
         });
-      } catch (permissionApiError) {
-        console.log('Permission API not supported, using fallback method');
+      } else {
+        // If permissions API not available, assume we need to prompt
+        setMicPermission('prompt');
       }
     } catch (error) {
-      console.log('Microphone access denied or not available:', error.name);
-      
-      // Check error type to set appropriate permission state
-      if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
-        setMicPermission('denied');
-      } else if (error.name === 'NotFoundError') {
-        setMicPermission('denied'); // No microphone found
-        console.warn('No microphone device found');
-      } else {
-        setMicPermission('prompt'); // Unknown error, let user try
-      }
+      console.log('Permission API not available, will check on first recording attempt');
+      // Don't assume denied, just keep as prompt
+      setMicPermission('prompt');
     }
   };
   
@@ -363,12 +352,12 @@ const TranscriptionPanel = () => {
         {!isRecording ? (
           <motion.button
             onClick={handleStartRecording}
-            disabled={micPermission === 'denied' || micPermission === 'checking'}
+            disabled={micPermission === 'denied'}
             className="start-button disabled:bg-gray-300 disabled:cursor-not-allowed"
-            whileHover={{ scale: micPermission === 'denied' || micPermission === 'checking' ? 1 : 1.05 }}
-            whileTap={{ scale: micPermission === 'denied' || micPermission === 'checking' ? 1 : 0.95 }}
+            whileHover={{ scale: micPermission === 'denied' ? 1 : 1.05 }}
+            whileTap={{ scale: micPermission === 'denied' ? 1 : 0.95 }}
           >
-            {micPermission === 'checking' ? 'Verificando permisos...' : 'Iniciar Grabación'}
+            Iniciar Grabación
           </motion.button>
         ) : (
           <motion.button
@@ -402,12 +391,30 @@ const TranscriptionPanel = () => {
         )}
         
         {micPermission === 'prompt' && !isRecording && (
-          <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <div className="flex items-center">
-              <ExclamationTriangleIcon className="w-5 h-5 text-yellow-500 mr-2" />
-              <span className="text-sm text-yellow-700">
-                Haz clic en "Iniciar Grabación" para solicitar acceso al micrófono.
-              </span>
+          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <ExclamationTriangleIcon className="w-5 h-5 text-blue-500 mr-2" />
+                <span className="text-sm text-blue-700">
+                  Necesitamos acceso al micrófono para grabar tu consulta.
+                </span>
+              </div>
+              <button
+                onClick={async () => {
+                  try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    setMicPermission('granted');
+                    stream.getTracks().forEach(track => track.stop());
+                  } catch (error) {
+                    if (error.name === 'NotAllowedError') {
+                      setMicPermission('denied');
+                    }
+                  }
+                }}
+                className="ml-4 px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded transition-colors"
+              >
+                Permitir acceso
+              </button>
             </div>
           </div>
         )}

@@ -8,6 +8,7 @@ import { ThemeProvider } from './providers/ThemeProvider'
 import { I18nProvider } from './providers/I18nProvider'
 import { PatientContextProvider } from './providers/PatientContextProvider'
 import MedicalAssistant from '../src/components/MedicalAssistant'
+import VersionInfo from './components/VersionInfo'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -32,6 +33,11 @@ export default function RootLayout({ children }) {
                   <DemoModeBanner />
                   {children}
                   <MedicalAssistant />
+                  
+                  {/* Version Info Footer */}
+                  <div className="fixed bottom-2 left-2 z-40">
+                    <VersionInfo />
+                  </div>
                 </AppModeProvider>
               </PatientContextProvider>
             </I18nProvider>
