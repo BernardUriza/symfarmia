@@ -54,57 +54,59 @@ body {
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
 }
 
-/* Consultation Tangram Grid System */
-.consultation-tangram-grid {
+/* Consultation Workspace Grid System */
+.consultation-workspace-grid {
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  grid-template-rows: 1fr;
   gap: 24px;
-  height: 100%;
-  min-height: 600px;
+  grid-template-columns: 1fr;
+  transition: grid-template-columns 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Transcription Area in Tangram */
-.consultation-tangram-grid .transcription-area {
+/* When AI assistant is present */
+.consultation-workspace-grid:has(.ai-assistant-section) {
+  grid-template-columns: 2fr auto;
+}
+
+/* Fallback for browsers without :has() support */
+.consultation-workspace-grid.with-assistant {
+  grid-template-columns: 2fr auto;
+}
+
+/* Transcription Section - No extra card wrapper */
+.consultation-workspace-grid .transcription-section {
   display: flex;
   flex-direction: column;
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 20px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  overflow: hidden;
+  min-width: 0; /* Allows flexbox to shrink properly */
 }
 
-/* AI Assistant Area in Tangram */
-.consultation-tangram-grid .ai-assistant-area {
+/* AI Assistant Section - No extra card wrapper */
+.consultation-workspace-grid .ai-assistant-section {
+  width: 400px;
   display: flex;
   flex-direction: column;
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 20px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  overflow: hidden;
+  min-width: 0;
 }
 
-/* Responsive Tangram Adjustments */
+/* Responsive Grid Adjustments */
 @media (max-width: 1280px) {
-  .consultation-tangram-grid {
-    grid-template-columns: 3fr 2fr;
-    gap: 20px;
+  .consultation-workspace-grid:has(.ai-assistant-section) {
+    grid-template-columns: 3fr auto;
+  }
+  
+  .consultation-workspace-grid .ai-assistant-section {
+    width: 350px;
   }
 }
 
 @media (max-width: 1024px) {
-  .consultation-tangram-grid {
-    grid-template-columns: 1fr;
+  .consultation-workspace-grid {
+    grid-template-columns: 1fr !important;
     grid-template-rows: 1fr auto;
     gap: 16px;
-    min-height: auto;
   }
   
-  .consultation-tangram-grid .ai-assistant-area {
+  .consultation-workspace-grid .ai-assistant-section {
+    width: 100%;
     max-height: 400px;
   }
 }
@@ -126,13 +128,8 @@ body {
     padding: 0.75rem;
   }
   
-  .consultation-tangram-grid {
+  .consultation-workspace-grid {
     gap: 12px;
-  }
-  
-  .consultation-tangram-grid .transcription-area,
-  .consultation-tangram-grid .ai-assistant-area {
-    border-radius: 16px;
   }
 }
 

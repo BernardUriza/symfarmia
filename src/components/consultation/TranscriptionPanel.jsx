@@ -26,7 +26,7 @@ const TranscriptionPanel = () => {
   } = useConsultation();
   
   const [recordingTime, setRecordingTime] = useState(0);
-  const [micPermission, setMicPermission] = useState('prompt'); // 'granted' | 'denied' | 'prompt'
+  const [micPermission, setMicPermission] = useState('checking'); // 'granted' | 'denied' | 'prompt' | 'checking'
   const [audioLevel, setAudioLevel] = useState(0);
   const [transcriptionService] = useState('browser'); // 'browser' | 'whisper'
   
@@ -65,14 +65,34 @@ const TranscriptionPanel = () => {
   
   const checkMicrophonePermission = async () => {
     try {
-      const result = await navigator.permissions.query({ name: 'microphone' });
-      setMicPermission(result.state);
+      // First, try to get user media to actually test access
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // If successful, we have permission
+      setMicPermission('granted');
+      // Stop the stream immediately since this is just a permission check
+      stream.getTracks().forEach(track => track.stop());
       
-      result.addEventListener('change', () => {
-        setMicPermission(result.state);
-      });
+      // Also try to set up permission change listener if supported
+      try {
+        const result = await navigator.permissions.query({ name: 'microphone' });
+        result.addEventListener('change', () => {
+          setMicPermission(result.state);
+        });
+      } catch (permissionApiError) {
+        console.log('Permission API not supported, using fallback method');
+      }
     } catch (error) {
-      console.log('Permission API not supported');
+      console.log('Microphone access denied or not available:', error.name);
+      
+      // Check error type to set appropriate permission state
+      if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+        setMicPermission('denied');
+      } else if (error.name === 'NotFoundError') {
+        setMicPermission('denied'); // No microphone found
+        console.warn('No microphone device found');
+      } else {
+        setMicPermission('prompt'); // Unknown error, let user try
+      }
     }
   };
   
@@ -242,8 +262,19 @@ const TranscriptionPanel = () => {
       
     } catch (error) {
       console.error('Error accessing microphone:', error);
-      setMicPermission('denied');
-      logEvent('microphone_error', { error: error.message });
+      
+      // Handle different error types
+      if (error.name === 'NotAllowedError') {
+        setMicPermission('denied');
+        logEvent('microphone_error', { error: 'Permission denied by user' });
+      } else if (error.name === 'NotFoundError') {
+        setMicPermission('denied');
+        logEvent('microphone_error', { error: 'No microphone device found' });
+      } else {
+        // For other errors, allow retry
+        setMicPermission('prompt');
+        logEvent('microphone_error', { error: error.message });
+      }
     }
   };
   
@@ -332,12 +363,12 @@ const TranscriptionPanel = () => {
         {!isRecording ? (
           <motion.button
             onClick={handleStartRecording}
-            disabled={micPermission === 'denied'}
+            disabled={micPermission === 'denied' || micPermission === 'checking'}
             className="start-button disabled:bg-gray-300 disabled:cursor-not-allowed"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: micPermission === 'denied' || micPermission === 'checking' ? 1 : 1.05 }}
+            whileTap={{ scale: micPermission === 'denied' || micPermission === 'checking' ? 1 : 0.95 }}
           >
-            Iniciar Grabación
+            {micPermission === 'checking' ? 'Verificando permisos...' : 'Iniciar Grabación'}
           </motion.button>
         ) : (
           <motion.button
@@ -353,10 +384,29 @@ const TranscriptionPanel = () => {
         {/* Permission Status */}
         {micPermission === 'denied' && (
           <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <ExclamationTriangleIcon className="w-5 h-5 text-red-500 mr-2" />
+                <span className="text-sm text-red-700">
+                  Acceso al micrófono denegado. Por favor, habilita los permisos en tu navegador.
+                </span>
+              </div>
+              <button
+                onClick={checkMicrophonePermission}
+                className="ml-4 px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded transition-colors"
+              >
+                Reintentar
+              </button>
+            </div>
+          </div>
+        )}
+        
+        {micPermission === 'prompt' && !isRecording && (
+          <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
             <div className="flex items-center">
-              <ExclamationTriangleIcon className="w-5 h-5 text-red-500 mr-2" />
-              <span className="text-sm text-red-700">
-                Acceso al micrófono denegado. Por favor, habilita los permisos en tu navegador.
+              <ExclamationTriangleIcon className="w-5 h-5 text-yellow-500 mr-2" />
+              <span className="text-sm text-yellow-700">
+                Haz clic en "Iniciar Grabación" para solicitar acceso al micrófono.
               </span>
             </div>
           </div>
