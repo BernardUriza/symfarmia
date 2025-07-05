@@ -18,7 +18,7 @@ describe('HomePage', () => {
         </I18nProvider>
       </ThemeProvider>
     )
-    expect(screen.getByText('El Futuro de la Medicina Está Aquí')).toBeInTheDocument()
+    expect(screen.getByText(/Convierte 666consultas médicas/i)).toBeInTheDocument()
   })
 
   it('contains the main SYMFARMIA branding', () => {
@@ -33,7 +33,7 @@ describe('HomePage', () => {
         </I18nProvider>
       </ThemeProvider>
     )
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('El Futuro de la Medicina Está Aquí')
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Convierte 666consultas médicas en reportes clínicos automáticamente')
   })
 
   it('displays the platform description', () => {
@@ -48,6 +48,6 @@ describe('HomePage', () => {
         </I18nProvider>
       </ThemeProvider>
     )
-    expect(screen.getByText('Libera el 70% de tu tiempo y restaura la esperanza en tu práctica médica')).toBeInTheDocument()
+    expect(screen.getByText(/Habla durante tu consulta/i)).toBeInTheDocument()
   })
 })
