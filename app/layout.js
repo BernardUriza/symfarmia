@@ -9,13 +9,37 @@ import { PatientContextProvider } from './providers/PatientContextProvider'
 import dynamic from 'next/dynamic'
 const MedicalAssistant = dynamic(() => import('../src/components/MedicalAssistant'), { ssr: false })
 import VersionInfo from './components/VersionInfo'
+import { getSiteConfig } from './lib/site-config'
 
+const siteConfig = getSiteConfig()
 
 export const metadata = {
-  title: 'SYMFARMIA',
-  description: 'Intelligent platform for independent doctors',
+  title: siteConfig.title,
+  description: siteConfig.description,
   icons: {
-    icon: '/favicon.ico',
+    icon: siteConfig.favicon,
+  },
+  openGraph: {
+    title: siteConfig.title,
+    description: siteConfig.description,
+    url: siteConfig.url,
+    siteName: siteConfig.name,
+    images: [
+      {
+        url: siteConfig.image,
+        width: 1200,
+        height: 630,
+        alt: 'SYMFARMIA - Plataforma médica inteligente',
+      },
+    ],
+    locale: 'es_ES',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: siteConfig.title,
+    description: siteConfig.description,
+    images: [siteConfig.image],
   },
 }
 
