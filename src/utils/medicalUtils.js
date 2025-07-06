@@ -292,21 +292,19 @@ export const medicalUtils = {
 // HuggingFace-powered medical AI integration
 export const mockMedicalAI = {
   /**
-   * Query HuggingFace medical models and return a structured response.
-   * Falls back to the legacy mock replies on error.
+   * Query medical AI through Next.js backend API.
+   * Falls back to mock replies on error.
    * @param {string} query - user question or transcript text
    * @param {object} context - additional patient context
    * @param {('diagnosis'|'prescription'|'soap'|'analytics')} type - response type
    * @returns {Promise<MedicalAIResponse>}
    */
     generateResponse: async (query, context = {}, type = 'diagnosis') => {
-      const HF_TOKEN = process.env.HUGGINGFACE_TOKEN;
-      const HF_API_URL = 'https://api-inference.huggingface.co/models';
-
       const CACHE_TTL = 60 * 60 * 1000; // 1 hour
       const patientId = context?.patient?.id || 'global';
       const now = Date.now();
 
+      // Rate limiting
       if (!mockMedicalAI._requestLog) mockMedicalAI._requestLog = new Map();
       const recent = (mockMedicalAI._requestLog.get(patientId) || []).filter(ts => now - ts < CACHE_TTL);
       if (recent.length >= 60) {
@@ -322,6 +320,7 @@ export const mockMedicalAI = {
       recent.push(now);
       mockMedicalAI._requestLog.set(patientId, recent);
 
+      // Cache management
       const cacheKey = JSON.stringify({ query, context, type });
       if (!mockMedicalAI._cache) mockMedicalAI._cache = new Map();
       const cached = mockMedicalAI._cache.get(cacheKey);
@@ -329,71 +328,77 @@ export const mockMedicalAI = {
         return cached.result;
       }
 
-      const modelMap = {
-        diagnosis: 'jiviai/medX_v2',
-        prescription: 'raidium/MQG',
-        soap: 'emilyalsentzer/Bio_ClinicalBERT',
-        analytics: 'raidium/MQG'
-      };
-      const params = {
-        'raidium/MQG': { max_length: 500, temperature: 0.7, do_sample: true },
-        'jiviai/medX_v2': { max_length: 300, temperature: 0.5 },
-        'emilyalsentzer/Bio_ClinicalBERT': { return_all_scores: true },
-        'openai/whisper-medium': { language: 'es', task: 'transcribe' }
-      };
-
-      const model = modelMap[type] || modelMap.diagnosis;
-
-      const headers = {
-        'Content-Type': 'application/json',
-        'User-Agent': 'SYMFARMIA-Medical-Assistant/1.0'
-      };
-      if (HF_TOKEN) headers['Authorization'] = `Bearer ${HF_TOKEN}`;
-
-      const body = {
-        inputs: query,
-        parameters: params[model]
-      };
-
-      const disclaimer =
-        'AVISO MÉDICO: Esta información es generada por IA y debe ser validada por un médico certificado. No reemplaza el criterio médico profesional.';
+      const disclaimer = 'AVISO MÉDICO: Esta información es generada por IA y debe ser validada por un médico certificado. No reemplaza el criterio médico profesional.';
 
       try {
-        const response = await fetch(`${HF_API_URL}/${model}`, {
+        // Call internal Next.js API
+        const response = await fetch('/api/medical', {
           method: 'POST',
-          headers,
-          body: JSON.stringify(body)
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            query,
+            context,
+            type
+          })
         });
 
         if (!response.ok) {
-          throw new Error(`HuggingFace API error: ${response.status}`);
+          const errorData = await response.json();
+          
+          // Handle specific error types
+          if (response.status === 401) {
+            throw new Error('authentication_error');
+          }
+          
+          if (response.status === 429) {
+            throw new Error('rate_limit_error');
+          }
+          
+          if (errorData.type === 'configuration_error') {
+            throw new Error('configuration_error');
+          }
+          
+          throw new Error(`API error: ${response.status}`);
         }
 
-        const data = await response.json();
-        const text = data.generated_text || data[0]?.generated_text || '';
+        const result = await response.json();
+        
+        if (result.success) {
+          mockMedicalAI._cache.set(cacheKey, { result, timestamp: now });
+          return result;
+        }
 
-        const result = {
-          response: text,
-          confidence: typeof data[0]?.score === 'number' ? data[0].score : 0.7,
-          reasoning: [],
-          suggestions: [],
-          disclaimer,
-          sources: [model]
-        };
+        throw new Error('Invalid API response');
 
-        mockMedicalAI._cache.set(cacheKey, { result, timestamp: now });
-        return result;
       } catch (err) {
         console.error('Medical AI error:', err);
-        const fallbackResponse = mockMedicalAI._fallbackResponse(query);
+        
+        // Generate appropriate fallback message based on error type
+        let fallbackMessage = mockMedicalAI._fallbackResponse(query);
+        let errorContext = '';
+        
+        if (err.message === 'authentication_error') {
+          errorContext = '(Token de Hugging Face inválido. Contacta al administrador)';
+        } else if (err.message === 'configuration_error') {
+          errorContext = '(Token de Hugging Face no configurado. Contacta al administrador)';
+        } else if (err.message === 'rate_limit_error') {
+          errorContext = '(Límite de uso de Hugging Face excedido. Intenta más tarde)';
+        } else {
+          errorContext = '(Esta respuesta es simulada. Para análisis real con IA médica, verifica la conexión a Hugging Face o contacta al administrador)';
+        }
+        
         const fallback = {
-          response: `${fallbackResponse}\n\n(Esta respuesta es simulada. Para análisis real con IA médica, verifica la conexión a Hugging Face o contacta al administrador)`,
+          response: `${fallbackMessage}\n\n${errorContext}`,
           confidence: 0.4,
           reasoning: [],
           suggestions: [],
           disclaimer,
-          sources: []
+          sources: [],
+          error: err.message
         };
+        
         mockMedicalAI._cache.set(cacheKey, { result: fallback, timestamp: now });
         return fallback;
       }

@@ -18,6 +18,8 @@
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "clean": "rm -rf .next && rm -rf node_modules/.cache",
     "deploy": "npm run version:generate && npm run build",
+    "accessibility:check": "node scripts/check-accessibility.js",
+    "accessibility:test": "npm run test tests/accessibility/",
     "version:generate": "node scripts/generate-version.js",
     "version:bump": "npm version patch && npm run version:generate",
     "analyze": "ANALYZE=true npm run build",
