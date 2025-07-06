@@ -358,6 +358,116 @@ npm run build
 npm start
 ```
 
+## 🤖 Medical AI API
+
+### `/api/medical` - AI-Powered Medical Consultation Endpoint
+
+The medical AI API provides intelligent medical assistance using Hugging Face models for diagnosis, prescription, and medical analysis.
+
+#### **Request Format (POST)**
+
+```json
+{
+  "query": "Patient presents with chest pain and shortness of breath",
+  "context": {
+    "patient": {
+      "age": 45,
+      "gender": "male",
+      "medical_history": []
+    }
+  },
+  "type": "diagnosis"
+}
+```
+
+#### **Parameters**
+
+- `query` (required): Medical query or symptoms description
+- `context` (optional): Additional patient context and medical history
+- `type` (optional): Type of medical analysis - `diagnosis`, `prescription`, `soap`, `analytics`
+
+#### **Response Format**
+
+```json
+{
+  "success": true,
+  "response": "Based on the symptoms, consider cardiac evaluation...",
+  "confidence": 0.85,
+  "reasoning": [],
+  "suggestions": [],
+  "disclaimer": "AVISO MÉDICO: Esta información es generada por IA y debe ser validada por un médico certificado. No reemplaza el criterio médico profesional.",
+  "sources": ["jiviai/medX_v2"]
+}
+```
+
+#### **Error Responses**
+
+| Status | Type | Description |
+|--------|------|-------------|
+| 400 | `validation_error` | Missing or invalid query parameter |
+| 401 | `authentication_error` | Invalid or missing Hugging Face token |
+| 404 | `model_not_found` | Specified model not available |
+| 408 | `timeout_error` | Request timeout (30 seconds) |
+| 429 | `rate_limit_error` | API rate limit exceeded |
+| 503 | `service_unavailable` | Model loading or network issues |
+| 500 | `server_error` | Internal server error |
+
+#### **Environment Setup**
+
+```env
+HUGGINGFACE_TOKEN="your_huggingface_api_token"
+```
+
+#### **Usage Examples**
+
+```bash
+# Diagnosis request
+curl -X POST http://localhost:3000/api/medical \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "Patient has persistent cough and fever for 3 days",
+    "type": "diagnosis"
+  }'
+
+# Prescription request
+curl -X POST http://localhost:3000/api/medical \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "Recommend treatment for mild hypertension",
+    "type": "prescription",
+    "context": {
+      "patient": {
+        "age": 50,
+        "medical_history": ["diabetes"]
+      }
+    }
+  }'
+```
+
+#### **Available Models**
+
+- **Diagnosis**: `jiviai/medX_v2` - Medical diagnosis and symptom analysis
+- **Prescription**: `raidium/MQG` - Treatment recommendations
+- **SOAP**: `emilyalsentzer/Bio_ClinicalBERT` - Clinical documentation
+- **Analytics**: `raidium/MQG` - Medical data analysis
+
+#### **Error Handling**
+
+The API implements comprehensive error handling for:
+- Network connectivity issues
+- API timeouts (30 seconds)
+- Invalid authentication tokens
+- Model availability and loading
+- Rate limiting and quota management
+
+#### **Integration Notes**
+
+The endpoint is designed for easy migration to microservices:
+- Stateless design with no session dependencies
+- Environment-based configuration
+- Standardized error responses
+- Timeout and retry mechanisms
+
 ## 🔐 Access Control
 
 - **Public Landing Page**: Available to all visitors at `/`
