@@ -9,7 +9,7 @@ describe('HomePage', () => {
   beforeEach(() => {
     localStorage.setItem('preferredLanguage', 'es')
   })
-  it('renders the LandingPage component', () => {
+  it('renders the LandingPage component', async () => {
     render(
       <ThemeProvider>
         <I18nProvider>
@@ -21,10 +21,10 @@ describe('HomePage', () => {
         </I18nProvider>
       </ThemeProvider>
     )
-    expect(screen.getByText(/Convierte consultas médicas/i)).toBeInTheDocument()
+    expect(await screen.findByText(/Convierte consultas médicas/i)).toBeInTheDocument()
   })
 
-  it('contains the main SYMFARMIA branding', () => {
+  it('contains the main SYMFARMIA branding', async () => {
     render(
       <ThemeProvider>
         <I18nProvider>
@@ -36,7 +36,8 @@ describe('HomePage', () => {
         </I18nProvider>
       </ThemeProvider>
     )
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Convierte consultas médicas en reportes clínicos automáticamente')
+    const heading = await screen.findByRole('heading', { level: 1 })
+    expect(heading).toHaveTextContent('Convierte consultas médicas en reportes clínicos automáticamente')
   })
 
   it('displays the platform description', () => {
