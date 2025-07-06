@@ -1,6 +1,6 @@
 "use client";
 import { useTranslation } from '../app/providers/I18nProvider';
-import { GlobeAltIcon } from '@heroicons/react/24/outline';
+import { GlobeAltIcon } from './icons';
 
 export default function LanguageToggle({ className = '', variant = 'default' }) {
   const { locale, setLocale, t } = useTranslation();

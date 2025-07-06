@@ -237,7 +237,7 @@ const AIAssistantPanel = () => {
   };
   
   return (
-    <div className="ai-assistant-section">
+    <>
       {/* Header */}
       <div className="ai-header">
         <div className="ai-info">
@@ -522,7 +522,7 @@ const AIAssistantPanel = () => {
           )}
         </AnimatePresence>
       </div>
-    </div>
+    </>
   );
 };
 
