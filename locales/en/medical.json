@@ -1,1 +1,245 @@
-{}
+{
+  "consultation": {
+    "title": "Medical Consultation",
+    "session_active": "Session active",
+    "session_inactive": "Session inactive",
+    "activate_advanced_ai": "Activate Advanced AI",
+    "basic_mode": "Basic Mode",
+    "change_layout": "Change layout"
+  },
+  "microphone": {
+    "permissions": {
+      "media_devices_unavailable": "MediaDevices API not available in this browser",
+      "update_browser": "Update your browser to a newer version",
+      "getusermedia_unavailable": "getUserMedia API not available",
+      "browser_not_supported": "Your browser does not support microphone access",
+      "https_required": "HTTPS required for microphone access",
+      "access_https": "Access the site using HTTPS://",
+      "access_denied": "Microphone access denied by user",
+      "allow_microphone": "Allow microphone access in browser",
+      "check_site_permissions": "Check site permission settings",
+      "device_not_found": "No microphone device found",
+      "verify_connection": "Verify microphone is connected and working",
+      "check_audio_settings": "Check system audio settings",
+      "device_in_use": "Microphone in use by another application",
+      "close_other_apps": "Close other applications that may be using the microphone",
+      "restart_browser": "Restart browser and try again",
+      "configuration_not_supported": "Audio configuration not supported",
+      "microphone_constraints": "Microphone does not support required configuration",
+      "security_error": "Security error accessing microphone",
+      "verify_site_permissions": "Verify site has microphone permissions",
+      "unknown_error": "Unknown error",
+      "reload_page": "Try reloading the page or restarting the browser",
+      "general_diagnostic_error": "General diagnostic error",
+      "permissions_denied_explicitly": "Microphone permissions explicitly denied",
+      "click_lock_icon": "Click the lock icon in the address bar and allow microphone",
+      "permissions_will_be_requested": "Permissions will be requested when attempting to record",
+      "permissions_granted": "Permissions granted, microphone should work",
+      "audio_context_unavailable": "Audio Context not available"
+    },
+    "devices": {
+      "unnamed_microphone": "Unnamed microphone",
+      "no_audio_devices": "No audio input devices found",
+      "connect_microphone": "Connect a microphone or verify it is enabled",
+      "device_enumeration_error": "Error enumerating devices"
+    },
+    "actions": {
+      "diagnose": "Diagnose",
+      "retry": "Retry",
+      "test_access": "Test access",
+      "allow_access": "Allow access"
+    },
+    "status": {
+      "problem_with_microphone": "Problem with microphone",
+      "need_access": "We need microphone access to record your consultation",
+      "problems_detected": "Problems detected:",
+      "recommended_solutions": "Recommended solutions:",
+      "detected_devices": "Detected devices:",
+      "technical_details": "View technical details"
+    }
+  },
+  "transcription": {
+    "title": "Real-time Transcription",
+    "recording": "Recording",
+    "ready_to_record": "Ready to record",
+    "start_recording": "Start Recording",
+    "stop_recording": "Stop",
+    "final_transcript": "Final Transcript",
+    "transcribing": "Transcribing...",
+    "no_transcript_available": "No transcript available",
+    "no_transcript_description": "Press \"Start Recording\" to begin transcribing your medical consultation",
+    "service_browser": "Browser",
+    "service_whisper": "Whisper",
+    "service_label": "Service",
+    "ai_active": "AI Active",
+    "words_count": "words",
+    "transcript_received": "Transcript received: "
+  },
+  "ai_assistant": {
+    "title": "Medical AI Assistant",
+    "subtitle": "Real-time analysis",
+    "analyzing": "Analyzing…",
+    "active": "Active",
+    "ready": "AI Assistant Ready",
+    "help_description": "I help with clinical analysis, differential diagnoses and treatment recommendations",
+    "confidence": "Confidence",
+    "placeholder": "Ask about symptoms, diagnoses or treatments...",
+    "error_message": "Sorry, there was an error processing your query. Please try again.",
+    "tabs": {
+      "chat": "Chat",
+      "suggestions": "Suggestions",
+      "analysis": "Analysis"
+    },
+    "suggestions": {
+      "active": "Active Suggestions",
+      "no_suggestions": "No suggestions available yet",
+      "suggestions_description": "Suggestions will appear as the transcription is analyzed",
+      "analyze_symptoms": "Analyze main symptoms",
+      "suggest_differential": "Suggest differential diagnoses",
+      "review_treatments": "Review recommended treatments",
+      "review_differentials": "Review differential diagnoses",
+      "request_studies": "Request complementary studies",
+      "evaluate_criteria": "Evaluate clinical criteria",
+      "verify_contraindications": "Verify contraindications",
+      "review_interactions": "Review drug interactions",
+      "calculate_dose": "Calculate dose by weight",
+      "expand_anamnesis": "Expand anamnesis",
+      "physical_exam": "Perform directed physical exam",
+      "evaluate_chronology": "Evaluate symptom chronology",
+      "continue_anamnesis": "Continue with anamnesis",
+      "review_history": "Review history",
+      "perform_physical_exam": "Perform physical exam"
+    },
+    "analysis": {
+      "clinical_analysis": "Clinical Analysis",
+      "clinical_alerts": "Clinical Alerts",
+      "transcript_analysis": "Transcript Analysis",
+      "total_words": "Total words",
+      "estimated_duration": "Estimated duration",
+      "detected_symptoms": "Detected symptoms",
+      "no_analysis": "No analysis available yet",
+      "analysis_description": "Analysis will appear as the consultation develops",
+      "symptoms_detected": "I detected symptoms related to:",
+      "clinical_alerts_detected": "⚠️ Clinical alerts detected:"
+    },
+    "quick_actions": {
+      "symptoms": "Symptoms",
+      "diagnosis": "Diagnosis",
+      "treatment": "Treatment"
+    },
+    "medical_conditions": {
+      "chest_pain": "intense chest pain",
+      "chest_pain_suggestion": "Consider acute coronary syndrome",
+      "severe_dyspnea": "severe shortness of breath",
+      "dyspnea_suggestion": "Evaluate respiratory distress",
+      "loss_consciousness": "loss of consciousness",
+      "consciousness_suggestion": "Investigate neurological causes",
+      "heavy_bleeding": "heavy bleeding",
+      "bleeding_suggestion": "Monitor vital signs"
+    },
+    "symptoms_analysis": {
+      "pain_scale": "Pain scale",
+      "specific_location": "Specific location",
+      "aggravating_factors": "Aggravating factors",
+      "current_temperature": "Current temperature",
+      "duration": "Duration",
+      "associated_symptoms": "Associated symptoms",
+      "headache_type": "Type of headache",
+      "intensity": "Intensity",
+      "triggering_factors": "Triggering factors",
+      "cough_type": "Dry/productive cough",
+      "time_of_day": "Time of day",
+      "activity_level": "Activity level",
+      "sleep": "Sleep",
+      "work_stress": "Work stress"
+    }
+  },
+  "documentation": {
+    "title": "Medical Documentation",
+    "subtitle": "Auto-generated SOAP notes",
+    "soap_sections": {
+      "subjective": "SUBJECTIVE",
+      "objective": "OBJECTIVE",
+      "assessment": "ASSESSMENT/ANALYSIS",
+      "plan": "PLAN",
+      "analysis": "ANALYSIS"
+    },
+    "actions": {
+      "auto_generate": "Auto-generate",
+      "generate_soap": "Generate SOAP",
+      "copy": "Copy",
+      "pdf": "PDF",
+      "export_pdf": "PDF export function in development"
+    },
+    "status": {
+      "generating": "Generating SOAP notes...",
+      "will_generate": "will be automatically generated...",
+      "no_documentation": "No documentation available",
+      "start_recording": "Start recording to automatically generate SOAP notes",
+      "soap_description": "SOAP notes will be generated when there is sufficient transcribed content",
+      "generate_soap_notes": "Generate SOAP Notes",
+      "duration": "Duration:",
+      "transcribed_words": "Transcribed words:",
+      "started": "Started:",
+      "copied_clipboard": "Copied to clipboard"
+    },
+    "templates": {
+      "not_generated": "Not generated",
+      "medical_note": "MEDICAL NOTE -",
+      "consultation_duration": "Consultation duration:",
+      "minutes": "minutes",
+      "patient_reports": "Patient reports",
+      "patient_consultation": "Patient comes to consultation for discomfort.",
+      "patient_evaluation": "Consultation for medical evaluation and therapeutic guidance. Denies known drug allergies.",
+      "patient_conscious": "Patient conscious, oriented, cooperative.",
+      "physical_examination": "Physical examination:",
+      "vital_signs": "Stable vital signs. General appearance preserved.",
+      "clinical_evaluation": "Clinical evaluation in progress. Complete medical history and physical examination required to establish definitive diagnosis.",
+      "pain_syndrome": "Pain syndrome to determine etiology. Consider inflammatory, mechanical or neuropathic causes.",
+      "febrile_syndrome": "Febrile syndrome. Evaluate infectious focus. Consider viral vs bacterial process.",
+      "cough_syndrome": "Cough syndrome. Investigate upper vs lower respiratory etiology.",
+      "asthenia": "Asthenia. Rule out metabolic, infectious or hematological causes.",
+      "clinical_study": "Clinical picture under study. Requires complementary evaluation for differential diagnosis.",
+      "continue_anamnesis": "• Continue with directed anamnesis\\n",
+      "complete_physical": "• Complete systematic physical examination\\n",
+      "pain_scale_plan": "• Pain scale and characteristics\\n",
+      "consider_analgesia": "• Consider analgesia according to intensity\\n",
+      "laboratory_studies": "• Laboratory: CBC, chemistry panel, acute phase reactants\\n",
+      "antipyretic": "• Antipyretic as needed\\n",
+      "followup": "• Follow-up in 24-48 hours\\n",
+      "return_if_worse": "• Return if worsening or new symptoms",
+      "transcript_note": "Original transcription available separately.\\nGenerated with medical AI assistance - Review and validate content."
+    }
+  },
+  "forms": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "loading": "Loading",
+    "error_occurred": "Error occurred:",
+    "changes_saved": "Changes saved successfully",
+    "record_removed": "Record removed successfully.",
+    "cancelled": "Cancelled",
+    "confirm_delete": "Are you sure you want to delete this record?",
+    "manage_patient": "Manage Patient",
+    "patient_name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "information": "Information",
+    "birth_date": "Date of Birth",
+    "gender": "Gender",
+    "male": "Male",
+    "female": "Female",
+    "other": "Other"
+  },
+  "navigation": {
+    "previous": "Previous",
+    "next": "Next",
+    "patients": "patients"
+  },
+  "status": {
+    "pending": "Pending",
+    "sent": "Sent",
+    "not_delivered": "Not delivered",
+    "sending": "Sending"
+  }
+}

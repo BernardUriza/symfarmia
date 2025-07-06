@@ -1,7 +1,6 @@
 "use client"
 import { useAppMode } from '../providers/AppModeProvider';
 import { useTranslation } from '../providers/I18nProvider';
-import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 
 function DemoBannerContent() {

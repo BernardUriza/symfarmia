@@ -269,7 +269,7 @@ Generado con asistencia de IA médica - Revisar y validar contenido.`;
     <div className="p-6">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6 sticky top-0 bg-white z-10 py-4">
+        <div className="flex items-center justify-between mb-6 sticky top-0 z-10 py-2">
           <div className="flex items-center space-x-3 flex-wrap gap-2">
             <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-blue-500 rounded-xl flex items-center justify-center">
               <DocumentTextIcon className="w-6 h-6 text-white" />
