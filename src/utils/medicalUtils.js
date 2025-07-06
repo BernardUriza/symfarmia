@@ -385,8 +385,9 @@ export const mockMedicalAI = {
         return result;
       } catch (err) {
         console.error('Medical AI error:', err);
+        const fallbackResponse = mockMedicalAI._fallbackResponse(query);
         const fallback = {
-          response: mockMedicalAI._fallbackResponse(query),
+          response: `${fallbackResponse}\n\n(Esta respuesta es simulada. Para análisis real con IA médica, verifica la conexión a Hugging Face o contacta al administrador)`,
           confidence: 0.4,
           reasoning: [],
           suggestions: [],

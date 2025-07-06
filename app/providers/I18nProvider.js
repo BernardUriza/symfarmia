@@ -189,10 +189,17 @@ function detectUserLanguage() {
 }
 
 export function I18nProvider({ children }) {
-  const [locale, setLocale] = useState(() => {
-    if (typeof window === 'undefined') return 'es';
-    return detectUserLanguage();
-  });
+  const [locale, setLocale] = useState('es'); // Always start with 'es' for consistent SSR
+
+  useEffect(() => {
+    // Only run on client side - detect and set user language after hydration
+    if (typeof window !== 'undefined') {
+      const detectedLang = detectUserLanguage();
+      if (detectedLang !== locale) {
+        setLocale(detectedLang);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     if (typeof localStorage !== 'undefined') {
