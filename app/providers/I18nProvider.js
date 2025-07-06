@@ -82,7 +82,11 @@ const translations = {
     'session_inactive': 'Sesión inactiva',
     'activate_advanced_ai': 'Activar IA Avanzada',
     'basic_mode': 'Modo Básico',
-    'change_layout': 'Cambiar disposición'
+    'change_layout': 'Cambiar disposición',
+    
+    // Language abbreviations
+    'english_abbr': 'EN',
+    'spanish_abbr': 'ES'
   },
   'en': {
     'ai_assistant_welcome': 'Hello! I\'m your AI Medical Analytics Assistant. I can help you analyze patient data, identify trends, and provide clinical insights.',
@@ -161,7 +165,11 @@ const translations = {
     'session_inactive': 'Session inactive',
     'activate_advanced_ai': 'Enable Advanced AI',
     'basic_mode': 'Basic Mode',
-    'change_layout': 'Change layout'
+    'change_layout': 'Change layout',
+    
+    // Language abbreviations
+    'english_abbr': 'EN',
+    'spanish_abbr': 'ES'
   }
 };
 
