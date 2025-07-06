@@ -145,7 +145,6 @@ Thumbs.db
 /exports/
 /app-screenshots/
 *.pdf
-*.png
 *.jpg
 *.jpeg
 /presentation-assets/
