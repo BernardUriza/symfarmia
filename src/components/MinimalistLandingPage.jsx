@@ -14,9 +14,11 @@ import dynamic from 'next/dynamic';
 const DemoLoginModal = dynamic(() => import('../../components/DemoLoginModal'));
 const DashboardLanding = dynamic(() => import('./DashboardLanding'));
 import { useTranslation } from '../../app/providers/I18nProvider';
+import { useAppMode } from '../../app/providers/AppModeProvider';
 
 const MinimalistLandingPage = ({ isDemo = false }) => {
-  const isDemoMode = isDemo;
+  const { isDemoMode: contextDemo } = useAppMode();
+  const isDemoMode = isDemo || contextDemo;
 
   const { t } = useTranslation();
 
