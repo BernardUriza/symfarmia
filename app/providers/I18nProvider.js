@@ -199,7 +199,7 @@ export function I18nProvider({ children }) {
         setLocale(detectedLang);
       }
     }
-  }, []);
+  }, [locale]);
 
   useEffect(() => {
     if (typeof localStorage !== 'undefined') {
