@@ -1,18 +1,18 @@
 "use client";
 import React, { useState } from 'react';
-import { 
-  MicrophoneIcon, 
-  DocumentTextIcon, 
+import {
+  MicrophoneIcon,
+  DocumentTextIcon,
   ArrowPathIcon,
   CheckCircleIcon,
   UserIcon,
   StarIcon,
   HeartIcon
-} from '@heroicons/react/24/outline';
+} from '../../components/icons';
 import LanguageToggle from '../../components/LanguageToggle';
-import DemoLoginModal from '../../components/DemoLoginModal';
-import TailwindTest from './TailwindTest';
-import DashboardLanding from './DashboardLanding';
+import dynamic from 'next/dynamic';
+const DemoLoginModal = dynamic(() => import('../../components/DemoLoginModal'));
+const DashboardLanding = dynamic(() => import('./DashboardLanding'));
 import { useTranslation } from '../../app/providers/I18nProvider';
 
 const MinimalistLandingPage = ({ isDemo = false }) => {
@@ -58,10 +58,6 @@ const MinimalistLandingPage = ({ isDemo = false }) => {
   
   console.log('MinimalistLandingPage: Rendering normal landing page');
 
-  // Temporary Tailwind test - remove this once styling is confirmed
-  if (typeof window !== 'undefined' && window.location.search.includes('test=tailwind')) {
-    return <TailwindTest />;
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 text-gray-900 font-sans">
