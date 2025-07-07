@@ -72,6 +72,11 @@
     "service_browser": "Navegador",
     "service_whisper": "Whisper",
     "service_label": "Servicio",
+    "demo_strategy_label": "🎭 Estrategia de Demo:",
+    "reset_demo": "Reiniciar Demo",
+    "demo_heading": "Demo de Transcripción IA",
+    "demo_instructions": "Presiona \"Iniciar Grabación\" para ver la magia en acción",
+    "medical_ai_active": "IA Médica Activa",
     "ai_active": "IA Activa",
     "words_count": "palabras",
     "transcript_received": "Transcripción recibida: "
