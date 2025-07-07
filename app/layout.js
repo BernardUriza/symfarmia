@@ -1,5 +1,6 @@
 import "./globals.css";
 import ErrorBoundary from "../src/components/ErrorBoundary";
+import ChunkErrorHandler from "../src/components/ChunkErrorHandler";
 import { Auth0Provider } from "@auth0/nextjs-auth0";
 import { AppModeProvider } from "./providers/AppModeProvider";
 import DemoModeBanner from "./components/DemoModeBanner";
@@ -60,6 +61,7 @@ export default function RootLayout({ children }) {
       <body className="font-sans bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-gray-100">
         <ThemeProvider>
           <ErrorBoundary>
+            <ChunkErrorHandler />
             <Auth0Provider>
               <I18nProvider>
                 <PatientContextProvider>
