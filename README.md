@@ -396,7 +396,7 @@ The medical AI API provides intelligent medical assistance using Hugging Face mo
   "reasoning": [],
   "suggestions": [],
   "disclaimer": "AVISO MÉDICO: Esta información es generada por IA y debe ser validada por un médico certificado. No reemplaza el criterio médico profesional.",
-  "sources": ["jiviai/medX_v2"]
+  "sources": ["bert-base-uncased"]
 }
 ```
 
@@ -446,10 +446,10 @@ curl -X POST http://localhost:3000/api/medical \
 
 #### **Available Models**
 
-- **Diagnosis**: `jiviai/medX_v2` - Medical diagnosis and symptom analysis
-- **Prescription**: `raidium/MQG` - Treatment recommendations
+- **Diagnosis**: `bert-base-uncased` - Medical diagnosis and symptom analysis
+- **Prescription**: `bert-base-uncased` - Treatment recommendations
 - **SOAP**: `emilyalsentzer/Bio_ClinicalBERT` - Clinical documentation
-- **Analytics**: `raidium/MQG` - Medical data analysis
+- **Analytics**: `bert-base-uncased` - Medical data analysis
 
 #### **Error Handling**
 

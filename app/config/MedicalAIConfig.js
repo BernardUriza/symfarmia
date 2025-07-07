@@ -11,28 +11,24 @@ export class MedicalAIConfig {
   static USER_AGENT = 'SYMFARMIA-Medical-Assistant/1.0';
   
   static MODEL_MAP = {
-    diagnosis: 'jiviai/medX_v2',
-    prescription: 'raidium/MQG',
+    diagnosis: 'bert-base-uncased',
+    prescription: 'bert-base-uncased',
     soap: 'emilyalsentzer/Bio_ClinicalBERT',
-    analytics: 'raidium/MQG'
+    analytics: 'bert-base-uncased'
   };
 
   static MODEL_PARAMS = {
-    'raidium/MQG': { 
-      max_length: 500, 
-      temperature: 0.7, 
-      do_sample: true 
+    'bert-base-uncased': {
+      max_length: 256,
+      temperature: 0.5,
+      do_sample: true
     },
-    'jiviai/medX_v2': { 
-      max_length: 300, 
-      temperature: 0.5 
+    'emilyalsentzer/Bio_ClinicalBERT': {
+      return_all_scores: true
     },
-    'emilyalsentzer/Bio_ClinicalBERT': { 
-      return_all_scores: true 
-    },
-    'openai/whisper-medium': { 
-      language: 'es', 
-      task: 'transcribe' 
+    'openai/whisper-medium': {
+      language: 'es',
+      task: 'transcribe'
     }
   };
 
