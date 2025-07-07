@@ -7,7 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { MedicalSpecialtyService } from '../../services/MedicalSpecialtyService.js';
-import Logger from '../../../utils/logger.js';
+import Logger from '../../../src/utils/logger.js';
 
 interface SpecialtyRequest {
   specialty: string;
@@ -42,7 +42,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<Specialty
       patientContext: patientContext ? Object.keys(patientContext) : [],
       testMode,
       timestamp: new Date().toISOString()
-    });
+    } as any);
 
     // Validate required fields
     if (!specialty || typeof specialty !== 'string') {
@@ -61,7 +61,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<Specialty
         specialty,
         error: serviceError.message,
         stack: serviceError.stack
-      });
+      } as any);
 
       return NextResponse.json<SpecialtyResponse>({
         error: 'Failed to execute specialty service',
@@ -76,7 +76,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<Specialty
       processingTimeMs: processingTime,
       responseCount: result.responses ? result.responses.length : 0,
       timestamp: new Date().toISOString()
-    });
+    } as any);
 
     return NextResponse.json<SpecialtyResponse>({
       success: true,
@@ -97,7 +97,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<Specialty
       stack: error?.stack,
       processingTimeMs: processingTime,
       timestamp: new Date().toISOString()
-    });
+    } as any);
 
     return NextResponse.json<SpecialtyResponse>({
       error: 'Internal server error',
