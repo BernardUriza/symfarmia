@@ -20,6 +20,7 @@ export function ThemeProvider({ children }) {
   const theme = storedTheme || systemPreference
 
   useEffect(() => {
+    if (typeof document === 'undefined') return
     const root = document.documentElement
     root.setAttribute('data-theme', theme)
     root.classList.toggle('dark', theme === 'dark')
