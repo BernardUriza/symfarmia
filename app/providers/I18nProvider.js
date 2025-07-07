@@ -132,7 +132,56 @@ const fallbackTranslations = {
     'completed': 'Completado',
     
     // UI Actions
-    'inventar_consulta': 'Inventar Consulta'
+    'inventar_consulta': 'Inventar Consulta',
+    
+    // Consultation workspace
+    'consultation_title': 'Consulta Médica',
+    'session_active': 'Sesión activa',
+    'session_inactive': 'Sesión inactiva',
+    'activate_advanced_ai': 'Activar IA Avanzada',
+    'basic_mode': 'Modo Básico',
+    'change_layout': 'Cambiar diseño',
+    
+    // Consultation settings
+    'consultation_settings': 'Configuración de Consulta',
+    'customize_experience': 'Personaliza tu experiencia médica',
+    'save_settings': 'Guardar Configuración',
+    'reset': 'Resetear',
+    
+    // Landing page critical content
+    'intelligent_transcription': 'Transcripción Inteligente',
+    'intelligent_transcription_desc': 'Convierte automáticamente el audio de la consulta en texto médico estructurado',
+    'assisted_diagnosis': 'Diagnóstico Asistido',
+    'assisted_diagnosis_desc': 'Sugiere diagnósticos posibles basados en síntomas y análisis clínico',
+    'transformation_voices': 'Voces de la Transformación',
+    'real_doctor_stories': 'Historias reales de médicos que ya transformaron su práctica',
+    'collective_transformation': 'Más de 500 médicos han reducido su tiempo en documentación en un 70%',
+    'join_transformation': 'Únete a la transformación digital médica',
+    
+    // Common testimonial fallbacks
+    'dr_maria_name': 'Dra. María González',
+    'dr_maria_specialty': 'Medicina General',
+    'dr_maria_location': 'Ciudad de México',
+    'dr_carlos_name': 'Dr. Carlos Ruiz',
+    'dr_carlos_specialty': 'Cardiología',
+    'dr_carlos_location': 'Barcelona',
+    'dr_ana_name': 'Dra. Ana López',
+    'dr_ana_specialty': 'Pediatría',
+    'dr_ana_location': 'Buenos Aires',
+    
+    // Landing page feature cards - BRUTAL FIX for hardcoded English
+    'Patient Management': 'Gestión de Pacientes',
+    'Medical Reports': 'Reportes Médicos', 
+    'Analytics': 'Análisis',
+    'Complete patient profiles and medical history tracking': 'Perfiles completos de pacientes y seguimiento de historial médico',
+    'Digital diagnosis tracking and documentation': 'Seguimiento y documentación digital de diagnósticos',
+    'Intelligent insights for medical practice': 'Información inteligente para la práctica médica',
+    'Welcome to SYMFARMIA': 'Bienvenido a SYMFARMIA',
+    'Modern medical practice management with intelligent automation': 'Gestión moderna de consultorios médicos con automatización inteligente',
+    'Login': 'Iniciar Sesión',
+    'Register': 'Registrarse',
+    'Get Started': 'Comenzar',
+    'Try Demo': 'Probar Demo'
   },
   'en': {
     'transcription.title': 'Real-time Transcription',
@@ -261,7 +310,17 @@ export function I18nProvider({ children }) {
       'Loading': 'Cargando',
       'Error': 'Error',
       'Success': 'Éxito',
-      'Warning': 'Advertencia'
+      'Warning': 'Advertencia',
+      // Landing page brutal fixes
+      'Patient Management': 'Gestión de Pacientes',
+      'Medical Reports': 'Reportes Médicos',
+      'Welcome to SYMFARMIA': 'Bienvenido a SYMFARMIA',
+      'Get Started': 'Comenzar',
+      'Try Demo': 'Probar Demo',
+      // Session status
+      'consultation_title': 'Consulta Médica',
+      'session_active': 'Sesión activa',
+      'basic_mode': 'Modo Básico'
     };
 
     // Direct key lookup

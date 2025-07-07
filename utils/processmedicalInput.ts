@@ -29,12 +29,10 @@ export const processmedicalInput = async (userInput: string) => {
   if (isMedicalQuery) {
     const dependencies = {
       config: MedicalAIConfig,
-      httpClient: {
-        fetch: (...args: Parameters<typeof fetch>) => globalThis.fetch(...args)
-      }
+      httpClient: { fetch: (input: RequestInfo | URL, init?: RequestInit) => globalThis.fetch(input, init) }
     };
     const medicalResponse = await processMedicalQuery(
-      { query: userInput, context: {}, type: 'diagnosis' },
+      { query: userInput, context: { timestamp: new Date(), source: 'user_input' }, type: 'diagnosis' },
       dependencies
     );
     return medicalResponse;

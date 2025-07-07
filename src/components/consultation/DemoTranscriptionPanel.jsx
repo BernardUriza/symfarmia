@@ -11,8 +11,7 @@ import {
   SparklesIcon,
   CheckCircleIcon,
   ArrowPathIcon,
-  BeakerIcon,
-  Cog6ToothIcon
+  BeakerIcon
 } from "@heroicons/react/24/outline";
 import { useTranslation } from "../../../app/providers/I18nProvider";
 import { useDemoTranscription } from "../../../hooks/useDemoTranscription";

@@ -19,6 +19,13 @@
 /build
 /dist/
 
+# CI/CD artifacts
+.last_build_count
+.last_build_timestamp
+build-reports/
+coverage/
+.turbo/
+
 # misc
 .DS_Store
 *.pem

@@ -1,8 +1,8 @@
 "use client"
 import { withPageAuthRequired } from '@auth0/nextjs-auth0';
-import dynamic from 'next/dynamic';
+import nextDynamic from 'next/dynamic';
 
-const LegacyApp = dynamic(() => import('../../legacy_core/app/app.js'), {
+const LegacyApp = nextDynamic(() => import('../../legacy_core/app/app.js'), {
   ssr: false,
   loading: () => <p>Loading legacy module...</p>,
 });
