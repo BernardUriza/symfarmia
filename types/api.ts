@@ -280,3 +280,17 @@ export interface ApiConfig {
     apiKey?: string;
   };
 }
+
+export interface ModuleStatus {
+  status: 'healthy' | 'degraded' | 'failed';
+  critical: boolean;
+  error?: string;
+  responseTime?: number;
+}
+
+export interface SystemHealthReport {
+  timestamp: Date;
+  overall: 'healthy' | 'degraded';
+  modules: Record<string, ModuleStatus>;
+  criticalFailures: ModuleStatus[];
+}
