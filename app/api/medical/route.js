@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
-import { processMedicalQuery, getErrorMessage } from '@/services/MedicalAILogic';
-import { MedicalAIConfig } from '@/config/MedicalAIConfig';
-
-// Utiliza tipos explícitos y un solo punto de entrada para dependencias
+import { processMedicalQuery, getErrorMessage } from '../../services/MedicalAILogic.js';
+import { MedicalAIConfig } from '../../config/MedicalAIConfig.js';
+// Dependency injection point, explicit, one place
 const dependencies = {
   config: MedicalAIConfig,
   httpClient: { fetch }
@@ -14,25 +13,77 @@ export async function POST(request) {
     const result = await processMedicalQuery({ query, type }, dependencies);
     return NextResponse.json(result);
   } catch (error) {
-    // Brutalidad absoluta en errores, un solo bloque, limpieza total
+    // Deep log brutal: logea TODO, sin piedad
+    console.error('[Medical API DeepLog]', {
+      name: error.name,
+      message: error.message,
+      status: error.status,
+      type: error.type,
+      details: error.details,
+      stack: error.stack,
+      ...(error.response && { response: error.response })
+    });
+
+    // Hugging Face error exposure
+    if (error.type === 'huggingface_error') {
+      return NextResponse.json(
+        {
+          error: 'Hugging Face API error',
+          status: error.status,
+          details: error.details,
+          message: error.message,
+          stack: error.stack,
+        },
+        { status: error.status || 502 }
+      );
+    }
+
+    // Configuration error
+    if (error.type === 'configuration_error') {
+      return NextResponse.json(
+        {
+          error: 'Configuration error',
+          type: error.type,
+          details: error.details || error.message,
+        },
+        { status: 500 }
+      );
+    }
+
+    // Timeout error
+    if (error.name === 'AbortError') {
+      return NextResponse.json(
+        {
+          error: 'Request timeout',
+          type: 'timeout_error',
+          message: 'Request to Hugging Face API timed out',
+          stack: error.stack,
+        },
+        { status: 408 }
+      );
+    }
+
+    // Network error
+    if (error.name === 'TypeError' && error.message?.includes('fetch')) {
+      return NextResponse.json(
+        {
+          error: 'Network error',
+          type: 'network_error',
+          message: 'Unable to connect to Hugging Face API',
+          stack: error.stack,
+        },
+        { status: 503 }
+      );
+    }
+
+    // Otros errores: show all
     return NextResponse.json(
       {
         error: getErrorMessage(error.status) || 'Internal server error',
         type: error.type || 'server_error',
         details: error.details || error.message,
-        ...(error.name === 'AbortError' && {
-          error: 'Request timeout',
-          type: 'timeout_error',
-          message: 'Request to Hugging Face API timed out'
-        }),
-        ...(error.name === 'TypeError' && error.message?.includes('fetch') && {
-          error: 'Network error',
-          type: 'network_error',
-          message: 'Unable to connect to Hugging Face API'
-        }),
-        ...(error.type === 'configuration_error' && {
-          error: 'Configuration error',
-        })
+        stack: error.stack,
+        status: error.status || 500,
       },
       { status: error.status || 500 }
     );
