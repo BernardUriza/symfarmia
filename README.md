@@ -210,6 +210,7 @@ symfarmia/
 │   ├── components/        # Older JS components
 │   ├── hooks/             # Utility hooks
 │   └── utils/             # Helpers for legacy pages
+├── src/apps/              # Modular applications per route
 ├── components/             # ✨ Modern TypeScript components
 ├── hooks/                  # ✨ Custom React hooks (TS)
 ├── types/                  # ✨ Global TypeScript types
