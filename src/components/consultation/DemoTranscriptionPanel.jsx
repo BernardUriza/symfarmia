@@ -47,7 +47,7 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
     return () => {
       resetDemo();
     };
-  }, []);
+  }, [resetDemo]);
 
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);

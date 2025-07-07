@@ -1,5 +1,5 @@
 // System-specific reducer for global application state
-import type { AppState, MedicalError, MedicalStateAction } from '../types';
+import type { AppState, MedicalError, MedicalStateAction, PerformanceMetrics } from '../types';
 
 export function systemReducer(
   state: AppState['system'],
@@ -85,7 +85,7 @@ export function systemReducer(
     }
     
     case 'UPDATE_PERFORMANCE': {
-      const { metrics } = action.payload as { metrics: any };
+      const { metrics } = action.payload as { metrics: Partial<PerformanceMetrics> };
       const updatedMetrics = {
         ...state.performance.globalMetrics,
         ...metrics
@@ -277,7 +277,7 @@ export function systemReducer(
     
     case 'HYDRATE_STATE': {
       // Handle state rehydration from persistence
-      const payload = action.payload as any;
+      const payload = action.payload as Partial<AppState>;
       
       if (payload.system) {
         return {
@@ -291,7 +291,7 @@ export function systemReducer(
           errors: (payload.system.errors as MedicalError[])?.filter((error: MedicalError) => 
             new Date().getTime() - error.timestamp.getTime() < 24 * 60 * 60 * 1000
           ) || [],
-          notifications: (payload.system.notifications as Array<{ persistent?: boolean; timestamp: string }>)?.filter((notification) =>
+          notifications: payload.system.notifications?.filter((notification: AppState['system']['notifications'][0]) =>
             notification.persistent || 
             new Date().getTime() - new Date(notification.timestamp).getTime() < 60 * 60 * 1000
           ) || []

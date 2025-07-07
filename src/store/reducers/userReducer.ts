@@ -1,5 +1,6 @@
 // User-specific reducer for preferences and statistics
 import type { AppState, MedicalStateAction } from '../types';
+import type { AnalyticsEvent } from '../../types/medical';
 
 export function userReducer(
   state: AppState['user'],
@@ -7,7 +8,7 @@ export function userReducer(
 ): AppState['user'] {
   switch (action.type) {
     case 'UPDATE_PREFERENCES': {
-      const { preferences } = action.payload as { preferences: any };
+      const { preferences } = action.payload as { preferences: Partial<AppState['user']['preferences']> };
       
       return {
         ...state,
@@ -19,7 +20,7 @@ export function userReducer(
     }
     
     case 'UPDATE_PERMISSIONS': {
-      const { permissions } = action.payload as { permissions: any };
+      const { permissions } = action.payload as { permissions: Partial<AppState['user']['permissions']> };
       
       return {
         ...state,
@@ -31,7 +32,7 @@ export function userReducer(
     }
     
     case 'LOG_ANALYTICS_EVENT': {
-      const { event } = action.payload as { event: any };
+      const { event } = action.payload as { event: AnalyticsEvent };
       
       // Update user statistics based on event type
       const newStatistics = { ...state.statistics };
@@ -76,7 +77,7 @@ export function userReducer(
     }
     
     case 'UPDATE_USER_PROFILE': {
-      const { profile } = action.payload as { profile: any };
+      const { profile } = action.payload as { profile: { id?: string; [key: string]: unknown } };
       
       return {
         ...state,
@@ -87,7 +88,7 @@ export function userReducer(
     
     case 'HYDRATE_STATE': {
       // Handle state rehydration from persistence
-      const payload = action.payload as any;
+      const payload = action.payload as Partial<AppState>;
       
       if (payload.user) {
         return {
