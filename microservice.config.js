@@ -60,7 +60,11 @@ export const microserviceConfig = {
   security: {
     cors: {
       enabled: true,
-      origins: process.env.ALLOWED_ORIGINS?.split(',') || ['*']
+      origins:
+        process.env.ALLOWED_ORIGINS?.split(',') || [
+          'https://symfarmia.netlify.app',
+          'http://localhost:3000'
+        ]
     },
     authentication: {
       required: false, // Internal service
