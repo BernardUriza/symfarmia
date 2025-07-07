@@ -683,3 +683,20 @@ The atomic diary entry system + mandatory git hygiene + conflict resolution mark
 <!-- ENTRY_END: CLAUDE_2025_07_07_21_00 -->
 
 ---
+<!-- ENTRY_START: CODEX_2025_07_07_19_41 -->
+## 🎨 Codex Entry [2025-07-07 19:41]
+**Context**: Added legacy design scaffolding and automation scripts
+**Status**: ✅ Design system directory initialized
+**Next**: Monitor updates with design-watcher and migrate components
+
+### Highlights
+- `legacy-design/` now stores timestamped Figma exports
+- Watcher logs updates to this diary automatically
+- Figma integration script fetches design tokens
+- Component migration template guides conversions
+
+**Duration**: 10 minutes
+**Energy**: Medium - setup infrastructure
+<!-- ENTRY_END: CODEX_2025_07_07_19_41 -->
+
+---
