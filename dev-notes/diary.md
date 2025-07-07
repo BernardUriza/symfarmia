@@ -50,6 +50,64 @@ _Ver commits y PRs para detalles técnicos completos._
 
 ---
 
+## 📝 **TRABAJO EN PROGRESO**
+
+### 2025-07-07 - Claude
+
+**FillMask Error Investigation & Fix**
+- 🔍 **Issue**: FillMask models receiving unwanted `sanitize` and `max_length` parameters
+- 🔎 **Finding**: Code was already correct - fill-mask models configured to receive NO parameters
+- 🛡️ **Solution**: Added debug logging and safeguard to strip any parameters from fill-mask requests
+- 📍 **Files**: `app/services/MedicalAILogic.js`
+
+```javascript
+// Added safeguard
+if (modelType === 'fill-mask' && requestBody.parameters) {
+  console.warn('[WARNING] Removing parameters from fill-mask model request');
+  delete requestBody.parameters;
+}
+```
+
+**Status**: ✅ Fixed - Added defensive coding to prevent external parameter injection
+
+**Memory Leak in DemoTranscriptionPanel**
+- 🔍 **Issue**: Memory leaks from event listeners not being removed on unmount
+- 🛡️ **Solution**: Consolidated click outside handlers into single useEffect
+- 📍 **Files**: `src/components/consultation/DemoTranscriptionPanel.jsx`
+- ✅ **Finding**: useDemoTranscription hook already has comprehensive cleanup implemented
+
+**Status**: ✅ Fixed - Consolidated event listeners and verified hook cleanup
+
+**Missing Validation in useDemoTranscription**
+- 🔍 **Issue**: Hook could throw if no strategy parameter passed
+- 🛡️ **Solution**: Added validation for strategy parameter with fallback to default
+- 📍 **Files**: `hooks/useDemoTranscription.js`
+- ✅ **Validates**: Type checking and existence in DEMO_STRATEGIES
+
+**Status**: ✅ Fixed - Added proper parameter validation with warnings
+
+**Convert Medical AI Endpoints to TypeScript**
+- 🔄 **Task**: Convert JS medical API routes to TypeScript
+- ✅ **Converted**: 
+  - `/api/medical-ai/demo/route.ts` - Added proper types for request/response
+  - `/api/medical/route.ts` - Added error types and request validation
+  - `/api/medical-specialty/route.ts` - Added interface definitions
+- 📍 **Benefits**: Type safety, better error handling, improved IDE support
+
+**Status**: ✅ Completed - All medical AI endpoints converted to TypeScript
+
+**Fix TypeScript Compilation Errors**
+- 🔍 **Issue**: TypeScript errors after converting medical AI endpoints
+- 🛠️ **Fixed**:
+  - Missing `context` parameter in processMedicalQuery calls
+  - Invalid `.ts` import extension (changed to `.js`)
+  - `getErrorMessage` call with potentially undefined status
+- ✅ **Result**: `npm run type-check` now passes without errors
+
+**Status**: ✅ Fixed - All TypeScript compilation errors resolved
+
+---
+
 <!-- ENTRY_START: CLAUDE_2025_07_07_15_00 -->
 ## 🤖 Claude Entry [2025-07-07 15:00]
 **Context**: Diary compaction and archive of completed work

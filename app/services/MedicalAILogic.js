@@ -78,6 +78,12 @@ export async function processMedicalQuery({ query, context, type = 'diagnosis' }
   if (config.acceptsParameters(model) && Object.keys(parameters).length > 0) {
     requestBody.parameters = parameters;
   }
+  
+  // SAFEGUARD: Ensure fill-mask models NEVER get parameters
+  if (modelType === 'fill-mask' && requestBody.parameters) {
+    console.warn('[WARNING] Removing parameters from fill-mask model request');
+    delete requestBody.parameters;
+  }
 
   try {
     const response = await makeAIRequest(model, requestBody, { config, httpClient });
@@ -103,6 +109,17 @@ async function makeAIRequest(model, body, { config, httpClient }) {
     'Authorization': `Bearer ${config.getToken()}`,
     'User-Agent': config.getUserAgent()
   };
+
+  // Debug logging for fill-mask models
+  if (config.getModelType(model) === 'fill-mask') {
+    console.log('[DEBUG] Fill-mask request:', {
+      model,
+      url: `${config.getBaseUrl()}/${model}`,
+      body: JSON.stringify(body, null, 2),
+      bodyKeys: Object.keys(body),
+      hasParameters: 'parameters' in body
+    });
+  }
 
   const response = await httpClient.fetch(`${config.getBaseUrl()}/${model}`, {
     method: 'POST',
