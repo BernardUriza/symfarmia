@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from 'react';
+import Image from 'next/image';
 import {
   MicrophoneIcon,
   DocumentTextIcon,
@@ -80,7 +81,7 @@ const MinimalistLandingPage = ({ isDemo = false }) => {
       <main className={`max-w-4xl mx-auto px-6 ${isDemoMode ? 'pt-32' : 'pt-20'}`}>
         
         {/* Hero Section */}
-        <section className="text-center mb-20">
+        <section className="text-center mb-20 hero-section">
           <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-8 shadow-lg border border-white/50">
             <h1 className="text-5xl md:text-6xl font-bold mb-6 text-gray-900 leading-tight">
               {t('hero_heading')}
@@ -88,6 +89,19 @@ const MinimalistLandingPage = ({ isDemo = false }) => {
             <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
               {t('hero_subheading')}
             </p>
+
+            <div className="mb-8">
+              <Image
+                src="/banner1.png"
+                alt="SYMFARMIA Medical Platform"
+                width={1200}
+                height={600}
+                priority
+                placeholder="blur"
+                blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABAAAAAQACAIAAADwf7zUAAEw2mNhQlgAATDaanVtYgAAAB5qdW1kYzJwYQARABCAAACqADibcQNjMnBhAAAANxNqdW1iAAAA"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              />
+            </div>
           
             {/* CTA Buttons */}
             <div className="mb-12">
