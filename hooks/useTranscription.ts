@@ -96,7 +96,7 @@ export function useTranscription() {
           interimTranscript += transcript;
         }
         if (conf < 0.5) {
-          Logger.debug('Low confidence transcription', { transcript, conf });
+          console.debug('[SYMFARMIA] Low confidence transcription', { transcript, conf });
         }
       }
       if (interimTranscript) {
