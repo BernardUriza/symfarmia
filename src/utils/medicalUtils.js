@@ -403,7 +403,7 @@ export const mockMedicalAI = {
         console.error('Medical AI error:', err);
         
         // Generate appropriate fallback message based on error type
-        let fallbackMessage = mockMedicalAI._fallbackResponse(query);
+        let fallbackData = mockMedicalAI._fallbackResponse(query);
         let errorContext = '';
         
         if (err.message === 'authentication_error') {
@@ -417,10 +417,10 @@ export const mockMedicalAI = {
         }
         
         const fallback = {
-          response: `${fallbackMessage}\n\n${errorContext}`,
-          confidence: 0.4,
-          reasoning: [],
-          suggestions: [],
+          response: `${fallbackData.response}\n\n${errorContext}`,
+          confidence: fallbackData.confidence || 0.4,
+          reasoning: fallbackData.reasoning || [],
+          suggestions: fallbackData.suggestions || [],
           disclaimer,
           sources: [],
           error: err.message
@@ -431,16 +431,204 @@ export const mockMedicalAI = {
       }
     },
 
-  _fallbackResponse: (_message) => {
-    const defaultResponses = [
-      "I understand you're looking for medical guidance. Could you provide more specific details about the patient's condition?",
-      "Based on the information provided, I'd recommend a comprehensive evaluation. What specific aspect would you like me to focus on?",
-      "For this clinical scenario, let me suggest some evidence-based approaches. Would you like me to elaborate on any particular aspect?",
-      "Puedo ayudarle con soporte clínico. Comparta más detalles sobre la presentación del paciente.",
-      "Este es un caso interesante. Permítame brindarle algunas ideas basadas en guías médicas actuales."
+  _fallbackResponse: (message) => {
+    // Input validation - check for garbage text
+    const isGarbageText = mockMedicalAI._isGarbageInput(message);
+    
+    if (isGarbageText) {
+      return {
+        response: "Input no válido para análisis médico. Para consultas efectivas, proporciona: síntomas específicos, duración, intensidad y contexto del paciente.",
+        confidence: 0.0,
+        reasoning: [
+          "Input no contiene terminología médica reconocible",
+          "Texto parece ser aleatorio o no relacionado con medicina",
+          "Sugiriendo formato de consulta estructurada para mejores resultados"
+        ],
+        suggestions: [
+          "dolor de cabeza persistente desde hace 3 días",
+          "fiebre de 38.5°C con escalofríos y malestar general",
+          "dolor torácico opresivo que irradia al brazo izquierdo",
+          "náuseas y vómitos después de las comidas",
+          "disnea de esfuerzo progresiva en paciente de 65 años"
+        ]
+      };
+    }
+
+    // Enhanced medical responses for valid input
+    const medicalKeywords = mockMedicalAI._extractMedicalKeywords(message);
+    const specialty = mockMedicalAI._inferSpecialty(message);
+    
+    const responses = [
+      {
+        response: `Basándome en la presentación clínica descrita, sugiero una evaluación sistemática considerando ${specialty}. El análisis de ${medicalKeywords.join(', ')} requiere un enfoque estructurado.`,
+        confidence: 0.75,
+        reasoning: [
+          `Identificadas palabras clave médicas: ${medicalKeywords.slice(0,3).join(', ')}`,
+          `Especialidad inferida: ${specialty}`,
+          "Aplicando protocolos de evaluación clínica estándar",
+          "Considerando diagnósticos diferenciales más probables"
+        ],
+        suggestions: mockMedicalAI._getSpecialtySpecificSuggestions(specialty)
+      },
+      {
+        response: `Para este caso clínico en ${specialty}, recomiendo un abordaje diagnóstico basado en evidencia. Los hallazgos de ${medicalKeywords.join(' y ')} orientan hacia un protocolo específico de evaluación.`,
+        confidence: 0.72,
+        reasoning: [
+          `Análisis de presentación clínica completado`,
+          `Términos médicos relevantes identificados: ${medicalKeywords.length} elementos`,
+          `Contexto especializado: ${specialty}`,
+          "Aplicando guías clínicas actualizadas"
+        ],
+        suggestions: mockMedicalAI._getSpecialtySpecificSuggestions(specialty)
+      },
+      {
+        response: `El cuadro clínico presentado sugiere una evaluación en ${specialty}. La combinación de ${medicalKeywords.join(', ')} requiere análisis diferencial sistemático.`,
+        confidence: 0.78,
+        reasoning: [
+          "Evaluación clínica estructurada iniciada",
+          `Especialidad médica relevante: ${specialty}`,
+          `Síntomas/signos clave identificados: ${medicalKeywords.length}`,
+          "Recomendando enfoque diagnóstico basado en evidencia"
+        ],
+        suggestions: mockMedicalAI._getSpecialtySpecificSuggestions(specialty)
+      }
     ];
 
-    return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
+    return responses[Math.floor(Math.random() * responses.length)];
+  },
+
+  // Helper function to detect garbage input
+  _isGarbageInput: (text) => {
+    if (!text || typeof text !== 'string') return true;
+    
+    const cleanText = text.toLowerCase().trim();
+    if (cleanText.length < 3) return true;
+    
+    // Check for random characters or keyboard mashing
+    const randomPatterns = [
+      /^[a-z]{1,2}[a-z]*[a-z]{1,2}$/i, // Short random strings
+      /(.)\1{3,}/, // Repeated characters
+      /^[qwertyuiop]+$/i, // Keyboard rows
+      /^[asdfghjkl]+$/i,
+      /^[zxcvbnm]+$/i,
+      /^[0-9]+$/, // Only numbers
+      /^[^a-zA-Z0-9\s]+$/ // Only special characters
+    ];
+    
+    // Check if it's too short or matches random patterns
+    if (cleanText.length < 5 || randomPatterns.some(pattern => pattern.test(cleanText))) {
+      return true;
+    }
+    
+    // Check for medical keywords
+    const medicalTerms = [
+      'dolor', 'pain', 'fiebre', 'fever', 'síntoma', 'symptom', 'paciente', 'patient',
+      'diagnóstico', 'diagnosis', 'tratamiento', 'treatment', 'medicamento', 'medication',
+      'consulta', 'consultation', 'examen', 'exam', 'análisis', 'analysis', 'sangre', 'blood',
+      'presión', 'pressure', 'corazón', 'heart', 'pulmón', 'lung', 'cabeza', 'head',
+      'estómago', 'stomach', 'náusea', 'nausea', 'vómito', 'vomit', 'diarrea', 'diarrhea',
+      'tos', 'cough', 'respiración', 'breathing', 'mareo', 'dizzy', 'cansancio', 'fatigue'
+    ];
+    
+    const hasAnyMedicalTerm = medicalTerms.some(term => cleanText.includes(term));
+    
+    // If no medical terms and looks random, it's garbage
+    return !hasAnyMedicalTerm && cleanText.split('').every(char => /[a-z]/i.test(char));
+  },
+
+  // Extract medical keywords from text
+  _extractMedicalKeywords: (text) => {
+    const medicalKeywords = [
+      'dolor', 'pain', 'fiebre', 'fever', 'náusea', 'nausea', 'vómito', 'vomit',
+      'tos', 'cough', 'disnea', 'dyspnea', 'fatiga', 'fatigue', 'mareo', 'dizziness',
+      'cefalea', 'headache', 'palpitaciones', 'palpitations', 'hipertensión', 'hypertension',
+      'diabetes', 'asma', 'asthma', 'alergia', 'allergy', 'infección', 'infection',
+      'inflamación', 'inflammation', 'lesión', 'injury', 'fractura', 'fracture'
+    ];
+    
+    const found = [];
+    const lowerText = text.toLowerCase();
+    
+    medicalKeywords.forEach(keyword => {
+      if (lowerText.includes(keyword)) {
+        found.push(keyword);
+      }
+    });
+    
+    return found.length > 0 ? found : ['síntomas no específicos'];
+  },
+
+  // Infer medical specialty from text
+  _inferSpecialty: (text) => {
+    const specialtyKeywords = {
+      'Cardiología': ['corazón', 'heart', 'palpitaciones', 'palpitations', 'presión', 'pressure', 'hipertensión', 'chest pain', 'dolor torácico'],
+      'Neurología': ['cabeza', 'head', 'cefalea', 'headache', 'mareo', 'dizziness', 'convulsión', 'seizure', 'memoria', 'memory'],
+      'Gastroenterología': ['estómago', 'stomach', 'náusea', 'nausea', 'vómito', 'vomit', 'diarrea', 'diarrhea', 'digestión', 'digestion'],
+      'Neumología': ['pulmón', 'lung', 'tos', 'cough', 'disnea', 'dyspnea', 'asma', 'asthma', 'respiración', 'breathing'],
+      'Endocrinología': ['diabetes', 'tiroides', 'thyroid', 'metabolismo', 'metabolism', 'hormona', 'hormone'],
+      'Dermatología': ['piel', 'skin', 'rash', 'erupción', 'picazón', 'itch', 'lesión cutánea', 'skin lesion'],
+      'Pediatría': ['niño', 'child', 'bebé', 'baby', 'infantil', 'pediatric', 'desarrollo', 'development']
+    };
+    
+    const lowerText = text.toLowerCase();
+    
+    for (const [specialty, keywords] of Object.entries(specialtyKeywords)) {
+      if (keywords.some(keyword => lowerText.includes(keyword))) {
+        return specialty;
+      }
+    }
+    
+    return 'Medicina General';
+  },
+
+  // Get specialty-specific suggestions
+  _getSpecialtySpecificSuggestions: (specialty) => {
+    const suggestions = {
+      'Cardiología': [
+        'Electrocardiograma de 12 derivaciones',
+        'Ecocardiograma transtorácico',
+        'Enzimas cardíacas (troponina, CK-MB)',
+        'Monitoreo de presión arterial 24h',
+        'Prueba de esfuerzo'
+      ],
+      'Neurología': [
+        'Tomografía computada de cráneo',
+        'Resonancia magnética cerebral',
+        'Evaluación neurológica completa',
+        'Electroencefalograma si hay convulsiones',
+        'Doppler de carótidas'
+      ],
+      'Gastroenterología': [
+        'Endoscopia digestiva alta',
+        'Ultrasonido abdominal',
+        'Análisis de heces completo',
+        'Pruebas de función hepática',
+        'Colonoscopia si es indicada'
+      ],
+      'Neumología': [
+        'Radiografía de tórax PA y lateral',
+        'Tomografía de tórax de alta resolución',
+        'Espirometría con broncodilatador',
+        'Gasometría arterial',
+        'Cultivo de esputo'
+      ],
+      'Endocrinología': [
+        'Glucemia en ayunas y postprandial',
+        'Hemoglobina glicosilada (HbA1c)',
+        'Perfil tiroideo completo (TSH, T3, T4)',
+        'Perfil lipídico',
+        'Insulina basal'
+      ],
+      'Medicina General': [
+        'Biometría hemática completa',
+        'Química sanguínea básica',
+        'Examen general de orina',
+        'Signos vitales completos',
+        'Exploración física sistemática'
+      ]
+    };
+    
+    return suggestions[specialty] || suggestions['Medicina General'];
   },
 
   generateSuggestions: (patientData) => {

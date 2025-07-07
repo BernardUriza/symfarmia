@@ -6,6 +6,41 @@
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
   --background-end-rgb: 255, 255, 255;
+  --bg-primary: #ffffff;
+  --bg-secondary: #f9fafb;
+  --bg-tertiary: #f3f4f6;
+  --bg-hover: #e5e7eb;
+  --text-primary: #1e293b;
+  --text-secondary: #4b5563;
+  --text-muted: #6b7280;
+  --border-primary: #d1d5db;
+  --border-light: #e5e7eb;
+}
+
+:root[data-theme="dark"] {
+  /* Backgrounds */
+  --bg-primary: #0f1419;
+  --bg-secondary: #1a1f2e;
+  --bg-tertiary: #242938;
+  --bg-hover: #2d3242;
+
+  /* Medical UI */
+  --medical-primary: #3b82f6;
+  --medical-success: #10b981;
+  --medical-warning: #f59e0b;
+  --medical-danger: #ef4444;
+  --medical-info: #06b6d4;
+
+  /* Text */
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --text-inverse: #1e293b;
+
+  /* Borders */
+  --border-primary: #374151;
+  --border-light: #4b5563;
+  --border-focus: #3b82f6;
 }
 
 * {
@@ -18,6 +53,18 @@ html,
 body {
   max-width: 100vw;
   overflow-x: hidden;
+}
+
+html {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  color-scheme: light;
 }
 
 body {
@@ -36,15 +83,12 @@ a {
 }
 
 
-html.dark {
+[data-theme="dark"] {
   --foreground-rgb: 255, 255, 255;
   --background-start-rgb: 15, 23, 42;
   --background-end-rgb: 30, 41, 59;
 }
 
-body {
-  @apply bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-gray-100;
-}
 
 .medical-assistant-container {
   width: 100%;
@@ -527,6 +571,31 @@ div[role="menu"] div:hover {
   box-shadow: 0 8px 25px rgba(0,0,0,0.1);
   overflow: hidden;
 }
+[data-theme="dark"] .transcription-area {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  color: var(--text-primary);
+}
+
+.medical-card {
+  @apply bg-white border border-gray-200;
+}
+[data-theme="dark"] .medical-card {
+  background: var(--bg-tertiary);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border-color: var(--border-primary);
+}
+
+[data-theme="dark"] .soap-section {
+  background: var(--bg-secondary);
+  border-left: 4px solid var(--medical-primary);
+}
+
+[data-theme="dark"] .alert-critical {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid var(--medical-danger);
+  color: #fca5a5;
+}
 .transcription-area .transcription-header {
   background: linear-gradient(135deg, #2563eb, #1d4ed8);
   padding: 20px;
@@ -696,4 +765,17 @@ div[role="menu"] div:hover {
 }
 .pulse-element {
   animation: pulse 2s infinite;
+}
+
+@keyframes blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+.typing-cursor {
+  display: inline-block;
+  width: 1px;
+  background: #111827;
+  margin-left: 2px;
+  animation: blink 1s step-start infinite;
 }

@@ -1,0 +1,5 @@
+{
+    "autoBuild": true,
+    "portRange": {"start": 3001, "end": 3010},
+    "medicalValidation": true
+}

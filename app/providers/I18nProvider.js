@@ -158,6 +158,35 @@ const fallbackTranslations = {
     'collective_transformation': 'Más de 500 médicos han reducido su tiempo en documentación en un 70%',
     'join_transformation': 'Únete a la transformación digital médica',
     
+    // Landing page missing keys
+    'beta_free': 'Acceso beta gratuito • Sin compromiso',
+    'demo_interactive': '🎯 Prueba el Demo Interactivo',
+    'benefit_speak': 'Habla naturalmente',
+    'benefit_speak_desc': 'Realiza tu consulta como siempre. Nuestro sistema escucha y entiende el contexto médico.',
+    'benefit_processing': 'Procesamiento inteligente',
+    'benefit_processing_desc': 'IA médica especializada estructura automáticamente la información en formato clínico.',
+    'benefit_report': 'Reporte instantáneo',
+    'benefit_report_desc': 'Obtén un PDF con diagnóstico, tratamiento y recomendaciones listo para entregar.',
+    'how_it_works': 'Así de simple funciona',
+    'step_consult': 'Consulta normal',
+    'step_consult_desc': '"Paciente de 45 años con dolor torácico intermitente..."',
+    'step_processing': 'Procesamiento IA',
+    'step_processing_desc': 'Sistema analiza y estructura la información médica',
+    'step_report': 'Reporte listo',
+    'step_report_desc': 'PDF con diagnóstico, tratamiento y seguimiento',
+    'testimonial_author': 'Dr. María González',
+    'testimonial_position': 'Medicina Interna, CDMX',
+    'testimonial_quote': '"Antes tardaba 15 minutos escribiendo cada reporte. Ahora me concentro en el paciente y el sistema hace el resto. Es exactamente lo que necesitaba."',
+    'testimonial_savings': 'Ahorra 2 horas diarias',
+    'final_cta_heading': '¿Listo para recuperar tu tiempo?',
+    'final_cta_text': 'Únete al beta para descubrir cómo la IA puede simplificar tu práctica médica.',
+    'final_cta_signup': 'Solicita acceso beta',
+    'final_cta_demo': 'O revisa el demo',
+    'footer_copy': '© 2024 SYMFARMIA • Hecho con 💙 para médicos en México',
+    'footer_privacy': 'Privacidad',
+    'footer_terms': 'Términos',
+    'footer_contact': 'Contacto',
+    
     // Common testimonial fallbacks
     'dr_maria_name': 'Dra. María González',
     'dr_maria_specialty': 'Medicina General',
@@ -207,7 +236,36 @@ const fallbackTranslations = {
     'register': 'Register',
     'hero_heading': 'Smart tools for modern doctors',
     'hero_subheading': 'Spend less time on paperwork and focus on your patients',
-    'cta_save_time': 'Yes, save me time'
+    'cta_save_time': 'Yes, save me time',
+    
+    // Landing page missing keys
+    'beta_free': 'Free beta access • No commitment',
+    'demo_interactive': '🎯 Try the Interactive Demo',
+    'benefit_speak': 'Speak naturally',
+    'benefit_speak_desc': 'Conduct your visit as usual. Our system listens and understands the medical context.',
+    'benefit_processing': 'Smart processing',
+    'benefit_processing_desc': 'Specialized medical AI automatically structures the information into clinical format.',
+    'benefit_report': 'Instant report',
+    'benefit_report_desc': 'Get a PDF with diagnosis, treatment and recommendations ready to hand over.',
+    'how_it_works': 'It\'s that simple',
+    'step_consult': 'Normal consultation',
+    'step_consult_desc': '"45 year old patient with intermittent chest pain..."',
+    'step_processing': 'AI processing',
+    'step_processing_desc': 'System analyzes and structures the medical information',
+    'step_report': 'Report ready',
+    'step_report_desc': 'PDF with diagnosis, treatment and follow-up',
+    'testimonial_author': 'Dr. María González',
+    'testimonial_position': 'Internal Medicine, Mexico City',
+    'testimonial_quote': '"I used to spend 15 minutes writing each report. Now I focus on the patient and the system does the rest. It\'s exactly what I needed."',
+    'testimonial_savings': 'Saves 2 hours daily',
+    'final_cta_heading': 'Ready to get your time back?',
+    'final_cta_text': 'Join the beta to see how AI can simplify your medical practice.',
+    'final_cta_signup': 'Request beta access',
+    'final_cta_demo': 'Or check out the demo',
+    'footer_copy': '© 2024 SYMFARMIA • Made with 💙 for doctors in Mexico',
+    'footer_privacy': 'Privacy',
+    'footer_terms': 'Terms',
+    'footer_contact': 'Contact'
   }
 };
 
@@ -285,61 +343,9 @@ export function I18nProvider({ children }) {
     return translation;
   };
 
-  // Create basic Spanish fallbacks for common English patterns
+  // Simple fallback for missing keys
   const createSpanishFallback = (key) => {
-    const englishToSpanish = {
-      'Start Recording': 'Iniciar Grabación',
-      'Stop Recording': 'Detener Grabación', 
-      'Real-time Transcription': 'Transcripción en Tiempo Real',
-      'Settings': 'Configuración',
-      'Dashboard': 'Panel Principal',
-      'Patients': 'Pacientes',
-      'Reports': 'Reportes',
-      'Analytics': 'Análisis',
-      'Consultation': 'Consulta',
-      'Profile': 'Perfil',
-      'Login': 'Iniciar Sesión',
-      'Register': 'Registrarse',
-      'Save': 'Guardar',
-      'Cancel': 'Cancelar',
-      'Delete': 'Eliminar',
-      'Edit': 'Editar',
-      'Create': 'Crear',
-      'Update': 'Actualizar',
-      'Search': 'Buscar',
-      'Loading': 'Cargando',
-      'Error': 'Error',
-      'Success': 'Éxito',
-      'Warning': 'Advertencia',
-      // Landing page brutal fixes
-      'Patient Management': 'Gestión de Pacientes',
-      'Medical Reports': 'Reportes Médicos',
-      'Welcome to SYMFARMIA': 'Bienvenido a SYMFARMIA',
-      'Get Started': 'Comenzar',
-      'Try Demo': 'Probar Demo',
-      // Session status
-      'consultation_title': 'Consulta Médica',
-      'session_active': 'Sesión activa',
-      'basic_mode': 'Modo Básico'
-    };
-
-    // Direct key lookup
-    if (englishToSpanish[key]) {
-      return englishToSpanish[key];
-    }
-
-    // Pattern matching for common suffixes
-    if (key.endsWith('_recording')) {
-      return key.replace('_recording', '_grabación');
-    }
-    if (key.endsWith('_transcription')) {
-      return key.replace('_transcription', '_transcripción');
-    }
-    if (key.startsWith('transcription.')) {
-      return key; // Keep transcription keys as-is for now
-    }
-
-    return null;
+    return key; // Just return the key itself as fallback
   };
 
   return (

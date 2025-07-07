@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import LandingPage from '../src/pages/LandingPage'
-import { ThemeProvider } from '../app/providers/ThemeProvider'
+import { ThemeProvider } from '../app/providers/ThemeProviderBulletproof'
 import { I18nProvider } from 'app/providers/I18nProvider'
 import { AppModeProvider } from '../app/providers/AppModeProvider'
 
