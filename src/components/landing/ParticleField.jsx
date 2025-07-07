@@ -1,8 +1,16 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
 const ParticleField = React.memo(({ count = 15, className = "bg-teal-400" }) => {
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   const particles = useMemo(() => {
+    if (!isClient) return [];
+
     return Array.from({ length: count }, (_, i) => ({
       id: i,
       left: Math.random() * 100,
@@ -10,8 +18,12 @@ const ParticleField = React.memo(({ count = 15, className = "bg-teal-400" }) => 
       delay: Math.random() * 3,
       duration: 4 + Math.random() * 2
     }));
-  }, [count]);
-  
+  }, [count, isClient]);
+
+  if (!isClient) {
+    return <div className="absolute inset-0 overflow-hidden pointer-events-none" />;
+  }
+
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
       {particles.map((particle) => (
