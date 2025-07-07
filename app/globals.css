@@ -131,6 +131,82 @@ body {
   .consultation-workspace-grid {
     gap: 12px;
   }
+  
+  /* TranscriptionPanel mobile optimizations */
+  .transcription-area {
+    margin: 0 8px;
+    border-radius: 12px;
+  }
+  
+  .transcription-area .transcription-header {
+    padding: 12px 16px;
+    border-radius: 12px 12px 0 0;
+  }
+  
+  .transcription-area .transcription-header .header-content {
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+  }
+  
+  .transcription-area .transcription-content {
+    padding: 20px 16px;
+    min-height: 150px;
+  }
+  
+  .transcription-area .transcription-content .start-button {
+    padding: 12px 24px;
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+  
+  .transcription-area .transcription-content .empty-state .empty-icon {
+    font-size: 36px;
+    margin-bottom: 12px;
+  }
+  
+  .transcription-area .transcription-content .empty-state .empty-title {
+    font-size: 16px;
+    margin-bottom: 6px;
+  }
+  
+  .transcription-area .transcription-content .empty-state .empty-description {
+    font-size: 13px;
+    line-height: 1.4;
+  }
+  
+  /* Mobile-specific permission dialogs */
+  .transcription-area .transcription-content > div[class*="bg-red-50"],
+  .transcription-area .transcription-content > div[class*="bg-blue-50"] {
+    margin: 16px 0;
+    padding: 12px;
+    border-radius: 8px;
+  }
+  
+  .transcription-area .transcription-content > div[class*="bg-red-50"] .flex,
+  .transcription-area .transcription-content > div[class*="bg-blue-50"] .flex {
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+  }
+  
+  .transcription-area .transcription-content > div[class*="bg-red-50"] .flex button,
+  .transcription-area .transcription-content > div[class*="bg-blue-50"] .flex button {
+    margin-left: 0;
+    width: 100%;
+  }
+  
+  /* Status bar mobile */
+  .transcription-area > div:last-child {
+    padding: 12px 16px;
+    border-radius: 0 0 12px 12px;
+  }
+  
+  .transcription-area > div:last-child .flex {
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+  }
 }
 
 /* Tremor UI Dropdown/Select Contrast Fix - Enhanced */
