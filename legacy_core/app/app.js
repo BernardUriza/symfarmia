@@ -10,7 +10,7 @@ import ConfirmationProvider from './providers/ConfirmationContext';
 import ConfirmationWrapper from './wrappers/ConfirmationWrapper';
 import LoadingProvider from './providers/LoadingContext';
 import { TabGroup, TabList, Tab, TabPanels, TabPanel } from "@tremor/react";
-import { useUser } from '@auth0/nextjs-auth0/client';
+import { useUser } from '@auth0/nextjs-auth0';
 import { HiOutlineArrowRightOnRectangle, HiArrowLeftOnRectangle } from "react-icons/hi2";
 import { Watch } from 'react-loader-spinner'
 import "./globals.css";
