@@ -213,7 +213,7 @@ export class MedicalSpecialtyService {
     return this._generateSummary(responses);
   }
 
-  static _generateSpecializedRecommendations(responses) {
+  static _generateSpecializedRecommendations(_responses) {
     return [
       'Establecer equipo multidisciplinario: infectólogo, obstetra, pediatra',
       'Monitoreo carga viral VIH cada 4 semanas durante embarazo',
@@ -226,7 +226,7 @@ export class MedicalSpecialtyService {
     ];
   }
 
-  static _generateQualityOfLifeRecommendations(responses) {
+  static _generateQualityOfLifeRecommendations(_responses) {
     return [
       'Evaluación nutricional completa y plan alimentario personalizado',
       'Screening de enfermedades crónicas y deficiencias vitamínicas',
@@ -239,7 +239,7 @@ export class MedicalSpecialtyService {
     ];
   }
 
-  static _generateCombinedRecommendations(hivPregnancy, qualityOfLife) {
+  static _generateCombinedRecommendations(_hivPregnancy, _qualityOfLife) {
     return [
       'PRIORIDAD CRÍTICA: Atención multidisciplinaria inmediata',
       'Coordinación entre infectología, obstetricia y medicina interna',

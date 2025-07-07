@@ -1,3 +1,6 @@
-import { handleAuth } from '@auth0/nextjs-auth0/edge';
+import { NextResponse } from 'next/server';
 
-export const GET = handleAuth();
+// Temporary Auth0 route - needs proper configuration
+export async function GET() {
+  return NextResponse.json({ message: 'Auth0 route - needs configuration' });
+}
