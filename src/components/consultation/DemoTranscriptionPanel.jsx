@@ -11,6 +11,8 @@ import {
   SparklesIcon,
   CheckCircleIcon,
   ArrowPathIcon,
+  BeakerIcon,
+  Cog6ToothIcon
 } from "@heroicons/react/24/outline";
 import { useTranslation } from "../../../app/providers/I18nProvider";
 import { useDemoTranscription } from "../../../hooks/useDemoTranscription";
@@ -168,26 +170,90 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
         </div>
       </div>
 
+      {/* Human-Readable Strategy Display */}
+      <div className="px-6 py-4 bg-gradient-to-r from-purple-50 to-indigo-50 border-b border-purple-100">
+        <div className="flex items-center justify-center">
+          <div className="text-center">
+            <div className="inline-flex items-center space-x-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm">
+              <BeakerIcon className="w-5 h-5 text-purple-600" />
+              <span className="text-sm font-semibold text-purple-800">
+                {currentStrategy === 'general_medicine' && '🩺 Medicina General'}
+                {currentStrategy === 'hiv_pregnancy_adolescent' && '🤰 VIH + Embarazo Adolescente'}
+                {currentStrategy === 'quality_of_life' && '💙 Calidad de Vida'}
+                {currentStrategy === 'cardiology' && '❤️ Cardiología'}
+                {currentStrategy === 'pediatrics' && '👶 Pediatría'}
+              </span>
+            </div>
+            <div className="text-xs text-purple-600 mt-2">
+              {currentStrategy === 'general_medicine' && 'Consulta médica estándar con síntomas comunes'}
+              {currentStrategy === 'hiv_pregnancy_adolescent' && 'Caso especial de población vulnerable crítica'}
+              {currentStrategy === 'quality_of_life' && 'Enfoque holístico en bienestar del paciente'}
+              {currentStrategy === 'cardiology' && 'Especialidad cardiovascular con énfasis en diagnóstico'}
+              {currentStrategy === 'pediatrics' && 'Atención médica especializada en menores'}
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Recording Controls */}
       <div className="p-6">
         <div className="text-center mb-6">
           {!isRecording ? (
-            <motion.button
-              onClick={startDemoRecording}
-              className="inline-flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <PlayIcon className="w-5 h-5" />
-              <span>
-                {t("transcription.start_recording") || "Iniciar Grabación"}
-              </span>
-            </motion.button>
+            <div className="flex items-center justify-center gap-3">
+              <motion.button
+                onClick={startDemoRecording}
+                className="inline-flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors shadow-md"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <PlayIcon className="w-5 h-5" />
+                <span>
+                  {t("transcription.start_recording") || "Iniciar Grabación"}
+                </span>
+              </motion.button>
+              
+              {/* Mock Strategy Button */}
+              <motion.button
+                onClick={() => {
+                  const newStrategy = currentStrategy === 'general_medicine' ? 'hiv_pregnancy_adolescent' : 
+                                    currentStrategy === 'hiv_pregnancy_adolescent' ? 'quality_of_life' :
+                                    'general_medicine';
+                  setCurrentStrategy(newStrategy);
+                  resetDemo();
+                }}
+                className="inline-flex items-center space-x-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors shadow-md"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                title="Cambiar estrategia de simulación médica"
+              >
+                <BeakerIcon className="w-5 h-5" />
+                <span>Mock</span>
+              </motion.button>
+              
+              {/* Strategy Settings Button */}
+              <motion.button
+                onClick={() => {
+                  // Toggle between available strategies in a more human way
+                  const strategies = availableStrategies;
+                  const currentIndex = strategies.indexOf(currentStrategy);
+                  const nextIndex = (currentIndex + 1) % strategies.length;
+                  setCurrentStrategy(strategies[nextIndex]);
+                  resetDemo();
+                }}
+                className="inline-flex items-center space-x-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors shadow-md"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                title="Configurar estrategia médica"
+              >
+                <Cog6ToothIcon className="w-5 h-5" />
+                <span>Estrategia</span>
+              </motion.button>
+            </div>
           ) : (
             <div className="space-y-3">
               <motion.button
                 onClick={stopDemoRecording}
-                className="inline-flex items-center space-x-2 bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+                className="inline-flex items-center space-x-2 bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors shadow-md"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
