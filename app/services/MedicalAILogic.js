@@ -36,8 +36,19 @@ export async function processMedicalQuery({ query, type = 'diagnosis' }, depende
   config.validateModel(model);
   const parameters = config.getModelParameters(model);
   
+  // PROCESS INPUT BASED ON MODEL TYPE
+  let processedInput = query;
+  const modelType = config.getModelType(model);
+  
+  if (modelType === 'fill-mask') {
+    // Bio_ClinicalBERT requires [MASK] token for fill-mask tasks
+    if (!query.includes('[MASK]')) {
+      processedInput = `${query} [MASK]`;
+    }
+  }
+  
   // CRITICAL: Only add parameters for models that accept them
-  const requestBody = { inputs: query };
+  const requestBody = { inputs: processedInput };
   
   if (config.acceptsParameters(model) && Object.keys(parameters).length > 0) {
     requestBody.parameters = parameters;
@@ -105,8 +116,37 @@ async function makeAIRequest(model, body, { config, httpClient }) {
  * @returns {Object} Formatted response
  */
 function formatAIResponse(data, model, config) {
+  const modelType = config.getModelType(model);
+  
+  let response, confidence;
+  
+  if (modelType === 'fill-mask') {
+    // Bio_ClinicalBERT returns array of predictions
+    if (Array.isArray(data) && data.length > 0) {
+      const topPrediction = data[0];
+      response = `Predicción médica: ${topPrediction.token_str}`;
+      confidence = topPrediction.score || 0.85;
+      
+      // Add additional predictions as suggestions
+      const suggestions = data.slice(1, 4).map(pred => 
+        `${pred.token_str} (${(pred.score * 100).toFixed(1)}%)`
+      );
+      
+      return {
+        response,
+        confidence,
+        reasoning: [`Modelo FillMask procesó: ${topPrediction.sequence}`],
+        suggestions,
+        disclaimer: config.getDisclaimer(),
+        sources: [model],
+        success: true
+      };
+    }
+  }
+  
+  // Default for text-generation and other models
   const text = data.generated_text || data[0]?.generated_text || '';
-  const confidence = typeof data[0]?.score === 'number' ? data[0].score : 0.85;
+  confidence = typeof data[0]?.score === 'number' ? data[0].score : 0.85;
 
   return {
     response: text,
