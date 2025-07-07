@@ -75,7 +75,8 @@
       "Bash(timeout 10s npm run dev)",
       "Bash(npm run clean:*)",
       "Bash(./scripts/quick-setup.sh:*)",
-      "Bash(npm run ci:status:*)"
+      "Bash(npm run ci:status:*)",
+      "Bash(./scripts/concise-cicd-system.sh restart:*)"
     ],
     "deny": []
   }
