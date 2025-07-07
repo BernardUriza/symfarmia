@@ -18,6 +18,7 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:type-check": "npm run type-check && npm run test",
+    "test:medical-modules": "jest tests/medical-modules.test.js tests/medical-workflows.test.js tests/performance.test.js",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "clean": "rm -rf .next && rm -rf node_modules/.cache",
