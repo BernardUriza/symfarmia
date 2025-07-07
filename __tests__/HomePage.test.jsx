@@ -21,7 +21,7 @@ describe('HomePage', () => {
         </I18nProvider>
       </ThemeProvider>
     )
-    expect(await screen.findByText(/Convierte consultas médicas/i)).toBeInTheDocument()
+    expect(await screen.findByText(/Herramientas inteligentes/i)).toBeInTheDocument()
   })
 
   it('contains the main SYMFARMIA branding', async () => {
@@ -37,7 +37,7 @@ describe('HomePage', () => {
       </ThemeProvider>
     )
     const heading = await screen.findByRole('heading', { level: 1 })
-    expect(heading).toHaveTextContent('Convierte consultas médicas en reportes clínicos automáticamente')
+    expect(heading).toHaveTextContent('Herramientas inteligentes para médicos modernos')
   })
 
   it('displays the platform description', () => {
@@ -52,6 +52,6 @@ describe('HomePage', () => {
         </I18nProvider>
       </ThemeProvider>
     )
-    expect(screen.getByText(/Habla durante tu consulta/i)).toBeInTheDocument()
+    expect(screen.getByText(/Ahorra tiempo de papeleo/i)).toBeInTheDocument()
   })
 })

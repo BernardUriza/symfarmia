@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import RootLayout from '../app/layout'
+import { SITE_CONFIG } from '../app/lib/site-config'
 
 describe('RootLayout', () => {
   const mockChildren = <div>Test Children Content</div>
@@ -11,8 +12,8 @@ describe('RootLayout', () => {
 
   it('has correct metadata structure', () => {
     const { metadata } = require('../app/layout')
-    expect(metadata.title).toBe('SYMFARMIA - Plataforma inteligente para médicos independientes')
-    expect(metadata.description).toBe('Convierte consultas médicas en reportes clínicos automáticamente. Habla durante tu consulta y obtén un reporte médico estructurado en segundos.')
+    expect(metadata.title).toBe(SITE_CONFIG.title)
+    expect(metadata.description).toBe(SITE_CONFIG.description)
   })
 
   it('renders with proper HTML structure', () => {

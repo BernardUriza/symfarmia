@@ -57,6 +57,17 @@ const fallbackTranslations = {
     'spanish': 'Español',
     'english_abbr': 'EN',
     'spanish_abbr': 'ES'
+    , 'hero_heading': 'Herramientas inteligentes para médicos modernos'
+    , 'hero_subheading': 'Ahorra tiempo de papeleo y enfócate en tus pacientes'
+    , 'tagline': 'Administra expedientes, reportes y analíticas desde un solo lugar'
+    , 'login': 'Iniciar sesión'
+    , 'register': 'Registrarse'
+    , 'try_demo': 'Probar modo demo'
+    , 'patient_management': 'Gestión de Pacientes'
+    , 'medical_reports': 'Reportes Médicos'
+    , 'analytics': 'Analíticas'
+    , 'welcome_to': 'Bienvenido a'
+    , 'demo_login': 'Acceso al Demo'
   },
   'en': {
     'transcription.title': 'Real-time Transcription',
@@ -78,6 +89,17 @@ const fallbackTranslations = {
     'spanish': 'Spanish',
     'english_abbr': 'EN',
     'spanish_abbr': 'ES'
+    , 'hero_heading': 'Intelligent tools for modern doctors'
+    , 'hero_subheading': 'Save paperwork time and focus on your patients'
+    , 'tagline': 'Manage records, reports and analytics in one place'
+    , 'login': 'Login'
+    , 'register': 'Register'
+    , 'try_demo': 'Try demo mode'
+    , 'patient_management': 'Patient Management'
+    , 'medical_reports': 'Medical Reports'
+    , 'analytics': 'Analytics'
+    , 'welcome_to': 'Welcome to'
+    , 'demo_login': 'Access Demo'
   }
 };
 

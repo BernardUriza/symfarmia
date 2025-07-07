@@ -37,7 +37,7 @@ describe('LandingPage', () => {
         </I18nProvider>
       </ThemeProvider>
     )
-    expect(screen.getByText('Plataforma inteligente para médicos independientes')).toBeInTheDocument()
+    expect(screen.getByText('Administra expedientes, reportes y analíticas desde un solo lugar')).toBeInTheDocument()
   })
 
   it('renders Login and Register buttons', () => {
@@ -79,7 +79,7 @@ describe('LandingPage', () => {
     )
     const demoButton = screen.getByRole('button', { name: /probar modo demo/i })
     fireEvent.click(demoButton)
-    expect(screen.getByText('Acceso Demo')).toBeInTheDocument()
+    expect(screen.getByText('Acceso al Demo')).toBeInTheDocument()
   })
 
   it('renders feature cards', () => {
@@ -92,9 +92,9 @@ describe('LandingPage', () => {
         </I18nProvider>
       </ThemeProvider>
     )
-    expect(screen.getByText('Patient Management')).toBeInTheDocument()
-    expect(screen.getByText('Medical Reports')).toBeInTheDocument()
-    expect(screen.getByText('Analytics')).toBeInTheDocument()
+    expect(screen.getByText('Gestión de Pacientes')).toBeInTheDocument()
+    expect(screen.getByText('Reportes Médicos')).toBeInTheDocument()
+    expect(screen.getByText('Analíticas')).toBeInTheDocument()
   })
 
   it('has correct Login link href', () => {
