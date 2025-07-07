@@ -60,6 +60,10 @@ export abstract class APIProvider {
     throw new Error('fetchStudyTypes must be implemented');
   }
 
+  async fetchStudies(): Promise<Study[]> {
+    throw new Error('fetchStudies must be implemented');
+  }
+
   async saveStudyType(_studyType: Partial<StudyType>): Promise<APIResponse<boolean>> {
     throw new Error('saveStudyType must be implemented');
   }
