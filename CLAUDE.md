@@ -73,3 +73,35 @@ This is a Next.js 14 medical management system called "SYMFARMIA" that manages p
 - The app uses both .js and .ts files (mixed TypeScript/JavaScript codebase)
 - All database clients export both named functions and default objects
 - Form submissions use React state and custom hooks like `useConfirmation`
+## Multi-Agent Workflow
+
+This repository uses two cooperating agents: **Claudio** and **Codex**. To keep context and automation in sync, follow these conventions.
+
+### Common Commands
+- `npm run dev` – start the development server on http://localhost:3000
+- `npm run build` – generate Prisma client and build the project
+- `git pull --tags origin dev --rebase` – update the `dev` branch with tags
+- `git pull --ff-only` – fast-forward only when merging
+
+### Branching & Rebase Format
+1. Create feature branches from `dev`.
+2. Rebase onto `dev` before merging.
+3. Use `git pull --rebase` to synchronize local work.
+4. Merge into `dev` with fast‑forward when possible.
+
+### Project Conventions
+- Keep agent notes under `dev-notes/claudo.md` and `dev-notes/codex.md`.
+- Document synchronization errors in `chronicles/dev-sync.md`.
+- Start each Claude session with `claude --resume` and save context using `Save your current context to a file`.
+
+## Loop Synchronization
+
+After Codex pushes new commits to `dev`, Claudio should run:
+
+```bash
+git pull --rebase
+npm run build
+npm test
+curl localhost:3000/api/medical
+```
+Resolve conflicts if they occur and record the outcome in the dev notes.
