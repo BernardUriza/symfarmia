@@ -6,3 +6,7 @@ export { processMedicalQuery, getErrorMessage, getAvailableTypes } from './Medic
 // Lazy imports for heavy services
 export const getMedicalSpecialtyService = () => import('./MedicalSpecialtyService.js').then(m => m.MedicalSpecialtyService);
 export const getMedicalAILogic = () => import('./MedicalAILogic.js').then(m => m.default);
+export { queryWithFallback } from './openAIFallbackService.js';
+export { CustomGPTService, customGPTService } from './customGPTService.js';
+
+
