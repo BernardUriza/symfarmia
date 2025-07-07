@@ -7,8 +7,94 @@ import { useState, useEffect, useRef } from 'react';
 
 // ESTRATEGIAS DE DEMO MODULARES por especialidad
 const DEMO_STRATEGIES = {
-  'hiv_pregnant_adolescent': {
+  'general_medicine': {
+    name: 'Medicina General',
+    icon: '🩺',
+    description: 'Consulta médica estándar con síntomas comunes',
+    consultation: [
+      'Paciente masculino de 35 años.',
+      'Consulta por dolor torácico intermitente.',
+      'Episodios de 2-3 minutos, sin relación con ejercicio.',
+      'Stress laboral elevado últimas semanas.',
+      'Fumador ocasional, 5 cigarrillos por semana.',
+      'Sin antecedentes cardiovasculares familiares.',
+      'Presión arterial normal en consultas previas.',
+      'Solicita evaluación cardiológica.'
+    ],
+    analysis: [
+      'Síntomas sugestivos de dolor atípico',
+      'Factores de riesgo: stress, tabaquismo',
+      'Probabilidad baja de síndrome coronario',
+      'Evaluación integral recomendada'
+    ],
+    recommendations: [
+      'ECG de 12 derivaciones',
+      'Análisis básicos: glucosa, colesterol',
+      'Manejo del stress laboral',
+      'Cesación tabáquica gradual'
+    ]
+  },
+  
+  'cardiology': {
+    name: 'Cardiología',
+    icon: '❤️',
+    description: 'Especialidad cardiovascular con énfasis en diagnóstico',
+    consultation: [
+      'Paciente femenina de 58 años.',
+      'Antecedentes de hipertensión arterial.',
+      'Episodios de palpitaciones nocturnas.',
+      'Disnea de esfuerzo progresiva.',
+      'Edema en miembros inferiores.',
+      'Dolor precordial irradiado a brazo izquierdo.',
+      'Factores de riesgo: obesidad, sedentarismo.',
+      'Solicita evaluación cardiológica completa.'
+    ],
+    analysis: [
+      'Síndrome coronario agudo a descartar',
+      'Signos de insuficiencia cardíaca',
+      'Múltiples factores de riesgo cardiovascular',
+      'Evaluación urgente requerida'
+    ],
+    recommendations: [
+      'ECG urgente + troponinas',
+      'Ecocardiograma transtorácico',
+      'Radiografía de tórax',
+      'BNP o NT-proBNP'
+    ]
+  },
+  
+  'pediatrics': {
+    name: 'Pediatría',
+    icon: '👶',
+    description: 'Atención médica especializada en menores',
+    consultation: [
+      'Paciente pediátrico de 4 años.',
+      'Fiebre de 38.5°C por 3 días.',
+      'Tos seca y congestión nasal.',
+      'Irritabilidad y rechazo al alimento.',
+      'Vómitos ocasionales.',
+      'Madre refiere contacto con caso COVID-19.',
+      'Esquema de vacunación completo.',
+      'Solicita evaluación pediátrica.'
+    ],
+    analysis: [
+      'Síndrome febril en preescolar',
+      'Síntomas respiratorios altos',
+      'Exposición COVID-19 confirmada',
+      'Evaluación integral necesaria'
+    ],
+    recommendations: [
+      'Test rápido COVID-19',
+      'Manejo sintomático de fiebre',
+      'Hidratación y aislamiento',
+      'Control en 24-48 horas'
+    ]
+  },
+  
+  'hiv_pregnancy_adolescent': {
     name: 'VIH + Embarazo Adolescente',
+    icon: '🤰',
+    description: 'Caso especial de población vulnerable crítica',
     consultation: [
       'Paciente femenina de 17 años, embarazada de 24 semanas.',
       'Diagnóstico de VIH positivo desde hace 6 meses.',
@@ -34,7 +120,9 @@ const DEMO_STRATEGIES = {
   },
   
   'quality_of_life': {
-    name: 'Calidad de Vida Deteriorada',
+    name: 'Calidad de Vida',
+    icon: '💙',
+    description: 'Enfoque holístico en bienestar del paciente',
     consultation: [
       'Paciente masculino de 45 años.',
       'Refiere fatiga crónica y pérdida de peso.',
@@ -57,36 +145,13 @@ const DEMO_STRATEGIES = {
       'Programa de ejercicio adaptado',
       'Conectar con recursos comunitarios'
     ]
-  },
-
-  'general_medicine': {
-    name: 'Medicina General',
-    consultation: [
-      'Paciente masculino de 35 años.',
-      'Consulta por dolor torácico intermitente.',
-      'Episodios de 2-3 minutos, sin relación con ejercicio.',
-      'Stress laboral elevado últimas semanas.',
-      'Fumador ocasional, 5 cigarrillos por semana.',
-      'Sin antecedentes cardiovasculares familiares.',
-      'Presión arterial normal en consultas previas.',
-      'Solicita evaluación cardiológica.'
-    ],
-    analysis: [
-      'Síntomas sugestivos de dolor atípico',
-      'Factores de riesgo: stress, tabaquismo',
-      'Probabilidad baja de síndrome coronario',
-      'Evaluación integral recomendada'
-    ],
-    recommendations: [
-      'ECG de 12 derivaciones',
-      'Análisis básicos: glucosa, colesterol',
-      'Manejo del stress laboral',
-      'Cesación tabáquica gradual'
-    ]
   }
 };
 
 export function useDemoTranscription(strategy = 'general_medicine') {
+  const [selectedSpecialty, setSelectedSpecialty] = useState(null);
+  const [showSpecialtyConfirmation, setShowSpecialtyConfirmation] = useState(false);
+  const [consultationGenerated, setConsultationGenerated] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [demoText, setDemoText] = useState('');
   const [currentAnalysis, setCurrentAnalysis] = useState([]);
@@ -101,6 +166,53 @@ export function useDemoTranscription(strategy = 'general_medicine') {
   const timeoutsRef = useRef([]);
   const demoStrategy = DEMO_STRATEGIES[strategy] || DEMO_STRATEGIES['general_medicine'];
 
+  const selectSpecialty = (specialty) => {
+    setSelectedSpecialty(specialty);
+    setShowSpecialtyConfirmation(true);
+    
+    // Track analytics
+    trackConsultationEvent('specialty_selected', { specialty });
+  };
+  
+  const confirmSpecialtyAndGenerate = () => {
+    if (!selectedSpecialty) return;
+    
+    setShowSpecialtyConfirmation(false);
+    setConsultationGenerated(true);
+    
+    // Track analytics
+    trackConsultationEvent('consultation_generated', { specialty: selectedSpecialty });
+    
+    // Start the automatic consultation generation
+    startDemoRecording();
+  };
+  
+  const trackConsultationEvent = (event, metadata = {}) => {
+    // Generate session ID if not exists
+    if (!sessionStorage.getItem('consultation_session_id')) {
+      sessionStorage.setItem('consultation_session_id', Date.now().toString());
+    }
+    
+    const analyticsData = {
+      sessionId: sessionStorage.getItem('consultation_session_id'),
+      event,
+      specialty: selectedSpecialty,
+      location: 'transcription_panel',
+      metadata: {
+        ...metadata,
+        timestamp: new Date().toISOString(),
+        userAgent: navigator.userAgent
+      }
+    };
+    
+    // Send to analytics endpoint
+    fetch('/api/analytics/consultation', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(analyticsData)
+    }).catch(console.error);
+  };
+  
   const startDemoRecording = () => {
     if (isRecording) return;
     
@@ -111,6 +223,9 @@ export function useDemoTranscription(strategy = 'general_medicine') {
     setRecordingTime(0);
     setConfidence(0);
     setIsAnalyzing(false);
+    
+    // Track recording start
+    trackConsultationEvent('recording_started');
 
     // Timer para duración de grabación
     intervalRef.current = setInterval(() => {
@@ -198,6 +313,9 @@ export function useDemoTranscription(strategy = 'general_medicine') {
     setRecommendations([]);
     setRecordingTime(0);
     setConfidence(0);
+    setSelectedSpecialty(null);
+    setShowSpecialtyConfirmation(false);
+    setConsultationGenerated(false);
     
     // Additional safety cleanup
     if (intervalRef.current) {
@@ -242,15 +360,21 @@ export function useDemoTranscription(strategy = 'general_medicine') {
     recordingTime,
     confidence,
     isAnalyzing,
+    selectedSpecialty,
+    showSpecialtyConfirmation,
+    consultationGenerated,
     
     // Acciones
     startDemoRecording,
     stopDemoRecording,
     resetDemo,
+    selectSpecialty,
+    confirmSpecialtyAndGenerate,
     
     // Info de estrategia
     strategyName: demoStrategy.name,
-    availableStrategies: Object.keys(DEMO_STRATEGIES)
+    availableStrategies: Object.keys(DEMO_STRATEGIES),
+    availableSpecialties: DEMO_STRATEGIES
   };
 }
 
