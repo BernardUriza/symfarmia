@@ -1,13 +1,12 @@
 // Consultation-specific reducer with optimized updates
-import type { AppState } from '../types';
+import type { AppState, MedicalStateAction } from '../types';
 import { createInitialConsultation } from '../utils/consultationUtils';
 
 export function consultationReducer(
   state: AppState['consultations'],
-  action: unknown
+  action: MedicalStateAction
 ): AppState['consultations'] {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const act = action as any;
+  const act = action as MedicalStateAction;
   
   switch (act.type) {
     case 'START_CONSULTATION': {
