@@ -302,7 +302,7 @@ div[role="menu"] div:hover {
   transition: all 0.3s ease;
 }
 .medical-bottom-nav .nav-item.active {
-  color: #3b82f6;
+  color: #2563eb;
   transform: translateY(-2px);
 }
 .medical-bottom-nav .nav-item.active .nav-icon {
@@ -350,7 +350,7 @@ div[role="menu"] div:hover {
   border-left: 4px solid #047857;
 }
 .medical-notification--info {
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
   color: white;
   border-left: 4px solid #1d4ed8;
 }
@@ -468,7 +468,7 @@ div[role="menu"] div:hover {
   overflow: hidden;
 }
 .transcription-area .transcription-header {
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
   padding: 20px;
   color: white;
 }
