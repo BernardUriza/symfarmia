@@ -3,8 +3,8 @@ import { useState, useEffect } from 'react';
 import jwt from 'jsonwebtoken';
 import MedicalReportDetails from '../../MedicalReportDetails';
 
-export default function Page({ params }) {
-  const { token } = params;
+export default async function Page({ params }) {
+  const { token } = await params;
   const [decodedToken, setDecodedToken] = useState(null);
   const [loading, setLoading] = useState(true);
 
