@@ -2,7 +2,6 @@
 import { useAppMode } from '../providers/AppModeProvider';
 import { useTranslation } from '../providers/I18nProvider';
 import dynamic from 'next/dynamic';
-import { SparklesIcon } from '@heroicons/react/24/outline';
 
 function DemoBannerContent() {
   const { isDemoMode, toggleMode } = useAppMode();
@@ -14,15 +13,9 @@ function DemoBannerContent() {
 
   return (
     <div className="demo-banner">
-      <div className="demo-banner-content">
-        <SparklesIcon className="w-4 h-4 text-white" />
-        <div className="demo-text">{t('demo_mode_active')}</div>
-        <div className="demo-buttons">
-          <button onClick={toggleMode} title={t('switch_live_mode')}>
-            ×
-          </button>
-        </div>
-      </div>
+      <span className="demo-emoji" role="img" aria-label="demo">🧪</span>
+      <span className="demo-text">{t('demo_mode_active')}</span>
+      <button onClick={toggleMode} title={t('switch_live_mode')}>×</button>
     </div>
   );
 }
