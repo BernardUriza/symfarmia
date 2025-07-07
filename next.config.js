@@ -110,15 +110,17 @@ const nextConfig = {
     
     // Reduce memory usage in development
     if (dev) {
+      // Simpler chunk configuration for development
       config.optimization.splitChunks = {
-        chunks: 'all',
-        maxSize: 244000, // Reduce chunk size
+        chunks: 'async',
+        maxAsyncRequests: 5,
+        maxInitialRequests: 3,
         cacheGroups: {
           vendor: {
             test: /[\\/]node_modules[\\/]/,
             name: 'vendors',
-            chunks: 'all',
-            maxSize: 244000,
+            chunks: 'async',
+            priority: 10,
           },
         },
       };
@@ -127,7 +129,6 @@ const nextConfig = {
       config.optimization.minimize = false;
       config.optimization.removeAvailableModules = false;
       config.optimization.removeEmptyChunks = false;
-      config.optimization.splitChunks.chunks = 'async';
       config.cache = false; // Disable webpack cache
       config.infrastructureLogging = { level: 'error' };
     }
@@ -193,42 +194,45 @@ const nextConfig = {
       };
     }
 
-    config.optimization.splitChunks.cacheGroups = {
-      ...(config.optimization.splitChunks.cacheGroups || {}),
-      landingCritical: {
-        test: /[\\/]components[\\/](Hero|CTA|Navigation)[\\/]/,
-        name: 'landing-critical',
-        chunks: 'all',
-        priority: 50,
-        enforce: true,
-      },
-      animations: {
-        test: /[\\/]node_modules[\\/](framer-motion|three|gsap)[\\/]/,
-        name: 'animations',
-        chunks: 'all',
-        priority: 40,
-        enforce: true,
-      },
-      dashboard: {
-        test: /[\\/]components[\\/](dashboard|medical|consultation)[\\/]/,
-        name: 'medical-dashboard',
-        chunks: 'all',
-        priority: 30,
-      },
-      particles: {
-        test: /[\\/]components[\\/].*[Pp]article.*[\\/]/,
-        name: 'particle-systems',
-        chunks: 'async',
-        priority: 20,
-      },
-      vendor: {
-        test: /[\\/]node_modules[\\/]/,
-        name: 'vendors',
-        chunks: 'all',
-        priority: 10,
-        maxSize: 244000,
-      },
-    };
+    // Only apply custom cache groups in production to avoid dev conflicts
+    if (!dev) {
+      config.optimization.splitChunks.cacheGroups = {
+        ...(config.optimization.splitChunks.cacheGroups || {}),
+        landingCritical: {
+          test: /[\\/]components[\\/](Hero|CTA|Navigation)[\\/]/,
+          name: 'landing-critical',
+          chunks: 'all',
+          priority: 50,
+          enforce: true,
+        },
+        animations: {
+          test: /[\\/]node_modules[\\/](framer-motion|three|gsap)[\\/]/,
+          name: 'animations',
+          chunks: 'all',
+          priority: 40,
+          enforce: true,
+        },
+        dashboard: {
+          test: /[\\/]components[\\/](dashboard|medical|consultation)[\\/]/,
+          name: 'medical-dashboard',
+          chunks: 'all',
+          priority: 30,
+        },
+        particles: {
+          test: /[\\/]components[\\/].*[Pp]article.*[\\/]/,
+          name: 'particle-systems',
+          chunks: 'async',
+          priority: 20,
+        },
+        vendor: {
+          test: /[\\/]node_modules[\\/]/,
+          name: 'vendors',
+          chunks: 'all',
+          priority: 10,
+          maxSize: 244000,
+        },
+      };
+    }
     
     // Add build time stats
     config.plugins.push(
