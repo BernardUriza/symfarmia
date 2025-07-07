@@ -23,7 +23,7 @@ describe('LandingPage', () => {
         </I18nProvider>
       </ThemeProvider>
     )
-    expect(screen.getByText('Bienvenido a')).toBeInTheDocument()
+    expect(screen.getByText('welcome_to')).toBeInTheDocument()
     expect(screen.getAllByText('SYMFARMIA').length).toBeGreaterThan(0)
   })
 
@@ -37,7 +37,7 @@ describe('LandingPage', () => {
         </I18nProvider>
       </ThemeProvider>
     )
-    expect(screen.getByText('Plataforma inteligente para médicos independientes')).toBeInTheDocument()
+    expect(screen.getByText('tagline')).toBeInTheDocument()
   })
 
   it('renders Login and Register buttons', () => {
@@ -64,7 +64,7 @@ describe('LandingPage', () => {
         </I18nProvider>
       </ThemeProvider>
     )
-    expect(screen.getByRole('button', { name: /probar modo demo/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /try_demo/i })).toBeInTheDocument()
   })
 
   it('opens the demo modal when Try Demo Mode is clicked', () => {
@@ -77,9 +77,9 @@ describe('LandingPage', () => {
         </I18nProvider>
       </ThemeProvider>
     )
-    const demoButton = screen.getByRole('button', { name: /probar modo demo/i })
+    const demoButton = screen.getByRole('button', { name: /try_demo/i })
     fireEvent.click(demoButton)
-    expect(screen.getByText('Acceso Demo')).toBeInTheDocument()
+    expect(screen.getByText('demo_login')).toBeInTheDocument()
   })
 
   it('renders feature cards', () => {
@@ -92,9 +92,9 @@ describe('LandingPage', () => {
         </I18nProvider>
       </ThemeProvider>
     )
-    expect(screen.getByText('Patient Management')).toBeInTheDocument()
-    expect(screen.getByText('Medical Reports')).toBeInTheDocument()
-    expect(screen.getByText('Analytics')).toBeInTheDocument()
+    expect(screen.getByText('patient_management')).toBeInTheDocument()
+    expect(screen.getByText('medical_reports')).toBeInTheDocument()
+    expect(screen.getByText('analytics')).toBeInTheDocument()
   })
 
   it('has correct Login link href', () => {
