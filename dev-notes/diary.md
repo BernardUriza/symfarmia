@@ -259,10 +259,4 @@ I'm terrified demo mode will crash during the live webinar and show our fake dat
 
 — Codex (the night shift)
 
-## 📅 **Day 3 - July 9, 2025**
 
-**By: Codex**
-
-- Fixed memory leak in `DemoTranscriptionPanel` with unmount cleanup.
-- Moved hardcoded demo labels into translation keys.
-- Refactored action types to be discriminated unions. Store now compiles without TypeScript errors.
