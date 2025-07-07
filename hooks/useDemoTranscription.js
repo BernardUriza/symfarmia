@@ -215,7 +215,7 @@ export function useDemoTranscription(strategy = 'general_medicine') {
   
   const startDemoRecording = () => {
     if (isRecording) return;
-    
+
     setIsRecording(true);
     setDemoText('');
     setCurrentAnalysis([]);
@@ -223,7 +223,7 @@ export function useDemoTranscription(strategy = 'general_medicine') {
     setRecordingTime(0);
     setConfidence(0);
     setIsAnalyzing(false);
-    
+
     // Track recording start
     trackConsultationEvent('recording_started');
 
@@ -232,30 +232,33 @@ export function useDemoTranscription(strategy = 'general_medicine') {
       setRecordingTime(prev => prev + 1);
     }, 1000);
 
-    // Simulación de transcripción en tiempo real
-    let currentIndex = 0;
-    const consultation = demoStrategy.consultation;
-    
-    const addNextSentence = () => {
-      if (currentIndex < consultation.length && isRecording) {
-        const sentence = consultation[currentIndex];
-        setDemoText(prev => prev + (prev ? ' ' : '') + sentence);
-        setConfidence(typeof window !== 'undefined' ? 0.85 + Math.random() * 0.1 : 0.9); // 85-95% confidence SOLO CLIENT
-        currentIndex++;
-        
-        // Tiempo variable entre oraciones (1.5-3 segundos) - SOLO CLIENT SIDE
-        const nextDelay = typeof window !== 'undefined' ? 1500 + Math.random() * 1500 : 2000;
-        timeoutsRef.current.push(setTimeout(addNextSentence, nextDelay));
-        
-        // Iniciar análisis después de la tercera oración
-        if (currentIndex === 3) {
+    // Transcripción palabra por palabra
+    const sentences = demoStrategy.consultation;
+    const allWords = sentences.join(' ').split(' ');
+    const analysisStartIndex = sentences.slice(0, 3).join(' ').split(' ').length;
+    let wordIndex = 0;
+
+    const addNextWord = () => {
+      if (wordIndex < allWords.length && isRecording) {
+        const word = allWords[wordIndex];
+        setDemoText(prev => prev + (prev ? ' ' : '') + word);
+        setConfidence(typeof window !== 'undefined' ? 0.85 + Math.random() * 0.1 : 0.9);
+        wordIndex++;
+
+        if (wordIndex === analysisStartIndex) {
           startAnalysis();
         }
+
+        let nextDelay = 150 + Math.random() * 150; // 150-300ms
+        if (/[\.,]$/.test(word)) {
+          nextDelay += 300; // pausa más larga después de puntuación
+        }
+        timeoutsRef.current.push(setTimeout(addNextWord, nextDelay));
       }
     };
 
     // Comenzar transcripción después de un pequeño delay
-    timeoutsRef.current.push(setTimeout(addNextSentence, 800));
+    timeoutsRef.current.push(setTimeout(addNextWord, 500));
   };
 
   const startAnalysis = () => {
