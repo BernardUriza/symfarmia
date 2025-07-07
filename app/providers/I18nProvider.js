@@ -56,7 +56,12 @@ const fallbackTranslations = {
     'english': 'Inglés',
     'spanish': 'Español',
     'english_abbr': 'EN',
-    'spanish_abbr': 'ES'
+    'spanish_abbr': 'ES',
+    'login': 'Iniciar sesión',
+    'register': 'Registrarse',
+    'hero_heading': 'Herramientas inteligentes para médicos modernos',
+    'hero_subheading': 'Ahorra tiempo en papeleo y enfócate en tus pacientes',
+    'cta_save_time': 'Sí, quiero ahorrar tiempo'
   },
   'en': {
     'transcription.title': 'Real-time Transcription',
@@ -77,7 +82,12 @@ const fallbackTranslations = {
     'english': 'English',
     'spanish': 'Spanish',
     'english_abbr': 'EN',
-    'spanish_abbr': 'ES'
+    'spanish_abbr': 'ES',
+    'login': 'Login',
+    'register': 'Register',
+    'hero_heading': 'Smart tools for modern doctors',
+    'hero_subheading': 'Spend less time on paperwork and focus on your patients',
+    'cta_save_time': 'Yes, save me time'
   }
 };
 
