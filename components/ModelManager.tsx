@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 interface Props {
   endpoint: string;
@@ -7,18 +7,25 @@ interface Props {
   title: string;
 }
 
+interface ModelItem {
+  id: number;
+  [key: string]: string | number;
+}
+
 export default function ModelManager({ endpoint, fields, title }: Props) {
-  const [items, setItems] = useState<any[]>([]);
-  const [form, setForm] = useState<Record<string, any>>({});
+  const [items, setItems] = useState<ModelItem[]>([]);
+  const [form, setForm] = useState<Record<string, string>>({});
   const [editingId, setEditingId] = useState<number | null>(null);
 
-  const fetchItems = async () => {
+  const fetchItems = useCallback(async () => {
     const res = await fetch(endpoint);
     const data = await res.json();
     setItems(data);
-  };
+  }, [endpoint]);
 
-  useEffect(() => { fetchItems(); }, []);
+  useEffect(() => { 
+    fetchItems(); 
+  }, [fetchItems]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -35,9 +42,12 @@ export default function ModelManager({ endpoint, fields, title }: Props) {
     fetchItems();
   };
 
-  const editItem = (item: any) => {
-    const f: Record<string, any> = {};
-    fields.forEach(fld => { f[fld] = item[fld] ?? ''; });
+  const editItem = (item: ModelItem) => {
+    const f: Record<string, string> = {};
+    fields.forEach(fld => { 
+      const value = item[fld];
+      f[fld] = typeof value === 'string' ? value : String(value || ''); 
+    });
     setForm(f);
     setEditingId(item.id);
   };

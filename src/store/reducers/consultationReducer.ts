@@ -1,6 +1,17 @@
 // Consultation-specific reducer with optimized updates
 import type { AppState, MedicalStateAction } from '../types';
-import type { SOAPNotes } from '../../types/medical';
+import type { 
+  SOAPNotes, 
+  PatientInfo, 
+  ConsultationSettings, 
+  MedicalTranscription,
+  AIMessage,
+  ClinicalAlert,
+  MedicalSymptom,
+  VitalSigns,
+  DiagnosisCandidate,
+  TreatmentPlan
+} from '../../types/medical';
 import { createInitialConsultation } from '../utils/consultationUtils';
 
 export function consultationReducer(
@@ -10,11 +21,11 @@ export function consultationReducer(
   switch (action.type) {
     case 'START_CONSULTATION': {
       const consultationId = crypto.randomUUID();
-      const payload = action.payload as { patientInfo?: any; settings?: any };
+      const payload = action.payload as { patientInfo?: PatientInfo; settings?: Partial<ConsultationSettings> };
       const newConsultation = createInitialConsultation(
         consultationId,
-        payload.patientInfo,
-        payload.settings
+        payload.patientInfo ? payload.patientInfo as Record<string, unknown> : undefined,
+        payload.settings ? payload.settings as Record<string, unknown> : undefined
       );
       
       return {
@@ -194,7 +205,7 @@ export function consultationReducer(
     }
     
     case 'FINALIZE_TRANSCRIPT': {
-      const { consultationId, transcription } = action.payload as { consultationId: string; transcription: any };
+      const { consultationId, transcription } = action.payload as { consultationId: string; transcription: MedicalTranscription };
       const consultation = state.active[consultationId];
       
       if (!consultation) return state;
@@ -263,7 +274,7 @@ export function consultationReducer(
     }
     
     case 'ADD_AI_MESSAGE': {
-      const { consultationId, message } = action.payload as { consultationId: string; message: any };
+      const { consultationId, message } = action.payload as { consultationId: string; message: AIMessage };
       const consultation = state.active[consultationId];
       
       if (!consultation) return state;
@@ -343,7 +354,7 @@ export function consultationReducer(
     }
     
     case 'ADD_CLINICAL_ALERT': {
-      const { consultationId, alert } = action.payload as { consultationId: string; alert: any };
+      const { consultationId, alert } = action.payload as { consultationId: string; alert: ClinicalAlert };
       const consultation = state.active[consultationId];
       
       if (!consultation) return state;
@@ -493,7 +504,7 @@ export function consultationReducer(
     }
     
     case 'COMPLETE_SOAP_GENERATION': {
-      const { consultationId, soapNotes } = action.payload as { consultationId: string; soapNotes: any };
+      const { consultationId, soapNotes } = action.payload as { consultationId: string; soapNotes: SOAPNotes };
       const consultation = state.active[consultationId];
       
       if (!consultation) return state;
@@ -527,7 +538,7 @@ export function consultationReducer(
     }
     
     case 'ADD_SYMPTOM': {
-      const { consultationId, symptom } = action.payload as { consultationId: string; symptom: any };
+      const { consultationId, symptom } = action.payload as { consultationId: string; symptom: MedicalSymptom };
       const consultation = state.active[consultationId];
       
       if (!consultation) return state;
@@ -561,7 +572,7 @@ export function consultationReducer(
     }
     
     case 'UPDATE_VITAL_SIGNS': {
-      const { consultationId, vitalSigns } = action.payload as { consultationId: string; vitalSigns: any };
+      const { consultationId, vitalSigns } = action.payload as { consultationId: string; vitalSigns: VitalSigns };
       const consultation = state.active[consultationId];
       
       if (!consultation) return state;
@@ -589,7 +600,7 @@ export function consultationReducer(
     }
     
     case 'ADD_DIAGNOSIS': {
-      const { consultationId, diagnosis } = action.payload as { consultationId: string; diagnosis: any };
+      const { consultationId, diagnosis } = action.payload as { consultationId: string; diagnosis: DiagnosisCandidate };
       const consultation = state.active[consultationId];
       
       if (!consultation) return state;
@@ -622,7 +633,7 @@ export function consultationReducer(
     }
     
     case 'UPDATE_TREATMENT_PLAN': {
-      const { consultationId, treatmentPlan } = action.payload as { consultationId: string; treatmentPlan: any };
+      const { consultationId, treatmentPlan } = action.payload as { consultationId: string; treatmentPlan: TreatmentPlan };
       const consultation = state.active[consultationId];
       
       if (!consultation) return state;
