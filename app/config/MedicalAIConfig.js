@@ -10,29 +10,21 @@ export class MedicalAIConfig {
   static TIMEOUT = 30000; // 30 seconds
   static USER_AGENT = 'SYMFARMIA-Medical-Assistant/1.0';
   
-  // MEDICAL MODELS - ONLY THESE THREE ARE SUPPORTED
+  // MEDICAL MODELS - CURRENTLY WORKING MODELS
   static SUPPORTED_MODELS = [
-    'emilyalsentzer/Bio_ClinicalBERT',
-    'openai/whisper-medium',
-    'jiviai/medX_v2'
+    'emilyalsentzer/Bio_ClinicalBERT'
   ];
 
   static MODEL_MAP = {
     diagnosis: 'emilyalsentzer/Bio_ClinicalBERT',
     prescription: 'emilyalsentzer/Bio_ClinicalBERT',
     soap: 'emilyalsentzer/Bio_ClinicalBERT',
-    analytics: 'emilyalsentzer/Bio_ClinicalBERT',
-    transcription: 'openai/whisper-medium',
-    conversation: 'jiviai/medX_v2',
-    treatment: 'jiviai/medX_v2',
-    education: 'jiviai/medX_v2'
+    analytics: 'emilyalsentzer/Bio_ClinicalBERT'
   };
 
   // MODEL TYPE MAPPING - CRITICAL FOR PARAMETER VALIDATION
   static MODEL_TYPE_MAP = {
-    'emilyalsentzer/Bio_ClinicalBERT': 'fill-mask',
-    'openai/whisper-medium': 'automatic-speech-recognition',
-    'jiviai/medX_v2': 'text-generation'
+    'emilyalsentzer/Bio_ClinicalBERT': 'fill-mask'
   };
 
   // ONLY SEND PARAMETERS TO COMPATIBLE MODEL TYPES
@@ -40,17 +32,6 @@ export class MedicalAIConfig {
     'emilyalsentzer/Bio_ClinicalBERT': {
       // FillMask models accept NO generation parameters
       // Only inputs: "text with [MASK] token"
-    },
-    'openai/whisper-medium': {
-      language: 'es',
-      task: 'transcribe',
-      return_timestamps: true
-    },
-    'jiviai/medX_v2': {
-      max_length: 1024,
-      temperature: 0.7,
-      do_sample: true,
-      top_p: 0.9
     }
   };
 
