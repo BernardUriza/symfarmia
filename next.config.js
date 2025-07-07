@@ -270,6 +270,36 @@ const nextConfig = {
           chunks: 'all',
           priority: 30,
         },
+        landingApp: {
+          test: /[\\/](pages|components)[\\/](landing|marketing)[\\/]/,
+          name: 'landing-app',
+          chunks: 'all',
+          priority: 50,
+        },
+        dashboardApp: {
+          test: /[\\/](pages|components)[\\/](dashboard|widgets)[\\/]/,
+          name: 'dashboard-app',
+          chunks: 'all',
+          priority: 40,
+        },
+        transcriptionApp: {
+          test: /[\\/](pages|components)[\\/](transcripcion|consultation)[\\/]/,
+          name: 'transcription-app',
+          chunks: 'all',
+          priority: 40,
+        },
+        patientsApp: {
+          test: /[\\/](pages|components)[\\/](pacientes|patients)[\\/]/,
+          name: 'patients-app',
+          chunks: 'all',
+          priority: 30,
+        },
+        reportsApp: {
+          test: /[\\/](pages|components)[\\/](reportes|medical-reports)[\\/]/,
+          name: 'reports-app',
+          chunks: 'all',
+          priority: 30,
+        },
         particles: {
           test: /[\\/]components[\\/].*[Pp]article.*[\\/]/,
           name: 'particle-systems',
