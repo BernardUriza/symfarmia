@@ -1,7 +1,8 @@
 "use client";
 import React from 'react';
-import CinematicLandingPage from './CinematicLandingPage';
-import MinimalistLandingPage from './MinimalistLandingPage';
+import dynamic from 'next/dynamic';
+const CinematicLandingPage = dynamic(() => import('./CinematicLandingPage'), { ssr: false });
+const MinimalistLandingPage = dynamic(() => import('./MinimalistLandingPage'));
 
 const LANDING_PAGE_TYPES = {
   CINEMATIC: 'cinematic',
