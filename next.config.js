@@ -70,6 +70,58 @@ const nextConfig = {
   // turbopack config not available in Next.js 14
   
   webpack: (config, { dev, isServer, webpack }) => {
+    // MEDICAL-GRADE MODULE RESOLUTION
+    config.resolve = {
+      ...config.resolve,
+      fallback: {
+        ...config.resolve.fallback,
+        fs: false,
+        path: false,
+        os: false,
+        crypto: false,
+        stream: false,
+        util: false,
+        buffer: false,
+        events: false,
+        url: false,
+        assert: false,
+        http: false,
+        https: false,
+        zlib: false,
+      },
+      alias: {
+        ...config.resolve.alias,
+        // Medical-grade path resolution
+        '@': '/workspaces/symfarmia',
+        '@/components': '/workspaces/symfarmia/src/components',
+        '@/app': '/workspaces/symfarmia/app',
+        '@/hooks': '/workspaces/symfarmia/hooks',
+        '@/lib': '/workspaces/symfarmia/lib',
+        '@/utils': '/workspaces/symfarmia/src/utils',
+        '@/services': '/workspaces/symfarmia/app/services',
+        '@/providers': '/workspaces/symfarmia/app/providers',
+      },
+      // Bulletproof extension resolution
+      extensions: ['.tsx', '.ts', '.jsx', '.js', '.json', '.mjs', '.cjs'],
+      // Module resolution priorities
+      modules: ['node_modules', '/workspaces/symfarmia/node_modules'],
+      // Medical-grade symlink handling
+      symlinks: false,
+      // Bulletproof cache safety
+      unsafeCache: false,
+      // Ensure consistent resolution
+      preferAbsolute: true,
+    };
+
+    // MEDICAL-GRADE ERROR HANDLING
+    config.plugins.push(
+      new webpack.DefinePlugin({
+        '__MEDICAL_ERROR_REPORTING__': JSON.stringify(true),
+        '__MEDICAL_SYSTEM_VERSION__': JSON.stringify(process.env.npm_package_version || '1.0.0'),
+        '__MEDICAL_BUILD_ID__': JSON.stringify(Math.random().toString(36).substr(2, 9)),
+      })
+    );
+
     // Add webpack progress plugin for build visibility
     if (!dev) {
       const ProgressPlugin = require('webpack').ProgressPlugin;
