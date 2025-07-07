@@ -1,3 +1,5 @@
+import { Gender, DocumentType, BloodType } from './constants';
+
 // Base Types
 export interface BaseEntity {
   id: number;
@@ -11,8 +13,21 @@ export interface Patient extends BaseEntity {
   phone: string;
   information: string;
   dateOfBirth: Date;
-  gender: string;
+  gender: Gender;
   status: string;
+  firstName?: string;
+  lastName?: string;
+  documentType?: DocumentType;
+  documentNumber?: string;
+  address?: Record<string, unknown>;
+  bloodType?: BloodType;
+  allergies?: string[];
+  chronicConditions?: string[];
+  emergencyContactName?: string;
+  emergencyContactRelationship?: string;
+  emergencyContactPhone?: string;
+  avatarUrl?: string;
+  isActive?: boolean;
   medicalReports?: MedicalReport[];
 }
 
@@ -22,8 +37,21 @@ export interface CreatePatientData {
   phone: string;
   information: string;
   dateOfBirth: Date;
-  gender: string;
+  gender: Gender;
   status: string;
+  firstName?: string;
+  lastName?: string;
+  documentType?: DocumentType;
+  documentNumber?: string;
+  address?: Record<string, unknown>;
+  bloodType?: BloodType;
+  allergies?: string[];
+  chronicConditions?: string[];
+  emergencyContactName?: string;
+  emergencyContactRelationship?: string;
+  emergencyContactPhone?: string;
+  avatarUrl?: string;
+  isActive?: boolean;
 }
 
 export interface UpdatePatientData extends Partial<CreatePatientData> {
