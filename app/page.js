@@ -1,5 +1,5 @@
-import dynamicComponent from 'next/dynamic'
-const LandingPageStrategy = dynamicComponent(() => import('../src/components/LandingPageStrategy'))
+import nextDynamic from 'next/dynamic'
+const LandingPageStrategy = nextDynamic(() => import('../src/components/LandingPageStrategy'))
 
 export const dynamic = 'force-static'
 
