@@ -1,4 +1,5 @@
 import { POST, GET } from '../../app/api/medical/route.js';
+import { MedicalAIConfig } from '../../app/config/MedicalAIConfig.js';
 
 function createRequest(body, method = 'POST') {
   return {
@@ -67,7 +68,7 @@ describe('/api/medical', () => {
       const response = await POST(request);
       
       expect(global.fetch).toHaveBeenCalledWith(
-        'https://api-inference.huggingface.co/models/bert-base-uncased',
+        `https://api-inference.huggingface.co/models/${MedicalAIConfig.getModel('diagnosis')}`,
         expect.objectContaining({
           method: 'POST',
           headers: expect.objectContaining({
@@ -199,8 +200,9 @@ describe('/api/medical', () => {
       process.env.HUGGINGFACE_TOKEN = 'valid-token';
 
       const mockHfResponse = {
-        generated_text: 'Based on the symptoms, consider cardiac evaluation.',
-        confidence: 0.85
+        token_str: 'cardiac evaluation',
+        score: 0.85,
+        sequence: 'Patient has chest pain and shortness of breath [MASK]'
       };
 
       const mockResponse = {
@@ -220,10 +222,10 @@ describe('/api/medical', () => {
 
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
-      expect(data.response).toBe('Based on the symptoms, consider cardiac evaluation.');
+      expect(data.response).toBe('Predicción médica: cardiac evaluation');
       expect(data.confidence).toBe(0.85);
       expect(data.disclaimer).toContain('AVISO MÉDICO');
-      expect(data.sources).toContain('bert-base-uncased');
+      expect(data.sources).toContain(MedicalAIConfig.getModel('diagnosis'));
     });
 
     it('should use correct model for different types', async () => {
@@ -243,7 +245,7 @@ describe('/api/medical', () => {
       await POST(request);
 
       expect(global.fetch).toHaveBeenCalledWith(
-        'https://api-inference.huggingface.co/models/bert-base-uncased',
+        `https://api-inference.huggingface.co/models/${MedicalAIConfig.getModel('prescription')}`,
         expect.any(Object)
       );
     });

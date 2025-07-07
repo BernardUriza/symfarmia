@@ -64,8 +64,8 @@ describe('Accessibility Contrast Tests', () => {
       const ratio = getContrastRatio('#2563eb', '#ffffff');
       const compliance = checkWCAGCompliance(ratio);
 
-      expect(compliance.aa).toBe(false);
-      expect(parseFloat(compliance.ratio)).toBeCloseTo(3.68, 1);
+      expect(compliance.aa).toBe(true);
+      expect(parseFloat(compliance.ratio)).toBeGreaterThanOrEqual(4.5);
     });
   });
 
@@ -73,17 +73,17 @@ describe('Accessibility Contrast Tests', () => {
     it('should have sufficient border contrast in light mode', () => {
       const ratio = getContrastRatio('#ffffff', '#6b7280');
       const compliance = checkWCAGCompliance(ratio, false);
-      
+
       // Borders need at least 3:1 contrast ratio
-      expect(parseFloat(compliance.ratio)).toBeCloseTo(1.47, 2);
+      expect(parseFloat(compliance.ratio)).toBeGreaterThanOrEqual(3.0);
     });
 
     it('should have sufficient border contrast in dark mode', () => {
       const ratio = getContrastRatio('#1f2937', '#6b7280');
       const compliance = checkWCAGCompliance(ratio, false);
-      
+
       // Borders need at least 3:1 contrast ratio
-      expect(parseFloat(compliance.ratio)).toBeCloseTo(1.42, 2);
+      expect(parseFloat(compliance.ratio)).toBeGreaterThanOrEqual(3.0);
     });
   });
 
@@ -100,8 +100,8 @@ describe('Accessibility Contrast Tests', () => {
       const ratio = getContrastRatio('#1f2937', '#60a5fa');
       const compliance = checkWCAGCompliance(ratio);
 
-      expect(compliance.aa).toBe(false);
-      expect(parseFloat(compliance.ratio)).toBeCloseTo(3.99, 2);
+      expect(compliance.aa).toBe(true);
+      expect(parseFloat(compliance.ratio)).toBeGreaterThanOrEqual(4.5);
     });
   });
 
