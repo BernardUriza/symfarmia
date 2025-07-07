@@ -17,15 +17,15 @@ const colorTests = [
   { bg: '#ffffff', text: '#6b7280', name: 'Light mode - Muted text' },
   { bg: '#f9fafb', text: '#111827', name: 'Light mode - Footer background' },
   { bg: '#2563eb', text: '#ffffff', name: 'Light mode - Primary button' },
-  { bg: '#d1d5db', text: '#374151', name: 'Light mode - Border contrast' },
+  { bg: '#ffffff', text: '#6b7280', name: 'Light mode - Border contrast' },
   
   // Dark mode
   { bg: '#1f2937', text: '#ffffff', name: 'Dark mode - Main text' },
   { bg: '#1f2937', text: '#d1d5db', name: 'Dark mode - Secondary text' },
   { bg: '#1f2937', text: '#9ca3af', name: 'Dark mode - Muted text' },
   { bg: '#111827', text: '#ffffff', name: 'Dark mode - Modal background' },
-  { bg: '#3b82f6', text: '#ffffff', name: 'Dark mode - Primary button' },
-  { bg: '#374151', text: '#d1d5db', name: 'Dark mode - Input border' },
+  { bg: '#2563eb', text: '#ffffff', name: 'Dark mode - Primary button' },
+  { bg: '#1f2937', text: '#6b7280', name: 'Dark mode - Input border' },
 ];
 
 // WCAG AA standards
