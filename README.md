@@ -500,6 +500,14 @@ The endpoint is designed for easy migration to microservices:
 4. Implement the methods in both `DemoAPIProvider` and `LiveAPIProvider` to call your new client.
 5. Expose the operations in `app/useCases/useCases.ts` so components can access them.
 
+## 🎨 Legacy Design System
+
+The `/legacy-design` folder stores Figma exports used as the single source of visual truth.
+- **Read-only reference**: do not import directly in production
+- **Watcher script**: `scripts/design-watcher.js` logs updates to `dev-notes/diary.md`
+- **Figma integration**: `scripts/figma-integration.js` pulls design tokens
+- **Migration workflow**: follow `legacy-design/ComponentMigrationTemplate.md` for each component
+
 ## 🤝 Contributing
 
 1. **Fork the repository**
