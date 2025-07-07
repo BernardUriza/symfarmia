@@ -12,8 +12,9 @@ import {
   CheckCircleIcon,
   ArrowPathIcon,
   BeakerIcon,
-  ChevronDownIcon
+  ChevronDownIcon,
 } from "@heroicons/react/24/outline";
+import { CheckIcon } from "@heroicons/react/24/solid";
 import { useTranslation } from "../../../app/providers/I18nProvider";
 import { useDemoTranscription } from "../../../hooks/useDemoTranscription";
 
@@ -37,16 +38,15 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
     confirmSpecialtyAndGenerate,
     strategyName,
     availableSpecialties,
-    availableStrategies
+    availableStrategies,
   } = useDemoTranscription(strategy);
 
   const [currentStrategy] = useState(strategy);
   const [isClient, setIsClient] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
-  const [isStrategyDropdownOpen, setIsStrategyDropdownOpen] = useState(false);
-  const strategyDropdownRef = useRef(null);
-
+  const [isStrategyOpen, setIsStrategyOpen] = useState(false);
+  const strategyRef = useRef(null);
 
   // Evitar hydration errors - solo renderizar después de mount
   useEffect(() => {
@@ -69,18 +69,21 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
   // Close confirmation when clicking outside - MEMORY LEAK FIX
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (showSpecialtyConfirmation && !event.target.closest('.specialty-confirmation-container')) {
+      if (
+        showSpecialtyConfirmation &&
+        !event.target.closest(".specialty-confirmation-container")
+      ) {
         // Don't close automatically - require explicit action
       }
     };
 
     // Always add/remove listener to prevent memory leaks
     if (showSpecialtyConfirmation) {
-      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside);
     }
-    
+
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [showSpecialtyConfirmation]);
 
@@ -93,30 +96,30 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
     };
 
     if (isDropdownOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside);
     }
-    
+
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isDropdownOpen]);
 
   // Close strategy dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (strategyDropdownRef.current && !strategyDropdownRef.current.contains(event.target)) {
-        setIsStrategyDropdownOpen(false);
+      if (strategyRef.current && !strategyRef.current.contains(event.target)) {
+        setIsStrategyOpen(false);
       }
     };
 
-    if (isStrategyDropdownOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
+    if (isStrategyOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
     }
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isStrategyDropdownOpen]);
+  }, [isStrategyOpen]);
 
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
@@ -215,15 +218,16 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
         </div>
       </div>
 
-
       {/* Ultra Compact Specialty Selector */}
       {!selectedSpecialty && (
         <div className="px-6 py-3 bg-gray-50 border-b border-gray-100">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <span className="text-sm font-medium text-gray-700">Especialidad:</span>
+              <span className="text-sm font-medium text-gray-700">
+                Especialidad:
+              </span>
             </div>
-            
+
             {/* Ultra Compact Dropdown */}
             <div className="relative" ref={dropdownRef}>
               <motion.button
@@ -235,9 +239,9 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
                 <span className="text-gray-600 truncate">
                   Seleccionar especialidad...
                 </span>
-                <ChevronDownIcon 
+                <ChevronDownIcon
                   className={`w-4 h-4 text-gray-500 transition-transform duration-200 ml-2 ${
-                    isDropdownOpen ? 'transform rotate-180' : ''
+                    isDropdownOpen ? "transform rotate-180" : ""
                   }`}
                 />
               </motion.button>
@@ -252,23 +256,29 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
                     transition={{ duration: 0.15 }}
                     className="absolute top-full right-0 mt-1 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-64 overflow-y-auto"
                   >
-                    {Object.entries(availableSpecialties).map(([key, specialty]) => (
-                      <motion.button
-                        key={key}
-                        onClick={() => {
-                          selectSpecialty(key);
-                          setIsDropdownOpen(false);
-                        }}
-                        className="w-full px-3 py-2 text-left hover:bg-gray-50 flex items-center space-x-2 transition-colors border-b border-gray-100 last:border-b-0"
-                        whileHover={{ backgroundColor: '#f9fafb' }}
-                      >
-                        <div className="text-lg">{specialty.icon}</div>
-                        <div className="flex-1 min-w-0">
-                          <div className="font-medium text-gray-900 text-sm truncate">{specialty.name}</div>
-                          <div className="text-xs text-gray-500 truncate">{specialty.description}</div>
-                        </div>
-                      </motion.button>
-                    ))}
+                    {Object.entries(availableSpecialties).map(
+                      ([key, specialty]) => (
+                        <motion.button
+                          key={key}
+                          onClick={() => {
+                            selectSpecialty(key);
+                            setIsDropdownOpen(false);
+                          }}
+                          className="w-full px-3 py-2 text-left hover:bg-gray-50 flex items-center space-x-2 transition-colors border-b border-gray-100 last:border-b-0"
+                          whileHover={{ backgroundColor: "#f9fafb" }}
+                        >
+                          <div className="text-lg">{specialty.icon}</div>
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium text-gray-900 text-sm truncate">
+                              {specialty.name}
+                            </div>
+                            <div className="text-xs text-gray-500 truncate">
+                              {specialty.description}
+                            </div>
+                          </div>
+                        </motion.button>
+                      ),
+                    )}
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -276,7 +286,7 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
           </div>
         </div>
       )}
-      
+
       {/* Specialty Confirmation */}
       {showSpecialtyConfirmation && selectedSpecialty && (
         <div className="px-6 py-4 bg-gradient-to-r from-green-50 to-emerald-50 border-b border-green-100 specialty-confirmation-container">
@@ -284,15 +294,21 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
             <div className="text-lg font-semibold text-green-900 mb-2">
               ❓ ¿Qué tipo de consulta vamos a inventar?
             </div>
-            
+
             <div className="inline-flex items-center space-x-3 bg-white/80 backdrop-blur-sm px-6 py-4 rounded-xl shadow-sm mb-4">
-              <div className="text-3xl">{availableSpecialties[selectedSpecialty]?.icon}</div>
+              <div className="text-3xl">
+                {availableSpecialties[selectedSpecialty]?.icon}
+              </div>
               <div className="text-left">
-                <div className="font-bold text-green-900">{availableSpecialties[selectedSpecialty]?.name}</div>
-                <div className="text-sm text-green-700">{availableSpecialties[selectedSpecialty]?.description}</div>
+                <div className="font-bold text-green-900">
+                  {availableSpecialties[selectedSpecialty]?.name}
+                </div>
+                <div className="text-sm text-green-700">
+                  {availableSpecialties[selectedSpecialty]?.description}
+                </div>
               </div>
             </div>
-            
+
             <div className="flex items-center justify-center space-x-3">
               <motion.button
                 onClick={confirmSpecialtyAndGenerate}
@@ -303,7 +319,7 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
                 <SparklesIcon className="w-5 h-5" />
                 <span>Sí, Inventar Esta Consulta</span>
               </motion.button>
-              
+
               <motion.button
                 onClick={resetDemo}
                 className="inline-flex items-center space-x-2 bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-4 rounded-lg transition-colors"
@@ -316,7 +332,7 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
           </div>
         </div>
       )}
-      
+
       {/* Compact Selected Specialty Display with Strategy Selector */}
       {selectedSpecialty && !showSpecialtyConfirmation && (
         <div className="px-6 py-2 bg-purple-50 border-b border-purple-100">
@@ -325,52 +341,73 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
               <div className="flex items-center space-x-2">
                 <BeakerIcon className="w-4 h-4 text-purple-600" />
                 <span className="text-sm font-medium text-purple-800">
-                  {availableSpecialties[selectedSpecialty]?.icon} {availableSpecialties[selectedSpecialty]?.name}
+                  {availableSpecialties[selectedSpecialty]?.icon}{" "}
+                  {availableSpecialties[selectedSpecialty]?.name}
                 </span>
               </div>
-              
+
               {/* Strategy Selector */}
-              <div className="relative flex items-center space-x-2" ref={strategyDropdownRef}>
-                <span className="text-xs text-purple-600">•</span>
+              <div className="relative" ref={strategyRef}>
                 <motion.button
-                  onClick={() => setIsStrategyDropdownOpen(!isStrategyDropdownOpen)}
-                  className="inline-flex items-center text-xs bg-white border border-purple-200 rounded px-2 py-1 text-purple-700 hover:bg-purple-100 transition-colors"
+                  onClick={() => setIsStrategyOpen(!isStrategyOpen)}
+                  className="inline-flex items-center space-x-2 bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg text-sm"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  <span className="truncate max-w-[120px]">{strategyName}</span>
-                  <ChevronDownIcon
-                    className={`w-3 h-3 ml-1 transition-transform ${isStrategyDropdownOpen ? 'rotate-180' : ''}`}
-                  />
+                  <span>{availableSpecialties[currentStrategy]?.icon}</span>
+                  <span className="max-w-[120px] truncate">
+                    {availableSpecialties[currentStrategy]?.name}
+                  </span>
+                  <ChevronDownIcon className="w-4 h-4" />
                 </motion.button>
 
                 <AnimatePresence>
-                  {isStrategyDropdownOpen && (
+                  {isStrategyOpen && (
                     <motion.div
-                      initial={{ opacity: 0, y: -5, scale: 0.95 }}
+                      initial={{ opacity: 0, y: -10, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: -5, scale: 0.95 }}
+                      exit={{ opacity: 0, y: -10, scale: 0.95 }}
                       transition={{ duration: 0.15 }}
-                      className="absolute top-full right-0 mt-1 w-72 bg-white rounded-lg shadow-lg border border-gray-200 z-50"
+                      className="absolute top-full left-0 mt-2 w-72 bg-white rounded-lg shadow-xl border z-50 max-h-[300px] overflow-y-auto md:w-72 w-[280px]"
                     >
-                      {availableStrategies.map((key) => (
-                        <button
-                          key={key}
-                          onClick={() => {
-                            window.location.href = window.location.pathname + `?strategy=${key}`;
-                            setIsStrategyDropdownOpen(false);
-                          }}
-                          className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
-                        >
-                          {availableSpecialties[key]?.name || key}
-                        </button>
-                      ))}
+                      <div className="py-2">
+                        {availableStrategies.map((key) => {
+                          const item = availableSpecialties[key];
+                          const selected = key === currentStrategy;
+                          return (
+                            <button
+                              key={key}
+                              onClick={() => {
+                                window.location.href =
+                                  window.location.pathname + `?strategy=${key}`;
+                                setIsStrategyOpen(false);
+                              }}
+                              className="w-full flex items-center px-4 py-2 hover:bg-gray-50"
+                            >
+                              <span className="text-lg mr-3">{item.icon}</span>
+                              <span className="text-sm font-medium">
+                                {item.name}
+                              </span>
+                              {selected && (
+                                <CheckIcon className="w-4 h-4 ml-auto text-blue-600" />
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
+
+                {isStrategyOpen && (
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setIsStrategyOpen(false)}
+                  />
+                )}
               </div>
             </div>
-            
+
             <button
               onClick={resetDemo}
               className="text-xs text-purple-600 hover:text-purple-800 px-2 py-1 rounded hover:bg-purple-100 transition-colors"
@@ -392,19 +429,20 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
                   onClick={startDemoRecording}
                   disabled={!selectedSpecialty}
                   className={`inline-flex items-center space-x-2 font-semibold py-3 px-6 rounded-lg transition-colors shadow-md ${
-                    selectedSpecialty 
-                      ? 'bg-blue-600 hover:bg-blue-700 text-white' 
-                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    selectedSpecialty
+                      ? "bg-blue-600 hover:bg-blue-700 text-white"
+                      : "bg-gray-300 text-gray-500 cursor-not-allowed"
                   }`}
                   whileHover={{ scale: selectedSpecialty ? 1.05 : 1 }}
                   whileTap={{ scale: selectedSpecialty ? 0.95 : 1 }}
                 >
                   <PlayIcon className="w-5 h-5" />
                   <span>
-                    {consultationGenerated 
-                      ? "Continuar Grabando" 
-                      : (selectedSpecialty ? t("transcription.start_recording") : "Selecciona Especialidad Primero")
-                    }
+                    {consultationGenerated
+                      ? "Continuar Grabando"
+                      : selectedSpecialty
+                        ? t("transcription.start_recording")
+                        : "Selecciona Especialidad Primero"}
                   </span>
                 </motion.button>
               )}
@@ -427,7 +465,8 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
                   animate={{ opacity: [1, 0.5, 1] }}
                   transition={{ duration: 1.5, repeat: Infinity }}
                 >
-                  🔴 Simulando consulta de {availableSpecialties[selectedSpecialty]?.name}...
+                  🔴 Simulando consulta de{" "}
+                  {availableSpecialties[selectedSpecialty]?.name}...
                 </motion.span>
               </div>
             </div>
@@ -586,28 +625,29 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
             </div>
           </div>
         )}
-        
+
         {/* Compact Waiting for Generation State */}
-        {selectedSpecialty && !consultationGenerated && !isRecording && !demoText && (
-          <div className="text-center py-6">
-            <div className="text-4xl mb-2">✨</div>
-            <div className="font-medium text-gray-900 mb-1">
-              {availableSpecialties[selectedSpecialty]?.name} Seleccionada
+        {selectedSpecialty &&
+          !consultationGenerated &&
+          !isRecording &&
+          !demoText && (
+            <div className="text-center py-6">
+              <div className="text-4xl mb-2">✨</div>
+              <div className="font-medium text-gray-900 mb-1">
+                {availableSpecialties[selectedSpecialty]?.name} Seleccionada
+              </div>
+              <div className="text-gray-500 text-sm">
+                Confirma arriba para generar la consulta automáticamente
+              </div>
             </div>
-            <div className="text-gray-500 text-sm">
-              Confirma arriba para generar la consulta automáticamente
-            </div>
-          </div>
-        )}
+          )}
       </div>
 
       {/* Status Footer */}
       <div className="px-6 py-3 bg-gray-50 border-t border-gray-100 rounded-b-xl">
         <div className="flex items-center justify-between text-sm text-gray-600">
           <div className="flex items-center space-x-4">
-            <span>
-              {t("transcription.service_label")}: Demo Simulado
-            </span>
+            <span>{t("transcription.service_label")}: Demo Simulado</span>
             <span className="flex items-center">
               <SparklesIcon className="w-4 h-4 mr-1 text-purple-500" />
               {t("transcription.medical_ai_active")}
@@ -616,15 +656,16 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
           <div className="flex items-center space-x-2">
             {selectedSpecialty && (
               <span className="flex items-center text-xs">
-                <span className="mr-1">{availableSpecialties[selectedSpecialty]?.icon}</span>
+                <span className="mr-1">
+                  {availableSpecialties[selectedSpecialty]?.icon}
+                </span>
                 {availableSpecialties[selectedSpecialty]?.name}
               </span>
             )}
             {demoText && (
               <span className="flex items-center">
                 <CheckCircleIcon className="w-4 h-4 mr-1 text-green-500" />
-                {demoText.split(" ").length}{" "}
-                {t("transcription.words_count")}
+                {demoText.split(" ").length} {t("transcription.words_count")}
               </span>
             )}
           </div>
