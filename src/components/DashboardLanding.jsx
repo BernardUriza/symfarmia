@@ -13,10 +13,13 @@ import {
   UserIcon
 } from '@heroicons/react/24/outline';
 import { mockMedicalAI } from '../utils/medicalUtils';
+import { mockMedicalReports } from '../data/mockMedicalReports';
+import { useTranslation } from '../../app/providers/I18nProvider';
 import ConsultationWorkspace from './ConsultationWorkspace';
 
 const DashboardLanding = () => {
   const [activeFlow, setActiveFlow] = useState(null);
+  const { t } = useTranslation();
   
   // Debug: Log when dashboard mounts
   useEffect(() => {
@@ -39,6 +42,14 @@ const DashboardLanding = () => {
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
   const intervalRef = useRef(null);
+
+  const draftReportsCount = mockMedicalReports.filter(
+    r => r.status === 'Borrador'
+  ).length;
+  const pendingReportsCount = mockMedicalReports.filter(
+    r => r.status === 'Pendiente'
+  ).length;
+  const totalReportsCount = mockMedicalReports.length;
 
   // Analytics tracking function
   const trackEvent = (eventName, eventData = {}) => {
@@ -237,7 +248,7 @@ Auscultación cardiopulmonar normal. No edemas en miembros inferiores.
         <motion.div
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-8 shadow-lg border border-blue-200 cursor-pointer"
+          className="medical-card bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-8 cursor-pointer"
           onClick={handleProbarAsistente}
         >
           <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
@@ -255,7 +266,7 @@ Auscultación cardiopulmonar normal. No edemas en miembros inferiores.
         <motion.div
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-8 shadow-lg border border-green-200 cursor-pointer"
+          className="medical-card bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-8 cursor-pointer"
           onClick={handleTranscribirConsulta}
         >
           <div className="w-16 h-16 bg-green-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
@@ -273,7 +284,7 @@ Auscultación cardiopulmonar normal. No edemas en miembros inferiores.
         <motion.div
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className="bg-gradient-to-br from-purple-50 to-violet-50 rounded-2xl p-8 shadow-lg border border-purple-200 cursor-pointer"
+          className="medical-card bg-gradient-to-br from-purple-50 to-violet-50 rounded-2xl p-8 cursor-pointer"
           onClick={handleVerAnalisis}
         >
           <div className="w-16 h-16 bg-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
@@ -286,6 +297,35 @@ Auscultación cardiopulmonar normal. No edemas en miembros inferiores.
             Explora análisis y métricas de tus consultas médicas
           </p>
         </motion.div>
+
+        {/* NEW: Reportes Médicos Card */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+          <div className="flex items-center space-x-4 mb-4">
+            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+              <DocumentTextIcon className="w-6 h-6 text-purple-600" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-900">{t('medical_reports')}</h3>
+              <p className="text-sm text-gray-600">{t('medical_reports_desc')}</p>
+            </div>
+          </div>
+          <div className="space-y-2 mb-4">
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-600">{t('drafts')}:</span>
+              <span className="font-medium">{draftReportsCount}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-600">{t('pending_signature')}:</span>
+              <span className="font-medium text-amber-600">{pendingReportsCount}</span>
+            </div>
+          </div>
+          <button
+            onClick={() => (window.location.href = '/reportes-medicos')}
+            className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+          >
+            {t('view_reports')} ({totalReportsCount})
+          </button>
+        </div>
       </div>
       
       {/* Demo info */}
