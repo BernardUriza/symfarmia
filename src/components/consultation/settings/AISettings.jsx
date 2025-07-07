@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import {
   SparklesIcon,
   HeartIcon,
-  UserGroupIcon,
   ExclamationTriangleIcon,
   DocumentTextIcon,
   ShieldExclamationIcon

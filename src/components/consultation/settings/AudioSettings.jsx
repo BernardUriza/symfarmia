@@ -2,7 +2,6 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import {
   MicrophoneIcon,
-  SpeakerWaveIcon,
   SignalIcon,
   ShieldCheckIcon,
   AdjustmentsHorizontalIcon
