@@ -1,5 +1,5 @@
 "use client"
-import { withPageAuthRequired } from '@auth0/nextjs-auth0/client';
+import { withPageAuthRequired } from '@auth0/nextjs-auth0';
 import LegacyApp from '../../legacy_core/app/app.js';
 
 export const dynamic = "force-dynamic";
