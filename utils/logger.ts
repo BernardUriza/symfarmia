@@ -64,7 +64,7 @@ class Logger {
   /**
    * Warning logging
    */
-  static warn(message: string, data?: LogData): void {
+  static warn(message: string, data?: any): void {
     if (Logger.isDevelopment) {
       console.warn(`${Logger.prefix} WARNING] ${message}`, data || '');
     }
@@ -73,7 +73,7 @@ class Logger {
   /**
    * Info logging
    */
-  static info(message: string, data?: LogData): void {
+  static info(message: string, data?: any): void {
     if (Logger.isDevelopment) {
       console.info(`${Logger.prefix} INFO] ${message}`, data || '');
     }
@@ -82,7 +82,7 @@ class Logger {
   /**
    * Debug logging
    */
-  static debug(message: string, data?: LogData): void {
+  static debug(message: string, data?: any): void {
     if (Logger.isDevelopment) {
       console.debug(`${Logger.prefix} DEBUG] ${message}`, data || '');
     }
