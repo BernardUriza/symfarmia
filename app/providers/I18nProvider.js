@@ -84,7 +84,6 @@ const fallbackTranslations = {
     'dashboard': 'Panel Principal',
     'patients': 'Pacientes',
     'reports': 'Reportes',
-    'analytics': 'Análisis',
     'consultation': 'Consulta',
     'profile': 'Perfil',
     'settings': 'Configuración',
