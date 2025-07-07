@@ -7,7 +7,7 @@ jest.mock('@auth0/nextjs-auth0/client', () => ({
     isLoading: false,
     error: null,
   }),
-  UserProvider: ({ children }) => children,
+  Auth0Provider: ({ children }) => children,
   withPageAuthRequired: (component) => component,
 }))
 
