@@ -1,5 +1,5 @@
 'use client'
-import { useTheme } from '../app/providers/ThemeProvider'
+import { useTheme } from '../app/providers/ThemeProviderBulletproof'
 import { useTranslation } from '../app/providers/I18nProvider'
 import { MoonIcon, SunIcon } from '@heroicons/react/24/outline'
 
