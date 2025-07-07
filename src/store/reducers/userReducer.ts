@@ -5,11 +5,9 @@ export function userReducer(
   state: AppState['user'],
   action: MedicalStateAction
 ): AppState['user'] {
-  const act = action as MedicalStateAction;
-  
-  switch (act.type) {
+  switch (action.type) {
     case 'UPDATE_PREFERENCES': {
-      const { preferences } = act.payload;
+      const { preferences } = action.payload as { preferences: any };
       
       return {
         ...state,
@@ -21,7 +19,7 @@ export function userReducer(
     }
     
     case 'UPDATE_PERMISSIONS': {
-      const { permissions } = act.payload;
+      const { permissions } = action.payload as { permissions: any };
       
       return {
         ...state,
@@ -33,7 +31,7 @@ export function userReducer(
     }
     
     case 'LOG_ANALYTICS_EVENT': {
-      const { event } = act.payload;
+      const { event } = action.payload as { event: any };
       
       // Update user statistics based on event type
       const newStatistics = { ...state.statistics };
@@ -78,7 +76,7 @@ export function userReducer(
     }
     
     case 'UPDATE_USER_PROFILE': {
-      const { profile } = act.payload;
+      const { profile } = action.payload as { profile: any };
       
       return {
         ...state,
@@ -89,7 +87,7 @@ export function userReducer(
     
     case 'HYDRATE_STATE': {
       // Handle state rehydration from persistence
-      const { payload } = act;
+      const payload = action.payload as any;
       
       if (payload.user) {
         return {
