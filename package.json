@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --turbopack",
     "build": "npm run version:generate && npm run type-check && npx prisma generate && next build",
     "start": "next start",
     "lint": "next lint && npm run type-check",
@@ -40,7 +40,7 @@
     "file-saver": "2.0.5",
     "framer-motion": "10.18.0",
     "jsonwebtoken": "9.0.2",
-    "next": "14.2.30",
+    "next": "^15.3.5",
     "node-fetch": "3.3.2",
     "nodemailer": "6.10.1",
     "pdf-lib": "1.17.1",
