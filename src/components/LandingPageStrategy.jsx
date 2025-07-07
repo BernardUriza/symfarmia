@@ -7,7 +7,7 @@ const LANDING_PAGE_TYPES = {
   MINIMALIST: 'minimalist'
 };
 
-const LandingPageStrategy = ({ type = LANDING_PAGE_TYPES.MINIMALIST, isDemo = false }) => {
+const LandingPageStrategy = ({ isDemo = false }) => {
   return <MinimalistLandingPage isDemo={isDemo} />;
 };
 
