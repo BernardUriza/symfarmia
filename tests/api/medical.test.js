@@ -1,5 +1,12 @@
 import { POST, GET } from '../../app/api/medical/route.js';
-import { NextRequest } from 'next/server';
+
+function createRequest(body, method = 'POST') {
+  return {
+    json: async () => (body && typeof body === 'object' ? body : JSON.parse(body || '{}')),
+    method,
+    headers: { get: () => 'application/json' }
+  };
+}
 
 // Mock fetch globally
 global.fetch = jest.fn();
@@ -19,11 +26,7 @@ describe('/api/medical', () => {
 
   describe('POST', () => {
     it('should return 400 when query is missing', async () => {
-      const request = new NextRequest('http://localhost:3000/api/medical', {
-        method: 'POST',
-        body: JSON.stringify({}),
-        headers: { 'Content-Type': 'application/json' }
-      });
+      const request = createRequest({}, 'POST');
 
       const response = await POST(request);
       const data = await response.json();
@@ -35,11 +38,7 @@ describe('/api/medical', () => {
     it('should return 500 when HUGGINGFACE_TOKEN is not configured', async () => {
       delete process.env.HUGGINGFACE_TOKEN;
 
-      const request = new NextRequest('http://localhost:3000/api/medical', {
-        method: 'POST',
-        body: JSON.stringify({ query: 'test query' }),
-        headers: { 'Content-Type': 'application/json' }
-      });
+      const request = createRequest({ query: 'test query' });
 
       const response = await POST(request);
       const data = await response.json();
@@ -60,19 +59,15 @@ describe('/api/medical', () => {
       };
       global.fetch.mockResolvedValue(mockResponse);
 
-      const request = new NextRequest('http://localhost:3000/api/medical', {
-        method: 'POST',
-        body: JSON.stringify({ 
-          query: 'Patient has chest pain',
-          type: 'diagnosis'
-        }),
-        headers: { 'Content-Type': 'application/json' }
+      const request = createRequest({
+        query: 'Patient has chest pain',
+        type: 'diagnosis'
       });
 
       const response = await POST(request);
       
       expect(global.fetch).toHaveBeenCalledWith(
-        'https://api-inference.huggingface.co/models/jiviai/medX_v2',
+        'https://api-inference.huggingface.co/models/bert-base-uncased',
         expect.objectContaining({
           method: 'POST',
           headers: expect.objectContaining({
@@ -97,11 +92,7 @@ describe('/api/medical', () => {
       };
       global.fetch.mockResolvedValue(mockResponse);
 
-      const request = new NextRequest('http://localhost:3000/api/medical', {
-        method: 'POST',
-        body: JSON.stringify({ query: 'test query' }),
-        headers: { 'Content-Type': 'application/json' }
-      });
+      const request = createRequest({ query: 'test query' });
 
       const response = await POST(request);
       const data = await response.json();
@@ -121,11 +112,7 @@ describe('/api/medical', () => {
       };
       global.fetch.mockResolvedValue(mockResponse);
 
-      const request = new NextRequest('http://localhost:3000/api/medical', {
-        method: 'POST',
-        body: JSON.stringify({ query: 'test query' }),
-        headers: { 'Content-Type': 'application/json' }
-      });
+      const request = createRequest({ query: 'test query' });
 
       const response = await POST(request);
       const data = await response.json();
@@ -145,11 +132,7 @@ describe('/api/medical', () => {
       };
       global.fetch.mockResolvedValue(mockResponse);
 
-      const request = new NextRequest('http://localhost:3000/api/medical', {
-        method: 'POST',
-        body: JSON.stringify({ query: 'test query' }),
-        headers: { 'Content-Type': 'application/json' }
-      });
+      const request = createRequest({ query: 'test query' });
 
       const response = await POST(request);
       const data = await response.json();
@@ -169,11 +152,7 @@ describe('/api/medical', () => {
       };
       global.fetch.mockResolvedValue(mockResponse);
 
-      const request = new NextRequest('http://localhost:3000/api/medical', {
-        method: 'POST',
-        body: JSON.stringify({ query: 'test query' }),
-        headers: { 'Content-Type': 'application/json' }
-      });
+      const request = createRequest({ query: 'test query' });
 
       const response = await POST(request);
       const data = await response.json();
@@ -190,11 +169,7 @@ describe('/api/medical', () => {
       abortError.name = 'AbortError';
       global.fetch.mockRejectedValue(abortError);
 
-      const request = new NextRequest('http://localhost:3000/api/medical', {
-        method: 'POST',
-        body: JSON.stringify({ query: 'test query' }),
-        headers: { 'Content-Type': 'application/json' }
-      });
+      const request = createRequest({ query: 'test query' });
 
       const response = await POST(request);
       const data = await response.json();
@@ -210,11 +185,7 @@ describe('/api/medical', () => {
       const networkError = new TypeError('fetch failed');
       global.fetch.mockRejectedValue(networkError);
 
-      const request = new NextRequest('http://localhost:3000/api/medical', {
-        method: 'POST',
-        body: JSON.stringify({ query: 'test query' }),
-        headers: { 'Content-Type': 'application/json' }
-      });
+      const request = createRequest({ query: 'test query' });
 
       const response = await POST(request);
       const data = await response.json();
@@ -238,14 +209,10 @@ describe('/api/medical', () => {
       };
       global.fetch.mockResolvedValue(mockResponse);
 
-      const request = new NextRequest('http://localhost:3000/api/medical', {
-        method: 'POST',
-        body: JSON.stringify({ 
-          query: 'Patient has chest pain and shortness of breath',
-          context: { patient: { age: 45 } },
-          type: 'diagnosis'
-        }),
-        headers: { 'Content-Type': 'application/json' }
+      const request = createRequest({
+        query: 'Patient has chest pain and shortness of breath',
+        context: { patient: { age: 45 } },
+        type: 'diagnosis'
       });
 
       const response = await POST(request);
@@ -256,7 +223,7 @@ describe('/api/medical', () => {
       expect(data.response).toBe('Based on the symptoms, consider cardiac evaluation.');
       expect(data.confidence).toBe(0.85);
       expect(data.disclaimer).toContain('AVISO MÉDICO');
-      expect(data.sources).toContain('jiviai/medX_v2');
+      expect(data.sources).toContain('bert-base-uncased');
     });
 
     it('should use correct model for different types', async () => {
@@ -268,19 +235,15 @@ describe('/api/medical', () => {
       };
       global.fetch.mockResolvedValue(mockResponse);
 
-      const request = new NextRequest('http://localhost:3000/api/medical', {
-        method: 'POST',
-        body: JSON.stringify({ 
-          query: 'test query',
-          type: 'prescription'
-        }),
-        headers: { 'Content-Type': 'application/json' }
+      const request = createRequest({
+        query: 'test query',
+        type: 'prescription'
       });
 
       await POST(request);
 
       expect(global.fetch).toHaveBeenCalledWith(
-        'https://api-inference.huggingface.co/models/raidium/MQG',
+        'https://api-inference.huggingface.co/models/bert-base-uncased',
         expect.any(Object)
       );
     });
@@ -288,9 +251,7 @@ describe('/api/medical', () => {
 
   describe('GET', () => {
     it('should return API information', async () => {
-      const request = new NextRequest('http://localhost:3000/api/medical', {
-        method: 'GET'
-      });
+      const request = createRequest(null, 'GET');
 
       const response = await GET(request);
       const data = await response.json();
