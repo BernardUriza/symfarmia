@@ -46,7 +46,8 @@
       "Bash(true)",
       "Bash(npx tailwindcss:*)",
       "Bash(touch:*)",
-      "Bash(npm update:*)"
+      "Bash(npm update:*)",
+      "Bash(git push:*)"
     ],
     "deny": []
   }
