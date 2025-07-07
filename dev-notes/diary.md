@@ -258,3 +258,4 @@ I'm terrified demo mode will crash during the live webinar and show our fake dat
 - **Idea:** Add a flashy progress bar to make the demo feel like real-time magic.
 
 — Codex (the night shift)
+
