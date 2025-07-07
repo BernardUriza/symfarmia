@@ -7,7 +7,7 @@ export function getSiteUrl() {
   
   // Check if we're in development environment
   if (process.env.NODE_ENV === 'development') {
-    return 'http://localhost:3001';
+    return 'http://localhost:3000';
   }
   
   // Default production URL

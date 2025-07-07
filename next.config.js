@@ -25,19 +25,11 @@ const nextConfig = {
   },
 
   experimental: {
-    optimizeCss: false,
-    optimizePackageImports: [
-      '@heroicons/react',
-      '@material-tailwind/react',
-      '@tremor/react',
-      'react-icons',
-      'lodash',
-      'date-fns',
-    ],
-    webpackBuildWorker: true,
+    webpackBuildWorker: false,
+    forceSwcTransforms: true,
   },
   
-  serverExternalPackages: ['prisma'],
+  // serverExternalPackages: ['prisma'], // Not available in Next.js 14
 
   env: {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
@@ -72,51 +64,38 @@ const nextConfig = {
     ];
   },
 
-  turbopack: {
-    resolveAlias: {
-      '@': './',
-      '@/components': './components',
-      '@/hooks': './hooks',
-      '@/utils': './utils',
-      '@/types': './types',
-    },
-    resolveExtensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
-    rules: {
-      '*.svg': {
-        loaders: ['@svgr/webpack'],
-        as: '*.js',
-      },
-    },
-  },
+  // turbopack config not available in Next.js 14
   
   webpack: (config, { dev, isServer }) => {
-    // Optimize for faster builds
+    // Reduce memory usage in development
     if (dev) {
       config.optimization.splitChunks = {
         chunks: 'all',
+        maxSize: 244000, // Reduce chunk size
         cacheGroups: {
           vendor: {
             test: /[\\/]node_modules[\\/]/,
             name: 'vendors',
             chunks: 'all',
-          },
-          providers: {
-            test: /[\\/]app[\\/]providers[\\/]/,
-            name: 'providers',
-            chunks: 'all',
-          },
-          services: {
-            test: /[\\/]app[\\/]services[\\/]/,
-            name: 'services',
-            chunks: 'all',
+            maxSize: 244000,
           },
         },
       };
+      
+      // Reduce memory usage for Codespaces
+      config.optimization.minimize = false;
+      config.optimization.removeAvailableModules = false;
+      config.optimization.removeEmptyChunks = false;
+      config.optimization.splitChunks.chunks = 'async';
+      config.cache = false; // Disable webpack cache
+      config.infrastructureLogging = { level: 'error' };
     }
     
-    // Tree shaking optimizations
-    config.optimization.usedExports = true;
-    config.optimization.sideEffects = false;
+    // Tree shaking optimizations (disabled in dev to save memory)
+    if (!dev) {
+      config.optimization.usedExports = true;
+      config.optimization.sideEffects = false;
+    }
     
     return config;
   },
