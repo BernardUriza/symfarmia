@@ -274,6 +274,14 @@ export class DemoAPIProvider extends APIProvider {
     });
   }
 
+  async fetchStudies(): Promise<Study[]> {
+    return new Promise<Study[]>((resolve) => {
+      setTimeout(() => {
+        resolve(this.demoData.studies);
+      }, 300);
+    });
+  }
+
   async saveStudyType(studyType: Partial<StudyType>): Promise<APIResponse<boolean>> {
     return new Promise<APIResponse<boolean>>((resolve) => {
       setTimeout(() => {

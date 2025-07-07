@@ -118,6 +118,15 @@ export function useUseCases() {
     }
   };
 
+  const fetchStudies = async (): Promise<Study[]> => {
+    try {
+      return await apiProvider!.fetchStudies();
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      throw new Error('Error fetching studies: ' + errorMessage);
+    }
+  };
+
   const saveStudy = async (study: Partial<Study>): Promise<APIResponse<boolean>> => {
     try {
       return await apiProvider!.saveStudy(study);
@@ -162,6 +171,7 @@ export function useUseCases() {
     saveCategory,
     fetchStudyTypes,
     saveStudyType,
+    fetchStudies,
     saveStudy,
     removeStudy,
     sendTokenByEmail,
