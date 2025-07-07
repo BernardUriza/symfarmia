@@ -11,8 +11,8 @@ describe('RootLayout', () => {
 
   it('has correct metadata structure', () => {
     const { metadata } = require('../app/layout')
-    expect(metadata.title).toBe('SYMFARMIA - Plataforma inteligente para médicos independientes')
-    expect(metadata.description).toBe('Convierte consultas médicas en reportes clínicos automáticamente. Habla durante tu consulta y obtén un reporte médico estructurado en segundos.')
+    expect(metadata.title).toBe('SYMFARMIA - Software médico integral para doctores independientes')
+    expect(metadata.description).toBe('Gestiona pacientes, reportes y analíticas en un solo lugar. Convierte consultas en reportes clínicos al instante.')
   })
 
   it('renders with proper HTML structure', () => {
