@@ -1,1 +1,43 @@
-{}
+{
+  "hero_heading": "Herramientas inteligentes para médicos modernos",
+  "hero_subheading": "Ahorra tiempo de papeleo y enfócate en tus pacientes",
+  "hero_cta": "Inicia gratis",
+  "cta_save_time": "Quiero ahorrar tiempo",
+  "cta_sending": "Enviando...",
+  "beta_free": "Acceso beta gratuito • Sin compromiso",
+  "demo_interactive": "🎯 Prueba el Demo Interactivo",
+  "demo_welcome": "¡Bienvenido al Demo de SYMFARMIA!",
+  "demo_explore_features": "Explora todas las funcionalidades con datos de ejemplo",
+  "contact_soon": "¡Perfecto! Te contactaremos pronto",
+  "check_email": "Revisa tu email para los próximos pasos",
+  
+  "benefit_speak": "Habla naturalmente",
+  "benefit_speak_desc": "Realiza tu consulta como siempre. Nuestro sistema escucha y entiende el contexto médico.",
+  "benefit_processing": "Procesamiento inteligente",
+  "benefit_processing_desc": "IA médica especializada estructura automáticamente la información en formato clínico.",
+  "benefit_report": "Reporte instantáneo",
+  "benefit_report_desc": "Obtén un PDF con diagnóstico, tratamiento y recomendaciones listo para entregar.",
+  
+  "how_it_works": "Así de simple funciona",
+  "step_consult": "Consulta normal",
+  "step_consult_desc": "\"Paciente de 45 años con dolor torácico intermitente...\"",
+  "step_processing": "Procesamiento IA",
+  "step_processing_desc": "Sistema analiza y estructura la información médica",
+  "step_report": "Reporte listo",
+  "step_report_desc": "PDF con diagnóstico, tratamiento y seguimiento",
+  
+  "testimonial_author": "Dr. María González",
+  "testimonial_position": "Medicina Interna, CDMX",
+  "testimonial_quote": "\"Antes tardaba 15 minutos escribiendo cada reporte. Ahora me concentro en el paciente y el sistema hace el resto. Es exactamente lo que necesitaba.\"",
+  "testimonial_savings": "Ahorra 2 horas diarias",
+  
+  "final_cta_heading": "¿Listo para recuperar tu tiempo?",
+  "final_cta_text": "Únete al beta y descubre cómo la IA puede simplificar tu práctica médica.",
+  "final_cta_signup": "Solicita acceso beta",
+  "final_cta_demo": "O prueba el demo",
+  
+  "footer_copy": "© 2024 SYMFARMIA • Hecho con 💙 para médicos en México",
+  "footer_privacy": "Privacidad",
+  "footer_terms": "Términos",
+  "footer_contact": "Contacto"
+}

@@ -3,265 +3,79 @@ import { createContext, useContext, useEffect, useState } from 'react';
 
 const I18nContext = createContext();
 
-// Mock translations for build fix
-const translations = {
+// Dynamic translations loader
+async function loadTranslations(locale) {
+  try {
+    const modules = await Promise.all([
+      import(`../../locales/${locale}/common.json`),
+      import(`../../locales/${locale}/medical.json`),
+      import(`../../locales/${locale}/landing.json`),
+      import(`../../locales/${locale}/dashboard.json`),
+    ]);
+    
+    // Flatten nested objects for easier access
+    const flattenObject = (obj, prefix = '') => {
+      return Object.keys(obj).reduce((acc, key) => {
+        const newKey = prefix ? `${prefix}.${key}` : key;
+        if (typeof obj[key] === 'object' && obj[key] !== null) {
+          Object.assign(acc, flattenObject(obj[key], newKey));
+        } else {
+          acc[newKey] = obj[key];
+        }
+        return acc;
+      }, {});
+    };
+
+    const combinedTranslations = {};
+    modules.forEach(module => {
+      Object.assign(combinedTranslations, flattenObject(module.default || module));
+    });
+
+    return combinedTranslations;
+  } catch (error) {
+    console.error(`Failed to load translations for ${locale}:`, error);
+    return fallbackTranslations[locale] || fallbackTranslations['es'];
+  }
+}
+
+// Fallback translations for critical functionality
+const fallbackTranslations = {
   'es': {
+    'transcription.title': 'Transcripción en Tiempo Real',
+    'transcription.ready_to_record': 'Listo para grabar',
+    'transcription.start_recording': 'Iniciar Grabación',
+    'transcription.stop_recording': 'Detener',
+    'transcription.no_transcript_available': 'No hay transcripción disponible',
+    'transcription.no_transcript_description': 'Presiona "Iniciar Grabación" para comenzar a transcribir tu consulta médica',
+    'transcription.service_label': 'Servicio',
+    'transcription.service_browser': 'Navegador',
+    'microphone.status.need_access': 'Necesitamos acceso al micrófono para grabar tu consulta',
+    'microphone.actions.test_access': 'Probar acceso',
     'ai_assistant_welcome': 'Hola! Soy tu Asistente de IA médica. Puedo ayudarte a analizar datos de pacientes, identificar tendencias y proporcionar información clínica.',
-    'ai_assistant': 'Asistente IA',
-    'powered_by_ai': 'Powered by AI',
-    'ask_medical_question': 'Haz una pregunta médica...',
-    'online': 'En línea',
-    'demographics': 'Demografía',
-    'outcomes': 'Resultados',
-    'revenue': 'Ingresos',
-    'welcome_to': 'Bienvenido a',
-    'tagline': 'Plataforma inteligente para médicos independientes',
-    'patient_management': 'Patient Management',
-    'medical_reports': 'Medical Reports',
-    'analytics': 'Analytics',
-    'demo_login': 'Acceso Demo',
-    'auto_fill_demo': 'Observa cómo llenamos automáticamente las credenciales de demostración',
-    'email': 'Email',
-    'password': 'Contraseña',
-    'login_demo': 'Acceder al Demo',
-    'try_demo': 'Probar modo demo',
-    'login': 'Iniciar sesión',
-    'register': 'Registrarse',
-    'demo_mode_full_access': 'El modo demo proporciona acceso completo con datos de muestra',
-    'demo_mode_active': 'Modo Demo Activo',
-    'demo_mode_desc': 'Explora todas las funcionalidades con datos de ejemplo',
-    'switch_live_mode': 'Cambiar a Modo Live',
-    'exit_demo': 'Salir del Demo',
-    'medical_crisis': 'Crisis Médica',
-    'medical_time_lost': 'Tiempo perdido en documentación',
-    'burnout_rate': 'Tasa de burnout médico',
-    'annual_inefficiency': 'Ineficiencia anual',
-    'human_contact_crisis': 'Crisis de contacto humano',
-    'finding_hope_again': 'Encontrando esperanza nuevamente',
-
-    // Minimalist landing page
-    'hero_heading': 'Convierte consultas médicas en reportes clínicos automáticamente',
-    'hero_subheading': 'Habla durante tu consulta y obtén un reporte médico estructurado en segundos. Sin interrupciones, sin formularios, sin perder tiempo.',
-    'cta_save_time': 'Quiero ahorrar tiempo',
-    'cta_sending': 'Enviando...',
-    'beta_free': 'Acceso beta gratuito • Sin compromiso',
-    'demo_interactive': '🎯 Prueba el Demo Interactivo',
-    'demo_welcome': '¡Bienvenido al Demo de SYMFARMIA!',
-    'demo_explore_features': 'Explora todas las funcionalidades con datos de ejemplo',
-    'contact_soon': '¡Perfecto! Te contactaremos pronto',
-    'check_email': 'Revisa tu email para los próximos pasos',
-    'benefit_speak': 'Habla naturalmente',
-    'benefit_speak_desc': 'Realiza tu consulta como siempre. Nuestro sistema escucha y entiende el contexto médico.',
-    'benefit_processing': 'Procesamiento inteligente',
-    'benefit_processing_desc': 'IA médica especializada estructura automáticamente la información en formato clínico.',
-    'benefit_report': 'Reporte instantáneo',
-    'benefit_report_desc': 'Obtén un PDF con diagnóstico, tratamiento y recomendaciones listo para entregar.',
-    'how_it_works': 'Así de simple funciona',
-    'step_consult': 'Consulta normal',
-    'step_consult_desc': '"Paciente de 45 años con dolor torácico intermitente..."',
-    'step_processing': 'Procesamiento IA',
-    'step_processing_desc': 'Sistema analiza y estructura la información médica',
-    'step_report': 'Reporte listo',
-    'step_report_desc': 'PDF con diagnóstico, tratamiento y seguimiento',
-    'testimonial_author': 'Dr. María González',
-    'testimonial_position': 'Medicina Interna, CDMX',
-    'testimonial_quote': '"Antes tardaba 15 minutos escribiendo cada reporte. Ahora me concentro en el paciente y el sistema hace el resto. Es exactamente lo que necesitaba."',
-    'testimonial_savings': 'Ahorra 2 horas diarias',
-    'final_cta_heading': '¿Listo para recuperar tu tiempo?',
-    'final_cta_text': 'Únete al beta y descubre cómo la IA puede simplificar tu práctica médica.',
-    'final_cta_signup': 'Solicita acceso beta',
-    'final_cta_demo': 'O prueba el demo',
-    'footer_copy': '© 2024 SYMFARMIA • Hecho con 💙 para médicos en México',
-    'footer_privacy': 'Privacidad',
-    'footer_terms': 'Términos',
-    'footer_contact': 'Contacto',
-
-    // Consultation workspace
-    'consultation_title': 'Consulta Médica',
-    'session_active': 'Sesión activa',
-    'session_inactive': 'Sesión inactiva',
-    'activate_advanced_ai': 'Activar IA Avanzada',
-    'basic_mode': 'Modo Básico',
-    'change_layout': 'Cambiar disposición',
-    
-    // Consultation settings
-    'consultation_settings': 'Configuración de Consulta',
-    'customize_experience': 'Personaliza tu experiencia de documentación médica',
-    'close_settings': 'Cerrar configuración',
-    'audio_recording': 'Audio y Grabación',
-    'audio_quality': 'Calidad de Audio',
-    'low_faster': 'Baja (más rápido)',
-    'medium_balanced': 'Media (balanceado)',
-    'high_quality': 'Alta (mejor calidad)',
-    'noise_suppression': 'Supresión de Ruido',
-    'echo_cancellation': 'Cancelación de Eco',
-    'transcription': 'Transcripción',
     'language': 'Idioma',
-    'spanish_spain': 'Español (España)',
-    'spanish_mexico': 'Español (México)',
-    'spanish_argentina': 'Español (Argentina)',
-    'english_us': 'English (US)',
-    'transcription_service': 'Servicio de Transcripción',
-    'browser_free': 'Navegador (Gratis)',
-    'whisper_premium': 'Whisper AI (Premium)',
-    'realtime_transcription': 'Transcripción en Tiempo Real',
-    'confidence_threshold': 'Umbral de Confianza',
-    'ai_assistant': 'Asistente IA',
-    'ai_assistance_level': 'Nivel de Asistencia IA',
-    'disabled': 'Deshabilitado',
-    'basic': 'Básico',
-    'advanced': 'Avanzado',
-    'auto_suggestions': 'Sugerencias Automáticas',
-    'clinical_alerts': 'Alertas Clínicas',
-    'proactive_analysis': 'Análisis Proactivo',
-    'soap_generation': 'Generación SOAP',
-    'auto_generate_soap': 'Auto-generar Notas SOAP',
-    'notes_style': 'Estilo de Notas',
-    'concise': 'Conciso',
-    'detailed': 'Detallado',
-    'comprehensive': 'Comprehensivo',
-    'include_timestamps': 'Incluir Marcas de Tiempo',
-    'export': 'Exportación',
-    'default_format': 'Formato por Defecto',
-    'word_docx': 'Word (.docx)',
-    'plain_text': 'Texto plano (.txt)',
-    'include_transcript': 'Incluir Transcripción Original',
-    'include_metadata': 'Incluir Metadatos de Sesión',
-    'reset': 'Restablecer',
-    'cancel': 'Cancelar',
-    'save_settings': 'Guardar Configuración',
-    
-    // Language abbreviations
+    'english': 'Inglés',
+    'spanish': 'Español',
     'english_abbr': 'EN',
     'spanish_abbr': 'ES'
   },
   'en': {
+    'transcription.title': 'Real-time Transcription',
+    'transcription.ready_to_record': 'Ready to record',
+    'transcription.start_recording': 'Start Recording',
+    'transcription.stop_recording': 'Stop',
+    'transcription.no_transcript_available': 'No transcript available',
+    'transcription.no_transcript_description': 'Press "Start Recording" to begin transcribing your medical consultation',
+    'transcription.service_label': 'Service',
+    'transcription.service_browser': 'Browser',
+    'microphone.status.need_access': 'We need microphone access to record your consultation',
+    'microphone.actions.test_access': 'Test access',
     'ai_assistant_welcome': 'Hello! I\'m your AI Medical Analytics Assistant. I can help you analyze patient data, identify trends, and provide clinical insights.',
     'ai_assistant': 'AI Assistant',
     'powered_by_ai': 'Powered by AI',
     'ask_medical_question': 'Ask a medical question...',
-    'online': 'Online',
-    'demographics': 'Demographics',
-    'outcomes': 'Outcomes',
-    'revenue': 'Revenue',
-    'welcome_to': 'Welcome to',
-    'tagline': 'Intelligent platform for independent doctors',
-    'patient_management': 'Patient Management',
-    'medical_reports': 'Medical Reports',
-    'analytics': 'Analytics',
-    'demo_login': 'Demo Login',
-    'auto_fill_demo': 'Watch as we automatically fill in demo credentials',
-    'email': 'Email',
-    'password': 'Password',
-    'login_demo': 'Login to Demo',
-    'try_demo': 'Try Demo Mode',
-    'login': 'Login',
-    'register': 'Register',
-    'demo_mode_full_access': 'Demo mode provides full access with sample data',
-    'demo_mode_active': 'Demo Mode Active',
-    'demo_mode_desc': 'Explore all features with sample data',
-    'switch_live_mode': 'Switch to Live Mode',
-    'exit_demo': 'Exit Demo',
-    'medical_crisis': 'Medical Crisis',
-    'medical_time_lost': 'Time lost in documentation',
-    'burnout_rate': 'Medical burnout rate',
-    'annual_inefficiency': 'Annual inefficiency',
-    'human_contact_crisis': 'Human contact crisis',
-    'finding_hope_again': 'Finding hope again',
-
-    // Minimalist landing page
-    'hero_heading': 'Turn medical visits into clinical reports automatically',
-    'hero_subheading': 'Speak during your visit and get a structured medical report in seconds. No interruptions, no forms, no wasted time.',
-    'cta_save_time': 'I want to save time',
-    'cta_sending': 'Sending...',
-    'beta_free': 'Free beta access • No commitment',
-    'demo_interactive': '🎯 Try the Interactive Demo',
-    'demo_welcome': 'Welcome to the SYMFARMIA Demo!',
-    'demo_explore_features': 'Explore all features with sample data',
-    'contact_soon': 'Great! We will contact you soon',
-    'check_email': 'Check your email for next steps',
-    'benefit_speak': 'Speak naturally',
-    'benefit_speak_desc': 'Conduct your visit as usual. Our system listens and understands the medical context.',
-    'benefit_processing': 'Smart processing',
-    'benefit_processing_desc': 'Specialized medical AI automatically structures the information into clinical format.',
-    'benefit_report': 'Instant report',
-    'benefit_report_desc': 'Get a PDF with diagnosis, treatment and recommendations ready to hand over.',
-    'how_it_works': 'It\'s that simple',
-    'step_consult': 'Normal consultation',
-    'step_consult_desc': '"45 year old patient with intermittent chest pain..."',
-    'step_processing': 'AI processing',
-    'step_processing_desc': 'System analyzes and structures the medical information',
-    'step_report': 'Report ready',
-    'step_report_desc': 'PDF with diagnosis, treatment and follow-up',
-    'testimonial_author': 'Dr. María González',
-    'testimonial_position': 'Internal Medicine, Mexico City',
-    'testimonial_quote': '"I used to spend 15 minutes writing each report. Now I focus on the patient and the system does the rest. It\'s exactly what I needed."',
-    'testimonial_savings': 'Saves 2 hours daily',
-    'final_cta_heading': 'Ready to get your time back?',
-    'final_cta_text': 'Join the beta and see how AI can simplify your medical practice.',
-    'final_cta_signup': 'Request beta access',
-    'final_cta_demo': 'Or try the demo',
-    'footer_copy': '© 2024 SYMFARMIA • Made with 💙 for doctors in Mexico',
-    'footer_privacy': 'Privacy',
-    'footer_terms': 'Terms',
-    'footer_contact': 'Contact',
-
-    // Consultation workspace
-    'consultation_title': 'Medical Consultation',
-    'session_active': 'Session active',
-    'session_inactive': 'Session inactive',
-    'activate_advanced_ai': 'Enable Advanced AI',
-    'basic_mode': 'Basic Mode',
-    'change_layout': 'Change layout',
-    
-    // Consultation settings
-    'consultation_settings': 'Consultation Settings',
-    'customize_experience': 'Customize your medical documentation experience',
-    'close_settings': 'Close settings',
-    'audio_recording': 'Audio and Recording',
-    'audio_quality': 'Audio Quality',
-    'low_faster': 'Low (faster)',
-    'medium_balanced': 'Medium (balanced)',
-    'high_quality': 'High (better quality)',
-    'noise_suppression': 'Noise Suppression',
-    'echo_cancellation': 'Echo Cancellation',
-    'transcription': 'Transcription',
     'language': 'Language',
-    'spanish_spain': 'Spanish (Spain)',
-    'spanish_mexico': 'Spanish (Mexico)',
-    'spanish_argentina': 'Spanish (Argentina)',
-    'english_us': 'English (US)',
-    'transcription_service': 'Transcription Service',
-    'browser_free': 'Browser (Free)',
-    'whisper_premium': 'Whisper AI (Premium)',
-    'realtime_transcription': 'Real-time Transcription',
-    'confidence_threshold': 'Confidence Threshold',
-    'ai_assistant': 'AI Assistant',
-    'ai_assistance_level': 'AI Assistance Level',
-    'disabled': 'Disabled',
-    'basic': 'Basic',
-    'advanced': 'Advanced',
-    'auto_suggestions': 'Auto Suggestions',
-    'clinical_alerts': 'Clinical Alerts',
-    'proactive_analysis': 'Proactive Analysis',
-    'soap_generation': 'SOAP Generation',
-    'auto_generate_soap': 'Auto-generate SOAP Notes',
-    'notes_style': 'Notes Style',
-    'concise': 'Concise',
-    'detailed': 'Detailed',
-    'comprehensive': 'Comprehensive',
-    'include_timestamps': 'Include Timestamps',
-    'export': 'Export',
-    'default_format': 'Default Format',
-    'word_docx': 'Word (.docx)',
-    'plain_text': 'Plain text (.txt)',
-    'include_transcript': 'Include Original Transcript',
-    'include_metadata': 'Include Session Metadata',
-    'reset': 'Reset',
-    'cancel': 'Cancel',
-    'save_settings': 'Save Settings',
-    
-    // Language abbreviations
+    'english': 'English',
+    'spanish': 'Spanish',
     'english_abbr': 'EN',
     'spanish_abbr': 'ES'
   }
@@ -272,7 +86,7 @@ function detectUserLanguage() {
   
   // Check localStorage first
   const stored = localStorage.getItem('preferredLanguage');
-  if (stored && translations[stored]) return stored;
+  if (stored && ['es', 'en'].includes(stored)) return stored;
   
   // Check browser language
   const browserLang = navigator.language || navigator.userLanguage;
@@ -285,6 +99,20 @@ function detectUserLanguage() {
 export function I18nProvider({ children }) {
   const [locale, setLocale] = useState('es'); // Always start with 'es' for consistent SSR
   const [hasHydrated, setHasHydrated] = useState(false);
+  const [translations, setTranslations] = useState({});
+  const [isLoadingTranslations, setIsLoadingTranslations] = useState(true);
+
+  // Load translations when locale changes
+  useEffect(() => {
+    async function loadAndSetTranslations() {
+      setIsLoadingTranslations(true);
+      const loadedTranslations = await loadTranslations(locale);
+      setTranslations(loadedTranslations);
+      setIsLoadingTranslations(false);
+    }
+    
+    loadAndSetTranslations();
+  }, [locale]);
 
   useEffect(() => {
     // Only run once on client side - detect and set user language after hydration
@@ -304,11 +132,14 @@ export function I18nProvider({ children }) {
   }, [locale]);
 
   const t = (key) => {
-    return translations[locale]?.[key] || translations['es']?.[key] || key;
+    if (isLoadingTranslations) {
+      return fallbackTranslations[locale]?.[key] || fallbackTranslations['es']?.[key] || key;
+    }
+    return translations[key] || fallbackTranslations[locale]?.[key] || fallbackTranslations['es']?.[key] || key;
   };
 
   return (
-    <I18nContext.Provider value={{ locale, setLocale, t }}>
+    <I18nContext.Provider value={{ locale, setLocale, t, isLoadingTranslations }}>
       {children}
     </I18nContext.Provider>
   );

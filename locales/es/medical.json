@@ -68,6 +68,7 @@
     "transcribing": "Transcribiendo...",
     "no_transcript_available": "No hay transcripción disponible",
     "no_transcript_description": "Presiona \"Iniciar Grabación\" para comenzar a transcribir tu consulta médica",
+    "demo_empty_state": "\ud83d\udc7e \u00a1No hay transcripci\u00f3n! Graba tu primera consulta.",
     "service_browser": "Navegador",
     "service_whisper": "Whisper",
     "service_label": "Servicio",
@@ -238,7 +239,7 @@
   },
   "status": {
     "pending": "Pendiente",
-    "sent": "Enviado", 
+    "sent": "Enviado",
     "not_delivered": "No entregado",
     "sending": "Enviando"
   }

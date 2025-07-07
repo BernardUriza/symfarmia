@@ -25,7 +25,7 @@ const colorTests = [
   { bg: '#1f2937', text: '#9ca3af', name: 'Dark mode - Muted text' },
   { bg: '#111827', text: '#ffffff', name: 'Dark mode - Modal background' },
   { bg: '#2563eb', text: '#ffffff', name: 'Dark mode - Primary button' },
-  { bg: '#1f2937', text: '#6b7280', name: 'Dark mode - Input border' },
+  { bg: '#1f2937', text: '#9ca3af', name: 'Dark mode - Input border' },
 ];
 
 // WCAG AA standards

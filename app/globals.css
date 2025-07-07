@@ -436,51 +436,34 @@ div[role="menu"] div:hover {
 }
 .demo-banner {
   position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 1000;
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.75), rgba(79, 70, 229, 0.75));
-  backdrop-filter: blur(8px) saturate(180%);
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  transition: all 0.3s ease;
-}
-.demo-banner:hover {
-  transform: translateX(-50%) translateY(-2px);
-  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.2);
-}
-.demo-banner-content {
+  top: 16px;
+  right: 50%;
+  transform: translateX(50%);
+  z-index: 9999;
+  background: #FFFBCC;
+  color: #9B870C;
+  border-radius: 12px;
+  padding: 10px 28px;
+  font-weight: 700;
+  font-size: 22px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
+  gap: 10px;
+  box-shadow: 0 4px 24px #0002;
+  animation: demo-banner-pulse 2s infinite;
 }
-.demo-banner .demo-text {
-  color: white;
-  font-size: 14px;
-  font-weight: 600;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
-}
-.demo-banner .demo-buttons {
-  display: flex;
-}
-.demo-banner .demo-buttons button {
-  background: rgba(255,255,255,0.2);
-  border: 1px solid rgba(255,255,255,0.3);
-  border-radius: 6px;
-  padding: 4px 8px;
-  color: white;
-  font-weight: 600;
-  font-size: 14px;
+.demo-banner button {
+  background: none;
+  border: none;
+  color: inherit;
   cursor: pointer;
-  transition: all 0.2s ease;
-  line-height: 1;
+  font-weight: 700;
+  margin-left: 12px;
 }
-.demo-banner .demo-buttons button:hover {
-  background: rgba(255,255,255,0.3);
-  transform: scale(1.1);
+@keyframes demo-banner-pulse {
+  0% { box-shadow: 0 0 0 0 #FFD70044; }
+  70% { box-shadow: 0 0 0 12px #FFD70011; }
+  100% { box-shadow: 0 0 0 0 #FFD70044; }
 }
 
 .medical-header {

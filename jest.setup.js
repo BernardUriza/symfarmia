@@ -1,13 +1,13 @@
 import '@testing-library/jest-dom'
 
 // Mock Auth0
-jest.mock('@auth0/nextjs-auth0/client', () => ({
+jest.mock('@auth0/nextjs-auth0', () => ({
   useUser: () => ({
     user: null,
     isLoading: false,
     error: null,
   }),
-  UserProvider: ({ children }) => children,
+  Auth0Provider: ({ children }) => children,
   withPageAuthRequired: (component) => component,
 }))
 

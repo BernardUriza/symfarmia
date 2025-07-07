@@ -1,12 +1,11 @@
 // User-specific reducer for preferences and statistics
-import type { AppState } from '../types';
+import type { AppState, MedicalStateAction } from '../types';
 
 export function userReducer(
   state: AppState['user'],
-  action: unknown
+  action: MedicalStateAction
 ): AppState['user'] {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const act = action as any;
+  const act = action as MedicalStateAction;
   
   switch (act.type) {
     case 'UPDATE_PREFERENCES': {

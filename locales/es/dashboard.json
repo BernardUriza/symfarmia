@@ -1,1 +1,27 @@
-{}
+{
+  "dashboard_title": "Panel de Control",
+  "patient_management": "Gestión de Pacientes",
+  "medical_reports": "Reportes Médicos",
+  "analytics": "Analíticas",
+  "consultation": "Consulta",
+  "new_consultation": "Nueva Consulta",
+  "patients": "Pacientes",
+  "reports": "Reportes",
+  "settings": "Configuración",
+  "profile": "Perfil",
+  "logout": "Cerrar Sesión",
+  "welcome_back": "Bienvenido de vuelta",
+  "today_stats": "Estadísticas de Hoy",
+  "consultations_today": "Consultas Hoy",
+  "pending_reports": "Reportes Pendientes",
+  "active_patients": "Pacientes Activos",
+  "quick_actions": "Acciones Rápidas",
+  "start_consultation": "Iniciar Consulta",
+  "view_patients": "Ver Pacientes",
+  "create_report": "Crear Reporte",
+  "recent_activity": "Actividad Reciente",
+  "no_activity": "No hay actividad reciente",
+  "search_placeholder": "Buscar pacientes, reportes...",
+  "notifications": "Notificaciones",
+  "no_notifications": "No hay notificaciones nuevas"
+}

@@ -11,6 +11,7 @@ const navItems: BottomNavItemWithEmoji[] = [
   {
     id: "dashboard",
     label: "Pacientes",
+    icon: "👥",
     emoji: "👥",
     route: "/dashboard",
     badge: null,
@@ -18,6 +19,7 @@ const navItems: BottomNavItemWithEmoji[] = [
   {
     id: "ai-assistant",
     label: "Asistente IA",
+    icon: "🧠",
     emoji: "🧠",
     route: "/chat",
     badge: null,
@@ -25,6 +27,7 @@ const navItems: BottomNavItemWithEmoji[] = [
   {
     id: "records",
     label: "Expedientes",
+    icon: "📂",
     emoji: "📂",
     route: "/records",
     badge: null,
@@ -32,6 +35,7 @@ const navItems: BottomNavItemWithEmoji[] = [
   {
     id: "settings",
     label: "Configuración",
+    icon: "⚙️",
     emoji: "⚙️",
     route: "/settings",
     badge: null,
