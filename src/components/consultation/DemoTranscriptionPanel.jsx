@@ -36,13 +36,16 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
     selectSpecialty,
     confirmSpecialtyAndGenerate,
     strategyName,
-    availableSpecialties
+    availableSpecialties,
+    availableStrategies
   } = useDemoTranscription(strategy);
 
   const [currentStrategy] = useState(strategy);
   const [isClient, setIsClient] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const [isStrategyDropdownOpen, setIsStrategyDropdownOpen] = useState(false);
+  const strategyDropdownRef = useRef(null);
 
 
   // Evitar hydration errors - solo renderizar después de mount
@@ -97,6 +100,23 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [isDropdownOpen]);
+
+  // Close strategy dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (strategyDropdownRef.current && !strategyDropdownRef.current.contains(event.target)) {
+        setIsStrategyDropdownOpen(false);
+      }
+    };
+
+    if (isStrategyDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isStrategyDropdownOpen]);
 
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
@@ -310,21 +330,44 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
               </div>
               
               {/* Strategy Selector */}
-              <div className="flex items-center space-x-2">
+              <div className="relative flex items-center space-x-2" ref={strategyDropdownRef}>
                 <span className="text-xs text-purple-600">•</span>
-                <select
-                  value={currentStrategy}
-                  onChange={(e) => {
-                    // Handle strategy change logic here
-                    window.location.href = window.location.pathname + `?strategy=${e.target.value}`;
-                  }}
-                  className="text-xs bg-white border border-purple-200 rounded px-2 py-1 text-purple-700 focus:outline-none focus:ring-1 focus:ring-purple-500"
+                <motion.button
+                  onClick={() => setIsStrategyDropdownOpen(!isStrategyDropdownOpen)}
+                  className="inline-flex items-center text-xs bg-white border border-purple-200 rounded px-2 py-1 text-purple-700 hover:bg-purple-100 transition-colors"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                 >
-                  <option value="general_medicine">General</option>
-                  <option value="cardiology">Cardio</option>
-                  <option value="pediatrics">Pediatría</option>
-                  <option value="quality_of_life">Calidad de Vida</option>
-                </select>
+                  <span className="truncate max-w-[120px]">{strategyName}</span>
+                  <ChevronDownIcon
+                    className={`w-3 h-3 ml-1 transition-transform ${isStrategyDropdownOpen ? 'rotate-180' : ''}`}
+                  />
+                </motion.button>
+
+                <AnimatePresence>
+                  {isStrategyDropdownOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -5, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -5, scale: 0.95 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute top-full right-0 mt-1 w-72 bg-white rounded-lg shadow-lg border border-gray-200 z-50"
+                    >
+                      {availableStrategies.map((key) => (
+                        <button
+                          key={key}
+                          onClick={() => {
+                            window.location.href = window.location.pathname + `?strategy=${key}`;
+                            setIsStrategyDropdownOpen(false);
+                          }}
+                          className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
+                        >
+                          {availableSpecialties[key]?.name || key}
+                        </button>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </div>
             
@@ -436,6 +479,7 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
                   transition={{ duration: 0.5 }}
                 >
                   {demoText}
+                  {isRecording && <span className="typing-cursor" />}
                 </motion.p>
               </div>
             </motion.div>
