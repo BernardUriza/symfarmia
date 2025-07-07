@@ -10,8 +10,17 @@ import {
 import { useTranscription } from "../../../hooks/useTranscription";
 import { useTranslation } from "../../../app/providers/I18nProvider";
 import { useAppMode } from "../../../app/providers/AppModeProvider";
+import DemoTranscriptionPanel from "./DemoTranscriptionPanel";
 
 const TranscriptionPanel = () => {
+  const { isDemoMode } = useAppMode();
+  
+  // DEMO MODE: Render magical animated demo panel
+  if (isDemoMode) {
+    return <DemoTranscriptionPanel strategy="general_medicine" />;
+  }
+
+  // REAL MODE: Continue with original transcription logic
   const {
     isRecording,
     liveTranscript,
@@ -30,7 +39,6 @@ const TranscriptionPanel = () => {
   } = useTranscription();
 
   const { t } = useTranslation();
-  const { isDemoMode } = useAppMode();
 
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
