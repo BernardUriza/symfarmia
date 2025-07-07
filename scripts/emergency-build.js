@@ -33,7 +33,7 @@ prismaProcess.on('close', (code) => {
   const buildProcess = spawn('npx', ['next', 'build'], {
     env: {
       ...process.env,
-      NODE_OPTIONS: '--max-old-space-size=1024 --max-semi-space-size=64 --max-new-space-size=512',
+      NODE_OPTIONS: '--max-old-space-size=1024 --max-semi-space-size=64',
       NEXT_TELEMETRY_DISABLED: '1',
       NODE_ENV: 'production',
       // Force minimal webpack configuration

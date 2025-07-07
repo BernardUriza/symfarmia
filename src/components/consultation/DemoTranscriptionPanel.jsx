@@ -56,73 +56,65 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
     setIsClient(true);
   }, []);
 
-  // Limpiar intervalos y timeouts al desmontar para evitar fugas de memoria - ENHANCED
+  // Cleanup on unmount to prevent memory leaks
   useEffect(() => {
+    // Store cleanup function reference
+    const cleanup = () => {
+      // Clear any pending state updates
+      setIsDropdownOpen(false);
+      setIsStrategyOpen(false);
+    };
+    
     return () => {
       // Force cleanup on unmount
+      cleanup();
       resetDemo();
     };
   }, [resetDemo]);
 
-  // Additional cleanup on strategy change to prevent cross-contamination
+  // Reset on strategy change to prevent cross-contamination
   useEffect(() => {
-    resetDemo();
-  }, [currentStrategy, resetDemo]);
+    // Only reset if strategy actually changed
+    if (currentStrategy !== strategy) {
+      resetDemo();
+    }
+  }, [currentStrategy, strategy, resetDemo]);
 
-  // Close confirmation when clicking outside - MEMORY LEAK FIX
+  // Consolidated click outside handler to prevent memory leaks
   useEffect(() => {
+    // Create stable references to avoid stale closures
     const handleClickOutside = (event) => {
+      // Handle specialty confirmation
       if (
         showSpecialtyConfirmation &&
         !event.target.closest(".specialty-confirmation-container")
       ) {
         // Don't close automatically - require explicit action
       }
-    };
-
-    // Always add/remove listener to prevent memory leaks
-    if (showSpecialtyConfirmation) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [showSpecialtyConfirmation]);
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
+      
+      // Handle dropdown
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsDropdownOpen(false);
       }
-    };
-
-    if (isDropdownOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isDropdownOpen]);
-
-  // Close strategy dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
+      
+      // Handle strategy dropdown
       if (strategyRef.current && !strategyRef.current.contains(event.target)) {
         setIsStrategyOpen(false);
       }
     };
 
-    if (isStrategyOpen) {
+    // Only add listener if any dropdown is open
+    const shouldAddListener = showSpecialtyConfirmation || isDropdownOpen || isStrategyOpen;
+    
+    if (shouldAddListener) {
       document.addEventListener("mousedown", handleClickOutside);
     }
 
+    // Cleanup function always removes the listener
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isStrategyOpen]);
+  }, [showSpecialtyConfirmation, isDropdownOpen, isStrategyOpen]);
 
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);

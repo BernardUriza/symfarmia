@@ -149,6 +149,18 @@ const DEMO_STRATEGIES = {
 };
 
 export function useDemoTranscription(strategy = 'general_medicine') {
+  // Validate strategy parameter
+  if (!strategy || typeof strategy !== 'string') {
+    console.warn('[useDemoTranscription] Invalid strategy parameter, using default:', strategy);
+    strategy = 'general_medicine';
+  }
+  
+  // Validate strategy exists
+  if (!DEMO_STRATEGIES[strategy]) {
+    console.warn('[useDemoTranscription] Unknown strategy, using default:', strategy);
+    strategy = 'general_medicine';
+  }
+  
   const [selectedSpecialty, setSelectedSpecialty] = useState(null);
   const [showSpecialtyConfirmation, setShowSpecialtyConfirmation] = useState(false);
   const [consultationGenerated, setConsultationGenerated] = useState(false);
@@ -164,7 +176,7 @@ export function useDemoTranscription(strategy = 'general_medicine') {
   const timeoutRef = useRef(null);
   // Track all demo timeouts for proper cleanup to avoid memory leaks
   const timeoutsRef = useRef([]);
-  const demoStrategy = DEMO_STRATEGIES[strategy] || DEMO_STRATEGIES['general_medicine'];
+  const demoStrategy = DEMO_STRATEGIES[strategy];
 
   const selectSpecialty = (specialty) => {
     setSelectedSpecialty(specialty);

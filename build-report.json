@@ -1,16 +1,16 @@
 {
-  "timestamp": "2025-07-07T12:50:45.485Z",
-  "totalDuration": "3.53s",
+  "timestamp": "2025-07-07T18:35:18.962Z",
+  "totalDuration": "3.23s",
   "phases": [
     {
       "name": "PRISMA",
-      "duration": "3.13s",
+      "duration": "1.38s",
       "exitCode": 0
     },
     {
-      "name": "COMPILE",
-      "duration": "3.53s",
-      "exitCode": 1
+      "name": "OPTIMIZE",
+      "duration": "3.23s",
+      "exitCode": 135
     }
   ],
   "memoryPeak": null,
