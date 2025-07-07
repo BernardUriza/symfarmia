@@ -14,13 +14,9 @@ import DemoTranscriptionPanel from "./DemoTranscriptionPanel";
 
 const TranscriptionPanel = () => {
   const { isDemoMode } = useAppMode();
+  const { t } = useTranslation();
   
-  // DEMO MODE: Render magical animated demo panel
-  if (isDemoMode) {
-    return <DemoTranscriptionPanel strategy="general_medicine" />;
-  }
-
-  // REAL MODE: Continue with original transcription logic
+  // Always call hooks before any conditional returns
   const {
     isRecording,
     liveTranscript,
@@ -37,8 +33,11 @@ const TranscriptionPanel = () => {
     runMicrophoneDiagnostics,
     isAdvancedMode,
   } = useTranscription();
-
-  const { t } = useTranslation();
+  
+  // DEMO MODE: Render magical animated demo panel
+  if (isDemoMode) {
+    return <DemoTranscriptionPanel strategy="general_medicine" />;
+  }
 
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
