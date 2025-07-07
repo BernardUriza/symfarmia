@@ -84,6 +84,53 @@ const translations = {
     'basic_mode': 'Modo Básico',
     'change_layout': 'Cambiar disposición',
     
+    // Consultation settings
+    'consultation_settings': 'Configuración de Consulta',
+    'customize_experience': 'Personaliza tu experiencia de documentación médica',
+    'close_settings': 'Cerrar configuración',
+    'audio_recording': 'Audio y Grabación',
+    'audio_quality': 'Calidad de Audio',
+    'low_faster': 'Baja (más rápido)',
+    'medium_balanced': 'Media (balanceado)',
+    'high_quality': 'Alta (mejor calidad)',
+    'noise_suppression': 'Supresión de Ruido',
+    'echo_cancellation': 'Cancelación de Eco',
+    'transcription': 'Transcripción',
+    'language': 'Idioma',
+    'spanish_spain': 'Español (España)',
+    'spanish_mexico': 'Español (México)',
+    'spanish_argentina': 'Español (Argentina)',
+    'english_us': 'English (US)',
+    'transcription_service': 'Servicio de Transcripción',
+    'browser_free': 'Navegador (Gratis)',
+    'whisper_premium': 'Whisper AI (Premium)',
+    'realtime_transcription': 'Transcripción en Tiempo Real',
+    'confidence_threshold': 'Umbral de Confianza',
+    'ai_assistant': 'Asistente IA',
+    'ai_assistance_level': 'Nivel de Asistencia IA',
+    'disabled': 'Deshabilitado',
+    'basic': 'Básico',
+    'advanced': 'Avanzado',
+    'auto_suggestions': 'Sugerencias Automáticas',
+    'clinical_alerts': 'Alertas Clínicas',
+    'proactive_analysis': 'Análisis Proactivo',
+    'soap_generation': 'Generación SOAP',
+    'auto_generate_soap': 'Auto-generar Notas SOAP',
+    'notes_style': 'Estilo de Notas',
+    'concise': 'Conciso',
+    'detailed': 'Detallado',
+    'comprehensive': 'Comprehensivo',
+    'include_timestamps': 'Incluir Marcas de Tiempo',
+    'export': 'Exportación',
+    'default_format': 'Formato por Defecto',
+    'word_docx': 'Word (.docx)',
+    'plain_text': 'Texto plano (.txt)',
+    'include_transcript': 'Incluir Transcripción Original',
+    'include_metadata': 'Incluir Metadatos de Sesión',
+    'reset': 'Restablecer',
+    'cancel': 'Cancelar',
+    'save_settings': 'Guardar Configuración',
+    
     // Language abbreviations
     'english_abbr': 'EN',
     'spanish_abbr': 'ES'
@@ -167,6 +214,53 @@ const translations = {
     'basic_mode': 'Basic Mode',
     'change_layout': 'Change layout',
     
+    // Consultation settings
+    'consultation_settings': 'Consultation Settings',
+    'customize_experience': 'Customize your medical documentation experience',
+    'close_settings': 'Close settings',
+    'audio_recording': 'Audio and Recording',
+    'audio_quality': 'Audio Quality',
+    'low_faster': 'Low (faster)',
+    'medium_balanced': 'Medium (balanced)',
+    'high_quality': 'High (better quality)',
+    'noise_suppression': 'Noise Suppression',
+    'echo_cancellation': 'Echo Cancellation',
+    'transcription': 'Transcription',
+    'language': 'Language',
+    'spanish_spain': 'Spanish (Spain)',
+    'spanish_mexico': 'Spanish (Mexico)',
+    'spanish_argentina': 'Spanish (Argentina)',
+    'english_us': 'English (US)',
+    'transcription_service': 'Transcription Service',
+    'browser_free': 'Browser (Free)',
+    'whisper_premium': 'Whisper AI (Premium)',
+    'realtime_transcription': 'Real-time Transcription',
+    'confidence_threshold': 'Confidence Threshold',
+    'ai_assistant': 'AI Assistant',
+    'ai_assistance_level': 'AI Assistance Level',
+    'disabled': 'Disabled',
+    'basic': 'Basic',
+    'advanced': 'Advanced',
+    'auto_suggestions': 'Auto Suggestions',
+    'clinical_alerts': 'Clinical Alerts',
+    'proactive_analysis': 'Proactive Analysis',
+    'soap_generation': 'SOAP Generation',
+    'auto_generate_soap': 'Auto-generate SOAP Notes',
+    'notes_style': 'Notes Style',
+    'concise': 'Concise',
+    'detailed': 'Detailed',
+    'comprehensive': 'Comprehensive',
+    'include_timestamps': 'Include Timestamps',
+    'export': 'Export',
+    'default_format': 'Default Format',
+    'word_docx': 'Word (.docx)',
+    'plain_text': 'Plain text (.txt)',
+    'include_transcript': 'Include Original Transcript',
+    'include_metadata': 'Include Session Metadata',
+    'reset': 'Reset',
+    'cancel': 'Cancel',
+    'save_settings': 'Save Settings',
+    
     // Language abbreviations
     'english_abbr': 'EN',
     'spanish_abbr': 'ES'
@@ -190,16 +284,18 @@ function detectUserLanguage() {
 
 export function I18nProvider({ children }) {
   const [locale, setLocale] = useState('es'); // Always start with 'es' for consistent SSR
+  const [hasHydrated, setHasHydrated] = useState(false);
 
   useEffect(() => {
-    // Only run on client side - detect and set user language after hydration
-    if (typeof window !== 'undefined') {
+    // Only run once on client side - detect and set user language after hydration
+    if (typeof window !== 'undefined' && !hasHydrated) {
       const detectedLang = detectUserLanguage();
+      setHasHydrated(true);
       if (detectedLang !== locale) {
         setLocale(detectedLang);
       }
     }
-  }, []);
+  }, [hasHydrated, locale]);
 
   useEffect(() => {
     if (typeof localStorage !== 'undefined') {

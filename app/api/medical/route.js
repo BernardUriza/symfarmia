@@ -1,101 +1,100 @@
 import { NextResponse } from 'next/server';
-import { medicalAIService, MedicalAIError } from '../../services/MedicalAIService.js';
+import { processMedicalQuery, getErrorMessage } from '../../services/MedicalAILogic.js';
 import { MedicalAIConfig } from '../../config/MedicalAIConfig.js';
+// Dependency injection point, explicit, one place
+const dependencies = {
+  config: MedicalAIConfig,
+  httpClient: { fetch }
+};
 
 export async function POST(request) {
   try {
-    const { query, context = {}, type = 'diagnosis' } = await request.json();
-    
-    if (!query) {
+    const { query, type = 'diagnosis' } = await request.json();
+    const result = await processMedicalQuery({ query, type }, dependencies);
+    return NextResponse.json(result);
+  } catch (error) {
+    // Deep log brutal: logea TODO, sin piedad
+    console.error('[Medical API DeepLog]', {
+      name: error.name,
+      message: error.message,
+      status: error.status,
+      type: error.type,
+      details: error.details,
+      stack: error.stack,
+      ...(error.response && { response: error.response })
+    });
+
+    // Hugging Face error exposure
+    if (error.type === 'huggingface_error') {
       return NextResponse.json(
-        { error: 'Query is required' },
-        { status: 400 }
+        {
+          error: 'Hugging Face API error',
+          status: error.status,
+          details: error.details,
+          message: error.message,
+          stack: error.stack,
+        },
+        { status: error.status || 502 }
       );
     }
 
-    // Validate configuration
-    const configErrors = MedicalAIConfig.validateConfig();
-    if (configErrors.length > 0) {
+    // Configuration error
+    if (error.type === 'configuration_error') {
       return NextResponse.json(
-        { 
+        {
           error: 'Configuration error',
-          type: 'configuration_error',
-          details: configErrors
+          type: error.type,
+          details: error.details || error.message,
         },
         { status: 500 }
       );
     }
 
-    // Use the service layer
-    const result = await medicalAIService.processQuery({ query, context, type });
-    return NextResponse.json(result);
-
-  } catch (error) {
-    console.error('Medical API error:', error);
-    
-    // Handle MedicalAIError (from service layer)
-    if (error instanceof MedicalAIError) {
-      return NextResponse.json(
-        { 
-          error: getErrorMessage(error.status),
-          type: error.type,
-          details: error.message
-        },
-        { status: error.status }
-      );
-    }
-
-    // Handle timeout errors
+    // Timeout error
     if (error.name === 'AbortError') {
       return NextResponse.json(
-        { 
+        {
           error: 'Request timeout',
           type: 'timeout_error',
-          message: 'Request to Hugging Face API timed out'
+          message: 'Request to Hugging Face API timed out',
+          stack: error.stack,
         },
         { status: 408 }
       );
     }
 
-    // Handle network errors
-    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+    // Network error
+    if (error.name === 'TypeError' && error.message?.includes('fetch')) {
       return NextResponse.json(
-        { 
+        {
           error: 'Network error',
           type: 'network_error',
-          message: 'Unable to connect to Hugging Face API'
+          message: 'Unable to connect to Hugging Face API',
+          stack: error.stack,
         },
         { status: 503 }
       );
     }
-    
-    // Handle other errors
+
+    // Otros errores: show all
     return NextResponse.json(
-      { 
-        error: 'Internal server error',
-        type: 'server_error',
-        message: error.message
+      {
+        error: getErrorMessage(error.status) || 'Internal server error',
+        type: error.type || 'server_error',
+        details: error.details || error.message,
+        stack: error.stack,
+        status: error.status || 500,
       },
-      { status: 500 }
+      { status: error.status || 500 }
     );
   }
 }
 
-function getErrorMessage(status) {
-  const errorMessages = {
-    401: 'Invalid Hugging Face token',
-    404: 'Model not found',
-    429: 'Rate limit exceeded',
-    503: 'Service unavailable - model loading'
-  };
-  return errorMessages[status] || `Hugging Face API error: ${status}`;
-}
-
 export async function GET() {
   return NextResponse.json(
-    { 
+    {
       message: 'Medical AI API endpoint',
-      availableTypes: medicalAIService.getAvailableTypes(),
+      availableTypes: MedicalAIConfig.getAvailableTypes(),
       usage: 'POST with { query, context?, type? }',
       service: 'SYMFARMIA Medical AI Service v1.0'
     },

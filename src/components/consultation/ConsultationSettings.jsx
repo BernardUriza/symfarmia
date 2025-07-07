@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import '../../styles/accessibility.css';
+import { useTranslation } from '../../../app/providers/I18nProvider';
 import { 
   XMarkIcon,
   MicrophoneIcon,
@@ -11,6 +12,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 const ConsultationSettings = ({ onClose }) => {
+  const { t } = useTranslation();
   const [settings, setSettings] = useState({
     // Audio settings
     audioQuality: 'high', // 'low' | 'medium' | 'high'
@@ -91,14 +93,14 @@ const ConsultationSettings = ({ onClose }) => {
               <Cog6ToothIcon className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Configuración de Consulta</h2>
-              <p className="text-sm text-gray-600 dark:text-gray-300">Personaliza tu experiencia de documentación médica</p>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{t('consultation_settings')}</h2>
+              <p className="text-sm text-gray-600 dark:text-gray-300">{t('customize_experience')}</p>
             </div>
           </div>
           <button
             onClick={onClose}
             className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
-            aria-label="Cerrar configuración"
+            aria-label={t('close_settings')}
           >
             <XMarkIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
           </button>
@@ -110,28 +112,28 @@ const ConsultationSettings = ({ onClose }) => {
           <div>
             <div className="flex items-center space-x-2 mb-4">
               <MicrophoneIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Audio y Grabación</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{t('audio_recording')}</h3>
             </div>
             
             <div className="space-y-4 pl-7">
               <div>
                 <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
-                  Calidad de Audio
+                  {t('audio_quality')}
                 </label>
                 <select
                   value={settings.audioQuality}
                   onChange={(e) => handleSettingChange('audioQuality', e.target.value)}
                   className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent"
                 >
-                  <option value="low">Baja (más rápido)</option>
-                  <option value="medium">Media (balanceado)</option>
-                  <option value="high">Alta (mejor calidad)</option>
+                  <option value="low">{t('low_faster')}</option>
+                  <option value="medium">{t('medium_balanced')}</option>
+                  <option value="high">{t('high_quality')}</option>
                 </select>
               </div>
               
               <div className="flex items-center justify-between">
                 <label className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                  Supresión de Ruido
+                  {t('noise_suppression')}
                 </label>
                 <input
                   type="checkbox"
@@ -143,7 +145,7 @@ const ConsultationSettings = ({ onClose }) => {
               
               <div className="flex items-center justify-between">
                 <label className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                  Cancelación de Eco
+                  {t('echo_cancellation')}
                 </label>
                 <input
                   type="checkbox"
@@ -159,43 +161,43 @@ const ConsultationSettings = ({ onClose }) => {
           <div>
             <div className="flex items-center space-x-2 mb-4">
               <SpeakerWaveIcon className="w-5 h-5 text-green-600 dark:text-green-400" />
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Transcripción</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{t('transcription')}</h3>
             </div>
             
             <div className="space-y-4 pl-7">
               <div>
                 <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
-                  Idioma
+                  {t('language')}
                 </label>
                 <select
                   value={settings.language}
                   onChange={(e) => handleSettingChange('language', e.target.value)}
                   className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent"
                 >
-                  <option value="es-ES">Español (España)</option>
-                  <option value="es-MX">Español (México)</option>
-                  <option value="es-AR">Español (Argentina)</option>
-                  <option value="en-US">English (US)</option>
+                  <option value="es-ES">{t('spanish_spain')}</option>
+                  <option value="es-MX">{t('spanish_mexico')}</option>
+                  <option value="es-AR">{t('spanish_argentina')}</option>
+                  <option value="en-US">{t('english_us')}</option>
                 </select>
               </div>
               
               <div>
                 <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
-                  Servicio de Transcripción
+                  {t('transcription_service')}
                 </label>
                 <select
                   value={settings.transcriptionService}
                   onChange={(e) => handleSettingChange('transcriptionService', e.target.value)}
                   className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent"
                 >
-                  <option value="browser">Navegador (Gratis)</option>
-                  <option value="whisper">Whisper AI (Premium)</option>
+                  <option value="browser">{t('browser_free')}</option>
+                  <option value="whisper">{t('whisper_premium')}</option>
                 </select>
               </div>
               
               <div className="flex items-center justify-between">
                 <label className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                  Transcripción en Tiempo Real
+                  {t('realtime_transcription')}
                 </label>
                 <input
                   type="checkbox"
@@ -207,7 +209,7 @@ const ConsultationSettings = ({ onClose }) => {
               
               <div>
                 <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
-                  Umbral de Confianza: {(settings.confidenceThreshold * 100).toFixed(0)}%
+                  {t('confidence_threshold')}: {(settings.confidenceThreshold * 100).toFixed(0)}%
                 </label>
                 <input
                   type="range"
@@ -226,28 +228,28 @@ const ConsultationSettings = ({ onClose }) => {
           <div>
             <div className="flex items-center space-x-2 mb-4">
               <SparklesIcon className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Asistente IA</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{t('ai_assistant')}</h3>
             </div>
             
             <div className="space-y-4 pl-7">
               <div>
                 <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
-                  Nivel de Asistencia IA
+                  {t('ai_assistance_level')}
                 </label>
                 <select
                   value={settings.aiAssistance}
                   onChange={(e) => handleSettingChange('aiAssistance', e.target.value)}
                   className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent"
                 >
-                  <option value="disabled">Deshabilitado</option>
-                  <option value="basic">Básico</option>
-                  <option value="advanced">Avanzado</option>
+                  <option value="disabled">{t('disabled')}</option>
+                  <option value="basic">{t('basic')}</option>
+                  <option value="advanced">{t('advanced')}</option>
                 </select>
               </div>
               
               <div className="flex items-center justify-between">
                 <label className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                  Sugerencias Automáticas
+                  {t('auto_suggestions')}
                 </label>
                 <input
                   type="checkbox"
@@ -259,7 +261,7 @@ const ConsultationSettings = ({ onClose }) => {
               
               <div className="flex items-center justify-between">
                 <label className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                  Alertas Clínicas
+                  {t('clinical_alerts')}
                 </label>
                 <input
                   type="checkbox"
@@ -271,7 +273,7 @@ const ConsultationSettings = ({ onClose }) => {
               
               <div className="flex items-center justify-between">
                 <label className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                  Análisis Proactivo
+                  {t('proactive_analysis')}
                 </label>
                 <input
                   type="checkbox"
@@ -287,13 +289,13 @@ const ConsultationSettings = ({ onClose }) => {
           <div>
             <div className="flex items-center space-x-2 mb-4">
               <DocumentTextIcon className="w-5 h-5 text-orange-600 dark:text-orange-400" />
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Generación SOAP</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{t('soap_generation')}</h3>
             </div>
             
             <div className="space-y-4 pl-7">
               <div className="flex items-center justify-between">
                 <label className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                  Auto-generar Notas SOAP
+                  {t('auto_generate_soap')}
                 </label>
                 <input
                   type="checkbox"
@@ -305,22 +307,22 @@ const ConsultationSettings = ({ onClose }) => {
               
               <div>
                 <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
-                  Estilo de Notas
+                  {t('notes_style')}
                 </label>
                 <select
                   value={settings.soapStyle}
                   onChange={(e) => handleSettingChange('soapStyle', e.target.value)}
                   className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent"
                 >
-                  <option value="concise">Conciso</option>
-                  <option value="detailed">Detallado</option>
-                  <option value="comprehensive">Comprehensivo</option>
+                  <option value="concise">{t('concise')}</option>
+                  <option value="detailed">{t('detailed')}</option>
+                  <option value="comprehensive">{t('comprehensive')}</option>
                 </select>
               </div>
               
               <div className="flex items-center justify-between">
                 <label className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                  Incluir Marcas de Tiempo
+                  {t('include_timestamps')}
                 </label>
                 <input
                   type="checkbox"
@@ -334,12 +336,12 @@ const ConsultationSettings = ({ onClose }) => {
           
           {/* Export Settings */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Exportación</h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">{t('export')}</h3>
             
             <div className="space-y-4 pl-7">
               <div>
                 <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
-                  Formato por Defecto
+                  {t('default_format')}
                 </label>
                 <select
                   value={settings.defaultExportFormat}
@@ -347,14 +349,14 @@ const ConsultationSettings = ({ onClose }) => {
                   className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent"
                 >
                   <option value="pdf">PDF</option>
-                  <option value="docx">Word (.docx)</option>
-                  <option value="txt">Texto plano (.txt)</option>
+                  <option value="docx">{t('word_docx')}</option>
+                  <option value="txt">{t('plain_text')}</option>
                 </select>
               </div>
               
               <div className="flex items-center justify-between">
                 <label className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                  Incluir Transcripción Original
+                  {t('include_transcript')}
                 </label>
                 <input
                   type="checkbox"
@@ -366,7 +368,7 @@ const ConsultationSettings = ({ onClose }) => {
               
               <div className="flex items-center justify-between">
                 <label className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                  Incluir Metadatos de Sesión
+                  {t('include_metadata')}
                 </label>
                 <input
                   type="checkbox"
@@ -385,7 +387,7 @@ const ConsultationSettings = ({ onClose }) => {
             onClick={handleReset}
             className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 rounded-lg"
           >
-            Restablecer
+            {t('reset')}
           </button>
           
           <div className="flex space-x-3">
@@ -393,13 +395,13 @@ const ConsultationSettings = ({ onClose }) => {
               onClick={onClose}
               className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
             >
-              Cancelar
+              {t('cancel')}
             </button>
             <button
               onClick={handleSave}
               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
             >
-              Guardar Configuración
+              {t('save_settings')}
             </button>
           </div>
         </div>
