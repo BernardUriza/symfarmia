@@ -20,8 +20,8 @@ export class MedicalAIConfig {
 
   static MODEL_MAP = {
     diagnosis: 'gpt2',
-    prescription: 'distilgpt2',
-    soap: 'microsoft/DialoGPT-small',
+    prescription: 'gpt2', 
+    soap: 'gpt2',
     analytics: 'gpt2'
   };
 

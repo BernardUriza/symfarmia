@@ -5,6 +5,7 @@ import { Badge } from '../ui/badge';
 import { Textarea } from '../ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { ChevronLeft, ChevronRight, Edit3, Check, FileText, Sparkles, Copy } from 'lucide-react';
+import { toast } from 'sonner';
 
 export function ClinicalNotes({ onNext, onPrevious }) {
   const [editMode, setEditMode] = useState(false);
@@ -50,7 +51,7 @@ Impresión Clínica: Paciente presenta características clínicas compatibles co
   const handleCopyNote = () => {
     const fullNote = `SUBJETIVO:\n${notes.subjective}\n\nOBJETIVO:\n${notes.objective}\n\nEVALUACIÓN:\n${notes.assessment}\n\nPLAN:\n${notes.plan}`;
     navigator.clipboard.writeText(fullNote);
-    // You might want to add a toast notification here
+    toast("Nota clínica copiada al portapapeles");
   };
 
   return (
