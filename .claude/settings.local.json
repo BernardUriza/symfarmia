@@ -51,7 +51,8 @@
       "Bash(curl:*)",
       "Bash(git config:*)",
       "Bash(docker:*)",
-      "Bash(sudo touch:*)"
+      "Bash(sudo touch:*)",
+      "Bash(git rebase:*)"
     ],
     "deny": []
   }
