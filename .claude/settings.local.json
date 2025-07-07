@@ -45,7 +45,8 @@
       "Bash(pkill:*)",
       "Bash(true)",
       "Bash(npx tailwindcss:*)",
-      "Bash(touch:*)"
+      "Bash(touch:*)",
+      "Bash(npm update:*)"
     ],
     "deny": []
   }
