@@ -183,7 +183,7 @@ export const VALIDATION = {
 
 // Theme Colors
 export const THEME_COLORS = {
-  PRIMARY: '#3b82f6',
+  PRIMARY: '#2563eb',
   SECONDARY: '#6b7280',
   SUCCESS: '#10b981',
   DANGER: '#ef4444',

@@ -551,7 +551,19 @@ export class AuditMiddleware {
       });
       
       if (!response.ok) {
-        throw new Error(`Audit log upload failed: ${response.status}`);
+        const errorText = await response.text();
+        console.error('[API ERROR]', {
+          endpoint: this.config.remoteEndpoint || 'audit-endpoint',
+          status: response.status,
+          method: 'POST',
+          requestBody: { sessionId: this.sessionId, events },
+          responseBody: errorText,
+          time: new Date().toISOString(),
+          stack: new Error().stack,
+        });
+
+        const statusText = response.statusText || 'Error';
+        throw new Error(`[API ERROR ${response.status}] ${statusText}: ${errorText}`);
       }
       
     } catch (error) {
