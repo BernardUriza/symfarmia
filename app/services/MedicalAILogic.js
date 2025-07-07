@@ -199,3 +199,12 @@ export function getErrorMessage(status) {
 export function getAvailableTypes(config) {
   return config.getAvailableTypes();
 }
+
+// Default export for ES modules compatibility
+const MedicalAILogic = {
+  processMedicalQuery,
+  getErrorMessage,
+  getAvailableTypes
+};
+
+export default MedicalAILogic;

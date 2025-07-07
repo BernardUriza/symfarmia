@@ -1,15 +1,13 @@
 // System-specific reducer for global application state
-import type { AppState, MedicalError, MedicalStateAction } from '../types';
+import type { AppState, MedicalError, MedicalStateAction, PerformanceMetrics } from '../types';
 
 export function systemReducer(
   state: AppState['system'],
   action: MedicalStateAction
 ): AppState['system'] {
-  const act = action as MedicalStateAction;
-  
-  switch (act.type) {
+  switch (action.type) {
     case 'SET_ONLINE_STATUS': {
-      const { online } = act.payload;
+      const { online } = action.payload as { online: boolean };
       return {
         ...state,
         online,
@@ -29,7 +27,7 @@ export function systemReducer(
     }
     
     case 'SET_LOADING': {
-      const { loading } = act.payload;
+      const { loading } = action.payload as { loading: boolean };
       return {
         ...state,
         loading,
@@ -38,7 +36,7 @@ export function systemReducer(
     }
     
     case 'ADD_ERROR': {
-      const { error } = act.payload;
+      const { error } = action.payload as { error: MedicalError };
       const updatedErrors = [...state.errors];
       
       // Avoid duplicate errors within 5 minutes
@@ -79,7 +77,7 @@ export function systemReducer(
     }
     
     case 'CLEAR_ERROR': {
-      const { errorId } = act.payload;
+      const { errorId } = action.payload as { errorId: string };
       return {
         ...state,
         errors: state.errors.filter(error => error.id !== errorId)
@@ -87,7 +85,7 @@ export function systemReducer(
     }
     
     case 'UPDATE_PERFORMANCE': {
-      const { metrics } = act.payload;
+      const { metrics } = action.payload as { metrics: Partial<PerformanceMetrics> };
       const updatedMetrics = {
         ...state.performance.globalMetrics,
         ...metrics
@@ -143,7 +141,7 @@ export function systemReducer(
     }
     
     case 'CLEAN_CACHE': {
-      const { force } = act.payload;
+      const { force } = action.payload as { force?: boolean };
       const now = new Date();
       
       // Calculate cache cleanup effectiveness
@@ -174,7 +172,7 @@ export function systemReducer(
     }
     
     case 'UPDATE_STORAGE_INFO': {
-      const { used, available } = act.payload;
+      const { used, available } = action.payload as { used: number; available: number };
       const quota = used + available;
       const usagePercent = (used / quota) * 100;
       
@@ -212,7 +210,7 @@ export function systemReducer(
     }
     
     case 'SET_PERFORMANCE_MODE': {
-      const { mode } = act.payload;
+      const { mode } = action.payload as { mode: 'high' | 'balanced' | 'battery_saver' };
       
       // Adjust thresholds based on performance mode
       let memoryThreshold = state.performance.memoryThreshold;
@@ -253,7 +251,7 @@ export function systemReducer(
     }
     
     case 'DISMISS_NOTIFICATION': {
-      const { notificationId } = act.payload;
+      const { notificationId } = action.payload as { notificationId: string };
       return {
         ...state,
         notifications: state.notifications.map(notification =>
@@ -279,7 +277,7 @@ export function systemReducer(
     
     case 'HYDRATE_STATE': {
       // Handle state rehydration from persistence
-      const { payload } = act;
+      const payload = action.payload as Partial<AppState>;
       
       if (payload.system) {
         return {
@@ -293,7 +291,7 @@ export function systemReducer(
           errors: (payload.system.errors as MedicalError[])?.filter((error: MedicalError) => 
             new Date().getTime() - error.timestamp.getTime() < 24 * 60 * 60 * 1000
           ) || [],
-          notifications: (payload.system.notifications as Array<{ persistent?: boolean; timestamp: string }>)?.filter((notification) =>
+          notifications: payload.system.notifications?.filter((notification: AppState['system']['notifications'][0]) =>
             notification.persistent || 
             new Date().getTime() - new Date(notification.timestamp).getTime() < 60 * 60 * 1000
           ) || []
