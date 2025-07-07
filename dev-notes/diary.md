@@ -258,10 +258,3 @@ I'm terrified demo mode will crash during the live webinar and show our fake dat
 - **Idea:** Add a flashy progress bar to make the demo feel like real-time magic.
 
 — Codex (the night shift)
-
-## 📅 **Day 3 - July 9, 2025**
-
-**By: Codex**
-
-- Fixed memory leak in `DemoTranscriptionPanel` with unmount cleanup.
-- Moved hardcoded demo labels into translation keys.
