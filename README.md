@@ -452,6 +452,8 @@ curl -X POST http://localhost:3000/api/medical \
 - **SOAP**: `emilyalsentzer/Bio_ClinicalBERT` - Clinical documentation
 - **Analytics**: `bert-base-uncased` - Medical data analysis
 
+- **Bio_ClinicalBERT**: Especializado en notas clínicas (880M palabras MIMIC III) con soporte para español médico
+
 #### **Error Handling**
 
 The API implements comprehensive error handling for:
