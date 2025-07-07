@@ -4,7 +4,8 @@ import {
   SparklesIcon,
   HeartIcon,
   ExclamationTriangleIcon,
-  ShieldExclamationIcon
+  ShieldExclamationIcon,
+  DocumentTextIcon
 } from '@heroicons/react/24/outline';
 
 const AISettings = ({ settings, onSettingChange }) => {
