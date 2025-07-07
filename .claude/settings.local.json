@@ -64,7 +64,9 @@
       "Bash(npm ls:*)",
       "Bash(NODE_OPTIONS=\"--max-old-space-size=2048\" timeout 180s npm run build)",
       "Bash(timeout 60s npm run build)",
-      "Bash(timeout 30s npm run build)"
+      "Bash(timeout 30s npm run build)",
+      "Bash(NODE_OPTIONS=\"--max-old-space-size=4096\" timeout 120s npm run build)",
+      "Bash(kill:*)"
     ],
     "deny": []
   }
