@@ -181,7 +181,7 @@ const AIChat = () => {
                       <button
                         key={index}
                         onClick={() => handleSuggestionClick(suggestion)}
-                        className="block w-full text-left px-3 py-2 text-xs bg-white dark:bg-slate-600 border border-gray-200 dark:border-gray-500 rounded-md hover:bg-gray-50 dark:hover:bg-slate-500 transition-colors"
+                        className="block w-full text-left px-3 py-2 text-xs bg-white dark:bg-slate-600 border border-gray-200 dark:border-gray-400 rounded-md hover:bg-gray-50 dark:hover:bg-slate-500 transition-colors"
                       >
                         {suggestion}
                       </button>

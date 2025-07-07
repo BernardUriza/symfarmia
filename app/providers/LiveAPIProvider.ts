@@ -179,6 +179,21 @@ export class LiveAPIProvider extends APIProvider {
     }
   }
 
+  async fetchStudies(): Promise<Study[]> {
+    try {
+      const response = await fetch('/api/studies');
+      if (response.ok) {
+        return (await response.json()) as Study[];
+      }
+      throw new Error('Error fetching studies');
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        throw new Error('Error fetching studies: ' + error.message);
+      }
+      throw error;
+    }
+  }
+
   async saveStudyType(studyType: Partial<StudyType>): Promise<APIResponse<boolean>> {
     try {
       const response = await fetch('/api/study-types', {

@@ -18,6 +18,7 @@ const customJestConfig = {
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@/app/(.*)$': '<rootDir>/app/$1',
+    '^@auth0/nextjs-auth0/client$': '<rootDir>/node_modules/@auth0/nextjs-auth0/dist/client/index.js'
   },
 }
 

@@ -1,6 +1,6 @@
 import "./globals.css";
 import ErrorBoundary from "../src/components/ErrorBoundary";
-import { UserProvider } from "@auth0/nextjs-auth0/client";
+import { Auth0Provider } from "@auth0/nextjs-auth0";
 import { AppModeProvider } from "./providers/AppModeProvider";
 import DemoModeBanner from "./components/DemoModeBanner";
 import { ThemeProvider } from "./providers/ThemeProvider";
@@ -46,7 +46,7 @@ export default function RootLayout({ children }) {
       <body className="font-sans bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-gray-100">
         <ThemeProvider>
           <ErrorBoundary>
-            <UserProvider>
+            <Auth0Provider>
               <I18nProvider>
                 <PatientContextProvider>
                   <AppModeProvider>
@@ -61,7 +61,7 @@ export default function RootLayout({ children }) {
                   </AppModeProvider>
                 </PatientContextProvider>
               </I18nProvider>
-            </UserProvider>
+            </Auth0Provider>
           </ErrorBoundary>
         </ThemeProvider>
       </body>

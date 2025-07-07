@@ -139,7 +139,7 @@ export function useMicrophoneDiagnostics() {
       diagnostics.errors.push(`Error general en diagnóstico: ${error.message}`);
     }
     setMicDiagnostics(diagnostics);
-    Logger.debug('Microphone diagnostics', diagnostics);
+    console.debug('[SYMFARMIA] Microphone diagnostics', diagnostics);
     return diagnostics;
   }, []);
 

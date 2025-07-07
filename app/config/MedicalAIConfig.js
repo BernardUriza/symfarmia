@@ -10,25 +10,28 @@ export class MedicalAIConfig {
   static TIMEOUT = 30000; // 30 seconds
   static USER_AGENT = 'SYMFARMIA-Medical-Assistant/1.0';
   
+  // MEDICAL MODELS - CURRENTLY WORKING MODELS
+  static SUPPORTED_MODELS = [
+    'emilyalsentzer/Bio_ClinicalBERT'
+  ];
+
   static MODEL_MAP = {
-    diagnosis: 'bert-base-uncased',
-    prescription: 'bert-base-uncased',
+    diagnosis: 'emilyalsentzer/Bio_ClinicalBERT',
+    prescription: 'emilyalsentzer/Bio_ClinicalBERT',
     soap: 'emilyalsentzer/Bio_ClinicalBERT',
-    analytics: 'bert-base-uncased'
+    analytics: 'emilyalsentzer/Bio_ClinicalBERT'
   };
 
+  // MODEL TYPE MAPPING - CRITICAL FOR PARAMETER VALIDATION
+  static MODEL_TYPE_MAP = {
+    'emilyalsentzer/Bio_ClinicalBERT': 'fill-mask'
+  };
+
+  // ONLY SEND PARAMETERS TO COMPATIBLE MODEL TYPES
   static MODEL_PARAMS = {
-    'bert-base-uncased': {
-      max_length: 256,
-      temperature: 0.5,
-      do_sample: true
-    },
     'emilyalsentzer/Bio_ClinicalBERT': {
-      return_all_scores: true
-    },
-    'openai/whisper-medium': {
-      language: 'es',
-      task: 'transcribe'
+      // FillMask models accept NO generation parameters
+      // Only inputs: "text with [MASK] token"
     }
   };
 
@@ -64,15 +67,68 @@ export class MedicalAIConfig {
 
   /**
    * Get model name for a given query type
+   * STRICT VALIDATION - NO FALLBACKS
    */
   static getModel(type) {
-    return this.MODEL_MAP[type] || this.MODEL_MAP.diagnosis;
+    const model = this.MODEL_MAP[type];
+    if (!model) {
+      const error = new Error(`Unsupported query type: ${type}`);
+      error.status = 400;
+      error.type = 'validation_error';
+      throw error;
+    }
+    return model;
+  }
+
+  /**
+   * Validate if a model is supported
+   */
+  static isModelSupported(modelName) {
+    return this.SUPPORTED_MODELS.includes(modelName);
+  }
+
+  /**
+   * Validate model with strict enforcement
+   */
+  static validateModel(modelName) {
+    if (!this.isModelSupported(modelName)) {
+      const error = new Error(`Modelo no soportado: ${modelName}. Modelos válidos: ${this.SUPPORTED_MODELS.join(', ')}`);
+      error.status = 400;
+      error.type = 'validation_error';
+      throw error;
+    }
+    return true;
+  }
+
+  /**
+   * Get model type for parameter validation
+   */
+  static getModelType(model) {
+    this.validateModel(model);
+    return this.MODEL_TYPE_MAP[model];
+  }
+
+  /**
+   * Check if model accepts generation parameters
+   */
+  static acceptsParameters(model) {
+    const modelType = this.getModelType(model);
+    // FillMask models accept NO parameters except inputs
+    return modelType !== 'fill-mask';
   }
 
   /**
    * Get parameters for a specific model
+   * STRICT VALIDATION - NO FALLBACKS
    */
   static getModelParameters(model) {
+    this.validateModel(model);
+    
+    // FillMask models get no parameters
+    if (!this.acceptsParameters(model)) {
+      return {};
+    }
+    
     return this.MODEL_PARAMS[model] || {};
   }
 
@@ -91,6 +147,13 @@ export class MedicalAIConfig {
   }
 
   /**
+   * Get supported models list
+   */
+  static getSupportedModels() {
+    return [...this.SUPPORTED_MODELS];
+  }
+
+  /**
    * Validate configuration
    */
   static validateConfig() {
@@ -106,6 +169,18 @@ export class MedicalAIConfig {
 
     if (this.TIMEOUT < 1000 || this.TIMEOUT > 60000) {
       errors.push('TIMEOUT must be between 1000ms and 60000ms');
+    }
+
+    // Validate supported models configuration
+    if (!this.SUPPORTED_MODELS || this.SUPPORTED_MODELS.length === 0) {
+      errors.push('SUPPORTED_MODELS must be defined and not empty');
+    }
+
+    // Validate model mappings point to supported models
+    for (const [type, model] of Object.entries(this.MODEL_MAP)) {
+      if (!this.SUPPORTED_MODELS.includes(model)) {
+        errors.push(`Model mapping for type "${type}" points to unsupported model "${model}"`);
+      }
     }
 
     return errors;
