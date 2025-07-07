@@ -345,30 +345,57 @@ export const mockMedicalAI = {
         });
 
         if (!response.ok) {
-          const errorData = await response.json();
-          
+          const errorText = await response.text();
+          let errorData = {};
+          try {
+            errorData = JSON.parse(errorText);
+          } catch (_) {
+            // ignore JSON parse errors
+          }
+
+          console.error('[API ERROR]', {
+            endpoint: response.url,
+            status: response.status,
+            method: 'POST',
+            requestBody: { query, context, type },
+            responseBody: errorText,
+            time: new Date().toISOString(),
+            stack: new Error().stack,
+          });
+
           // Handle specific error types
           if (response.status === 401) {
             throw new Error('authentication_error');
           }
-          
+
           if (response.status === 429) {
             throw new Error('rate_limit_error');
           }
-          
+
           if (errorData.type === 'configuration_error') {
             throw new Error('configuration_error');
           }
-          
-          throw new Error(`API error: ${response.status}`);
+
+          const statusText = response.statusText || 'Error';
+          throw new Error(`[API ERROR ${response.status}] ${statusText}: ${errorText}`);
         }
 
         const result = await response.json();
-        
+
         if (result.success) {
           mockMedicalAI._cache.set(cacheKey, { result, timestamp: now });
           return result;
         }
+
+        console.error('[API ERROR]', {
+          endpoint: '/api/medical',
+          status: 'Invalid response',
+          method: 'POST',
+          requestBody: { query, context, type },
+          responseBody: result,
+          time: new Date().toISOString(),
+          stack: new Error().stack,
+        });
 
         throw new Error('Invalid API response');
 
