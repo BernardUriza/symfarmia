@@ -72,7 +72,8 @@
       "Bash(NODE_OPTIONS=\"--max-old-space-size=2048\" timeout 120s npm run build)",
       "Bash(WEBPACK_MINIMIZE=false NODE_OPTIONS=\"--max-old-space-size=6144\" next build --no-lint)",
       "Bash(WEBPACK_MINIMIZE=false NODE_OPTIONS=\"--max-old-space-size=6144\" npx next build --no-lint)",
-      "Bash(timeout 10s npm run dev)"
+      "Bash(timeout 10s npm run dev)",
+      "Bash(npm run clean:*)"
     ],
     "deny": []
   }

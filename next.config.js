@@ -205,8 +205,9 @@ const nextConfig = {
       animations: {
         test: /[\\/]node_modules[\\/](framer-motion|three|gsap)[\\/]/,
         name: 'animations',
-        chunks: 'async',
+        chunks: 'all',
         priority: 40,
+        enforce: true,
       },
       dashboard: {
         test: /[\\/]components[\\/](dashboard|medical|consultation)[\\/]/,
