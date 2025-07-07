@@ -15,7 +15,7 @@ const customJestConfig = {
     '!**/node_modules/**',
     '!**/legacy_core/**',
   ],
-  moduleNameMapping: {
+  moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@/app/(.*)$': '<rootDir>/app/$1',
   },

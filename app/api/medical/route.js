@@ -1,40 +1,36 @@
 import { NextResponse } from 'next/server';
-import { medicalAIService, MedicalAIError } from '../../services/MedicalAIService.js';
+import { processMedicalQuery, getErrorMessage } from '../../services/MedicalAILogic.js';
 import { MedicalAIConfig } from '../../config/MedicalAIConfig.js';
 
 export async function POST(request) {
   try {
     const { query, context = {}, type = 'diagnosis' } = await request.json();
     
-    if (!query) {
-      return NextResponse.json(
-        { error: 'Query is required' },
-        { status: 400 }
-      );
-    }
+    const dependencies = {
+      config: MedicalAIConfig,
+      httpClient: { fetch: fetch }
+    };
 
-    // Validate configuration
-    const configErrors = MedicalAIConfig.validateConfig();
-    if (configErrors.length > 0) {
-      return NextResponse.json(
-        { 
-          error: 'Configuration error',
-          type: 'configuration_error',
-          details: configErrors
-        },
-        { status: 500 }
-      );
-    }
-
-    // Use the service layer
-    const result = await medicalAIService.processQuery({ query, context, type });
+    const result = await processMedicalQuery({ query, context, type }, dependencies);
     return NextResponse.json(result);
 
   } catch (error) {
     console.error('Medical API error:', error);
     
-    // Handle MedicalAIError (from service layer)
-    if (error instanceof MedicalAIError) {
+    // Handle configuration errors
+    if (error.type === 'configuration_error') {
+      return NextResponse.json(
+        { 
+          error: 'Configuration error',
+          type: error.type,
+          details: error.details
+        },
+        { status: 500 }
+      );
+    }
+
+    // Handle API errors with status codes
+    if (error.status && error.type) {
       return NextResponse.json(
         { 
           error: getErrorMessage(error.status),
@@ -81,21 +77,12 @@ export async function POST(request) {
   }
 }
 
-function getErrorMessage(status) {
-  const errorMessages = {
-    401: 'Invalid Hugging Face token',
-    404: 'Model not found',
-    429: 'Rate limit exceeded',
-    503: 'Service unavailable - model loading'
-  };
-  return errorMessages[status] || `Hugging Face API error: ${status}`;
-}
 
 export async function GET() {
   return NextResponse.json(
     { 
       message: 'Medical AI API endpoint',
-      availableTypes: medicalAIService.getAvailableTypes(),
+      availableTypes: MedicalAIConfig.getAvailableTypes(),
       usage: 'POST with { query, context?, type? }',
       service: 'SYMFARMIA Medical AI Service v1.0'
     },
