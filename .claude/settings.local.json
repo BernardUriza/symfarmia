@@ -61,7 +61,10 @@
       "Bash(npm run cache:clean:*)",
       "Bash(env)",
       "mcp__ide__getDiagnostics",
-      "Bash(npm ls:*)"
+      "Bash(npm ls:*)",
+      "Bash(NODE_OPTIONS=\"--max-old-space-size=2048\" timeout 180s npm run build)",
+      "Bash(timeout 60s npm run build)",
+      "Bash(timeout 30s npm run build)"
     ],
     "deny": []
   }
