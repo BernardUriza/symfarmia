@@ -11,6 +11,10 @@ export { useDebounce, useDebouncedCallback, useThrottledCallback } from './useDe
 export { useDemoHighlight } from './useDemoHighlight';
 export { useAppApi } from './useAppApi';
 export { usePatients } from './usePatients';
+export { useCategories } from './useCategories';
+export { useStudyTypes } from './useStudyTypes';
+export { useStudies } from './useStudies';
+export { useMedicalReports } from './useMedicalReports';
 
 // API hooks
 export {
