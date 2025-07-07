@@ -76,14 +76,20 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
     setIsClient(true);
   }, []);
 
-  // Limpiar intervalos y timeouts al desmontar para evitar fugas de memoria
+  // Limpiar intervalos y timeouts al desmontar para evitar fugas de memoria - ENHANCED
   useEffect(() => {
     return () => {
+      // Force cleanup on unmount
       resetDemo();
     };
   }, [resetDemo]);
 
-  // Close strategy menu when clicking outside
+  // Additional cleanup on strategy change to prevent cross-contamination
+  useEffect(() => {
+    resetDemo();
+  }, [currentStrategy, resetDemo]);
+
+  // Close strategy menu when clicking outside - MEMORY LEAK FIX
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (showStrategyMenu && !event.target.closest('.strategy-menu-container')) {
@@ -91,10 +97,9 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
       }
     };
 
-    if (showStrategyMenu) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
+    // Always add/remove listener to prevent memory leaks
+    document.addEventListener('mousedown', handleClickOutside);
+    
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
