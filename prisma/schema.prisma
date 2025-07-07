@@ -126,3 +126,91 @@ model ConsultationAnalytics {
   
   @@map("consultation_analytics")
 }
+model User {
+  id    String @id @default(cuid())
+  email String @unique
+  name  String
+  picture String?
+  role   String?
+  customAssistant CustomAssistant?
+}
+
+model CustomAssistant {
+  id           String   @id @default(cuid())
+  name         String
+  description  String?
+  instructions String
+  isActive     Boolean  @default(true)
+
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+
+  modelProvider String   @default("openai")
+  modelName     String   @default("gpt-4o")
+  temperature   Float    @default(0.3)
+  maxTokens     Int      @default(1000)
+
+  attachments   AssistantFile[]
+  conversations AssistantConversation[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  lastUsedAt    DateTime?
+  usageCount    Int      @default(0)
+
+  @@unique([userId])
+  @@map("custom_assistants")
+}
+
+model AssistantFile {
+  id           String   @id @default(cuid())
+  fileName     String
+  originalName String
+  fileSize     Int
+  mimeType     String
+  fileUrl      String
+
+  extractedText String?
+  fileType      String
+
+  assistantId   String
+  assistant     CustomAssistant @relation(fields: [assistantId], references: [id], onDelete: Cascade)
+
+  createdAt     DateTime @default(now())
+
+  @@map("assistant_files")
+}
+
+model AssistantConversation {
+  id          String   @id @default(cuid())
+  title       String?
+
+  assistantId String
+  assistant   CustomAssistant @relation(fields: [assistantId], references: [id], onDelete: Cascade)
+
+  messages    AssistantMessage[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  isArchived  Boolean  @default(false)
+
+  @@map("assistant_conversations")
+}
+
+model AssistantMessage {
+  id             String   @id @default(cuid())
+  role           String
+  content        String
+  modelUsed      String?
+  tokensUsed     Int?
+  responseTime   Int?
+  fallbackUsed   Boolean  @default(false)
+
+  conversationId String
+  conversation   AssistantConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  createdAt      DateTime @default(now())
+
+  @@map("assistant_messages")
+}
+
