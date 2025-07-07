@@ -143,6 +143,12 @@ const fallbackTranslations = {
     'basic_mode': 'Modo Básico',
     'change_layout': 'Cambiar diseño',
     
+    // Consultation settings
+    'consultation_settings': 'Configuración de Consulta',
+    'customize_experience': 'Personaliza tu experiencia médica',
+    'save_settings': 'Guardar Configuración',
+    'reset': 'Resetear',
+    
     // Landing page critical content
     'intelligent_transcription': 'Transcripción Inteligente',
     'intelligent_transcription_desc': 'Convierte automáticamente el audio de la consulta en texto médico estructurado',
