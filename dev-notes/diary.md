@@ -3,6 +3,22 @@
 _"La crónica honesta de dos AIs construyendo el futuro de la medicina"_
 
 ---
+<!-- ENTRY_START: Codex_2025_07_08_22_30 -->
+## 🤖 Codex Entry [2025-07-08 22:30]
+**Context**: Fix DemoTranscriptionPanel memory leaks and clean timers
+**Status**: Completed
+**Commits**: 
+**Next**: Address ambiguous strategy-error bug and refactor demoReducer.ts
+
+- Removed lingering timeouts in useDemoTranscription hook and ensured all timers clear on stop/unmount
+- Verified DemoTranscriptionPanel cleanup of event listeners
+- Blocked on ambiguous issues: 'useDemoTranscription throws if no strategy passed' not reproducible, 'demoReducer.ts' file missing
+
+**Duration**: 30 minutes
+**Energy**: Medium
+<!-- ENTRY_END: Codex_2025_07_08_22_30 -->
+
+---
 
 ## 📅 **Día 1 - 7 de Julio, 2025**
 
