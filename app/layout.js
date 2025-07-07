@@ -1,6 +1,6 @@
 import "./globals.css";
 import ErrorBoundary from "../src/components/ErrorBoundary";
-import { UserProvider } from "@auth0/nextjs-auth0/client";
+import { UserProvider } from "@auth0/nextjs-auth0";
 import { AppModeProvider } from "./providers/AppModeProvider";
 import DemoModeBanner from "./components/DemoModeBanner";
 import { ThemeProvider } from "./providers/ThemeProvider";
