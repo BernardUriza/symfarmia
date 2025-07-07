@@ -1,13 +1,13 @@
 {
   "hero_heading": "Smart tools for modern doctors",
-  "hero_subheading": "Save paperwork time and focus on your patients",
+  "hero_subheading": "Spend less time on paperwork and focus on your patients",
   "hero_cta": "Start free",
-  "cta_save_time": "I want to save time",
+  "cta_save_time": "Yes, save me time",
   "cta_sending": "Sending...",
   "beta_free": "Free beta access • No commitment",
   "demo_interactive": "🎯 Try the Interactive Demo",
   "demo_welcome": "Welcome to the SYMFARMIA Demo!",
-  "demo_explore_features": "Explore all features with sample data",
+  "demo_explore_features": "Explore every feature using sample data",
   "contact_soon": "Great! We will contact you soon",
   "check_email": "Check your email for next steps",
   
@@ -32,9 +32,9 @@
   "testimonial_savings": "Saves 2 hours daily",
   
   "final_cta_heading": "Ready to get your time back?",
-  "final_cta_text": "Join the beta and see how AI can simplify your medical practice.",
+  "final_cta_text": "Join the beta to see how AI can simplify your medical practice.",
   "final_cta_signup": "Request beta access",
-  "final_cta_demo": "Or try the demo",
+  "final_cta_demo": "Or check out the demo",
   
   "footer_copy": "© 2024 SYMFARMIA • Made with 💙 for doctors in Mexico",
   "footer_privacy": "Privacy",

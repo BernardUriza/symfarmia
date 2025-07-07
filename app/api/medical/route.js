@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { processMedicalQuery, getErrorMessage } from '../../services/MedicalAILogic.js';
-import { MedicalAIConfig } from '../../config/MedicalAIConfig.js';
+import { processMedicalQuery, getErrorMessage } from '@/app/services/MedicalAILogic.js';
+import { MedicalAIConfig } from '@/app/config/MedicalAIConfig.js';
 // Dependency injection point, explicit, one place
 const dependencies = {
   config: MedicalAIConfig,

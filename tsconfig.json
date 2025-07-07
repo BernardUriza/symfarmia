@@ -36,7 +36,12 @@
       "@/hooks/*": ["./hooks/*"],
       "@/utils/*": ["./utils/*"],
       "@/types/*": ["./types/*"],
-      "@/app/*": ["./app/*"]
+      "@/app/*": ["./app/*"],
+      "@/providers/*": ["./app/providers/*"],
+      "@/services/*": ["./app/services/*"],
+      "@/providers/core/*": ["./app/providers/core/*"],
+      "@/providers/lazy/*": ["./app/providers/lazy/*"],
+      "@/services/core/*": ["./app/services/core/*"]
     }
   },
   "include": [

@@ -48,7 +48,12 @@
       "Bash(touch:*)",
       "Bash(npm update:*)",
       "Bash(git push:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(git config:*)",
+      "Bash(docker:*)",
+      "Bash(sudo touch:*)",
+      "Bash(git rebase:*)",
+      "Bash(git pull:*)"
     ],
     "deny": []
   }

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import Logger from '../src/utils/logger';
 
 export interface MicrophoneDiagnostics {
@@ -26,14 +26,21 @@ export function useMicrophoneDiagnostics() {
   const [micPermission, setMicPermission] = useState<PermissionState>('prompt');
   const [micDiagnostics, setMicDiagnostics] = useState<MicrophoneDiagnostics | null>(null);
 
+  const permissionStatusRef = useRef<PermissionStatus | null>(null);
+
+  const handlePermissionChange = useCallback(() => {
+    if (permissionStatusRef.current) {
+      setMicPermission(permissionStatusRef.current.state as PermissionState);
+    }
+  }, []);
+
   const checkMicrophonePermission = useCallback(async () => {
     try {
       if ('permissions' in navigator) {
         const result = await navigator.permissions.query({ name: 'microphone' as PermissionName });
+        permissionStatusRef.current = result;
         setMicPermission(result.state as PermissionState);
-        result.addEventListener('change', () => {
-          setMicPermission(result.state as PermissionState);
-        });
+        result.addEventListener('change', handlePermissionChange);
       } else {
         setMicPermission('prompt');
       }
@@ -41,7 +48,7 @@ export function useMicrophoneDiagnostics() {
       Logger.warn('Permission API not available');
       setMicPermission('prompt');
     }
-  }, []);
+  }, [handlePermissionChange]);
 
   const runMicrophoneDiagnostics = useCallback(async () => {
     const diagnostics: MicrophoneDiagnostics = {
@@ -142,6 +149,17 @@ export function useMicrophoneDiagnostics() {
     console.debug('[SYMFARMIA] Microphone diagnostics', diagnostics);
     return diagnostics;
   }, []);
+
+  useEffect(() => {
+    return () => {
+      if (
+        permissionStatusRef.current &&
+        typeof permissionStatusRef.current.removeEventListener === 'function'
+      ) {
+        permissionStatusRef.current.removeEventListener('change', handlePermissionChange);
+      }
+    };
+  }, [handlePermissionChange]);
 
   return {
     micPermission,

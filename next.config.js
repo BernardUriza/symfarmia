@@ -31,8 +31,13 @@ const nextConfig = {
       '@material-tailwind/react',
       '@tremor/react',
       'react-icons',
+      'lodash',
+      'date-fns',
     ],
+    webpackBuildWorker: true,
   },
+  
+  serverExternalPackages: ['prisma'],
 
   env: {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
@@ -70,9 +75,50 @@ const nextConfig = {
   turbopack: {
     resolveAlias: {
       '@': './',
+      '@/components': './components',
+      '@/hooks': './hooks',
+      '@/utils': './utils',
+      '@/types': './types',
     },
     resolveExtensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
-    // splitChunks automático: Turbopack lo maneja internamente
+    rules: {
+      '*.svg': {
+        loaders: ['@svgr/webpack'],
+        as: '*.js',
+      },
+    },
+  },
+  
+  webpack: (config, { dev, isServer }) => {
+    // Optimize for faster builds
+    if (dev) {
+      config.optimization.splitChunks = {
+        chunks: 'all',
+        cacheGroups: {
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendors',
+            chunks: 'all',
+          },
+          providers: {
+            test: /[\\/]app[\\/]providers[\\/]/,
+            name: 'providers',
+            chunks: 'all',
+          },
+          services: {
+            test: /[\\/]app[\\/]services[\\/]/,
+            name: 'services',
+            chunks: 'all',
+          },
+        },
+      };
+    }
+    
+    // Tree shaking optimizations
+    config.optimization.usedExports = true;
+    config.optimization.sideEffects = false;
+    
+    return config;
   },
 };
 
