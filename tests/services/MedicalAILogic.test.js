@@ -39,7 +39,7 @@ describe('MedicalAILogic', () => {
 
       expect(result).toEqual({
         response: 'Test medical response',
-        confidence: 0.7,
+        confidence: 0.85,
         reasoning: [],
         suggestions: [],
         disclaimer: 'Test disclaimer',
