@@ -153,9 +153,15 @@ export function useTranscription() {
       }
       mediaRecorderRef.current = new MediaRecorder(stream, { mimeType: 'audio/webm' });
       audioChunksRef.current = [];
-      mediaRecorderRef.current.ondataavailable = (e: BlobEvent) => { audioChunksRef.current.push(e.data); };
+      mediaRecorderRef.current.ondataavailable = (e: BlobEvent) => { 
+        if (audioChunksRef.current) {
+          audioChunksRef.current.push(e.data); 
+        }
+      };
       mediaRecorderRef.current.onstop = () => {
-        new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        if (audioChunksRef.current) {
+          new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        }
         stream.getTracks().forEach(track => track.stop());
       };
       mediaRecorderRef.current.start(1000);

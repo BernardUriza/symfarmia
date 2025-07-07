@@ -10,25 +10,41 @@ export class MedicalAIConfig {
   static TIMEOUT = 30000; // 30 seconds
   static USER_AGENT = 'SYMFARMIA-Medical-Assistant/1.0';
   
+  // MEDICAL MODELS - ONLY THESE THREE ARE SUPPORTED
+  static SUPPORTED_MODELS = [
+    'emilyalsentzer/Bio_ClinicalBERT',
+    'openai/whisper-medium',
+    'jiviai/medX_v2'
+  ];
+
   static MODEL_MAP = {
-    diagnosis: 'bert-base-uncased',
-    prescription: 'bert-base-uncased',
+    diagnosis: 'emilyalsentzer/Bio_ClinicalBERT',
+    prescription: 'emilyalsentzer/Bio_ClinicalBERT',
     soap: 'emilyalsentzer/Bio_ClinicalBERT',
-    analytics: 'bert-base-uncased'
+    analytics: 'emilyalsentzer/Bio_ClinicalBERT',
+    transcription: 'openai/whisper-medium',
+    conversation: 'jiviai/medX_v2',
+    treatment: 'jiviai/medX_v2',
+    education: 'jiviai/medX_v2'
   };
 
   static MODEL_PARAMS = {
-    'bert-base-uncased': {
-      max_length: 256,
-      temperature: 0.5,
-      do_sample: true
-    },
     'emilyalsentzer/Bio_ClinicalBERT': {
+      max_length: 512,
+      temperature: 0.3,
+      do_sample: true,
       return_all_scores: true
     },
     'openai/whisper-medium': {
       language: 'es',
-      task: 'transcribe'
+      task: 'transcribe',
+      return_timestamps: true
+    },
+    'jiviai/medX_v2': {
+      max_length: 1024,
+      temperature: 0.7,
+      do_sample: true,
+      top_p: 0.9
     }
   };
 
@@ -64,15 +80,45 @@ export class MedicalAIConfig {
 
   /**
    * Get model name for a given query type
+   * STRICT VALIDATION - NO FALLBACKS
    */
   static getModel(type) {
-    return this.MODEL_MAP[type] || this.MODEL_MAP.diagnosis;
+    const model = this.MODEL_MAP[type];
+    if (!model) {
+      const error = new Error(`Unsupported query type: ${type}`);
+      error.status = 400;
+      error.type = 'validation_error';
+      throw error;
+    }
+    return model;
+  }
+
+  /**
+   * Validate if a model is supported
+   */
+  static isModelSupported(modelName) {
+    return this.SUPPORTED_MODELS.includes(modelName);
+  }
+
+  /**
+   * Validate model with strict enforcement
+   */
+  static validateModel(modelName) {
+    if (!this.isModelSupported(modelName)) {
+      const error = new Error(`Modelo no soportado: ${modelName}. Modelos válidos: ${this.SUPPORTED_MODELS.join(', ')}`);
+      error.status = 400;
+      error.type = 'validation_error';
+      throw error;
+    }
+    return true;
   }
 
   /**
    * Get parameters for a specific model
+   * STRICT VALIDATION - NO FALLBACKS
    */
   static getModelParameters(model) {
+    this.validateModel(model);
     return this.MODEL_PARAMS[model] || {};
   }
 
@@ -91,6 +137,13 @@ export class MedicalAIConfig {
   }
 
   /**
+   * Get supported models list
+   */
+  static getSupportedModels() {
+    return [...this.SUPPORTED_MODELS];
+  }
+
+  /**
    * Validate configuration
    */
   static validateConfig() {
@@ -106,6 +159,18 @@ export class MedicalAIConfig {
 
     if (this.TIMEOUT < 1000 || this.TIMEOUT > 60000) {
       errors.push('TIMEOUT must be between 1000ms and 60000ms');
+    }
+
+    // Validate supported models configuration
+    if (!this.SUPPORTED_MODELS || this.SUPPORTED_MODELS.length === 0) {
+      errors.push('SUPPORTED_MODELS must be defined and not empty');
+    }
+
+    // Validate model mappings point to supported models
+    for (const [type, model] of Object.entries(this.MODEL_MAP)) {
+      if (!this.SUPPORTED_MODELS.includes(model)) {
+        errors.push(`Model mapping for type "${type}" points to unsupported model "${model}"`);
+      }
     }
 
     return errors;

@@ -9,6 +9,7 @@ const actions: ActionWithEmoji[] = [
   {
     id: "vital-signs",
     label: "Signos Vitales",
+    icon: "❤️",
     emoji: "❤️",
     color: "#ef4444",
     action: () => window.openVitalSignsModal?.(),
@@ -16,6 +17,7 @@ const actions: ActionWithEmoji[] = [
   {
     id: "prescription",
     label: "Nueva Receta",
+    icon: "💊",
     emoji: "💊",
     color: "#10b981",
     action: () => window.openPrescriptionForm?.(),
@@ -23,6 +25,7 @@ const actions: ActionWithEmoji[] = [
   {
     id: "follow-up",
     label: "Seguimiento",
+    icon: "📅",
     emoji: "📅",
     color: "#f59e0b",
     action: () => window.scheduleFollowUp?.(),
@@ -30,6 +33,7 @@ const actions: ActionWithEmoji[] = [
   {
     id: "emergency",
     label: "Emergencia",
+    icon: "🚨",
     emoji: "🚨",
     color: "#dc2626",
     action: () => window.triggerEmergencyProtocol?.(),

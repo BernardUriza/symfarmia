@@ -31,7 +31,9 @@ export async function processMedicalQuery({ query, type = 'diagnosis' }, depende
     throw error;
   }
 
+  // STRICT MODEL VALIDATION - NO FALLBACKS
   const model = config.getModel(type);
+  config.validateModel(model);
   const parameters = config.getModelParameters(model);
   
   const requestBody = {
@@ -56,6 +58,8 @@ export async function processMedicalQuery({ query, type = 'diagnosis' }, depende
  * @returns {Promise<Object>} Response data
  */
 async function makeAIRequest(model, body, { config, httpClient }) {
+  // FINAL MODEL VALIDATION BEFORE API CALL
+  config.validateModel(model);
   const headers = {
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${config.getToken()}`,
@@ -120,6 +124,7 @@ function formatAIResponse(data, model, config) {
  */
 function getErrorType(status) {
   const errorMap = {
+    400: 'validation_error',
     401: 'authentication_error',
     404: 'model_not_found',
     429: 'rate_limit_error',
@@ -135,6 +140,7 @@ function getErrorType(status) {
  */
 export function getErrorMessage(status) {
   const errorMessages = {
+    400: 'Modelo no soportado',
     401: 'Invalid Hugging Face token',
     404: 'Model not found',
     429: 'Rate limit exceeded',
