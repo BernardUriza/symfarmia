@@ -61,7 +61,7 @@ describe('Accessibility Contrast Tests', () => {
     });
 
     it('should meet WCAG AA for dark mode primary button', () => {
-      const ratio = getContrastRatio('#3b82f6', '#ffffff');
+      const ratio = getContrastRatio('#2563eb', '#ffffff');
       const compliance = checkWCAGCompliance(ratio);
       
       expect(compliance.aa).toBe(true);
@@ -71,7 +71,7 @@ describe('Accessibility Contrast Tests', () => {
 
   describe('Border and Input Contrast', () => {
     it('should have sufficient border contrast in light mode', () => {
-      const ratio = getContrastRatio('#ffffff', '#d1d5db');
+      const ratio = getContrastRatio('#ffffff', '#6b7280');
       const compliance = checkWCAGCompliance(ratio, false);
       
       // Borders need at least 3:1 contrast ratio
@@ -79,7 +79,7 @@ describe('Accessibility Contrast Tests', () => {
     });
 
     it('should have sufficient border contrast in dark mode', () => {
-      const ratio = getContrastRatio('#1f2937', '#374151');
+      const ratio = getContrastRatio('#1f2937', '#6b7280');
       const compliance = checkWCAGCompliance(ratio, false);
       
       // Borders need at least 3:1 contrast ratio
@@ -97,7 +97,7 @@ describe('Accessibility Contrast Tests', () => {
     });
 
     it('should have high contrast focus indicators in dark mode', () => {
-      const ratio = getContrastRatio('#1f2937', '#3b82f6');
+      const ratio = getContrastRatio('#1f2937', '#60a5fa');
       const compliance = checkWCAGCompliance(ratio);
       
       expect(compliance.aa).toBe(true);

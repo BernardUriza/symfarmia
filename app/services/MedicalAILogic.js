@@ -67,9 +67,21 @@ async function makeAIRequest(model, body, { config, httpClient }) {
   });
 
   if (!response.ok) {
-    const error = new Error(await response.text());
+    const errorText = await response.text();
+    console.error('[API ERROR]', {
+      endpoint: `${config.getBaseUrl()}/${model}`,
+      status: response.status,
+      method: 'POST',
+      requestBody: body,
+      responseBody: errorText,
+      time: new Date().toISOString(),
+      stack: new Error().stack,
+    });
+
+    const error = new Error(`[API ERROR ${response.status}] ${(response.statusText || 'Error')}: ${errorText}`);
     error.status = response.status;
     error.type = getErrorType(response.status);
+    error.response = errorText;
     throw error;
   }
 

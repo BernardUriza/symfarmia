@@ -1,15 +1,14 @@
-import './globals.css'
-import ErrorBoundary from '../src/components/ErrorBoundary'
-import { UserProvider } from '@auth0/nextjs-auth0/client'
-import { AppModeProvider } from './providers/AppModeProvider'
-import DemoModeBanner from './components/DemoModeBanner'
-import { ThemeProvider } from './providers/ThemeProvider'
-import { I18nProvider } from './providers/I18nProvider'
-import { PatientContextProvider } from './providers/PatientContextProvider'
-import dynamic from 'next/dynamic'
-const MedicalAssistant = dynamic(() => import('../src/components/MedicalAssistant'), { ssr: false })
-import VersionInfo from './components/VersionInfo'
-import { SITE_CONFIG } from './lib/site-config'
+import "./globals.css";
+import ErrorBoundary from "../src/components/ErrorBoundary";
+import { UserProvider } from "@auth0/nextjs-auth0/client";
+import { AppModeProvider } from "./providers/AppModeProvider";
+import DemoModeBanner from "./components/DemoModeBanner";
+import { ThemeProvider } from "./providers/ThemeProvider";
+import { I18nProvider } from "./providers/I18nProvider";
+import { PatientContextProvider } from "./providers/PatientContextProvider";
+import MedicalAssistant from "./components/MedicalAssistantWrapper";
+import VersionInfo from "./components/VersionInfo";
+import { SITE_CONFIG } from "./lib/site-config";
 
 export const metadata = {
   title: SITE_CONFIG.title,
@@ -27,19 +26,19 @@ export const metadata = {
         url: SITE_CONFIG.image,
         width: 1200,
         height: 630,
-        alt: 'SYMFARMIA - Plataforma médica inteligente',
+        alt: "SYMFARMIA - Plataforma médica inteligente",
       },
     ],
-    locale: 'es_ES',
-    type: 'website',
+    locale: "es_ES",
+    type: "website",
   },
   twitter: {
-    card: 'summary_large_image',
+    card: "summary_large_image",
     title: SITE_CONFIG.title,
     description: SITE_CONFIG.description,
     images: [SITE_CONFIG.image],
   },
-}
+};
 
 export default function RootLayout({ children }) {
   return (
@@ -48,24 +47,24 @@ export default function RootLayout({ children }) {
         <ThemeProvider>
           <ErrorBoundary>
             <UserProvider>
-            <I18nProvider>
-              <PatientContextProvider>
-                <AppModeProvider>
-                  <DemoModeBanner />
-                  {children}
-                  <MedicalAssistant />
-                  
-                  {/* Version Info Footer */}
-                  <div className="fixed bottom-2 left-2 z-40">
-                    <VersionInfo />
-                  </div>
-                </AppModeProvider>
-              </PatientContextProvider>
-            </I18nProvider>
+              <I18nProvider>
+                <PatientContextProvider>
+                  <AppModeProvider>
+                    <DemoModeBanner />
+                    {children}
+                    <MedicalAssistant />
+
+                    {/* Version Info Footer */}
+                    <div className="fixed bottom-2 left-2 z-40">
+                      <VersionInfo />
+                    </div>
+                  </AppModeProvider>
+                </PatientContextProvider>
+              </I18nProvider>
             </UserProvider>
           </ErrorBoundary>
         </ThemeProvider>
       </body>
     </html>
-  )
+  );
 }

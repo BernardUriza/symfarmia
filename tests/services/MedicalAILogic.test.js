@@ -1,5 +1,14 @@
 import { processMedicalQuery, getErrorMessage, getAvailableTypes } from '../../app/services/MedicalAILogic.js';
 
+// Polyfill AbortSignal.timeout for test environment
+if (typeof AbortSignal !== 'undefined' && !AbortSignal.timeout) {
+  AbortSignal.timeout = function (ms) {
+    const controller = new AbortController();
+    setTimeout(() => controller.abort(), ms);
+    return controller.signal;
+  };
+}
+
 // Mock dependencies
 const mockConfig = {
   validateConfig: jest.fn(() => []),
@@ -85,7 +94,7 @@ describe('MedicalAILogic', () => {
           { config: mockConfig, httpClient: mockHttpClient }
         )
       ).rejects.toMatchObject({
-        message: 'Unauthorized',
+        message: '[API ERROR 401] Error: Unauthorized',
         status: 401,
         type: 'authentication_error'
       });
