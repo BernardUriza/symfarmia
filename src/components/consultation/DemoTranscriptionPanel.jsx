@@ -35,11 +35,10 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
     selectSpecialty,
     confirmSpecialtyAndGenerate,
     strategyName,
-    availableStrategies,
     availableSpecialties
   } = useDemoTranscription(strategy);
 
-  const [currentStrategy, setCurrentStrategy] = useState(strategy);
+  const [currentStrategy] = useState(strategy);
   const [isClient, setIsClient] = useState(false);
 
   // Get specialty colors mapping
