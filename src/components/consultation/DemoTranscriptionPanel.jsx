@@ -36,6 +36,41 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
 
   const [currentStrategy, setCurrentStrategy] = useState(strategy);
   const [isClient, setIsClient] = useState(false);
+  const [showStrategyMenu, setShowStrategyMenu] = useState(false);
+
+  // Strategy menu data with icons and descriptions
+  const strategyMenuData = {
+    general_medicine: {
+      icon: '🩺',
+      name: 'Medicina General',
+      description: 'Consulta médica estándar con síntomas comunes',
+      color: 'bg-blue-500'
+    },
+    hiv_pregnancy_adolescent: {
+      icon: '🤰',
+      name: 'VIH + Embarazo Adolescente',
+      description: 'Caso especial de población vulnerable crítica',
+      color: 'bg-red-500'
+    },
+    quality_of_life: {
+      icon: '💙',
+      name: 'Calidad de Vida',
+      description: 'Enfoque holístico en bienestar del paciente',
+      color: 'bg-cyan-500'
+    },
+    cardiology: {
+      icon: '❤️',
+      name: 'Cardiología',
+      description: 'Especialidad cardiovascular con énfasis en diagnóstico',
+      color: 'bg-rose-500'
+    },
+    pediatrics: {
+      icon: '👶',
+      name: 'Pediatría',
+      description: 'Atención médica especializada en menores',
+      color: 'bg-pink-500'
+    }
+  };
 
   // Evitar hydration errors - solo renderizar después de mount
   useEffect(() => {
@@ -48,6 +83,23 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
       resetDemo();
     };
   }, [resetDemo]);
+
+  // Close strategy menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showStrategyMenu && !event.target.closest('.strategy-menu-container')) {
+        setShowStrategyMenu(false);
+      }
+    };
+
+    if (showStrategyMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showStrategyMenu]);
 
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
@@ -146,29 +198,6 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
         </div>
       </div>
 
-      {/* Demo Strategy Selector */}
-      <div className="px-6 py-3 bg-blue-50 border-b border-blue-100">
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-blue-800">
-            {t("transcription.demo_strategy_label") || "🎭 Estrategia de Demo:"}
-          </span>
-          <select
-            value={currentStrategy}
-            onChange={(e) => {
-              setCurrentStrategy(e.target.value);
-              resetDemo();
-            }}
-            disabled={isRecording}
-            className="text-sm border-0 bg-transparent text-blue-700 font-medium focus:ring-0 disabled:opacity-50"
-          >
-            {availableStrategies.map((strat) => (
-              <option key={strat} value={strat}>
-                {strat.replace(/_/g, " ").toUpperCase()}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
 
       {/* Human-Readable Strategy Display */}
       <div className="px-6 py-4 bg-gradient-to-r from-purple-50 to-indigo-50 border-b border-purple-100">
@@ -208,46 +237,98 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
               >
                 <PlayIcon className="w-5 h-5" />
                 <span>
-                  {t("transcription.start_recording") || "Iniciar Grabación"}
+                  Iniciar Grabación
                 </span>
               </motion.button>
               
-              {/* Mock Strategy Button */}
-              <motion.button
-                onClick={() => {
-                  const newStrategy = currentStrategy === 'general_medicine' ? 'hiv_pregnancy_adolescent' : 
-                                    currentStrategy === 'hiv_pregnancy_adolescent' ? 'quality_of_life' :
-                                    'general_medicine';
-                  setCurrentStrategy(newStrategy);
-                  resetDemo();
-                }}
-                className="inline-flex items-center space-x-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors shadow-md"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                title="Cambiar estrategia de simulación médica"
-              >
-                <BeakerIcon className="w-5 h-5" />
-                <span>Mock</span>
-              </motion.button>
-              
-              {/* Strategy Settings Button */}
-              <motion.button
-                onClick={() => {
-                  // Toggle between available strategies in a more human way
-                  const strategies = availableStrategies;
-                  const currentIndex = strategies.indexOf(currentStrategy);
-                  const nextIndex = (currentIndex + 1) % strategies.length;
-                  setCurrentStrategy(strategies[nextIndex]);
-                  resetDemo();
-                }}
-                className="inline-flex items-center space-x-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors shadow-md"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                title="Configurar estrategia médica"
-              >
-                <Cog6ToothIcon className="w-5 h-5" />
-                <span>Estrategia</span>
-              </motion.button>
+              {/* InventarConsulta Button - Same height and padding as StartRecording */}
+              <div className="relative strategy-menu-container">
+                <motion.button
+                  onClick={() => setShowStrategyMenu(!showStrategyMenu)}
+                  className="inline-flex items-center space-x-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors shadow-md"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  title="Inventar consulta médica simulada"
+                >
+                  <BeakerIcon className="w-5 h-5" />
+                  <span>Inventar Consulta</span>
+                </motion.button>
+
+                {/* Strategy Selection Menu */}
+                <AnimatePresence>
+                  {showStrategyMenu && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      transition={{ duration: 0.2 }}
+                      className="absolute top-full mt-2 left-0 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 overflow-hidden"
+                    >
+                      <div className="p-4 border-b border-gray-100">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                          🎭 Estrategias de Simulación
+                        </h3>
+                        <p className="text-sm text-gray-600">
+                          Selecciona el tipo de consulta a simular
+                        </p>
+                      </div>
+                      
+                      <div className="max-h-80 overflow-y-auto">
+                        {availableStrategies.map((strat) => {
+                          const stratData = strategyMenuData[strat];
+                          const isSelected = currentStrategy === strat;
+                          
+                          return (
+                            <motion.button
+                              key={strat}
+                              onClick={() => {
+                                setCurrentStrategy(strat);
+                                resetDemo();
+                                setShowStrategyMenu(false);
+                              }}
+                              className={`w-full p-4 text-left hover:bg-purple-50 transition-colors border-l-4 ${
+                                isSelected 
+                                  ? 'bg-purple-50 border-purple-500' 
+                                  : 'border-transparent hover:border-purple-300'
+                              }`}
+                              whileHover={{ x: 4 }}
+                              whileTap={{ scale: 0.98 }}
+                            >
+                              <div className="flex items-start space-x-3">
+                                <div className={`w-10 h-10 rounded-lg ${stratData?.color || 'bg-gray-500'} flex items-center justify-center text-white text-lg flex-shrink-0`}>
+                                  {stratData?.icon || '🔬'}
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                  <div className={`font-semibold ${isSelected ? 'text-purple-900' : 'text-gray-900'}`}>
+                                    {stratData?.name || strat.replace(/_/g, ' ')}
+                                  </div>
+                                  <div className={`text-sm mt-1 ${isSelected ? 'text-purple-700' : 'text-gray-600'}`}>
+                                    {stratData?.description || 'Simulación médica personalizada'}
+                                  </div>
+                                  {isSelected && (
+                                    <div className="mt-2 text-xs text-purple-600 font-medium">
+                                      ✓ Actualmente seleccionada
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </motion.button>
+                          );
+                        })}
+                      </div>
+                      
+                      <div className="p-3 bg-gray-50 border-t border-gray-100">
+                        <button
+                          onClick={() => setShowStrategyMenu(false)}
+                          className="w-full text-center text-sm text-gray-600 hover:text-gray-800 transition-colors"
+                        >
+                          Cerrar menú
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
           ) : (
             <div className="space-y-3">
