@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { queryWithFallback } from '@/app/services/openAIFallbackService.js';
+import { queryWithFallback } from '@/app/services/openAIFallbackService';
 
 export async function POST(request: Request) {
   try {

@@ -1,4 +1,4 @@
-import { medicalAIService } from './MedicalAIService.js';
+import { medicalAIService } from './MedicalAIService';
 
 export interface FallbackResult {
   message: string;
