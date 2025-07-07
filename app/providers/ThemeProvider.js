@@ -2,40 +2,39 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { useLocalStorage } from '../../hooks/useLocalStorage'
 
-const ThemeContext = createContext();
+const ThemeContext = createContext()
 
 export function ThemeProvider({ children }) {
   const [storedTheme, setStoredTheme] = useLocalStorage('theme', null)
-  const [systemTheme, setSystemTheme] = useState('light')
+  const [systemPreference, setSystemPreference] = useState('light')
 
-  // Detect system preference changes
   useEffect(() => {
     if (typeof window === 'undefined' || !window.matchMedia) return
-    const mq = window.matchMedia('(prefers-color-scheme: dark)')
-    const updateSystemTheme = () => setSystemTheme(mq.matches ? 'dark' : 'light')
-    updateSystemTheme()
-    mq.addEventListener('change', updateSystemTheme)
-    return () => mq.removeEventListener('change', updateSystemTheme)
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+    const handleChange = e => setSystemPreference(e.matches ? 'dark' : 'light')
+    setSystemPreference(mediaQuery.matches ? 'dark' : 'light')
+    mediaQuery.addEventListener('change', handleChange)
+    return () => mediaQuery.removeEventListener('change', handleChange)
   }, [])
 
-  const theme = storedTheme || systemTheme
+  const theme = storedTheme || systemPreference
 
   useEffect(() => {
     const root = document.documentElement
-    if (theme === 'dark') {
-      root.classList.add('dark')
-    } else {
-      root.classList.remove('dark')
-    }
+    root.setAttribute('data-theme', theme)
+    root.classList.toggle('dark', theme === 'dark')
   }, [theme])
 
-  const toggleTheme = () => setStoredTheme(theme === 'dark' ? 'light' : 'dark')
+  const setTheme = value => setStoredTheme(value)
+  const toggleTheme = () => {
+    setStoredTheme(theme === 'dark' ? 'light' : 'dark')
+  }
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+    <ThemeContext.Provider value={{ theme, setTheme, toggleTheme, systemPreference }}>
       {children}
     </ThemeContext.Provider>
-  );
+  )
 }
 
 export function useTheme() {
