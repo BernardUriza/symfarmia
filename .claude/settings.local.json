@@ -54,7 +54,8 @@
       "Bash(sudo touch:*)",
       "Bash(git rebase:*)",
       "Bash(git pull:*)",
-      "Bash(timeout 30s npm run dev)"
+      "Bash(timeout 30s npm run dev)",
+      "Bash(chmod:*)"
     ],
     "deny": []
   }
