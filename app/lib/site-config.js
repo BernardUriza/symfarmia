@@ -19,8 +19,8 @@ function createSiteConfig() {
   const baseUrl = getSiteUrl();
   return {
     name: 'SYMFARMIA',
-    title: 'SYMFARMIA - Plataforma inteligente para médicos independientes',
-    description: 'Convierte consultas médicas en reportes clínicos automáticamente. Habla durante tu consulta y obtén un reporte médico estructurado en segundos.',
+    title: 'SYMFARMIA - Software médico integral para doctores independientes',
+    description: 'Gestiona pacientes, reportes y analíticas en un solo lugar. Convierte consultas en reportes clínicos al instante.',
     url: baseUrl,
     image: `${baseUrl}/banner2.png`,
     favicon: `${baseUrl}/favicon.ico`,
