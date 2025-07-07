@@ -195,17 +195,37 @@ const nextConfig = {
 
     config.optimization.splitChunks.cacheGroups = {
       ...(config.optimization.splitChunks.cacheGroups || {}),
-      landing: {
-        test: /[\\/]components[\\/]landing[\\/]/,
-        name: 'landing',
+      landingCritical: {
+        test: /[\\/]components[\\/](Hero|CTA|Navigation)[\\/]/,
+        name: 'landing-critical',
         chunks: 'all',
-        priority: 30,
+        priority: 50,
+        enforce: true,
       },
       animations: {
         test: /[\\/]node_modules[\\/](framer-motion|three|gsap)[\\/]/,
         name: 'animations',
         chunks: 'async',
-        priority: 25,
+        priority: 40,
+      },
+      dashboard: {
+        test: /[\\/]components[\\/](dashboard|medical|consultation)[\\/]/,
+        name: 'medical-dashboard',
+        chunks: 'all',
+        priority: 30,
+      },
+      particles: {
+        test: /[\\/]components[\\/].*[Pp]article.*[\\/]/,
+        name: 'particle-systems',
+        chunks: 'async',
+        priority: 20,
+      },
+      vendor: {
+        test: /[\\/]node_modules[\\/]/,
+        name: 'vendors',
+        chunks: 'all',
+        priority: 10,
+        maxSize: 244000,
       },
     };
     
