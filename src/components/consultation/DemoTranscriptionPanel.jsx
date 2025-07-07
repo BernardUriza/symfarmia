@@ -17,9 +17,11 @@ import {
 import { CheckIcon } from "@heroicons/react/24/solid";
 import { useTranslation } from "../../../app/providers/I18nProvider";
 import { useDemoTranscription } from "../../../hooks/useDemoTranscription";
+import { useRouter } from 'next/navigation';
 
 const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
   const { t } = useTranslation();
+  const router = useRouter();
   const {
     isRecording,
     demoText,
@@ -157,6 +159,30 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
       );
     }
     return bars;
+  };
+
+  const extractSubjective = (text) => text;
+  const extractObjective = (analysis) => analysis.join(' ');
+  const extractAssessment = (recs) => recs.join(' ');
+  const extractPlan = (recs) => recs.join(' ');
+
+  const handleGenerateReport = () => {
+    const reportData = {
+      title: `Consulta ${strategyName} - ${new Date().toLocaleDateString()}`,
+      reportType: 'consultation',
+      clinicalFindings: demoText,
+      soapNotes: {
+        subjective: extractSubjective(demoText),
+        objective: extractObjective(currentAnalysis),
+        assessment: extractAssessment(recommendations),
+        plan: extractPlan(recommendations),
+      },
+    };
+
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('prefillReportData', JSON.stringify(reportData));
+    }
+    router.push('/reportes-medicos/nuevo');
   };
 
   if (!isClient) {
@@ -641,6 +667,17 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
               </div>
             </div>
           )}
+
+        {demoText && (
+          <div className="text-center mb-6">
+            <button
+              onClick={handleGenerateReport}
+              className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg"
+            >
+              📄 {t('generate_medical_report')}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Status Footer */}

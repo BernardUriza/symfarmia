@@ -366,7 +366,7 @@ function generateMedicalReasoning(query, topPrediction, alternatives) {
  * @param {string} prediction - AI prediction
  * @returns {Array} Contextual suggestions
  */
-function generateContextualSuggestions(query, prediction) {
+function generateContextualSuggestions(query, _prediction) {
   const suggestions = [];
   
   // Specialty-based suggestions
@@ -396,7 +396,7 @@ function generateContextualSuggestions(query, prediction) {
  * @param {Object} context - Additional context
  * @returns {string} Enhanced medical prompt
  */
-function createMedicalPrompt(query, type, context) {
+function createMedicalPrompt(query, type, _context) {
   const prompts = {
     diagnosis: `Como médico especialista, analiza el siguiente caso clínico y proporciona un diagnóstico diferencial:
 
