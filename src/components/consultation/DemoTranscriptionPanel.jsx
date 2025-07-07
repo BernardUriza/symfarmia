@@ -3,6 +3,7 @@
  * Animación perfecta sin audio real, todo simulado
  */
 
+"use client";
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
