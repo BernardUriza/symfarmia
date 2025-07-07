@@ -1,5 +1,5 @@
 /**
- * Demo Transcription Panel - MAGIA PURA 
+ * Demo Transcription Panel - MAGIA PURA
  * Animación perfecta sin audio real, todo simulado
  */
 
@@ -11,12 +11,12 @@ import {
   SparklesIcon,
   ExclamationTriangleIcon,
   CheckCircleIcon,
-  ArrowPathIcon
+  ArrowPathIcon,
 } from "@heroicons/react/24/outline";
 import { useTranslation } from "../../../app/providers/I18nProvider";
 import { useDemoTranscription } from "../../../hooks/useDemoTranscription";
 
-const DemoTranscriptionPanel = ({ strategy = 'general_medicine' }) => {
+const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
   const { t } = useTranslation();
   const {
     isRecording,
@@ -30,7 +30,7 @@ const DemoTranscriptionPanel = ({ strategy = 'general_medicine' }) => {
     stopDemoRecording,
     resetDemo,
     strategyName,
-    availableStrategies
+    availableStrategies,
   } = useDemoTranscription(strategy);
 
   const [currentStrategy, setCurrentStrategy] = useState(strategy);
@@ -39,6 +39,13 @@ const DemoTranscriptionPanel = ({ strategy = 'general_medicine' }) => {
   // Evitar hydration errors - solo renderizar después de mount
   useEffect(() => {
     setIsClient(true);
+  }, []);
+
+  // Limpiar intervalos y timeouts al desmontar para evitar fugas de memoria
+  useEffect(() => {
+    return () => {
+      resetDemo();
+    };
   }, []);
 
   const formatTime = (seconds) => {
@@ -55,11 +62,12 @@ const DemoTranscriptionPanel = ({ strategy = 'general_medicine' }) => {
 
   const getAudioLevelBars = () => {
     if (!isRecording) return null;
-    
+
     const bars = [];
     for (let i = 0; i < 5; i++) {
       // Animación simulada de niveles de audio - SOLO CLIENT SIDE
-      const height = (typeof window !== 'undefined' && Math.random() > 0.5) ? 'h-6' : 'h-2';
+      const height =
+        typeof window !== "undefined" && Math.random() > 0.5 ? "h-6" : "h-2";
       bars.push(
         <motion.div
           key={i}
@@ -70,9 +78,9 @@ const DemoTranscriptionPanel = ({ strategy = 'general_medicine' }) => {
           transition={{
             duration: 0.5,
             repeat: isRecording ? Infinity : 0,
-            delay: i * 0.1
+            delay: i * 0.1,
           }}
-        />
+        />,
       );
     }
     return bars;
@@ -84,7 +92,7 @@ const DemoTranscriptionPanel = ({ strategy = 'general_medicine' }) => {
       <div className="bg-white rounded-xl shadow-sm border border-gray-100">
         <div className="p-6">
           <div className="text-center text-gray-500">
-            {t('transcription.title') || 'Transcripción en Tiempo Real'}
+            {t("transcription.title") || "Transcripción en Tiempo Real"}
           </div>
         </div>
       </div>
@@ -102,11 +110,9 @@ const DemoTranscriptionPanel = ({ strategy = 'general_medicine' }) => {
             </div>
             <div>
               <div className="font-semibold text-gray-900">
-                {t('transcription.title') || 'Transcripción en Tiempo Real'}
+                {t("transcription.title") || "Transcripción en Tiempo Real"}
               </div>
-              <div className="text-sm text-gray-500">
-                Demo: {strategyName}
-              </div>
+              <div className="text-sm text-gray-500">Demo: {strategyName}</div>
             </div>
           </div>
 
@@ -143,7 +149,7 @@ const DemoTranscriptionPanel = ({ strategy = 'general_medicine' }) => {
       <div className="px-6 py-3 bg-blue-50 border-b border-blue-100">
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium text-blue-800">
-            🎭 Estrategia de Demo:
+            {t("transcription.demo_strategy_label") || "🎭 Estrategia de Demo:"}
           </span>
           <select
             value={currentStrategy}
@@ -154,9 +160,9 @@ const DemoTranscriptionPanel = ({ strategy = 'general_medicine' }) => {
             disabled={isRecording}
             className="text-sm border-0 bg-transparent text-blue-700 font-medium focus:ring-0 disabled:opacity-50"
           >
-            {availableStrategies.map(strat => (
+            {availableStrategies.map((strat) => (
               <option key={strat} value={strat}>
-                {strat.replace(/_/g, ' ').toUpperCase()}
+                {strat.replace(/_/g, " ").toUpperCase()}
               </option>
             ))}
           </select>
@@ -174,7 +180,9 @@ const DemoTranscriptionPanel = ({ strategy = 'general_medicine' }) => {
               whileTap={{ scale: 0.95 }}
             >
               <PlayIcon className="w-5 h-5" />
-              <span>{t('transcription.start_recording') || 'Iniciar Grabación'}</span>
+              <span>
+                {t("transcription.start_recording") || "Iniciar Grabación"}
+              </span>
             </motion.button>
           ) : (
             <div className="space-y-3">
@@ -185,9 +193,9 @@ const DemoTranscriptionPanel = ({ strategy = 'general_medicine' }) => {
                 whileTap={{ scale: 0.95 }}
               >
                 <StopIcon className="w-5 h-5" />
-                <span>{t('transcription.stop_recording') || 'Detener'}</span>
+                <span>{t("transcription.stop_recording") || "Detener"}</span>
               </motion.button>
-              
+
               <div className="text-sm text-gray-600">
                 <motion.span
                   className="inline-flex items-center"
@@ -209,7 +217,7 @@ const DemoTranscriptionPanel = ({ strategy = 'general_medicine' }) => {
               className="inline-flex items-center space-x-1 text-sm text-gray-500 hover:text-gray-700"
             >
               <ArrowPathIcon className="w-4 h-4" />
-              <span>Reiniciar Demo</span>
+              <span>{t("transcription.reset_demo") || "Reiniciar Demo"}</span>
             </button>
           </div>
         )}
@@ -226,11 +234,14 @@ const DemoTranscriptionPanel = ({ strategy = 'general_medicine' }) => {
               <div className="bg-gray-50 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="text-sm font-medium text-gray-700">
-                    {t('transcription.final_transcript') || 'Transcripción Final'}
+                    {t("transcription.final_transcript") ||
+                      "Transcripción Final"}
                   </h3>
                   {confidence > 0 && (
                     <div className="flex items-center space-x-1">
-                      <SparklesIcon className={`w-4 h-4 ${getConfidenceColor()}`} />
+                      <SparklesIcon
+                        className={`w-4 h-4 ${getConfidenceColor()}`}
+                      />
                       <span className={`text-xs ${getConfidenceColor()}`}>
                         {Math.round(confidence * 100)}%
                       </span>
@@ -272,7 +283,7 @@ const DemoTranscriptionPanel = ({ strategy = 'general_medicine' }) => {
                     🧠 Análisis IA Médica
                   </h3>
                 </div>
-                
+
                 <div className="space-y-2">
                   {currentAnalysis.map((analysis, index) => (
                     <motion.div
@@ -286,7 +297,7 @@ const DemoTranscriptionPanel = ({ strategy = 'general_medicine' }) => {
                       {analysis}
                     </motion.div>
                   ))}
-                  
+
                   {isAnalyzing && (
                     <motion.div
                       className="text-sm text-purple-600 italic"
@@ -318,7 +329,7 @@ const DemoTranscriptionPanel = ({ strategy = 'general_medicine' }) => {
                     📋 Recomendaciones Clínicas
                   </h3>
                 </div>
-                
+
                 <div className="space-y-2">
                   {recommendations.map((rec, index) => (
                     <motion.div
@@ -343,10 +354,11 @@ const DemoTranscriptionPanel = ({ strategy = 'general_medicine' }) => {
           <div className="text-center py-8">
             <div className="text-6xl mb-4">🎭</div>
             <div className="font-medium text-gray-900 mb-2">
-              Demo de Transcripción IA
+              {t("transcription.demo_heading") || "Demo de Transcripción IA"}
             </div>
             <div className="text-gray-500 text-sm">
-              Presiona "Iniciar Grabación" para ver la magia en acción
+              {t("transcription.demo_instructions") ||
+                'Presiona "Iniciar Grabación" para ver la magia en acción'}
             </div>
           </div>
         )}
@@ -357,18 +369,19 @@ const DemoTranscriptionPanel = ({ strategy = 'general_medicine' }) => {
         <div className="flex items-center justify-between text-sm text-gray-600">
           <div className="flex items-center space-x-4">
             <span>
-              {t('transcription.service_label') || 'Servicio'}: Demo Simulado
+              {t("transcription.service_label") || "Servicio"}: Demo Simulado
             </span>
             <span className="flex items-center">
               <SparklesIcon className="w-4 h-4 mr-1 text-purple-500" />
-              IA Médica Activa
+              {t("transcription.medical_ai_active") || "IA Médica Activa"}
             </span>
           </div>
           <div className="flex items-center space-x-2">
             {demoText && (
               <span className="flex items-center">
                 <CheckCircleIcon className="w-4 h-4 mr-1 text-green-500" />
-                {demoText.split(' ').length} palabras
+                {demoText.split(" ").length}{" "}
+                {t("transcription.words_count") || "palabras"}
               </span>
             )}
           </div>

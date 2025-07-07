@@ -72,6 +72,11 @@
     "service_browser": "Browser",
     "service_whisper": "Whisper",
     "service_label": "Service",
+    "demo_strategy_label": "🎭 Demo Strategy:",
+    "reset_demo": "Reset Demo",
+    "demo_heading": "AI Transcription Demo",
+    "demo_instructions": "Press \"Start Recording\" to see the magic",
+    "medical_ai_active": "Medical AI Active",
     "ai_active": "AI Active",
     "words_count": "words",
     "transcript_received": "Transcript received: "
