@@ -41,6 +41,7 @@ async function loadTranslations(locale) {
 // Fallback translations for critical functionality
 const fallbackTranslations = {
   'es': {
+    // Core transcription functionality
     'transcription.title': 'Transcripción en Tiempo Real',
     'transcription.ready_to_record': 'Listo para grabar',
     'transcription.start_recording': 'Iniciar Grabación',
@@ -49,19 +50,90 @@ const fallbackTranslations = {
     'transcription.no_transcript_description': 'Presiona "Iniciar Grabación" para comenzar a transcribir tu consulta médica',
     'transcription.service_label': 'Servicio',
     'transcription.service_browser': 'Navegador',
+    'transcription.demo_heading': 'Demo de Transcripción IA',
+    'transcription.demo_instructions': 'Presiona "Iniciar Grabación" para ver la magia en acción',
+    'transcription.final_transcript': 'Transcripción Final',
+    'transcription.words_count': 'palabras',
+    'transcription.medical_ai_active': 'IA Médica Activa',
+    'transcription.reset_demo': 'Reiniciar Demo',
+    
+    // Microphone functionality
     'microphone.status.need_access': 'Necesitamos acceso al micrófono para grabar tu consulta',
     'microphone.actions.test_access': 'Probar acceso',
+    
+    // AI Assistant
     'ai_assistant_welcome': 'Hola! Soy tu Asistente de IA médica. Puedo ayudarte a analizar datos de pacientes, identificar tendencias y proporcionar información clínica.',
+    
+    // Languages
     'language': 'Idioma',
     'english': 'Inglés',
     'spanish': 'Español',
     'english_abbr': 'EN',
     'spanish_abbr': 'ES',
+    
+    // Authentication
     'login': 'Iniciar sesión',
     'register': 'Registrarse',
+    
+    // Landing page
     'hero_heading': 'Herramientas inteligentes para médicos modernos',
     'hero_subheading': 'Ahorra tiempo en papeleo y enfócate en tus pacientes',
-    'cta_save_time': 'Sí, quiero ahorrar tiempo'
+    'cta_save_time': 'Sí, quiero ahorrar tiempo',
+    
+    // Navigation
+    'dashboard': 'Panel Principal',
+    'patients': 'Pacientes',
+    'reports': 'Reportes',
+    'analytics': 'Análisis',
+    'consultation': 'Consulta',
+    'profile': 'Perfil',
+    'settings': 'Configuración',
+    
+    // Common actions
+    'save': 'Guardar',
+    'cancel': 'Cancelar',
+    'delete': 'Eliminar',
+    'edit': 'Editar',
+    'create': 'Crear',
+    'update': 'Actualizar',
+    'search': 'Buscar',
+    'loading': 'Cargando',
+    'error': 'Error',
+    'success': 'Éxito',
+    'warning': 'Advertencia',
+    'close': 'Cerrar',
+    'open': 'Abrir',
+    'view': 'Ver',
+    'export': 'Exportar',
+    'import': 'Importar',
+    
+    // Medical terminology
+    'medical_assistant': 'Asistente Médico',
+    'ai_assistant': 'Asistente IA',
+    'documentation': 'Documentación',
+    'soap_notes': 'Notas SOAP',
+    'symptoms': 'Síntomas',
+    'diagnosis': 'Diagnóstico',
+    'treatment': 'Tratamiento',
+    'vital_signs': 'Signos Vitales',
+    'clinical_alerts': 'Alertas Clínicas',
+    
+    // Demo strategies
+    'general_medicine': 'Medicina General',
+    'cardiology': 'Cardiología',
+    'pediatrics': 'Pediatría',
+    'quality_of_life': 'Calidad de Vida',
+    
+    // Status messages
+    'active': 'Activo',
+    'inactive': 'Inactivo',
+    'recording': 'Grabando',
+    'stopped': 'Detenido',
+    'analyzing': 'Analizando',
+    'completed': 'Completado',
+    
+    // UI Actions
+    'inventar_consulta': 'Inventar Consulta'
   },
   'en': {
     'transcription.title': 'Real-time Transcription',
@@ -142,10 +214,74 @@ export function I18nProvider({ children }) {
   }, [locale]);
 
   const t = (key) => {
+    // Brutal translation system - NEVER mix languages, ALWAYS fallback to Spanish
+    let translation;
+    
     if (isLoadingTranslations) {
-      return fallbackTranslations[locale]?.[key] || fallbackTranslations['es']?.[key] || key;
+      translation = fallbackTranslations[locale]?.[key] || fallbackTranslations['es']?.[key];
+    } else {
+      translation = translations[key] || fallbackTranslations[locale]?.[key] || fallbackTranslations['es']?.[key];
     }
-    return translations[key] || fallbackTranslations[locale]?.[key] || fallbackTranslations['es']?.[key] || key;
+    
+    // If no translation found, console.warn and return Spanish fallback or key
+    if (!translation || translation === key) {
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(`[TRANSLATION BROKEN] Missing key: "${key}" - falling back to Spanish or key itself`);
+      }
+      
+      // Try to create a basic Spanish fallback for common patterns
+      const spanishFallback = createSpanishFallback(key);
+      return spanishFallback || key;
+    }
+    
+    return translation;
+  };
+
+  // Create basic Spanish fallbacks for common English patterns
+  const createSpanishFallback = (key) => {
+    const englishToSpanish = {
+      'Start Recording': 'Iniciar Grabación',
+      'Stop Recording': 'Detener Grabación', 
+      'Real-time Transcription': 'Transcripción en Tiempo Real',
+      'Settings': 'Configuración',
+      'Dashboard': 'Panel Principal',
+      'Patients': 'Pacientes',
+      'Reports': 'Reportes',
+      'Analytics': 'Análisis',
+      'Consultation': 'Consulta',
+      'Profile': 'Perfil',
+      'Login': 'Iniciar Sesión',
+      'Register': 'Registrarse',
+      'Save': 'Guardar',
+      'Cancel': 'Cancelar',
+      'Delete': 'Eliminar',
+      'Edit': 'Editar',
+      'Create': 'Crear',
+      'Update': 'Actualizar',
+      'Search': 'Buscar',
+      'Loading': 'Cargando',
+      'Error': 'Error',
+      'Success': 'Éxito',
+      'Warning': 'Advertencia'
+    };
+
+    // Direct key lookup
+    if (englishToSpanish[key]) {
+      return englishToSpanish[key];
+    }
+
+    // Pattern matching for common suffixes
+    if (key.endsWith('_recording')) {
+      return key.replace('_recording', '_grabación');
+    }
+    if (key.endsWith('_transcription')) {
+      return key.replace('_transcription', '_transcripción');
+    }
+    if (key.startsWith('transcription.')) {
+      return key; // Keep transcription keys as-is for now
+    }
+
+    return null;
   };
 
   return (
