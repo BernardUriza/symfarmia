@@ -46,13 +46,14 @@ describe('mockMedicalAI.generateResponse', () => {
   });
 
   it('should handle authentication error (401) correctly', async () => {
+    const mockError = {
+      error: 'Invalid Hugging Face token',
+      type: 'authentication_error'
+    };
     const mockResponse = {
       ok: false,
       status: 401,
-      json: jest.fn().mockResolvedValue({
-        error: 'Invalid Hugging Face token',
-        type: 'authentication_error'
-      })
+      text: jest.fn().mockResolvedValue(JSON.stringify(mockError))
     };
     global.fetch.mockResolvedValue(mockResponse);
 
@@ -64,13 +65,14 @@ describe('mockMedicalAI.generateResponse', () => {
   });
 
   it('should handle configuration error correctly', async () => {
+    const mockError = {
+      error: 'Hugging Face token not configured',
+      type: 'configuration_error'
+    };
     const mockResponse = {
       ok: false,
       status: 500,
-      json: jest.fn().mockResolvedValue({
-        error: 'Hugging Face token not configured',
-        type: 'configuration_error'
-      })
+      text: jest.fn().mockResolvedValue(JSON.stringify(mockError))
     };
     global.fetch.mockResolvedValue(mockResponse);
 
@@ -82,13 +84,14 @@ describe('mockMedicalAI.generateResponse', () => {
   });
 
   it('should handle rate limit error (429) correctly', async () => {
+    const mockError = {
+      error: 'Rate limit exceeded',
+      type: 'rate_limit_error'
+    };
     const mockResponse = {
       ok: false,
       status: 429,
-      json: jest.fn().mockResolvedValue({
-        error: 'Rate limit exceeded',
-        type: 'rate_limit_error'
-      })
+      text: jest.fn().mockResolvedValue(JSON.stringify(mockError))
     };
     global.fetch.mockResolvedValue(mockResponse);
 
@@ -103,9 +106,7 @@ describe('mockMedicalAI.generateResponse', () => {
     const mockResponse = {
       ok: false,
       status: 500,
-      json: jest.fn().mockResolvedValue({
-        error: 'Internal server error'
-      })
+      text: jest.fn().mockResolvedValue('Internal server error')
     };
     global.fetch.mockResolvedValue(mockResponse);
 
