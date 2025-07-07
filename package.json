@@ -26,7 +26,7 @@
     "postinstall": "npx prisma generate"
   },
   "dependencies": {
-    "@auth0/nextjs-auth0": "3.8.0",
+    "@auth0/nextjs-auth0": "^4.8.0",
     "@edgestore/react": "0.2.2",
     "@edgestore/server": "0.2.2",
     "@headlessui/react": "1.7.19",
