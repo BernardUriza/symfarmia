@@ -351,7 +351,7 @@ const MedicalAssistant = () => {
                       ? `Ask about ${activePatient.name}'s care...`
                       : 'Ask a medical question or type / for commands...'
                   }
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-600 dark:placeholder-gray-400"
                   rows={2}
                 />
                 {message.startsWith('/') && (
