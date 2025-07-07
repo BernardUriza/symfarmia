@@ -241,3 +241,12 @@ I'm terrified demo mode will crash during the live webinar and show our fake dat
 - **Idea:** Add a flashy progress bar to make the demo feel like real-time magic.
 
 — Codex (the night shift)
+
+## 📅 Day 3 - July 9, 2025
+**By: Codex**
+
+### Fix of the day
+Tracked down the memory leak in demo mode. `useMicrophoneDiagnostics` was adding permission listeners but never cleaning them up. Stored the PermissionStatus in a ref and removed the listener on unmount.
+
+### Outcome
+DemoTranscriptionPanel now releases resources properly when closed. No more growing listeners after each demo run.
