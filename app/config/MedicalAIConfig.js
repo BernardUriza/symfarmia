@@ -28,12 +28,18 @@ export class MedicalAIConfig {
     education: 'jiviai/medX_v2'
   };
 
+  // MODEL TYPE MAPPING - CRITICAL FOR PARAMETER VALIDATION
+  static MODEL_TYPE_MAP = {
+    'emilyalsentzer/Bio_ClinicalBERT': 'fill-mask',
+    'openai/whisper-medium': 'automatic-speech-recognition',
+    'jiviai/medX_v2': 'text-generation'
+  };
+
+  // ONLY SEND PARAMETERS TO COMPATIBLE MODEL TYPES
   static MODEL_PARAMS = {
     'emilyalsentzer/Bio_ClinicalBERT': {
-      max_length: 512,
-      temperature: 0.3,
-      do_sample: true,
-      return_all_scores: true
+      // FillMask models accept NO generation parameters
+      // Only inputs: "text with [MASK] token"
     },
     'openai/whisper-medium': {
       language: 'es',
@@ -114,11 +120,34 @@ export class MedicalAIConfig {
   }
 
   /**
+   * Get model type for parameter validation
+   */
+  static getModelType(model) {
+    this.validateModel(model);
+    return this.MODEL_TYPE_MAP[model];
+  }
+
+  /**
+   * Check if model accepts generation parameters
+   */
+  static acceptsParameters(model) {
+    const modelType = this.getModelType(model);
+    // FillMask models accept NO parameters except inputs
+    return modelType !== 'fill-mask';
+  }
+
+  /**
    * Get parameters for a specific model
    * STRICT VALIDATION - NO FALLBACKS
    */
   static getModelParameters(model) {
     this.validateModel(model);
+    
+    // FillMask models get no parameters
+    if (!this.acceptsParameters(model)) {
+      return {};
+    }
+    
     return this.MODEL_PARAMS[model] || {};
   }
 

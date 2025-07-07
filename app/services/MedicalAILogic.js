@@ -36,10 +36,12 @@ export async function processMedicalQuery({ query, type = 'diagnosis' }, depende
   config.validateModel(model);
   const parameters = config.getModelParameters(model);
   
-  const requestBody = {
-    inputs: query,
-    parameters
-  };
+  // CRITICAL: Only add parameters for models that accept them
+  const requestBody = { inputs: query };
+  
+  if (config.acceptsParameters(model) && Object.keys(parameters).length > 0) {
+    requestBody.parameters = parameters;
+  }
 
   try {
     const response = await makeAIRequest(model, requestBody, { config, httpClient });
