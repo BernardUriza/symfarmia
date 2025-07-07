@@ -343,61 +343,9 @@ export function I18nProvider({ children }) {
     return translation;
   };
 
-  // Create basic Spanish fallbacks for common English patterns
+  // Simple fallback for missing keys
   const createSpanishFallback = (key) => {
-    const englishToSpanish = {
-      'Start Recording': 'Iniciar Grabación',
-      'Stop Recording': 'Detener Grabación', 
-      'Real-time Transcription': 'Transcripción en Tiempo Real',
-      'Settings': 'Configuración',
-      'Dashboard': 'Panel Principal',
-      'Patients': 'Pacientes',
-      'Reports': 'Reportes',
-      'Analytics': 'Análisis',
-      'Consultation': 'Consulta',
-      'Profile': 'Perfil',
-      'Login': 'Iniciar Sesión',
-      'Register': 'Registrarse',
-      'Save': 'Guardar',
-      'Cancel': 'Cancelar',
-      'Delete': 'Eliminar',
-      'Edit': 'Editar',
-      'Create': 'Crear',
-      'Update': 'Actualizar',
-      'Search': 'Buscar',
-      'Loading': 'Cargando',
-      'Error': 'Error',
-      'Success': 'Éxito',
-      'Warning': 'Advertencia',
-      // Landing page brutal fixes
-      'Patient Management': 'Gestión de Pacientes',
-      'Medical Reports': 'Reportes Médicos',
-      'Welcome to SYMFARMIA': 'Bienvenido a SYMFARMIA',
-      'Get Started': 'Comenzar',
-      'Try Demo': 'Probar Demo',
-      // Session status
-      'consultation_title': 'Consulta Médica',
-      'session_active': 'Sesión activa',
-      'basic_mode': 'Modo Básico'
-    };
-
-    // Direct key lookup
-    if (englishToSpanish[key]) {
-      return englishToSpanish[key];
-    }
-
-    // Pattern matching for common suffixes
-    if (key.endsWith('_recording')) {
-      return key.replace('_recording', '_grabación');
-    }
-    if (key.endsWith('_transcription')) {
-      return key.replace('_transcription', '_transcripción');
-    }
-    if (key.startsWith('transcription.')) {
-      return key; // Keep transcription keys as-is for now
-    }
-
-    return null;
+    return key; // Just return the key itself as fallback
   };
 
   return (
