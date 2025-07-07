@@ -1,1 +1,43 @@
-{}
+{
+  "hero_heading": "Smart tools for modern doctors",
+  "hero_subheading": "Save paperwork time and focus on your patients",
+  "hero_cta": "Start free",
+  "cta_save_time": "I want to save time",
+  "cta_sending": "Sending...",
+  "beta_free": "Free beta access • No commitment",
+  "demo_interactive": "🎯 Try the Interactive Demo",
+  "demo_welcome": "Welcome to the SYMFARMIA Demo!",
+  "demo_explore_features": "Explore all features with sample data",
+  "contact_soon": "Great! We will contact you soon",
+  "check_email": "Check your email for next steps",
+  
+  "benefit_speak": "Speak naturally",
+  "benefit_speak_desc": "Conduct your visit as usual. Our system listens and understands the medical context.",
+  "benefit_processing": "Smart processing",
+  "benefit_processing_desc": "Specialized medical AI automatically structures the information into clinical format.",
+  "benefit_report": "Instant report",
+  "benefit_report_desc": "Get a PDF with diagnosis, treatment and recommendations ready to hand over.",
+  
+  "how_it_works": "It's that simple",
+  "step_consult": "Normal consultation",
+  "step_consult_desc": "\"45 year old patient with intermittent chest pain...\"",
+  "step_processing": "AI processing",
+  "step_processing_desc": "System analyzes and structures the medical information",
+  "step_report": "Report ready",
+  "step_report_desc": "PDF with diagnosis, treatment and follow-up",
+  
+  "testimonial_author": "Dr. María González",
+  "testimonial_position": "Internal Medicine, Mexico City",
+  "testimonial_quote": "\"I used to spend 15 minutes writing each report. Now I focus on the patient and the system does the rest. It's exactly what I needed.\"",
+  "testimonial_savings": "Saves 2 hours daily",
+  
+  "final_cta_heading": "Ready to get your time back?",
+  "final_cta_text": "Join the beta and see how AI can simplify your medical practice.",
+  "final_cta_signup": "Request beta access",
+  "final_cta_demo": "Or try the demo",
+  
+  "footer_copy": "© 2024 SYMFARMIA • Made with 💙 for doctors in Mexico",
+  "footer_privacy": "Privacy",
+  "footer_terms": "Terms",
+  "footer_contact": "Contact"
+}
