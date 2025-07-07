@@ -131,7 +131,7 @@ const nextConfig = {
       config.cache = false; // Disable webpack cache
       config.infrastructureLogging = { level: 'error' };
     }
-    
+
     // Tree shaking optimizations (disabled in dev to save memory)
     if (!dev) {
       config.optimization.usedExports = true;
@@ -192,6 +192,22 @@ const nextConfig = {
         },
       };
     }
+
+    config.optimization.splitChunks.cacheGroups = {
+      ...(config.optimization.splitChunks.cacheGroups || {}),
+      landing: {
+        test: /[\\/]components[\\/]landing[\\/]/,
+        name: 'landing',
+        chunks: 'all',
+        priority: 30,
+      },
+      animations: {
+        test: /[\\/]node_modules[\\/](framer-motion|three|gsap)[\\/]/,
+        name: 'animations',
+        chunks: 'async',
+        priority: 25,
+      },
+    };
     
     // Add build time stats
     config.plugins.push(

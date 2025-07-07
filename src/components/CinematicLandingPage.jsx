@@ -95,12 +95,23 @@ const CinematicLandingPage = () => {
   };
 
   // Hero Section - "EL AMANECER MÉDICO"
-  const HeroSection = () => (
-    <section className="relative min-h-screen overflow-hidden">
-      {/* Cinematic Background Gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-900 to-teal-600">
-        <div className="absolute inset-0 bg-gradient-to-t from-transparent via-transparent to-slate-900/30" />
-      </div>
+  const HeroSection = () => {
+    const [showAnimations, setShowAnimations] = useState(false)
+
+    useEffect(() => {
+      setTimeout(() => setShowAnimations(true), 100)
+    }, [])
+
+    return (
+      <motion.div
+        initial={showAnimations ? { opacity: 0 } : false}
+        animate={showAnimations ? { opacity: 1 } : {}}
+      >
+        <section className="relative min-h-screen overflow-hidden">
+          {/* Cinematic Background Gradient */}
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-900 to-teal-600">
+            <div className="absolute inset-0 bg-gradient-to-t from-transparent via-transparent to-slate-900/30" />
+          </div>
       
       {/* Grid Layout Container */}
       <div className="relative z-10 min-h-screen grid grid-rows-[auto_1fr_auto] gap-8 p-6">
@@ -216,7 +227,9 @@ const CinematicLandingPage = () => {
         </div>
       </div>
     </section>
-  );
+      </motion.div>
+    );
+  };
 
   // Problem Section - "LA CRISIS MÉDICA" (Currently unused)
   const ProblemSection = () => (

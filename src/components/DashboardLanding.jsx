@@ -237,7 +237,7 @@ Auscultación cardiopulmonar normal. No edemas en miembros inferiores.
         <motion.div
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-8 shadow-lg border border-blue-200 cursor-pointer"
+          className="medical-card bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-8 cursor-pointer"
           onClick={handleProbarAsistente}
         >
           <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
@@ -255,7 +255,7 @@ Auscultación cardiopulmonar normal. No edemas en miembros inferiores.
         <motion.div
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-8 shadow-lg border border-green-200 cursor-pointer"
+          className="medical-card bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-8 cursor-pointer"
           onClick={handleTranscribirConsulta}
         >
           <div className="w-16 h-16 bg-green-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
@@ -273,7 +273,7 @@ Auscultación cardiopulmonar normal. No edemas en miembros inferiores.
         <motion.div
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className="bg-gradient-to-br from-purple-50 to-violet-50 rounded-2xl p-8 shadow-lg border border-purple-200 cursor-pointer"
+          className="medical-card bg-gradient-to-br from-purple-50 to-violet-50 rounded-2xl p-8 cursor-pointer"
           onClick={handleVerAnalisis}
         >
           <div className="w-16 h-16 bg-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6">

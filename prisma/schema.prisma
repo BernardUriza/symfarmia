@@ -11,17 +11,63 @@ datasource db {
 }
 
 model Patient {
+  /// Core existing fields
   id         Int       @id @default(autoincrement())
   name       String
   email      String
   phone      String
   information String @db.Text
   dateOfBirth DateTime
-  gender     String
+  gender     Gender
   status     String
   createdAt  DateTime  @default(now())
+
+  /// Extended demographics
+  firstName    String?
+  lastName     String?
+  documentType DocumentType @default(CEDULA)
+  documentNumber String?  @unique
+  address      Json?
+
+  /// Medical info
+  bloodType    BloodType?
+  allergies         String[]
+  chronicConditions String[]
+
+  /// Emergency contact
+  emergencyContactName         String?
+  emergencyContactRelationship String?
+  emergencyContactPhone        String?
+
+  /// Misc
+  avatarUrl String?
+  isActive Boolean @default(true)
+
   medicalReports MedicalReport[]
-  // Otros campos relevantes para el paciente
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum DocumentType {
+  CEDULA
+  PASAPORTE
+  TARJETA_IDENTIDAD
+}
+
+enum BloodType {
+  A_POSITIVE
+  A_NEGATIVE
+  B_POSITIVE
+  B_NEGATIVE
+  AB_POSITIVE
+  AB_NEGATIVE
+  O_POSITIVE
+  O_NEGATIVE
+  UNKNOWN
 }
 model MedicalReport {
   id         Int       @id @default(autoincrement())
