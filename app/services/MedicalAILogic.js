@@ -2,6 +2,7 @@
  * Pure business logic functions for Medical AI operations
  * These functions are framework-agnostic and can be easily tested
  */
+import modelMonitor from "@/utils/modelMonitor";
 
 /**
  * Process a medical query with AI logic
@@ -86,13 +87,16 @@ export async function processMedicalQuery({ query, context, type = 'diagnosis' }
   }
 
   try {
+    const start = Date.now();
     const response = await makeAIRequest(model, requestBody, { config, httpClient });
-    return formatAIResponse(response, model, config, { query, context });
+    const latency = Date.now() - start;
+    const formatted = formatAIResponse(response, model, config, { query, context, type });
+    modelMonitor.recordCall(model, latency, formatted.confidence ?? 0, type);
+    return formatted;
   } catch (error) {
-    // Re-throw with proper error handling
+    modelMonitor.recordFailure(model, error);
     throw error;
   }
-}
 
 /**
  * Make HTTP request to AI service

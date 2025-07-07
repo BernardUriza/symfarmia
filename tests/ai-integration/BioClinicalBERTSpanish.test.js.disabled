@@ -1,0 +1,62 @@
+const { processMedicalQuery } = jest.requireActual('../../app/services/MedicalAILogic.js');
+const modelMonitor = require('../../utils/modelMonitor');
+
+global.fetch = jest.fn();
+
+jest.mock('../../utils/modelMonitor', () => ({
+  recordCall: jest.fn(),
+  recordFailure: jest.fn(),
+  getMetrics: jest.fn()
+}));
+
+const mockConfig = {
+  validateConfig: jest.fn(() => []),
+  getModel: jest.fn(() => 'emilyalsentzer/Bio_ClinicalBERT'),
+  getModelParameters: jest.fn(() => ({})),
+  validateModel: jest.fn(),
+  getModelType: jest.fn(() => 'fill-mask'),
+  acceptsParameters: jest.fn(() => false),
+  getToken: jest.fn(() => 'token'),
+  getUserAgent: jest.fn(() => 'agent'),
+  getBaseUrl: jest.fn(() => 'https://api.test.com'),
+  getTimeout: jest.fn(() => 5000),
+  getDisclaimer: jest.fn(() => 'disc'),
+  getAvailableTypes: jest.fn(() => ['diagnosis'])
+};
+
+const mockHttpClient = {
+  fetch: jest.fn()
+};
+
+describe('Bio_ClinicalBERT Spanish integration', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('processes Spanish medical fill-mask query under 500ms', async () => {
+    const responseData = [{ token_str: 'cefalea', score: 0.9 }];
+    mockHttpClient.fetch.mockResolvedValue({ ok: true, json: () => Promise.resolve(responseData) });
+
+    const start = Date.now();
+    const result = await processMedicalQuery(
+      { query: 'El paciente presenta dolor de cabeza', type: 'diagnosis' },
+      { config: mockConfig, httpClient: mockHttpClient }
+    );
+    const latency = Date.now() - start;
+
+    expect(result.success).toBe(true);
+    expect(latency).toBeLessThan(500);
+    expect(modelMonitor.recordCall).toHaveBeenCalled();
+  });
+
+  it('logs failure on API error', async () => {
+    mockHttpClient.fetch.mockResolvedValue({ ok: false, status: 500, text: () => Promise.resolve('error') });
+    await expect(
+      processMedicalQuery(
+        { query: 'dolor abdominal', type: 'diagnosis' },
+        { config: mockConfig, httpClient: mockHttpClient }
+      )
+    ).rejects.toThrow();
+    expect(modelMonitor.recordFailure).toHaveBeenCalled();
+  });
+});
