@@ -97,6 +97,8 @@ export function useDemoTranscription(strategy = 'general_medicine') {
   
   const intervalRef = useRef(null);
   const timeoutRef = useRef(null);
+  // Track all demo timeouts for proper cleanup to avoid memory leaks
+  const timeoutsRef = useRef([]);
   const demoStrategy = DEMO_STRATEGIES[strategy] || DEMO_STRATEGIES['general_medicine'];
 
   const startDemoRecording = () => {
@@ -128,7 +130,7 @@ export function useDemoTranscription(strategy = 'general_medicine') {
         
         // Tiempo variable entre oraciones (1.5-3 segundos) - SOLO CLIENT SIDE
         const nextDelay = typeof window !== 'undefined' ? 1500 + Math.random() * 1500 : 2000;
-        timeoutRef.current = setTimeout(addNextSentence, nextDelay);
+        timeoutsRef.current.push(setTimeout(addNextSentence, nextDelay));
         
         // Iniciar análisis después de la tercera oración
         if (currentIndex === 3) {
@@ -138,7 +140,7 @@ export function useDemoTranscription(strategy = 'general_medicine') {
     };
 
     // Comenzar transcripción después de un pequeño delay
-    timeoutRef.current = setTimeout(addNextSentence, 800);
+    timeoutsRef.current.push(setTimeout(addNextSentence, 800));
   };
 
   const startAnalysis = () => {
@@ -151,17 +153,17 @@ export function useDemoTranscription(strategy = 'general_medicine') {
       if (analysisIndex < analysis.length) {
         setCurrentAnalysis(prev => [...prev, analysis[analysisIndex]]);
         analysisIndex++;
-        setTimeout(addAnalysisPoint, 2000);
+        timeoutsRef.current.push(setTimeout(addAnalysisPoint, 2000));
       } else {
         // Agregar recomendaciones después del análisis
-        setTimeout(() => {
+        timeoutsRef.current.push(setTimeout(() => {
           setRecommendations(demoStrategy.recommendations);
           setIsAnalyzing(false);
-        }, 1500);
+        }, 1500));
       }
     };
 
-    setTimeout(addAnalysisPoint, 1000);
+    timeoutsRef.current.push(setTimeout(addAnalysisPoint, 1000));
   };
 
   const stopDemoRecording = () => {
@@ -177,6 +179,9 @@ export function useDemoTranscription(strategy = 'general_medicine') {
       clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
     }
+    // Clear all scheduled timeouts
+    timeoutsRef.current.forEach((t) => clearTimeout(t));
+    timeoutsRef.current = [];
   };
 
   const resetDemo = () => {
@@ -188,11 +193,14 @@ export function useDemoTranscription(strategy = 'general_medicine') {
     setConfidence(0);
   };
 
-  // Cleanup on unmount
+  // Cleanup on unmount: clear interval and all timeouts
   useEffect(() => {
     return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+      timeoutsRef.current.forEach((t) => clearTimeout(t));
+      timeoutsRef.current = [];
     };
   }, []);
 
