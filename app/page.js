@@ -1,9 +1,14 @@
-import nextDynamic from 'next/dynamic'
-const LandingPageStrategy = nextDynamic(() => import('../src/components/LandingPageStrategy'))
+import { lazy, Suspense } from 'react'
+const LandingPageStrategy = lazy(() => import('../src/components/LandingPageStrategy'))
+import LandingSkeleton from '../src/components/LandingSkeleton'
 
 export const dynamic = 'force-static'
 
 export default function HomePage({ searchParams }) {
   const isDemo = searchParams?.demo === 'true'
-  return <LandingPageStrategy isDemo={isDemo} />
+  return (
+    <Suspense fallback={<LandingSkeleton />}>
+      <LandingPageStrategy isDemo={isDemo} />
+    </Suspense>
+  )
 }
