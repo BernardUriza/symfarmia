@@ -63,3 +63,19 @@ model Study {
   medicalReport    MedicalReport?  @relation(fields: [medicalReportId], references: [id], onDelete: Cascade) 
   // Otros campos relevantes para tu estudio
 }
+
+// Analytics tracking for consultation interactions
+model ConsultationAnalytics {
+  id           Int      @id @default(autoincrement())
+  sessionId    String   // Unique session identifier
+  userId       String?  // Optional user identifier
+  event        String   // Event type: 'specialty_selected', 'consult_generated', 'recording_started', etc.
+  specialty    String?  // Medical specialty selected
+  location     String?  // UI location of interaction
+  metadata     Json?    // Additional event data
+  timestamp    DateTime @default(now())
+  userAgent    String?  // Browser info
+  ipAddress    String?  // IP address (anonymized)
+  
+  @@map("consultation_analytics")
+}

@@ -26,49 +26,31 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
     recordingTime,
     confidence,
     isAnalyzing,
+    selectedSpecialty,
+    showSpecialtyConfirmation,
+    consultationGenerated,
     startDemoRecording,
     stopDemoRecording,
     resetDemo,
+    selectSpecialty,
+    confirmSpecialtyAndGenerate,
     strategyName,
-    availableStrategies,
+    availableSpecialties
   } = useDemoTranscription(strategy);
 
-  const [currentStrategy, setCurrentStrategy] = useState(strategy);
+  const [currentStrategy] = useState(strategy);
   const [isClient, setIsClient] = useState(false);
-  const [showStrategyMenu, setShowStrategyMenu] = useState(false);
 
-  // Strategy menu data with icons and descriptions
-  const strategyMenuData = {
-    general_medicine: {
-      icon: '🩺',
-      name: 'Medicina General',
-      description: 'Consulta médica estándar con síntomas comunes',
-      color: 'bg-blue-500'
-    },
-    hiv_pregnancy_adolescent: {
-      icon: '🤰',
-      name: 'VIH + Embarazo Adolescente',
-      description: 'Caso especial de población vulnerable crítica',
-      color: 'bg-red-500'
-    },
-    quality_of_life: {
-      icon: '💙',
-      name: 'Calidad de Vida',
-      description: 'Enfoque holístico en bienestar del paciente',
-      color: 'bg-cyan-500'
-    },
-    cardiology: {
-      icon: '❤️',
-      name: 'Cardiología',
-      description: 'Especialidad cardiovascular con énfasis en diagnóstico',
-      color: 'bg-rose-500'
-    },
-    pediatrics: {
-      icon: '👶',
-      name: 'Pediatría',
-      description: 'Atención médica especializada en menores',
-      color: 'bg-pink-500'
-    }
+  // Get specialty colors mapping
+  const getSpecialtyColor = (specialty) => {
+    const colorMap = {
+      general_medicine: 'bg-blue-500',
+      cardiology: 'bg-rose-500', 
+      pediatrics: 'bg-pink-500',
+      hiv_pregnancy_adolescent: 'bg-red-500',
+      quality_of_life: 'bg-cyan-500'
+    };
+    return colorMap[specialty] || 'bg-gray-500';
   };
 
   // Evitar hydration errors - solo renderizar después de mount
@@ -89,21 +71,23 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
     resetDemo();
   }, [currentStrategy, resetDemo]);
 
-  // Close strategy menu when clicking outside - MEMORY LEAK FIX
+  // Close confirmation when clicking outside - MEMORY LEAK FIX
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (showStrategyMenu && !event.target.closest('.strategy-menu-container')) {
-        setShowStrategyMenu(false);
+      if (showSpecialtyConfirmation && !event.target.closest('.specialty-confirmation-container')) {
+        // Don't close automatically - require explicit action
       }
     };
 
     // Always add/remove listener to prevent memory leaks
-    document.addEventListener('mousedown', handleClickOutside);
+    if (showSpecialtyConfirmation) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
     
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [showStrategyMenu]);
+  }, [showSpecialtyConfirmation]);
 
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
@@ -203,136 +187,130 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
       </div>
 
 
-      {/* Human-Readable Strategy Display */}
-      <div className="px-6 py-4 bg-gradient-to-r from-purple-50 to-indigo-50 border-b border-purple-100">
-        <div className="flex items-center justify-center">
+      {/* Specialty Selection Header */}
+      {!selectedSpecialty && (
+        <div className="px-6 py-4 bg-gradient-to-r from-blue-50 to-cyan-50 border-b border-blue-100">
           <div className="text-center">
-            <div className="inline-flex items-center space-x-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm">
-              <BeakerIcon className="w-5 h-5 text-purple-600" />
-              <span className="text-sm font-semibold text-purple-800">
-                {currentStrategy === 'general_medicine' && '🩺 Medicina General'}
-                {currentStrategy === 'hiv_pregnancy_adolescent' && '🤰 VIH + Embarazo Adolescente'}
-                {currentStrategy === 'quality_of_life' && '💙 Calidad de Vida'}
-                {currentStrategy === 'cardiology' && '❤️ Cardiología'}
-                {currentStrategy === 'pediatrics' && '👶 Pediatría'}
-              </span>
+            <div className="text-lg font-semibold text-blue-900 mb-2">
+              🎩 Selecciona la Especialidad
             </div>
-            <div className="text-xs text-purple-600 mt-2">
-              {currentStrategy === 'general_medicine' && 'Consulta médica estándar con síntomas comunes'}
-              {currentStrategy === 'hiv_pregnancy_adolescent' && 'Caso especial de población vulnerable crítica'}
-              {currentStrategy === 'quality_of_life' && 'Enfoque holístico en bienestar del paciente'}
-              {currentStrategy === 'cardiology' && 'Especialidad cardiovascular con énfasis en diagnóstico'}
-              {currentStrategy === 'pediatrics' && 'Atención médica especializada en menores'}
+            <div className="text-sm text-blue-700 mb-4">
+              Primero elige el tipo de consulta médica que deseas simular
+            </div>
+            
+            {/* Specialty Buttons Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-w-4xl mx-auto">
+              {Object.entries(availableSpecialties).map(([key, specialty]) => (
+                <motion.button
+                  key={key}
+                  onClick={() => selectSpecialty(key)}
+                  className={`p-4 rounded-xl border-2 border-transparent hover:border-blue-300 transition-all text-left ${getSpecialtyColor(key)} text-white hover:shadow-lg`}
+                  whileHover={{ scale: 1.02, y: -2 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className="text-2xl">{specialty.icon}</div>
+                    <div className="flex-1">
+                      <div className="font-semibold text-white">{specialty.name}</div>
+                      <div className="text-xs text-white/80 mt-1">{specialty.description}</div>
+                    </div>
+                  </div>
+                </motion.button>
+              ))}
             </div>
           </div>
         </div>
-      </div>
+      )}
+      
+      {/* Specialty Confirmation */}
+      {showSpecialtyConfirmation && selectedSpecialty && (
+        <div className="px-6 py-4 bg-gradient-to-r from-green-50 to-emerald-50 border-b border-green-100 specialty-confirmation-container">
+          <div className="text-center">
+            <div className="text-lg font-semibold text-green-900 mb-2">
+              ❓ ¿Qué tipo de consulta vamos a inventar?
+            </div>
+            
+            <div className="inline-flex items-center space-x-3 bg-white/80 backdrop-blur-sm px-6 py-4 rounded-xl shadow-sm mb-4">
+              <div className="text-3xl">{availableSpecialties[selectedSpecialty]?.icon}</div>
+              <div className="text-left">
+                <div className="font-bold text-green-900">{availableSpecialties[selectedSpecialty]?.name}</div>
+                <div className="text-sm text-green-700">{availableSpecialties[selectedSpecialty]?.description}</div>
+              </div>
+            </div>
+            
+            <div className="flex items-center justify-center space-x-3">
+              <motion.button
+                onClick={confirmSpecialtyAndGenerate}
+                className="inline-flex items-center space-x-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors shadow-md"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <SparklesIcon className="w-5 h-5" />
+                <span>Sí, Inventar Esta Consulta</span>
+              </motion.button>
+              
+              <motion.button
+                onClick={() => {
+                  setSelectedSpecialty(null);
+                  setShowSpecialtyConfirmation(false);
+                }}
+                className="inline-flex items-center space-x-2 bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-4 rounded-lg transition-colors"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <span>Cambiar</span>
+              </motion.button>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Selected Specialty Display */}
+      {selectedSpecialty && !showSpecialtyConfirmation && (
+        <div className="px-6 py-4 bg-gradient-to-r from-purple-50 to-indigo-50 border-b border-purple-100">
+          <div className="flex items-center justify-center">
+            <div className="text-center">
+              <div className="inline-flex items-center space-x-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm">
+                <BeakerIcon className="w-5 h-5 text-purple-600" />
+                <span className="text-sm font-semibold text-purple-800">
+                  {availableSpecialties[selectedSpecialty]?.icon} {availableSpecialties[selectedSpecialty]?.name}
+                </span>
+              </div>
+              <div className="text-xs text-purple-600 mt-2">
+                {availableSpecialties[selectedSpecialty]?.description}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Recording Controls */}
       <div className="p-6">
         <div className="text-center mb-6">
           {!isRecording ? (
             <div className="flex items-center justify-center gap-3">
-              <motion.button
-                onClick={startDemoRecording}
-                className="inline-flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors shadow-md"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <PlayIcon className="w-5 h-5" />
-                <span>
-                  {t("transcription.start_recording")}
-                </span>
-              </motion.button>
-              
-              {/* InventarConsulta Button - Same height and padding as StartRecording */}
-              <div className="relative strategy-menu-container">
+              {/* Start Recording Button - Only show after consultation generated or no specialty selected */}
+              {(consultationGenerated || !selectedSpecialty) && (
                 <motion.button
-                  onClick={() => setShowStrategyMenu(!showStrategyMenu)}
-                  className="inline-flex items-center space-x-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors shadow-md"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  title="Inventar consulta médica simulada"
+                  onClick={startDemoRecording}
+                  disabled={!selectedSpecialty}
+                  className={`inline-flex items-center space-x-2 font-semibold py-3 px-6 rounded-lg transition-colors shadow-md ${
+                    selectedSpecialty 
+                      ? 'bg-blue-600 hover:bg-blue-700 text-white' 
+                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  }`}
+                  whileHover={{ scale: selectedSpecialty ? 1.05 : 1 }}
+                  whileTap={{ scale: selectedSpecialty ? 0.95 : 1 }}
                 >
-                  <BeakerIcon className="w-5 h-5" />
-                  <span>{t("inventar_consulta") || "Inventar Consulta"}</span>
+                  <PlayIcon className="w-5 h-5" />
+                  <span>
+                    {consultationGenerated 
+                      ? "Continuar Grabando" 
+                      : (selectedSpecialty ? t("transcription.start_recording") : "Selecciona Especialidad Primero")
+                    }
+                  </span>
                 </motion.button>
-
-                {/* Strategy Selection Menu */}
-                <AnimatePresence>
-                  {showStrategyMenu && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      transition={{ duration: 0.2 }}
-                      className="absolute top-full mt-2 left-0 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 overflow-hidden"
-                    >
-                      <div className="p-4 border-b border-gray-100">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                          🎭 Estrategias de Simulación
-                        </h3>
-                        <p className="text-sm text-gray-600">
-                          Selecciona el tipo de consulta a simular
-                        </p>
-                      </div>
-                      
-                      <div className="max-h-80 overflow-y-auto">
-                        {availableStrategies.map((strat) => {
-                          const stratData = strategyMenuData[strat];
-                          const isSelected = currentStrategy === strat;
-                          
-                          return (
-                            <motion.button
-                              key={strat}
-                              onClick={() => {
-                                setCurrentStrategy(strat);
-                                resetDemo();
-                                setShowStrategyMenu(false);
-                              }}
-                              className={`w-full p-4 text-left hover:bg-purple-50 transition-colors border-l-4 ${
-                                isSelected 
-                                  ? 'bg-purple-50 border-purple-500' 
-                                  : 'border-transparent hover:border-purple-300'
-                              }`}
-                              whileHover={{ x: 4 }}
-                              whileTap={{ scale: 0.98 }}
-                            >
-                              <div className="flex items-start space-x-3">
-                                <div className={`w-10 h-10 rounded-lg ${stratData?.color || 'bg-gray-500'} flex items-center justify-center text-white text-lg flex-shrink-0`}>
-                                  {stratData?.icon || '🔬'}
-                                </div>
-                                <div className="min-w-0 flex-1">
-                                  <div className={`font-semibold ${isSelected ? 'text-purple-900' : 'text-gray-900'}`}>
-                                    {stratData?.name || strat.replace(/_/g, ' ')}
-                                  </div>
-                                  <div className={`text-sm mt-1 ${isSelected ? 'text-purple-700' : 'text-gray-600'}`}>
-                                    {stratData?.description || 'Simulación médica personalizada'}
-                                  </div>
-                                  {isSelected && (
-                                    <div className="mt-2 text-xs text-purple-600 font-medium">
-                                      ✓ Actualmente seleccionada
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            </motion.button>
-                          );
-                        })}
-                      </div>
-                      
-                      <div className="p-3 bg-gray-50 border-t border-gray-100">
-                        <button
-                          onClick={() => setShowStrategyMenu(false)}
-                          className="w-full text-center text-sm text-gray-600 hover:text-gray-800 transition-colors"
-                        >
-                          Cerrar menú
-                        </button>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+              )}
             </div>
           ) : (
             <div className="space-y-3">
@@ -352,7 +330,7 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
                   animate={{ opacity: [1, 0.5, 1] }}
                   transition={{ duration: 1.5, repeat: Infinity }}
                 >
-                  🔴 Grabando consulta demo...
+                  🔴 Simulando consulta de {availableSpecialties[selectedSpecialty]?.name}...
                 </motion.span>
               </div>
             </div>
@@ -499,14 +477,27 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
         </AnimatePresence>
 
         {/* Empty State */}
-        {!demoText && !isRecording && (
+        {!demoText && !isRecording && !selectedSpecialty && (
           <div className="text-center py-8">
-            <div className="text-6xl mb-4">🎭</div>
+            <div className="text-6xl mb-4">🎩</div>
             <div className="font-medium text-gray-900 mb-2">
-              {t("transcription.demo_heading")}
+              Inventar Consulta Médica
             </div>
             <div className="text-gray-500 text-sm">
-              {t("transcription.demo_instructions")}
+              Selecciona una especialidad arriba para comenzar
+            </div>
+          </div>
+        )}
+        
+        {/* Waiting for Generation State */}
+        {selectedSpecialty && !consultationGenerated && !isRecording && !demoText && (
+          <div className="text-center py-8">
+            <div className="text-6xl mb-4">✨</div>
+            <div className="font-medium text-gray-900 mb-2">
+              {availableSpecialties[selectedSpecialty]?.name} Seleccionada
+            </div>
+            <div className="text-gray-500 text-sm">
+              Confirma arriba para generar la consulta automáticamente
             </div>
           </div>
         )}
@@ -525,6 +516,12 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
             </span>
           </div>
           <div className="flex items-center space-x-2">
+            {selectedSpecialty && (
+              <span className="flex items-center text-xs">
+                <span className="mr-1">{availableSpecialties[selectedSpecialty]?.icon}</span>
+                {availableSpecialties[selectedSpecialty]?.name}
+              </span>
+            )}
             {demoText && (
               <span className="flex items-center">
                 <CheckCircleIcon className="w-4 h-4 mr-1 text-green-500" />
