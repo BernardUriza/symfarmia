@@ -10,28 +10,54 @@ export class MedicalAIConfig {
   static TIMEOUT = 30000; // 30 seconds
   static USER_AGENT = 'SYMFARMIA-Medical-Assistant/1.0';
   
-  // MEDICAL MODELS - CURRENTLY WORKING MODELS
+  // MEDICAL MODELS - TEXT GENERATION FOR REAL RESPONSES
   static SUPPORTED_MODELS = [
+    'gpt2',
+    'distilgpt2',
+    'microsoft/DialoGPT-small',
     'emilyalsentzer/Bio_ClinicalBERT'
   ];
 
   static MODEL_MAP = {
-    diagnosis: 'emilyalsentzer/Bio_ClinicalBERT',
-    prescription: 'emilyalsentzer/Bio_ClinicalBERT',
-    soap: 'emilyalsentzer/Bio_ClinicalBERT',
-    analytics: 'emilyalsentzer/Bio_ClinicalBERT'
+    diagnosis: 'gpt2',
+    prescription: 'distilgpt2',
+    soap: 'microsoft/DialoGPT-small',
+    analytics: 'gpt2'
   };
 
   // MODEL TYPE MAPPING - CRITICAL FOR PARAMETER VALIDATION
   static MODEL_TYPE_MAP = {
-    'emilyalsentzer/Bio_ClinicalBERT': 'fill-mask'
+    'emilyalsentzer/Bio_ClinicalBERT': 'fill-mask',
+    'gpt2': 'text-generation',
+    'distilgpt2': 'text-generation',
+    'microsoft/DialoGPT-small': 'text-generation'
   };
 
-  // ONLY SEND PARAMETERS TO COMPATIBLE MODEL TYPES
+  // PARAMETERS FOR TEXT GENERATION MODELS
   static MODEL_PARAMS = {
     'emilyalsentzer/Bio_ClinicalBERT': {
       // FillMask models accept NO generation parameters
-      // Only inputs: "text with [MASK] token"
+    },
+    'gpt2': {
+      max_length: 150,
+      temperature: 0.7,
+      do_sample: true,
+      num_return_sequences: 1,
+      pad_token_id: 50256
+    },
+    'distilgpt2': {
+      max_length: 120,
+      temperature: 0.8,
+      do_sample: true,
+      num_return_sequences: 1,
+      pad_token_id: 50256
+    },
+    'microsoft/DialoGPT-small': {
+      max_length: 100,
+      temperature: 0.6,
+      do_sample: true,
+      num_return_sequences: 1,
+      pad_token_id: 50256
     }
   };
 

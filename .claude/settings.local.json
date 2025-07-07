@@ -59,7 +59,9 @@
       "Bash(timeout 20s npm run dev)",
       "Bash(DEBUG=*)",
       "Bash(npm run cache:clean:*)",
-      "Bash(env)"
+      "Bash(env)",
+      "mcp__ide__getDiagnostics",
+      "Bash(npm ls:*)"
     ],
     "deny": []
   }

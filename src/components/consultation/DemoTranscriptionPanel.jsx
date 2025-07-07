@@ -196,67 +196,62 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
       </div>
 
 
-      {/* Compact Specialty Selector */}
+      {/* Ultra Compact Specialty Selector */}
       {!selectedSpecialty && (
-        <div className="px-6 py-4 bg-gradient-to-r from-blue-50 to-cyan-50 border-b border-blue-100">
-          <div className="flex items-center justify-center">
-            <div className="text-center">
-              <div className="text-lg font-semibold text-blue-900 mb-2">
-                🎩 Selecciona la Especialidad
-              </div>
-              <div className="text-sm text-blue-700 mb-4">
-                Elige el tipo de consulta médica que deseas simular
-              </div>
-              
-              {/* Compact Dropdown Selector */}
-              <div className="relative inline-block" ref={dropdownRef}>
-                <motion.button
-                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="inline-flex items-center justify-between w-72 px-4 py-3 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-lg text-left transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <span className="text-gray-700 font-medium">
-                    Seleccionar especialidad...
-                  </span>
-                  <ChevronDownIcon 
-                    className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${
-                      isDropdownOpen ? 'transform rotate-180' : ''
-                    }`}
-                  />
-                </motion.button>
+        <div className="px-6 py-3 bg-gray-50 border-b border-gray-100">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <span className="text-sm font-medium text-gray-700">Especialidad:</span>
+            </div>
+            
+            {/* Ultra Compact Dropdown */}
+            <div className="relative" ref={dropdownRef}>
+              <motion.button
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                className="inline-flex items-center justify-between w-64 px-3 py-2 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-md text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
+              >
+                <span className="text-gray-600 truncate">
+                  Seleccionar especialidad...
+                </span>
+                <ChevronDownIcon 
+                  className={`w-4 h-4 text-gray-500 transition-transform duration-200 ml-2 ${
+                    isDropdownOpen ? 'transform rotate-180' : ''
+                  }`}
+                />
+              </motion.button>
 
-                {/* Dropdown Menu */}
-                <AnimatePresence>
-                  {isDropdownOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                      transition={{ duration: 0.2 }}
-                      className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-96 overflow-y-auto"
-                    >
-                      {Object.entries(availableSpecialties).map(([key, specialty]) => (
-                        <motion.button
-                          key={key}
-                          onClick={() => {
-                            selectSpecialty(key);
-                            setIsDropdownOpen(false);
-                          }}
-                          className="w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center space-x-3 transition-colors border-b border-gray-100 last:border-b-0"
-                          whileHover={{ backgroundColor: '#f9fafb' }}
-                        >
-                          <div className="text-xl">{specialty.icon}</div>
-                          <div className="flex-1">
-                            <div className="font-medium text-gray-900">{specialty.name}</div>
-                            <div className="text-xs text-gray-500 mt-1">{specialty.description}</div>
-                          </div>
-                        </motion.button>
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+              {/* Compact Dropdown Menu */}
+              <AnimatePresence>
+                {isDropdownOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -5, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -5, scale: 0.95 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute top-full right-0 mt-1 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-64 overflow-y-auto"
+                  >
+                    {Object.entries(availableSpecialties).map(([key, specialty]) => (
+                      <motion.button
+                        key={key}
+                        onClick={() => {
+                          selectSpecialty(key);
+                          setIsDropdownOpen(false);
+                        }}
+                        className="w-full px-3 py-2 text-left hover:bg-gray-50 flex items-center space-x-2 transition-colors border-b border-gray-100 last:border-b-0"
+                        whileHover={{ backgroundColor: '#f9fafb' }}
+                      >
+                        <div className="text-lg">{specialty.icon}</div>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-gray-900 text-sm truncate">{specialty.name}</div>
+                          <div className="text-xs text-gray-500 truncate">{specialty.description}</div>
+                        </div>
+                      </motion.button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
         </div>
@@ -302,21 +297,43 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
         </div>
       )}
       
-      {/* Selected Specialty Display */}
+      {/* Compact Selected Specialty Display with Strategy Selector */}
       {selectedSpecialty && !showSpecialtyConfirmation && (
-        <div className="px-6 py-4 bg-gradient-to-r from-purple-50 to-indigo-50 border-b border-purple-100">
-          <div className="flex items-center justify-center">
-            <div className="text-center">
-              <div className="inline-flex items-center space-x-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm">
-                <BeakerIcon className="w-5 h-5 text-purple-600" />
-                <span className="text-sm font-semibold text-purple-800">
+        <div className="px-6 py-2 bg-purple-50 border-b border-purple-100">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-2">
+                <BeakerIcon className="w-4 h-4 text-purple-600" />
+                <span className="text-sm font-medium text-purple-800">
                   {availableSpecialties[selectedSpecialty]?.icon} {availableSpecialties[selectedSpecialty]?.name}
                 </span>
               </div>
-              <div className="text-xs text-purple-600 mt-2">
-                {availableSpecialties[selectedSpecialty]?.description}
+              
+              {/* Strategy Selector */}
+              <div className="flex items-center space-x-2">
+                <span className="text-xs text-purple-600">•</span>
+                <select
+                  value={currentStrategy}
+                  onChange={(e) => {
+                    // Handle strategy change logic here
+                    window.location.href = window.location.pathname + `?strategy=${e.target.value}`;
+                  }}
+                  className="text-xs bg-white border border-purple-200 rounded px-2 py-1 text-purple-700 focus:outline-none focus:ring-1 focus:ring-purple-500"
+                >
+                  <option value="general_medicine">General</option>
+                  <option value="cardiology">Cardio</option>
+                  <option value="pediatrics">Pediatría</option>
+                  <option value="quality_of_life">Calidad de Vida</option>
+                </select>
               </div>
             </div>
+            
+            <button
+              onClick={resetDemo}
+              className="text-xs text-purple-600 hover:text-purple-800 px-2 py-1 rounded hover:bg-purple-100 transition-colors"
+            >
+              Cambiar
+            </button>
           </div>
         </div>
       )}
@@ -513,11 +530,11 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
           )}
         </AnimatePresence>
 
-        {/* Empty State */}
+        {/* Compact Empty State */}
         {!demoText && !isRecording && !selectedSpecialty && (
-          <div className="text-center py-8">
-            <div className="text-6xl mb-4">🎩</div>
-            <div className="font-medium text-gray-900 mb-2">
+          <div className="text-center py-6">
+            <div className="text-4xl mb-2">🎩</div>
+            <div className="font-medium text-gray-900 mb-1">
               Inventar Consulta Médica
             </div>
             <div className="text-gray-500 text-sm">
@@ -526,11 +543,11 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
           </div>
         )}
         
-        {/* Waiting for Generation State */}
+        {/* Compact Waiting for Generation State */}
         {selectedSpecialty && !consultationGenerated && !isRecording && !demoText && (
-          <div className="text-center py-8">
-            <div className="text-6xl mb-4">✨</div>
-            <div className="font-medium text-gray-900 mb-2">
+          <div className="text-center py-6">
+            <div className="text-4xl mb-2">✨</div>
+            <div className="font-medium text-gray-900 mb-1">
               {availableSpecialties[selectedSpecialty]?.name} Seleccionada
             </div>
             <div className="text-gray-500 text-sm">
