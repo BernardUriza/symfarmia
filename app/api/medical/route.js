@@ -4,7 +4,9 @@ import { MedicalAIConfig } from '../../config/MedicalAIConfig.js';
 // Dependency injection point, explicit, one place
 const dependencies = {
   config: MedicalAIConfig,
-  httpClient: { fetch }
+  httpClient: {
+    fetch: (...args) => globalThis.fetch(...args)
+  }
 };
 
 export async function POST(request) {
@@ -42,11 +44,22 @@ export async function POST(request) {
     if (error.type === 'configuration_error') {
       return NextResponse.json(
         {
-          error: 'Configuration error',
+          error: 'Hugging Face token not configured',
           type: error.type,
           details: error.details || error.message,
         },
         { status: 500 }
+      );
+    }
+
+    // Validation error
+    if (error.type === 'validation_error') {
+      return NextResponse.json(
+        {
+          error: error.message,
+          type: error.type,
+        },
+        { status: error.status || 400 }
       );
     }
 

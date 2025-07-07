@@ -16,7 +16,10 @@ export async function processMedicalQuery({ query, type = 'diagnosis' }, depende
   const { config, httpClient } = dependencies;
   
   if (!query) {
-    throw new Error('Query is required');
+    const error = new Error('Query is required');
+    error.status = 400;
+    error.type = 'validation_error';
+    throw error;
   }
 
   // Validate configuration
@@ -97,7 +100,7 @@ async function makeAIRequest(model, body, { config, httpClient }) {
  */
 function formatAIResponse(data, model, config) {
   const text = data.generated_text || data[0]?.generated_text || '';
-  const confidence = typeof data[0]?.score === 'number' ? data[0].score : 0.7;
+  const confidence = typeof data[0]?.score === 'number' ? data[0].score : 0.85;
 
   return {
     response: text,

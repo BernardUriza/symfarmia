@@ -18,7 +18,7 @@ describe('mockMedicalAI.generateResponse', () => {
         success: true,
         response: 'Medical analysis result',
         confidence: 0.8,
-        sources: ['jiviai/medX_v2']
+        sources: ['bert-base-uncased']
       })
     };
     global.fetch.mockResolvedValue(mockResponse);
