@@ -16,11 +16,10 @@ export class MedicalAIService {
    * Process a medical query using AI
    * @param {Object} params - Query parameters
    * @param {string} params.query - The medical query
-   * @param {Object} params.context - Additional context
    * @param {string} params.type - Query type (diagnosis, prescription, etc.)
    * @returns {Promise<Object>} AI response
    */
-  async processQuery({ query, context = {}, type = 'diagnosis' }) {
+  async processQuery({ query, type = 'diagnosis' }) {
     const model = this.config.getModel(type);
     const parameters = this.config.getModelParameters(model);
     
