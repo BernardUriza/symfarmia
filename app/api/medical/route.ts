@@ -5,7 +5,7 @@ import { MedicalAIConfig } from '@/app/config/MedicalAIConfig.js';
 interface MedicalRequest {
   query: string;
   type?: string;
-  context?: any;
+  context?: Record<string, unknown>;
 }
 
 interface ErrorResponse {

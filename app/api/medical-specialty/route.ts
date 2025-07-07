@@ -11,13 +11,13 @@ import Logger from '../../../src/utils/logger.js';
 
 interface SpecialtyRequest {
   specialty: string;
-  patientContext?: Record<string, any>;
+  patientContext?: Record<string, unknown>;
   testMode?: boolean;
 }
 
 interface SpecialtyResponse {
   success?: boolean;
-  data?: any;
+  data?: Record<string, unknown>;
   metadata?: {
     processingTimeMs: number;
     timestamp: string;
@@ -42,7 +42,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<Specialty
       patientContext: patientContext ? Object.keys(patientContext) : [],
       testMode,
       timestamp: new Date().toISOString()
-    } as any);
+    } as Record<string, unknown>);
 
     // Validate required fields
     if (!specialty || typeof specialty !== 'string') {
@@ -56,16 +56,16 @@ export async function POST(request: NextRequest): Promise<NextResponse<Specialty
     let result;
     try {
       result = await MedicalSpecialtyService.testEndpoint(specialty, patientContext || {});
-    } catch (serviceError: any) {
+    } catch (serviceError: unknown) {
       Logger.error('Specialty Service Error', {
         specialty,
-        error: serviceError.message,
-        stack: serviceError.stack
-      } as any);
+        error: (serviceError as Error).message,
+        stack: (serviceError as Error).stack
+      } as Record<string, unknown>);
 
       return NextResponse.json<SpecialtyResponse>({
         error: 'Failed to execute specialty service',
-        details: serviceError.message
+        details: (serviceError as Error).message
       }, { status: 500 });
     }
 
@@ -76,7 +76,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<Specialty
       processingTimeMs: processingTime,
       responseCount: result.responses ? result.responses.length : 0,
       timestamp: new Date().toISOString()
-    } as any);
+    } as Record<string, unknown>);
 
     return NextResponse.json<SpecialtyResponse>({
       success: true,
@@ -89,19 +89,20 @@ export async function POST(request: NextRequest): Promise<NextResponse<Specialty
       }
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const err = error as Error;
     const processingTime = Date.now() - startTime;
 
     Logger.error('Medical Specialty API Error', {
-      error: error?.message || 'Unknown error',
-      stack: error?.stack,
+      error: err?.message || 'Unknown error',
+      stack: err?.stack,
       processingTimeMs: processingTime,
       timestamp: new Date().toISOString()
-    } as any);
+    } as Record<string, unknown>);
 
     return NextResponse.json<SpecialtyResponse>({
       error: 'Internal server error',
-      details: error?.message || 'Unknown error',
+      details: err?.message || 'Unknown error',
       timestamp: new Date().toISOString()
     }, { status: 500 });
   }
