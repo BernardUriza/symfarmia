@@ -70,12 +70,9 @@ const MinimalistLandingPage = ({ isDemo = false }) => {
       
       {/* Demo Mode Banner */}
       {isDemoMode && (
-        <div className="fixed top-0 left-0 right-0 bg-gradient-to-r from-green-500 to-teal-500 text-white py-3 px-6 z-40">
-          <div className="max-w-4xl mx-auto flex items-center justify-center">
-            <HeartIcon className="w-5 h-5 mr-2" />
-            <span className="font-semibold">{t('demo_mode_active')}</span>
-            <span className="ml-2 text-green-100">• {t('demo_mode_desc')}</span>
-          </div>
+        <div className="demo-banner">
+          <span role="img" aria-label="demo">🧪</span>
+          <span className="demo-text">{t('demo_mode_active')}</span>
         </div>
       )}
 
