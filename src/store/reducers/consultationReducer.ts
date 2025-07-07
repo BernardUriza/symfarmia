@@ -413,7 +413,9 @@ export function consultationReducer(
       
       if (!consultation) return state;
       
-      const previousValue = consultation.documentation.soapNotes[section] || '';
+      const previousValue = String(
+        consultation.documentation.soapNotes[section] ?? ''
+      );
       
       const updatedEditHistory = [...consultation.documentation.editHistory];
       updatedEditHistory.push({

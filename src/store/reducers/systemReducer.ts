@@ -290,12 +290,14 @@ export function systemReducer(
           loading: false,
           initializing: false,
           // Clear old errors and notifications
-          errors: (payload.system.errors as MedicalError[])?.filter((error: MedicalError) => 
+          errors: (payload.system.errors as MedicalError[])?.filter((error: MedicalError) =>
             new Date().getTime() - error.timestamp.getTime() < 24 * 60 * 60 * 1000
           ) || [],
-          notifications: (payload.system.notifications as Array<{ persistent?: boolean; timestamp: string }>)?.filter((notification) =>
-            notification.persistent || 
-            new Date().getTime() - new Date(notification.timestamp).getTime() < 60 * 60 * 1000
+          notifications: (payload.system.notifications as AppState['system']['notifications'])?.filter(
+            (notification) =>
+              notification.persistent ||
+              new Date().getTime() - new Date(notification.timestamp).getTime() <
+                60 * 60 * 1000
           ) || []
         };
       }

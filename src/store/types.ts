@@ -180,9 +180,11 @@ export interface AppState {
 }
 
 // Action types for state management
-export interface BaseAction {
-  type: string;
+// Generic base action with typed `type` and `payload` for proper discrimination
+export interface BaseAction<T extends string, P = undefined> {
+  type: T;
   timestamp: Date;
+  payload: P;
   meta?: {
     consultationId?: string;
     userId?: string;
@@ -194,50 +196,50 @@ export interface BaseAction {
 // Consultation actions
 export interface ConsultationActions {
   // Session management
-  START_CONSULTATION: BaseAction & { payload: { patientInfo?: PatientInfo; settings?: Partial<ConsultationSettings> } };
-  END_CONSULTATION: BaseAction & { payload: { consultationId: string; reason: 'completed' | 'cancelled' | 'error' } };
-  PAUSE_CONSULTATION: BaseAction & { payload: { consultationId: string } };
-  RESUME_CONSULTATION: BaseAction & { payload: { consultationId: string } };
-  ARCHIVE_CONSULTATION: BaseAction & { payload: { consultationId: string } };
+  START_CONSULTATION: BaseAction<'START_CONSULTATION', { patientInfo?: PatientInfo; settings?: Partial<ConsultationSettings> }>;
+  END_CONSULTATION: BaseAction<'END_CONSULTATION', { consultationId: string; reason: 'completed' | 'cancelled' | 'error' }>;
+  PAUSE_CONSULTATION: BaseAction<'PAUSE_CONSULTATION', { consultationId: string }>;
+  RESUME_CONSULTATION: BaseAction<'RESUME_CONSULTATION', { consultationId: string }>;
+  ARCHIVE_CONSULTATION: BaseAction<'ARCHIVE_CONSULTATION', { consultationId: string }>;
   
   // Transcription actions
-  START_RECORDING: BaseAction & { payload: { consultationId: string } };
-  STOP_RECORDING: BaseAction & { payload: { consultationId: string; duration: number } };
-  UPDATE_LIVE_TRANSCRIPT: BaseAction & { payload: { consultationId: string; text: string; confidence: number } };
-  FINALIZE_TRANSCRIPT: BaseAction & { payload: { consultationId: string; transcription: MedicalTranscription } };
-  UPDATE_AUDIO_LEVEL: BaseAction & { payload: { consultationId: string; level: number } };
+  START_RECORDING: BaseAction<'START_RECORDING', { consultationId: string }>;
+  STOP_RECORDING: BaseAction<'STOP_RECORDING', { consultationId: string; duration: number }>;
+  UPDATE_LIVE_TRANSCRIPT: BaseAction<'UPDATE_LIVE_TRANSCRIPT', { consultationId: string; text: string; confidence: number }>;
+  FINALIZE_TRANSCRIPT: BaseAction<'FINALIZE_TRANSCRIPT', { consultationId: string; transcription: MedicalTranscription }>;
+  UPDATE_AUDIO_LEVEL: BaseAction<'UPDATE_AUDIO_LEVEL', { consultationId: string; level: number }>;
   
   // AI actions
-  ADD_AI_MESSAGE: BaseAction & { payload: { consultationId: string; message: AIMessage } };
-  SET_AI_THINKING: BaseAction & { payload: { consultationId: string; thinking: boolean } };
-  UPDATE_AI_MODE: BaseAction & { payload: { consultationId: string; mode: 'basic' | 'advanced' | 'expert' } };
-  ADD_CLINICAL_ALERT: BaseAction & { payload: { consultationId: string; alert: ClinicalAlert } };
-  DISMISS_ALERT: BaseAction & { payload: { consultationId: string; alertId: string } };
+  ADD_AI_MESSAGE: BaseAction<'ADD_AI_MESSAGE', { consultationId: string; message: AIMessage }>;
+  SET_AI_THINKING: BaseAction<'SET_AI_THINKING', { consultationId: string; thinking: boolean }>;
+  UPDATE_AI_MODE: BaseAction<'UPDATE_AI_MODE', { consultationId: string; mode: 'basic' | 'advanced' | 'expert' }>;
+  ADD_CLINICAL_ALERT: BaseAction<'ADD_CLINICAL_ALERT', { consultationId: string; alert: ClinicalAlert }>;
+  DISMISS_ALERT: BaseAction<'DISMISS_ALERT', { consultationId: string; alertId: string }>;
   
   // Documentation actions
-  UPDATE_SOAP_SECTION: BaseAction & { payload: { consultationId: string; section: keyof SOAPNotes; content: string } };
-  START_SOAP_GENERATION: BaseAction & { payload: { consultationId: string } };
-  UPDATE_SOAP_PROGRESS: BaseAction & { payload: { consultationId: string; progress: number } };
-  COMPLETE_SOAP_GENERATION: BaseAction & { payload: { consultationId: string; soapNotes: SOAPNotes } };
+  UPDATE_SOAP_SECTION: BaseAction<'UPDATE_SOAP_SECTION', { consultationId: string; section: keyof SOAPNotes; content: string }>;
+  START_SOAP_GENERATION: BaseAction<'START_SOAP_GENERATION', { consultationId: string }>;
+  UPDATE_SOAP_PROGRESS: BaseAction<'UPDATE_SOAP_PROGRESS', { consultationId: string; progress: number }>;
+  COMPLETE_SOAP_GENERATION: BaseAction<'COMPLETE_SOAP_GENERATION', { consultationId: string; soapNotes: SOAPNotes }>;
   
   // Medical data actions
-  ADD_SYMPTOM: BaseAction & { payload: { consultationId: string; symptom: MedicalSymptom } };
-  UPDATE_VITAL_SIGNS: BaseAction & { payload: { consultationId: string; vitalSigns: VitalSigns } };
-  ADD_DIAGNOSIS: BaseAction & { payload: { consultationId: string; diagnosis: DiagnosisCandidate } };
-  UPDATE_TREATMENT_PLAN: BaseAction & { payload: { consultationId: string; treatmentPlan: TreatmentPlan } };
+  ADD_SYMPTOM: BaseAction<'ADD_SYMPTOM', { consultationId: string; symptom: MedicalSymptom }>;
+  UPDATE_VITAL_SIGNS: BaseAction<'UPDATE_VITAL_SIGNS', { consultationId: string; vitalSigns: VitalSigns }>;
+  ADD_DIAGNOSIS: BaseAction<'ADD_DIAGNOSIS', { consultationId: string; diagnosis: DiagnosisCandidate }>;
+  UPDATE_TREATMENT_PLAN: BaseAction<'UPDATE_TREATMENT_PLAN', { consultationId: string; treatmentPlan: TreatmentPlan }>;
 }
 
 // System actions
 export interface SystemActions {
-  SET_ONLINE_STATUS: BaseAction & { payload: { online: boolean } };
-  SET_LOADING: BaseAction & { payload: { loading: boolean } };
-  ADD_ERROR: BaseAction & { payload: { error: MedicalError } };
-  CLEAR_ERROR: BaseAction & { payload: { errorId: string } };
-  UPDATE_PERFORMANCE: BaseAction & { payload: { metrics: Partial<PerformanceMetrics> } };
-  CLEAN_CACHE: BaseAction & { payload: { force?: boolean } };
-  UPDATE_STORAGE_INFO: BaseAction & { payload: { used: number; available: number } };
-  SET_PERFORMANCE_MODE: BaseAction & { payload: { mode: 'high' | 'balanced' | 'battery_saver' } };
-  ADD_NOTIFICATION: BaseAction & { payload: { notification: {
+  SET_ONLINE_STATUS: BaseAction<'SET_ONLINE_STATUS', { online: boolean }>;
+  SET_LOADING: BaseAction<'SET_LOADING', { loading: boolean }>;
+  ADD_ERROR: BaseAction<'ADD_ERROR', { error: MedicalError }>;
+  CLEAR_ERROR: BaseAction<'CLEAR_ERROR', { errorId: string }>;
+  UPDATE_PERFORMANCE: BaseAction<'UPDATE_PERFORMANCE', { metrics: Partial<PerformanceMetrics> }>;
+  CLEAN_CACHE: BaseAction<'CLEAN_CACHE', { force?: boolean }>;
+  UPDATE_STORAGE_INFO: BaseAction<'UPDATE_STORAGE_INFO', { used: number; available: number }>;
+  SET_PERFORMANCE_MODE: BaseAction<'SET_PERFORMANCE_MODE', { mode: 'high' | 'balanced' | 'battery_saver' }>;
+  ADD_NOTIFICATION: BaseAction<'ADD_NOTIFICATION', { notification: {
     id: string;
     type: 'info' | 'warning' | 'error' | 'success';
     title: string;
@@ -245,17 +247,24 @@ export interface SystemActions {
     timestamp: Date;
     read: boolean;
     persistent: boolean;
-  } } };
-  ARCHIVE_OLD_CONSULTATIONS: BaseAction & { payload: { maxAge: number } };
-  CLEAR_AI_CACHE: BaseAction & { payload: { consultationId: string } };
-  HYDRATE_STATE: BaseAction & { payload: Partial<AppState> };
+  } }>;
+  DISMISS_NOTIFICATION: BaseAction<'DISMISS_NOTIFICATION', { notificationId: string }>;
+  CLEAR_OLD_NOTIFICATIONS: BaseAction<'CLEAR_OLD_NOTIFICATIONS'>;
+  ARCHIVE_OLD_CONSULTATIONS: BaseAction<'ARCHIVE_OLD_CONSULTATIONS', { maxAge: number }>;
+  CLEAR_AI_CACHE: BaseAction<'CLEAR_AI_CACHE', { consultationId: string }>;
+  HYDRATE_STATE: BaseAction<'HYDRATE_STATE', Partial<AppState>>;
+  RESET_SYSTEM_STATE: BaseAction<'RESET_SYSTEM_STATE'>;
 }
 
 // User actions
 export interface UserActions {
-  UPDATE_PREFERENCES: BaseAction & { payload: { preferences: Partial<AppState['user']['preferences']> } };
-  UPDATE_PERMISSIONS: BaseAction & { payload: { permissions: Partial<AppState['user']['permissions']> } };
-  LOG_ANALYTICS_EVENT: BaseAction & { payload: { event: AnalyticsEvent } };
+  UPDATE_PREFERENCES: BaseAction<'UPDATE_PREFERENCES', { preferences: Partial<AppState['user']['preferences']> }>;
+  UPDATE_PERMISSIONS: BaseAction<'UPDATE_PERMISSIONS', { permissions: Partial<AppState['user']['permissions']> }>;
+  LOG_ANALYTICS_EVENT: BaseAction<'LOG_ANALYTICS_EVENT', { event: AnalyticsEvent }>;
+  RESET_USER_STATISTICS: BaseAction<'RESET_USER_STATISTICS'>;
+  UPDATE_USER_PROFILE: BaseAction<'UPDATE_USER_PROFILE', { profile: Partial<AppState['user']> }>;
+  EXPORT_USER_DATA: BaseAction<'EXPORT_USER_DATA'>;
+  DELETE_USER_DATA: BaseAction<'DELETE_USER_DATA'>;
 }
 
 export type MedicalStateAction = 

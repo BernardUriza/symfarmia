@@ -1,10 +1,11 @@
 // Utility functions for creating and managing consultation state
 import type { ConsultationState } from '../types';
+import type { PatientInfo, ConsultationSettings } from '../../types/medical';
 
 export function createInitialConsultation(
   id: string,
-  patientInfo?: Record<string, unknown>,
-  _settings?: Record<string, unknown>
+  patientInfo?: PatientInfo,
+  _settings?: Partial<ConsultationSettings>
 ): ConsultationState {
   return {
     id,

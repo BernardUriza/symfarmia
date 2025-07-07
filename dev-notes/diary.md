@@ -265,3 +265,4 @@ I'm terrified demo mode will crash during the live webinar and show our fake dat
 
 - Fixed memory leak in `DemoTranscriptionPanel` with unmount cleanup.
 - Moved hardcoded demo labels into translation keys.
+- Refactored action types to be discriminated unions. Store now compiles without TypeScript errors.
