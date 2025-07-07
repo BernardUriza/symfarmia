@@ -170,6 +170,7 @@ export function useDemoTranscription(strategy = 'general_medicine') {
     setIsRecording(false);
     setIsAnalyzing(false);
     
+    // MEMORY LEAK FIX: More defensive cleanup
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
@@ -179,27 +180,55 @@ export function useDemoTranscription(strategy = 'general_medicine') {
       clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
     }
-    // Clear all scheduled timeouts
-    timeoutsRef.current.forEach((t) => clearTimeout(t));
+    
+    // Clear all scheduled timeouts - ENHANCED
+    timeoutsRef.current.forEach((timeoutId) => {
+      if (timeoutId) clearTimeout(timeoutId);
+    });
     timeoutsRef.current = [];
   };
 
   const resetDemo = () => {
+    // MEMORY LEAK FIX: Enhanced reset with comprehensive cleanup
     stopDemoRecording();
+    
+    // Reset all state
     setDemoText('');
     setCurrentAnalysis([]);
     setRecommendations([]);
     setRecordingTime(0);
     setConfidence(0);
+    
+    // Additional safety cleanup
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+    timeoutsRef.current.forEach(t => t && clearTimeout(t));
+    timeoutsRef.current = [];
   };
 
-  // Cleanup on unmount: clear interval and all timeouts
+  // MEMORY LEAK FIX: Comprehensive cleanup on unmount
   useEffect(() => {
     return () => {
+      // Force stop recording to ensure all cleanup
+      setIsRecording(false);
+      setIsAnalyzing(false);
+      
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
+        intervalRef.current = null;
       }
-      timeoutsRef.current.forEach((t) => clearTimeout(t));
+      
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+      
+      // Clear all timeouts with null check
+      timeoutsRef.current.forEach((timeoutId) => {
+        if (timeoutId) clearTimeout(timeoutId);
+      });
       timeoutsRef.current = [];
     };
   }, []);
