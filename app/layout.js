@@ -43,6 +43,11 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `(() => { const s = localStorage.getItem('theme'); const m = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; const t = s || m; document.documentElement.setAttribute('data-theme', t); document.documentElement.classList.toggle('dark', t === 'dark'); })();`,
+        }}
+      />
       <body className="font-sans bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-gray-100">
         <ThemeProvider>
           <ErrorBoundary>
