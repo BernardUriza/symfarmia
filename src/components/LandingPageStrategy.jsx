@@ -2,7 +2,7 @@
 import React from 'react';
 import dynamic from 'next/dynamic';
 const CinematicLandingPage = dynamic(() => import('./CinematicLandingPage'), { ssr: false });
-const MinimalistLandingPage = dynamic(() => import('./MinimalistLandingPage'));
+const MinimalistLandingPage = dynamic(() => import('./MinimalistLandingPage'), { ssr: false });
 
 const LANDING_PAGE_TYPES = {
   CINEMATIC: 'cinematic',
