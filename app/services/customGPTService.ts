@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { medicalAIService } from './MedicalAIService.js';
+import { medicalAIService } from './MedicalAIService';
 
 const prisma = new PrismaClient();
 
@@ -37,18 +37,28 @@ export class CustomGPTService {
     return prisma.customAssistant.findUnique({ where: { userId } });
   }
 
-  async sendMessage(assistantId: string, message: string): Promise<AssistantResponse> {
-    const assistant = await prisma.customAssistant.findUnique({ where: { id: assistantId }, include: { conversations: { take: 1, orderBy: { createdAt: 'desc' }, include: { messages: { orderBy: { createdAt: 'asc' } } } }, attachments: true } });
+  async sendMessage(assistantId: string, message: string, conversationId?: string): Promise<AssistantResponse> {
+    const assistant = await prisma.customAssistant.findUnique({ where: { id: assistantId }, include: { attachments: true } });
     if (!assistant) throw new Error('Assistant not found');
 
-    // Build context from recent messages (simplified)
-    const history = assistant.conversations[0]?.messages.map(m => ({ role: m.role, content: m.content })) || [];
+    let conversation = conversationId ? await prisma.assistantConversation.findUnique({ where: { id: conversationId } }) : null;
+    if (!conversation) {
+      conversation = await this.createNewConversation(assistantId);
+    }
+
+    await prisma.assistantMessage.create({ data: { conversationId: conversation.id, role: 'user', content: message } });
+
+    const history = await prisma.assistantMessage.findMany({
+      where: { conversationId: conversation.id },
+      orderBy: { createdAt: 'asc' },
+      take: 6
+    });
 
     const payload = {
       model: assistant.modelName,
       messages: [
         { role: 'system', content: assistant.instructions },
-        ...history,
+        ...history.map(m => ({ role: m.role, content: m.content })),
         { role: 'user', content: message }
       ],
       temperature: assistant.temperature,
@@ -68,12 +78,12 @@ export class CustomGPTService {
       if (!res.ok) throw new Error(`OpenAI error ${res.status}`);
       const data = await res.json();
       const content = data.choices?.[0]?.message?.content || '';
-      await this.storeMessage(assistant.id, 'assistant', content, assistant.modelName, data.usage?.total_tokens, false);
+      await this.storeMessage(conversation.id, 'assistant', content, assistant.modelName, data.usage?.total_tokens, false);
       return { message: content, modelUsed: assistant.modelName, tokensUsed: data.usage?.total_tokens, fallbackUsed: false };
     } catch (err) {
       // Fallback to internal service
       const result = await medicalAIService.processQuery({ query: message, type: 'diagnosis' });
-      await this.storeMessage(assistant.id, 'assistant', result.response, 'internal', undefined, true);
+      await this.storeMessage(conversation.id, 'assistant', result.response, 'internal', undefined, true);
       return { message: result.response, modelUsed: 'internal', fallbackUsed: true };
     }
   }
@@ -86,9 +96,8 @@ export class CustomGPTService {
     return prisma.assistantMessage.findMany({ where: { conversationId }, orderBy: { createdAt: 'asc' } });
   }
 
-  private async storeMessage(assistantId: string, role: string, content: string, modelUsed?: string, tokensUsed?: number, fallbackUsed = false) {
-    const conversation = await this.createNewConversation(assistantId);
-    await prisma.assistantMessage.create({ data: { conversationId: conversation.id, role, content, modelUsed, tokensUsed, fallbackUsed } });
+  private async storeMessage(conversationId: string, role: string, content: string, modelUsed?: string, tokensUsed?: number, fallbackUsed = false) {
+    await prisma.assistantMessage.create({ data: { conversationId, role, content, modelUsed, tokensUsed, fallbackUsed } });
   }
 }
 
