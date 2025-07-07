@@ -376,6 +376,7 @@ const AIAssistantPanel = () => {
                 <div className="flex items-end space-x-2">
                   <div className="flex-1">
                     <textarea
+                      aria-label="Escribe tu mensaje"
                       value={inputValue}
                       onChange={(e) => setInputValue(e.target.value)}
                       onKeyPress={handleKeyPress}
@@ -385,6 +386,7 @@ const AIAssistantPanel = () => {
                     />
                   </div>
                   <button
+                    aria-label="Enviar mensaje"
                     onClick={handleSendMessage}
                     disabled={!inputValue.trim() || isAiThinking}
                     className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"

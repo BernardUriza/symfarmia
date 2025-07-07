@@ -1,12 +1,11 @@
 // System-specific reducer for global application state
-import type { AppState, MedicalError } from '../types';
+import type { AppState, MedicalError, MedicalStateAction } from '../types';
 
 export function systemReducer(
   state: AppState['system'],
-  action: unknown
+  action: MedicalStateAction
 ): AppState['system'] {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const act = action as any;
+  const act = action as MedicalStateAction;
   
   switch (act.type) {
     case 'SET_ONLINE_STATUS': {
