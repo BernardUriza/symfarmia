@@ -5,7 +5,8 @@
  * Focuses on HIV management, pregnancy care, adolescent health, and quality of life.
  */
 
-import { MedicalAIConfig } from '../config/MedicalAIConfig.js';
+// Lazy load heavy dependencies
+const getMedicalAIConfig = () => import('../config/MedicalAIConfig.js').then(m => m.MedicalAIConfig);
 
 export class MedicalSpecialtyService {
   
@@ -79,7 +80,7 @@ export class MedicalSpecialtyService {
       recommendations: this._generateSpecializedRecommendations(responses),
       urgency: 'HIGH',
       vulnerability: 'CRITICAL',
-      disclaimer: MedicalAIConfig.getDisclaimer()
+      disclaimer: (await getMedicalAIConfig()).getDisclaimer()
     };
   }
 
@@ -153,7 +154,7 @@ export class MedicalSpecialtyService {
       recommendations: this._generateQualityOfLifeRecommendations(responses),
       priority: 'HIGH',
       focus: 'HOLISTIC_CARE',
-      disclaimer: MedicalAIConfig.getDisclaimer()
+      disclaimer: (await getMedicalAIConfig()).getDisclaimer()
     };
   }
 
@@ -172,7 +173,7 @@ export class MedicalSpecialtyService {
       qualityOfLifeResults: qualityOfLife,
       combinedRecommendations: this._generateCombinedRecommendations(hivPregnancy, qualityOfLife),
       overallPriority: 'CRITICAL',
-      disclaimer: MedicalAIConfig.getDisclaimer()
+      disclaimer: (await getMedicalAIConfig()).getDisclaimer()
     };
   }
 

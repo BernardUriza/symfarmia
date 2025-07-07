@@ -9,7 +9,6 @@ import {
   PlayIcon,
   StopIcon,
   SparklesIcon,
-  ExclamationTriangleIcon,
   CheckCircleIcon,
   ArrowPathIcon,
 } from "@heroicons/react/24/outline";
