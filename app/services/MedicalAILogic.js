@@ -12,7 +12,7 @@
  * @param {Object} dependencies - Injected dependencies
  * @returns {Promise<Object>} AI response
  */
-export async function processMedicalQuery({ query, context = {}, type = 'diagnosis' }, dependencies) {
+export async function processMedicalQuery({ query, type = 'diagnosis' }, dependencies) {
   const { config, httpClient } = dependencies;
   
   if (!query) {
