@@ -6,6 +6,18 @@ export interface Patient {
   dateOfBirth: string;
   address?: string;
   medicalHistory?: string;
+  firstName?: string;
+  lastName?: string;
+  documentType?: string;
+  documentNumber?: string;
+  bloodType?: string;
+  allergies?: string[];
+  chronicConditions?: string[];
+  emergencyContactName?: string;
+  emergencyContactRelationship?: string;
+  emergencyContactPhone?: string;
+  avatarUrl?: string;
+  isActive?: boolean;
   createdAt: string;
   updatedAt: string;
 }

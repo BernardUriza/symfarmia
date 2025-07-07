@@ -26,10 +26,27 @@ export const STUDY_STATUS = {
 
 // Gender Values
 export const GENDER = {
-  MALE: 'male',
-  FEMALE: 'female',
-  OTHER: 'other',
-  PREFER_NOT_TO_SAY: 'prefer_not_to_say',
+  MALE: 'MALE',
+  FEMALE: 'FEMALE',
+  OTHER: 'OTHER',
+} as const;
+
+export const DOCUMENT_TYPE = {
+  CEDULA: 'CEDULA',
+  PASAPORTE: 'PASAPORTE',
+  TARJETA_IDENTIDAD: 'TARJETA_IDENTIDAD',
+} as const;
+
+export const BLOOD_TYPE = {
+  A_POSITIVE: 'A_POSITIVE',
+  A_NEGATIVE: 'A_NEGATIVE',
+  B_POSITIVE: 'B_POSITIVE',
+  B_NEGATIVE: 'B_NEGATIVE',
+  AB_POSITIVE: 'AB_POSITIVE',
+  AB_NEGATIVE: 'AB_NEGATIVE',
+  O_POSITIVE: 'O_POSITIVE',
+  O_NEGATIVE: 'O_NEGATIVE',
+  UNKNOWN: 'UNKNOWN',
 } as const;
 
 // Notification Types
@@ -301,6 +318,8 @@ export type PatientStatus = typeof PATIENT_STATUS[keyof typeof PATIENT_STATUS];
 export type MedicalReportStatus = typeof MEDICAL_REPORT_STATUS[keyof typeof MEDICAL_REPORT_STATUS];
 export type StudyStatus = typeof STUDY_STATUS[keyof typeof STUDY_STATUS];
 export type Gender = typeof GENDER[keyof typeof GENDER];
+export type DocumentType = typeof DOCUMENT_TYPE[keyof typeof DOCUMENT_TYPE];
+export type BloodType = typeof BLOOD_TYPE[keyof typeof BLOOD_TYPE];
 export type NotificationType = typeof NOTIFICATION_TYPE[keyof typeof NOTIFICATION_TYPE];
 export type ModalVariant = typeof MODAL_VARIANT[keyof typeof MODAL_VARIANT];
 export type ButtonVariant = typeof BUTTON_VARIANT[keyof typeof BUTTON_VARIANT];
