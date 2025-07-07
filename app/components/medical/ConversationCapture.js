@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useMicrophoneLevel } from '../../../hooks/useMicrophoneLevel';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { Mic, MicOff, Volume2, ChevronRight, Activity } from 'lucide-react';
 
 export function ConversationCapture({ onNext, isRecording, setIsRecording }) {
-  const [audioLevel, setAudioLevel] = useState(0);
+  const audioLevel = useMicrophoneLevel(isRecording);
   const [transcriptSegments, setTranscriptSegments] = useState([
     { speaker: 'Doctor', text: 'Buenos días, María. ¿Cómo se siente hoy?', time: '00:00:15' },
     { speaker: 'Paciente', text: 'He tenido este dolor de cabeza persistente durante los últimos tres días.', time: '00:00:22' },
@@ -13,14 +14,7 @@ export function ConversationCapture({ onNext, isRecording, setIsRecording }) {
     { speaker: 'Paciente', text: 'Es más bien un dolor sordo y constante, especialmente en el lado derecho de mi cabeza.', time: '00:00:42' },
   ]);
 
-  useEffect(() => {
-    if (isRecording) {
-      const interval = setInterval(() => {
-        setAudioLevel(Math.random() * 100);
-      }, 200);
-      return () => clearInterval(interval);
-    }
-  }, [isRecording]);
+  // The useMicrophoneLevel hook handles microphone setup and cleanup
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -60,9 +54,9 @@ export function ConversationCapture({ onNext, isRecording, setIsRecording }) {
                   <Activity className="h-4 w-4" />
                   <span>Nivel de Audio:</span>
                   <div className="w-32 h-2 bg-slate-200 rounded-full overflow-hidden">
-                    <div 
+                    <div
                       className="h-full bg-green-500 transition-all duration-200"
-                      style={{ width: `${audioLevel}%` }}
+                      style={{ width: `${Math.min(100, (audioLevel / 255) * 100)}%` }}
                     />
                   </div>
                 </div>
