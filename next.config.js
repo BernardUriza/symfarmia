@@ -90,12 +90,28 @@ const nextConfig = {
       config.cache = false; // Disable webpack cache
       config.infrastructureLogging = { level: 'error' };
     }
-    
+
     // Tree shaking optimizations (disabled in dev to save memory)
     if (!dev) {
       config.optimization.usedExports = true;
       config.optimization.sideEffects = false;
     }
+
+    config.optimization.splitChunks.cacheGroups = {
+      ...(config.optimization.splitChunks.cacheGroups || {}),
+      landing: {
+        test: /[\\/]components[\\/]landing[\\/]/,
+        name: 'landing',
+        chunks: 'all',
+        priority: 30,
+      },
+      animations: {
+        test: /[\\/]node_modules[\\/](framer-motion|three|gsap)[\\/]/,
+        name: 'animations',
+        chunks: 'async',
+        priority: 25,
+      },
+    };
     
     return config;
   },

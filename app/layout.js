@@ -10,6 +10,12 @@ import MedicalAssistant from "./components/MedicalAssistantWrapper";
 import VersionInfo from "./components/VersionInfo";
 import { SITE_CONFIG } from "./lib/site-config";
 
+const CriticalCSS = `
+  .hero-section { padding-top: 5rem; }
+  .loading-spinner { animation: spin 1s linear infinite; }
+  .main-nav { position: fixed; top: 0; width: 100%; }
+`;
+
 export const metadata = {
   title: SITE_CONFIG.title,
   description: SITE_CONFIG.description,
@@ -43,6 +49,9 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
+      <head>
+        <style dangerouslySetInnerHTML={{ __html: CriticalCSS }} />
+      </head>
       <script
         dangerouslySetInnerHTML={{
           __html: `(() => { const s = localStorage.getItem('theme'); const m = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; const t = s || m; document.documentElement.setAttribute('data-theme', t); document.documentElement.classList.toggle('dark', t === 'dark'); })();`,
