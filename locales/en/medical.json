@@ -68,6 +68,7 @@
     "transcribing": "Transcribing...",
     "no_transcript_available": "No transcript available",
     "no_transcript_description": "Press \"Start Recording\" to begin transcribing your medical consultation",
+    "demo_empty_state": "\ud83d\udc7e No transcript yet! Record your first consultation.",
     "service_browser": "Browser",
     "service_whisper": "Whisper",
     "service_label": "Service",

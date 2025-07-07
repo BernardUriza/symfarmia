@@ -22,6 +22,7 @@
     "accessibility:test": "npm run test tests/accessibility/",
     "version:generate": "node scripts/generate-version.js",
     "version:bump": "npm version patch && npm run version:generate",
+    "translations:ensure": "node scripts/ensure-translations.js",
     "analyze": "ANALYZE=true npm run build",
     "postinstall": "npx prisma generate"
   },
