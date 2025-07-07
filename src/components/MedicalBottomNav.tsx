@@ -2,46 +2,41 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BottomNavItem } from "../types/medicalUI";
-import { FaUserDoctor, FaBrain, FaFolderOpen, FaGear } from "react-icons/fa6";
-type IconComponent = (props: { className?: string }) => JSX.Element;
+// use simple emoji strings instead of react-icons
+interface BottomNavItemWithEmoji extends BottomNavItem {
+  emoji: string;
+}
 
-const navItems: BottomNavItem[] = [
+const navItems: BottomNavItemWithEmoji[] = [
   {
     id: "dashboard",
     label: "Pacientes",
-    icon: "users-medical",
+    emoji: "👥",
     route: "/dashboard",
     badge: null,
   },
   {
     id: "ai-assistant",
     label: "Asistente IA",
-    icon: "brain",
+    emoji: "🧠",
     route: "/chat",
     badge: null,
   },
   {
     id: "records",
     label: "Expedientes",
-    icon: "folder-medical",
+    emoji: "📂",
     route: "/records",
     badge: null,
   },
   {
     id: "settings",
     label: "Configuración",
-    icon: "gear-medical",
+    emoji: "⚙️",
     route: "/settings",
     badge: null,
   },
 ];
-
-const iconMap: Record<string, IconComponent> = {
-  "users-medical": FaUserDoctor as IconComponent,
-  brain: FaBrain as IconComponent,
-  "folder-medical": FaFolderOpen as IconComponent,
-  "gear-medical": FaGear as IconComponent,
-};
 
 export default function MedicalBottomNav() {
   const pathname = usePathname();
@@ -49,14 +44,15 @@ export default function MedicalBottomNav() {
     <nav className="medical-bottom-nav flex justify-around">
       {navItems.map((item) => {
         const active = pathname === item.route;
-        const Icon = iconMap[item.icon] || FaUserDoctor;
         return (
           <Link
             key={item.id}
             href={item.route}
             className={`nav-item ${active ? "active" : ""}`}
           >
-            <Icon className="nav-icon" />
+            <span className="nav-icon" role="img" aria-hidden="true">
+              {item.emoji}
+            </span>
             <span className="nav-label">{item.label}</span>
           </Link>
         );
