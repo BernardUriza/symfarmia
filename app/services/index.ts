@@ -8,5 +8,6 @@ export const getMedicalSpecialtyService = () => import('./MedicalSpecialtyServic
 export const getMedicalAILogic = () => import('./MedicalAILogic').then(m => m.default);
 export { queryWithFallback } from './openAIFallbackService';
 export { CustomGPTService, customGPTService } from './customGPTService';
+export * from './modelDiscoveryService';
 
 

@@ -73,7 +73,10 @@
       "Bash(WEBPACK_MINIMIZE=false NODE_OPTIONS=\"--max-old-space-size=6144\" next build --no-lint)",
       "Bash(WEBPACK_MINIMIZE=false NODE_OPTIONS=\"--max-old-space-size=6144\" npx next build --no-lint)",
       "Bash(timeout 10s npm run dev)",
-      "Bash(npm run clean:*)"
+      "Bash(npm run clean:*)",
+      "Bash(./scripts/quick-setup.sh:*)",
+      "Bash(npm run ci:status:*)",
+      "Bash(./scripts/concise-cicd-system.sh restart:*)"
     ],
     "deny": []
   }
