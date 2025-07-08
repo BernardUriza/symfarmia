@@ -41,7 +41,12 @@
     "ci:status": "./scripts/concise-cicd-system.sh status",
     "ci:restart": "./scripts/concise-cicd-system.sh restart",
     "ci:stop": "./scripts/concise-cicd-system.sh stop",
-    "ci:logs": "./scripts/concise-cicd-system.sh logs"
+    "ci:logs": "./scripts/concise-cicd-system.sh logs",
+    "permanent:start": "./scripts/permanent-dev-server.sh start",
+    "permanent:stop": "./scripts/permanent-dev-server.sh stop",
+    "permanent:restart": "./scripts/permanent-dev-server.sh restart",
+    "permanent:status": "./scripts/permanent-dev-server.sh status",
+    "permanent:logs": "./scripts/permanent-dev-server.sh logs"
   },
   "dependencies": {
     "@auth0/nextjs-auth0": "^4.8.0",
