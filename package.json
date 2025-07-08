@@ -51,6 +51,7 @@
     "@heroicons/react": "2.0.18",
     "@material-tailwind/react": "2.1.10",
     "@prisma/client": "^6.11.1",
+    "@radix-ui/react-alert-dialog": "^1.1.14",
     "@radix-ui/react-progress": "^1.1.7",
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-tabs": "^1.1.12",
@@ -77,6 +78,7 @@
     "react-slick": "0.29.0",
     "resend": "2.1.0",
     "slick-carousel": "1.8.1",
+    "sonner": "^2.0.6",
     "tailwind-merge": "^3.3.1",
     "zod": "3.25.67",
     "zustand": "^5.0.6"
