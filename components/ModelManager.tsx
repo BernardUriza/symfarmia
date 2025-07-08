@@ -82,7 +82,7 @@ export default function ModelManager({ endpoint, fields, title }: Props) {
               <select
                 name={fd.name}
                 className="border p-1"
-                value={form[fd.name] ?? ''}
+                value={String(form[fd.name] ?? '')}
                 onChange={handleChange}
               >
                 {(fd.options || []).map(opt => (
@@ -96,7 +96,7 @@ export default function ModelManager({ endpoint, fields, title }: Props) {
                 type={fd.type === 'date' ? 'date' : fd.type === 'number' ? 'number' : fd.type === 'checkbox' ? 'checkbox' : 'text'}
                 name={fd.name}
                 className="border p-1"
-                value={fd.type === 'checkbox' ? undefined : form[fd.name] ?? ''}
+                value={fd.type === 'checkbox' ? undefined : String(form[fd.name] ?? '')}
                 checked={fd.type === 'checkbox' ? Boolean(form[fd.name]) : undefined}
                 onChange={handleChange}
               />
