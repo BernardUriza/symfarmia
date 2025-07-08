@@ -1,0 +1,114 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Legacy design directory structure should match the approved directory structure 1`] = `
+[
+  "ComponentMigrationTemplate.md",
+  "README.md",
+  {
+    "component-registry": [
+      "alerts.md",
+      "buttons.md",
+      "cards.md",
+      "forms.md",
+      "medical-components.md",
+    ],
+  },
+  {
+    "design-tokens": [
+      "colors.json",
+      "medical-theme.json",
+      "spacing.json",
+      "typography.json",
+    ],
+  },
+  {
+    "figma-exports": [
+      {
+        "2025-01-15-medical-v1": [
+          "App.tsx",
+          "Attributions.md",
+          "Guidelines.md",
+          {
+            "components": [
+              "ClinicalNotes.tsx",
+              "ConversationCapture.tsx",
+              "DialogueFlow.tsx",
+              "OrderEntry.tsx",
+              "SummaryExport.tsx",
+              "ThemeProvider.tsx",
+              {
+                "figma": [
+                  "ImageWithFallback.tsx",
+                ],
+              },
+              {
+                "ui": [
+                  "accordion.tsx",
+                  "alert-dialog.tsx",
+                  "alert.tsx",
+                  "aspect-ratio.tsx",
+                  "avatar.tsx",
+                  "badge.tsx",
+                  "breadcrumb.tsx",
+                  "button.tsx",
+                  "calendar.tsx",
+                  "card.tsx",
+                  "carousel.tsx",
+                  "chart.tsx",
+                  "checkbox.tsx",
+                  "collapsible.tsx",
+                  "command.tsx",
+                  "context-menu.tsx",
+                  "dialog.tsx",
+                  "drawer.tsx",
+                  "dropdown-menu.tsx",
+                  "form.tsx",
+                  "hover-card.tsx",
+                  "input-otp.tsx",
+                  "input.tsx",
+                  "label.tsx",
+                  "menubar.tsx",
+                  "navigation-menu.tsx",
+                  "pagination.tsx",
+                  "popover.tsx",
+                  "progress.tsx",
+                  "radio-group.tsx",
+                  "resizable.tsx",
+                  "scroll-area.tsx",
+                  "select.tsx",
+                  "separator.tsx",
+                  "sheet.tsx",
+                  "sidebar.tsx",
+                  "skeleton.tsx",
+                  "slider.tsx",
+                  "sonner.tsx",
+                  "switch.tsx",
+                  "table.tsx",
+                  "tabs.tsx",
+                  "textarea.tsx",
+                  "toggle-group.tsx",
+                  "toggle.tsx",
+                  "tooltip.tsx",
+                  "use-mobile.ts",
+                  "utils.ts",
+                ],
+              },
+            ],
+          },
+          {
+            "styles": [
+              "globals.css",
+            ],
+          },
+        ],
+      },
+      {
+        "current": "-> 2025-01-15-medical-v1
+",
+      },
+    ],
+  },
+  "legacy_design_system_docs.md",
+  "migration-log.md",
+]
+`;
