@@ -10,9 +10,9 @@ import {
   StarIcon,
   HeartIcon
 } from '@heroicons/react/24/outline';
-import LanguageToggle from '../../components/LanguageToggle';
+import LanguageToggle from '../LanguageToggle';
 import dynamic from 'next/dynamic';
-const DemoLoginModal = dynamic(() => import('../../components/DemoLoginModal'));
+const DemoLoginModal = dynamic(() => import('../DemoLoginModal'));
 const DashboardLanding = dynamic(() => import('./DashboardLanding'));
 import { useTranslation } from '../../app/providers/I18nProvider';
 import { useAppMode } from '../../app/providers/AppModeProvider';
