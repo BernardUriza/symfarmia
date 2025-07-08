@@ -76,7 +76,7 @@ const DashboardLanding = () => {
 
   const handleTranscribirConsulta = () => {
     trackEvent('button_click', { button: 'transcribir_consulta' });
-    setActiveFlow('consultation_workspace');
+    window.location.href = '/medical-ai-demo';
   };
 
   const handleVerAnalisis = () => {

@@ -47,7 +47,7 @@ const dialogueStructure = [
 ];
 
 export function DialogueFlow({ onNext, onPrevious }) {
-  const { t } = useTranslation();
+  const { t: _t } = useTranslation();
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">

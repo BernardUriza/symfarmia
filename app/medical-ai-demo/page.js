@@ -13,7 +13,7 @@ import { Progress } from '../components/ui/progress';
 import { Mic, MicOff, Clock, User, Stethoscope, FileText, Users, FolderOpen, MessageSquare, Activity, ClipboardList, Download } from 'lucide-react';
 
 // EXACT Figma workflow steps as specified
-const MedicalWorkflowSteps = t => ([
+const MedicalWorkflowSteps = (_t) => ([
   { id: 'escuchar', label: 'Escuchar', icon: Mic, component: ConversationCapture },
   { id: 'revisar', label: 'Revisar Flujo', icon: MessageSquare, component: DialogueFlow },
   { id: 'notas', label: 'Notas', icon: FileText, component: ClinicalNotes },

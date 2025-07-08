@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from '../../providers/I18nProvider';
 import { useMicrophoneLevel } from '../../../hooks/useMicrophoneLevel';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
@@ -9,12 +9,50 @@ import { Mic, MicOff, Volume2, ChevronRight, Activity } from 'lucide-react';
 export function ConversationCapture({ onNext, isRecording, setIsRecording }) {
   const { t } = useTranslation();
   const audioLevel = useMicrophoneLevel(isRecording);
-  const [transcriptSegments] = useState([
+  const [transcriptSegments, setTranscriptSegments] = useState([
     { speaker: 'Doctor', text: 'Buenos días, María. ¿Cómo se siente hoy?', time: '00:00:15' },
     { speaker: 'Paciente', text: 'He tenido este dolor de cabeza persistente durante los últimos tres días.', time: '00:00:22' },
     { speaker: 'Doctor', text: '¿Puede describir el dolor? ¿Es pulsátil, punzante o sordo?', time: '00:00:35' },
     { speaker: 'Paciente', text: 'Es más bien un dolor sordo y constante, especialmente en el lado derecho de mi cabeza.', time: '00:00:42' },
   ]);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  // Simulate AI processing and add new segments
+  useEffect(() => {
+    if (isRecording && !isProcessing) {
+      const timer = setTimeout(() => {
+        setIsProcessing(true);
+        // Simulate AI processing with medical-ai API
+        const simulateAIResponse = async () => {
+          try {
+            const response = await fetch('/api/medical-ai/demo', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ input: 'dolor de cabeza persistente' })
+            });
+            const data = await response.json();
+            
+            if (data.success) {
+              const newSegment = {
+                speaker: 'IA Médica',
+                text: data.response || 'Analizando síntomas...',
+                time: new Date().toLocaleTimeString('es-ES', { hour12: false }).slice(0, 8)
+              };
+              setTranscriptSegments(prev => [...prev, newSegment]);
+            }
+          } catch (error) {
+            console.error('AI processing error:', error);
+          } finally {
+            setIsProcessing(false);
+          }
+        };
+        
+        simulateAIResponse();
+      }, 3000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isRecording, isProcessing]);
 
   // The useMicrophoneLevel hook handles microphone setup and cleanup
 
@@ -124,6 +162,20 @@ export function ConversationCapture({ onNext, isRecording, setIsRecording }) {
                 </div>
                 <p className="flex-1 text-slate-700">
                   ¿Ha probado algún medicamento o tratamiento...
+                  <span className="animate-pulse">|</span>
+                </p>
+              </div>
+            )}
+            {isProcessing && (
+              <div className="flex gap-4 p-3 rounded-lg bg-green-50 border border-green-200">
+                <div className="flex flex-col items-center">
+                  <Badge variant="secondary" className="text-xs mb-1">
+                    IA Médica
+                  </Badge>
+                  <span className="text-xs text-slate-500">procesando...</span>
+                </div>
+                <p className="flex-1 text-slate-700">
+                  Analizando síntomas médicos...
                   <span className="animate-pulse">|</span>
                 </p>
               </div>
