@@ -397,15 +397,15 @@ class MedicalErrorBoundary extends React.Component {
             </div>
 
             {/* Development Mode Error Details */}
-            {process.env.NODE_ENV === 'development' && this.state.error && (
+            {this.state.error && (
               <details style={{ marginTop: '20px' }}>
-                <summary style={{ 
-                  cursor: 'pointer', 
+                <summary style={{
+                  cursor: 'pointer',
                   color: '#64748b',
                   fontSize: '14px',
                   fontWeight: '600'
                 }}>
-                  🔧 Detalles Técnicos (Modo Desarrollo)
+                  🔧 Detalles Técnicos
                 </summary>
                 <div style={{
                   marginTop: '10px',
@@ -416,10 +416,16 @@ class MedicalErrorBoundary extends React.Component {
                   fontSize: '12px',
                   fontFamily: 'monospace',
                   overflow: 'auto',
-                  maxHeight: '200px'
+                  maxHeight: '400px'
                 }}>
                   <div style={{ marginBottom: '10px' }}>
                     <strong>Error:</strong> {this.state.error.toString()}
+                  </div>
+                  <div style={{ marginBottom: '10px' }}>
+                    <strong>Stack Trace:</strong>
+                    <pre style={{ whiteSpace: 'pre-wrap', margin: '5px 0' }}>
+                      {this.state.error.stack}
+                    </pre>
                   </div>
                   <div>
                     <strong>Component Stack:</strong>

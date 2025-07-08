@@ -2,9 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
 // Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+let openai: OpenAI | null = null;
+
+try {
+  if (process.env.OPENAI_API_KEY) {
+    openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+  }
+} catch (error) {
+  console.warn('OpenAI initialization failed:', error);
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,12 +25,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (!openai) {
+      return NextResponse.json(
+        { error: 'OpenAI service not available - API key missing' },
+        { status: 503 }
+      );
+    }
+
     // Create medical prompt based on type
     const systemPrompt = getSystemPrompt(type);
     const userPrompt = formatUserPrompt(query, context);
 
     // Call OpenAI
-    const completion = await openai.chat.completions.create({
+    const completion = await openai!.chat.completions.create({
       model: 'gpt-4',
       messages: [
         { role: 'system', content: systemPrompt },

@@ -13,6 +13,11 @@ Esta API soporta ÚNICAMENTE los siguientes modelos médicos:
   - Generación de resúmenes médicos
   - Sugerencias de códigos ICD-10
 - **Tipos de consulta soportados**: `diagnosis`, `prescription`, `soap`, `analytics`
+- **Entrenamiento**: 880M palabras de notas MIMIC III
+- **Variantes**: 4 modelos (BERT-Base y BioBERT)
+- **Especialización**: Texto clínico de UCI Beth Israel Hospital
+- **Descargas mensuales**: ~2.7M
+
 
 ### 2. OpenAI Whisper Medium
 - **Endpoint Model Key**: `openai/whisper-medium`
@@ -104,6 +109,14 @@ Esta API soporta ÚNICAMENTE los siguientes modelos médicos:
 }
 ```
 
+Bio_ClinicalBERT maneja terminología médica en español aplicando tokenización multiidioma. Fue preentrenado con batch=32, seq=128 y lr=5e-5.
+Ejemplo real:
+```bash
+curl -X POST http://localhost:3000/api/medical \
+  -H "Content-Type: application/json" \
+  -d '{"query": "Paciente con fiebre y tos persistente", "type": "diagnosis"}'
+```
+Si HuggingFace falla, la API devuelve un error 503 y se recomienda reintentar con menor carga.
 ### OpenAI Whisper Medium
 ```json
 {

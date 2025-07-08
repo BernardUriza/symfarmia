@@ -5,10 +5,31 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Development Commands
 
 - **Development server**: `npm run dev` - Start Next.js development server on http://localhost:3000
+- **Permanent dev server**: `npm run permanent:start` - Start stable dev server on http://localhost:3002 (TypeScript errors bypassed)
+- **Permanent server status**: `npm run permanent:status` - Check permanent server status
 - **Build**: `npm run build` - Generates Prisma client and builds the application
 - **Production server**: `npm start` - Start production server
 - **Linting**: `npm run lint` - Run Next.js ESLint
 - **Deploy**: `npm run deploy` - Generates date and runs git-commit.bat
+
+### Permanent Development Server
+
+For continuous testing and reviews, use the permanent dev server:
+
+```bash
+npm run permanent:start   # Start permanent server on port 3002
+npm run permanent:status  # Check if server is running
+npm run permanent:stop    # Stop permanent server
+npm run permanent:restart # Restart permanent server
+npm run permanent:logs    # View server logs
+```
+
+**Key features:**
+- **Stable URL**: Always available at http://localhost:3002
+- **TypeScript bypass**: Runs even with TypeScript errors
+- **Process management**: Background process with PID tracking
+- **Log monitoring**: Dedicated log file at `/tmp/symfarmia-permanent-dev.log`
+- **CI/CD integration**: Works alongside the main CI/CD pipeline
 
 ## Architecture Overview
 

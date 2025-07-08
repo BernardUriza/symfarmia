@@ -1,20 +1,20 @@
 {
-  "timestamp": "2025-07-07T18:35:18.962Z",
-  "totalDuration": "3.23s",
+  "timestamp": "2025-07-08T04:36:34.165Z",
+  "totalDuration": "83.22s",
   "phases": [
     {
       "name": "PRISMA",
-      "duration": "1.38s",
+      "duration": "2.33s",
       "exitCode": 0
     },
     {
-      "name": "OPTIMIZE",
-      "duration": "3.23s",
-      "exitCode": 135
+      "name": "BUNDLE",
+      "duration": "83.22s",
+      "exitCode": 1
     }
   ],
-  "memoryPeak": null,
+  "memoryPeak": 4,
   "bundleSizes": {},
-  "warnings": 0,
-  "errors": 1
+  "warnings": 1,
+  "errors": 0
 }
