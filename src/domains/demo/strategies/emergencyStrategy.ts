@@ -472,7 +472,7 @@ export class EmergencyStrategy implements DemoStrategy {
       input.toLowerCase().includes(keyword)
     );
     
-    const recommendations = [];
+    const recommendations: string[] = [];
     if (!followingProtocol) {
       recommendations.push('Siga algoritmo ABCDE para evaluación primaria');
       recommendations.push('Aplique protocolos BLS/ACLS según corresponda');

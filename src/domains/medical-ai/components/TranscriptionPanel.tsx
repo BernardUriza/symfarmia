@@ -22,8 +22,8 @@ interface TranscriptionPanelProps {
   realTimeAnalysis?: boolean;
 }
 
-export const TranscriptionPanel: React.FC<TranscriptionPanelProps> = ({
-  specialty = MedicalSpecialty.GENERAL,
+export const TranscriptionPanel = ({
+  specialty = 'general' as MedicalSpecialty,
   patientContext,
   onTranscriptionComplete,
   className = '',

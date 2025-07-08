@@ -41,7 +41,7 @@ interface UseMedicalAIReturn {
 
 export const useMedicalAI = (props: UseMedicalAIProps = {}): UseMedicalAIReturn => {
   const {
-    specialty = MedicalSpecialty.GENERAL,
+    specialty = 'general',
     autoAnalysis = false,
     realTimeValidation = false
   } = props;
@@ -143,10 +143,10 @@ export const useMedicalAI = (props: UseMedicalAIProps = {}): UseMedicalAIReturn 
         return response.data.urgency;
       }
       
-      return UrgencyLevel.MEDIUM;
+      return 'urgent';
     } catch (err) {
       console.error('Triage assessment error:', err);
-      return UrgencyLevel.MEDIUM;
+      return 'urgent';
     }
   }, [currentSpecialty]);
 
@@ -167,15 +167,21 @@ export const useMedicalAI = (props: UseMedicalAIProps = {}): UseMedicalAIReturn 
     resetAnalysis();
   }, [resetAnalysis]);
 
+  // Alias for compatibility
+  const analyzeSymptoms = analyzeMedicalContent;
+  const isAnalyzing = loading;
+
   return {
     // State
     analysis,
     loading,
     error,
     suggestions,
+    isAnalyzing,
     
     // Actions
     analyzeMedicalContent,
+    analyzeSymptoms,
     validateMedicalTerms,
     generateSuggestions,
     triageAssessment,

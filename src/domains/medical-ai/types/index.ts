@@ -60,6 +60,8 @@ export interface AudioConfig {
 }
 
 export interface MedicalContext {
+  patientId?: string;
+  consultationId?: string;
   patientAge?: number;
   patientGender?: 'male' | 'female' | 'other';
   medicalHistory?: string[];
@@ -67,14 +69,22 @@ export interface MedicalContext {
   allergies?: string[];
   emergencyContact?: string;
   specialty: MedicalSpecialty;
+  urgencyLevel: UrgencyLevel;
 }
 
-export interface ConfidenceLevel {
+export interface ConfidenceMetrics {
   overall: number;
   transcription: number;
   medicalAnalysis: number;
   termRecognition: number;
   contextAccuracy: number;
+}
+
+export enum ConfidenceLevel {
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
+  VERY_HIGH = 'very_high'
 }
 
 export interface MedicalStrategy {
@@ -103,7 +113,7 @@ export enum TranscriptionStatus {
 }
 
 export enum MedicalCategory {
-  SYMPTOMS = 'symptoms',
+  SYMPTOM = 'symptom',
   DIAGNOSIS = 'diagnosis',
   TREATMENT = 'treatment',
   MEDICATION = 'medication',
@@ -112,25 +122,19 @@ export enum MedicalCategory {
   LABORATORY = 'laboratory'
 }
 
-export enum UrgencyLevel {
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  CRITICAL = 'critical'
-}
+export type UrgencyLevel = 'routine' | 'urgent' | 'emergency' | 'critical';
 
-export enum MedicalSpecialty {
-  GENERAL = 'general',
-  CARDIOLOGY = 'cardiology',
-  PEDIATRICS = 'pediatrics',
-  EMERGENCY = 'emergency',
-  OBSTETRICS = 'obstetrics',
-  NEUROLOGY = 'neurology',
-  PSYCHIATRY = 'psychiatry',
-  DERMATOLOGY = 'dermatology',
-  ORTHOPEDICS = 'orthopedics',
-  ONCOLOGY = 'oncology'
-}
+export type MedicalSpecialty = 
+  | 'general'
+  | 'cardiology'
+  | 'pediatrics'
+  | 'emergency'
+  | 'obstetrics'
+  | 'neurology'
+  | 'psychiatry'
+  | 'dermatology'
+  | 'orthopedics'
+  | 'oncology';
 
 export enum AudioFormat {
   WAV = 'wav',

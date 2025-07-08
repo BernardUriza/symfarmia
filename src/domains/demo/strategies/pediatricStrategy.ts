@@ -502,7 +502,7 @@ export class PediatricStrategy implements DemoStrategy {
     
     const appropriate = hasAge || hasDevelopment || hasNutrition;
     
-    const suggestions = [];
+    const suggestions: string[] = [];
     if (!hasAge) {
       suggestions.push('Considere la edad específica del paciente pediátrico');
     }
