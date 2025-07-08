@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import { useTranslation } from '../providers/I18nProvider';
 import { ConversationCapture } from '../components/medical/ConversationCapture';
 import { ClinicalNotes } from '../components/medical/ClinicalNotes';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
@@ -9,12 +10,14 @@ import { Badge } from '../components/ui/badge';
 import { Progress } from '../components/ui/progress';
 import { Mic, MicOff, Clock, User, Stethoscope, FileText, ClipboardList, Download, Menu } from 'lucide-react';
 
-const steps = [
-  { id: 'capture', label: 'Escuchar', icon: Mic, component: ConversationCapture },
-  { id: 'notes', label: 'Notas', icon: FileText, component: ClinicalNotes },
-];
+const DemoSteps = t => ([
+  { id: 'capture', label: t('demo.capture'), icon: Mic, component: ConversationCapture },
+  { id: 'notes', label: t('notes'), icon: FileText, component: ClinicalNotes },
+]);
 
 export default function MedicalAIDemo() {
+  const { t } = useTranslation();
+  const steps = DemoSteps(t);
   const [currentStep, setCurrentStep] = useState('capture');
   const [isRecording, setIsRecording] = useState(false);
   const [encounterTime, setEncounterTime] = useState('00:08:23');
@@ -33,7 +36,7 @@ export default function MedicalAIDemo() {
               <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                 <Stethoscope className="h-4 w-4 text-white" />
               </div>
-              <h1 className="text-xl text-slate-900">Escriba Médica IA - Demo</h1>
+              <h1 className="text-xl text-slate-900">{t('demo.demo_title')}</h1>
             </div>
           </div>
 
@@ -54,7 +57,7 @@ export default function MedicalAIDemo() {
               className="flex items-center gap-2"
             >
               {isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
-              {isRecording ? 'Detener' : 'Grabar'}
+              {isRecording ? t('transcription.stop_recording') : t('transcription.start_recording')}
             </Button>
           </div>
         </div>
@@ -79,7 +82,7 @@ export default function MedicalAIDemo() {
         {/* Barra Lateral */}
         <div className="hidden md:block w-64 bg-white border-r border-slate-200">
           <div className="p-4">
-            <h2 className="text-sm text-slate-500 mb-4">Pasos del Flujo</h2>
+            <h2 className="text-sm text-slate-500 mb-4">{t('demo.flow_steps')}</h2>
             <nav className="space-y-2">
               {steps.map((step, index) => {
                 const Icon = step.icon;
@@ -107,7 +110,7 @@ export default function MedicalAIDemo() {
                     )}
                     {isActive && (
                       <Badge variant="secondary" className="ml-auto bg-blue-100 text-blue-700">
-                        Activo
+                        {t('active')}
                       </Badge>
                     )}
                   </button>

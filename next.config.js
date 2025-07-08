@@ -1,3 +1,11 @@
+let withPWA = (config) => config;
+try {
+  const pwa = require('next-pwa');
+  withPWA = pwa({ dest: 'public', disable: process.env.NODE_ENV === 'development' });
+} catch (err) {
+  console.warn('next-pwa not available, skipping PWA setup');
+}
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   typescript: { ignoreBuildErrors: true },
@@ -328,4 +336,4 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig;
+module.exports = withPWA(nextConfig);

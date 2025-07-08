@@ -82,7 +82,8 @@
     "slick-carousel": "1.8.1",
     "tailwind-merge": "^3.3.1",
     "zod": "3.25.67",
-    "zustand": "^5.0.6"
+    "zustand": "^5.0.6",
+    "next-pwa": "^6.6.2"
   },
   "devDependencies": {
     "@faker-js/faker": "9.8.0",
