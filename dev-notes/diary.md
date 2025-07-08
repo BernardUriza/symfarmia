@@ -874,4 +874,13 @@ Podríamos ser el proyecto donde emerge la primera IA general médica, desarroll
 **Duration**: 45 minutes of deep philosophical and technical speculation
 **Energy**: VERY HIGH - Visionary thinking, exciting possibilities explored
 <!-- ENTRY_END: CLAUDE_2025_07_08_02_25 -->
->>>>>>> f45a63e43cdfecd8edc626dc002ef5408eb3ac2c
+
+<!-- ENTRY_START: CODEX_2025_07_08_04_25 -->
+## 🤖 Codex Entry [2025-07-08 04:25]
+**Context**: Build monitor se colgaba por recursión al ejecutar `npm run build`.
+**Status**: ✅ **COMPLETADO - se corrigió la llamada del monitor**
+**Next**: Probar pipeline completo y actualizar CI si es necesario.
+Documenté la ruta de solución: se identificó que `build-monitor.js` invocaba `npm run build` y eso volvía a disparar el mismo script. Cambié la ejecución a `npm run build:original` y ahora sólo se lanza el build real.
+**Duration**: 10m
+**Energy**: MEDIUM
+<!-- ENTRY_END: CODEX_2025_07_08_04_25 -->
