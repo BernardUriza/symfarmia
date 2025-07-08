@@ -10,10 +10,10 @@ export function ConversationCapture({ onNext, isRecording, setIsRecording }) {
   const { t } = useTranslation();
   const audioLevel = useMicrophoneLevel(isRecording);
   const [transcriptSegments, setTranscriptSegments] = useState([
-    { speaker: 'Doctor', text: 'Buenos días, María. ¿Cómo se siente hoy?', time: '00:00:15' },
-    { speaker: 'Paciente', text: 'He tenido este dolor de cabeza persistente durante los últimos tres días.', time: '00:00:22' },
-    { speaker: 'Doctor', text: '¿Puede describir el dolor? ¿Es pulsátil, punzante o sordo?', time: '00:00:35' },
-    { speaker: 'Paciente', text: 'Es más bien un dolor sordo y constante, especialmente en el lado derecho de mi cabeza.', time: '00:00:42' },
+    { speaker: t('conversation.doctor_speaker'), text: 'Buenos días, María. ¿Cómo se siente hoy?', time: '00:00:15' },
+    { speaker: t('conversation.patient_speaker'), text: 'He tenido este dolor de cabeza persistente durante los últimos tres días.', time: '00:00:22' },
+    { speaker: t('conversation.doctor_speaker'), text: '¿Puede describir el dolor? ¿Es pulsátil, punzante o sordo?', time: '00:00:35' },
+    { speaker: t('conversation.patient_speaker'), text: 'Es más bien un dolor sordo y constante, especialmente en el lado derecho de mi cabeza.', time: '00:00:42' },
   ]);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -34,8 +34,8 @@ export function ConversationCapture({ onNext, isRecording, setIsRecording }) {
             
             if (data.success) {
               const newSegment = {
-                speaker: 'IA Médica',
-                text: data.response || 'Analizando síntomas...',
+                speaker: t('conversation.ai_speaker'),
+                text: data.response || t('conversation.ai_processing'),
                 time: new Date().toLocaleTimeString('es-ES', { hour12: false }).slice(0, 8)
               };
               setTranscriptSegments(prev => [...prev, newSegment]);
@@ -59,8 +59,8 @@ export function ConversationCapture({ onNext, isRecording, setIsRecording }) {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="text-center mb-6">
-        <h1 className="text-2xl text-slate-900 mb-2">Captura de Conversación</h1>
-        <p className="text-slate-600">La IA está escuchando y transcribiendo su consulta médica en tiempo real</p>
+        <h1 className="text-2xl text-slate-900 mb-2">{t('conversation.title')}</h1>
+        <p className="text-slate-600">{t('conversation.subtitle')}</p>
       </div>
 
       {/* Tarjeta de Estado de Grabación */}
@@ -156,7 +156,7 @@ export function ConversationCapture({ onNext, isRecording, setIsRecording }) {
               <div className="flex gap-4 p-3 rounded-lg bg-blue-50 border border-blue-200">
                 <div className="flex flex-col items-center">
                   <Badge variant="default" className="text-xs mb-1">
-                    Doctor
+                    {t('conversation.doctor_speaker')}
                   </Badge>
                   <span className="text-xs text-slate-500">00:01:05</span>
                 </div>
@@ -170,12 +170,12 @@ export function ConversationCapture({ onNext, isRecording, setIsRecording }) {
               <div className="flex gap-4 p-3 rounded-lg bg-green-50 border border-green-200">
                 <div className="flex flex-col items-center">
                   <Badge variant="secondary" className="text-xs mb-1">
-                    IA Médica
+                    {t('conversation.ai_speaker')}
                   </Badge>
-                  <span className="text-xs text-slate-500">procesando...</span>
+                  <span className="text-xs text-slate-500">{t('conversation.processing_status')}</span>
                 </div>
                 <p className="flex-1 text-slate-700">
-                  Analizando síntomas médicos...
+                  {t('conversation.ai_processing')}
                   <span className="animate-pulse">|</span>
                 </p>
               </div>

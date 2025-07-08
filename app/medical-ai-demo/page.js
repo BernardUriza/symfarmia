@@ -13,12 +13,12 @@ import { Progress } from '../components/ui/progress';
 import { Mic, MicOff, Clock, User, Stethoscope, FileText, Users, FolderOpen, MessageSquare, Activity, ClipboardList, Download } from 'lucide-react';
 
 // EXACT Figma workflow steps as specified
-const MedicalWorkflowSteps = (_t) => ([
-  { id: 'escuchar', label: 'Escuchar', icon: Mic, component: ConversationCapture },
-  { id: 'revisar', label: 'Revisar Flujo', icon: MessageSquare, component: DialogueFlow },
-  { id: 'notas', label: 'Notas', icon: FileText, component: ClinicalNotes },
-  { id: 'ordenes', label: 'Órdenes', icon: ClipboardList, component: OrderEntry },
-  { id: 'resumen', label: 'Resumen', icon: Download, component: SummaryExport },
+const MedicalWorkflowSteps = (t) => ([
+  { id: 'escuchar', label: t('workflow.steps.listen'), icon: Mic, component: ConversationCapture },
+  { id: 'revisar', label: t('workflow.steps.review'), icon: MessageSquare, component: DialogueFlow },
+  { id: 'notas', label: t('workflow.steps.notes'), icon: FileText, component: ClinicalNotes },
+  { id: 'ordenes', label: t('workflow.steps.orders'), icon: ClipboardList, component: OrderEntry },
+  { id: 'resumen', label: t('workflow.steps.summary'), icon: Download, component: SummaryExport },
 ]);
 
 export default function MedicalAIDemo() {
@@ -55,8 +55,8 @@ export default function MedicalAIDemo() {
                 <Stethoscope className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-semibold text-slate-900">SYMFARMIA</h1>
-                <p className="text-sm text-slate-600">Consulta Médica Profesional</p>
+                <h1 className="text-xl font-semibold text-slate-900">{t('workflow.title')}</h1>
+                <p className="text-sm text-slate-600">{t('workflow.subtitle')}</p>
               </div>
             </div>
           </div>
@@ -65,7 +65,7 @@ export default function MedicalAIDemo() {
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-3 px-4 py-2 bg-blue-50 rounded-lg border border-blue-200">
               <User className="h-4 w-4 text-blue-600" />
-              <span className="font-medium text-slate-900">María García, FN: 15/03/1985</span>
+              <span className="font-medium text-slate-900">{t('workflow.patient.name')}, {t('workflow.patient.birth_date')}</span>
             </div>
             <div className="flex items-center gap-3 px-4 py-2 bg-green-50 rounded-lg border border-green-200">
               <Clock className="h-4 w-4 text-green-600" />
@@ -77,7 +77,7 @@ export default function MedicalAIDemo() {
               className="flex items-center gap-2"
             >
               {isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
-              {isRecording ? 'Detener Grabación' : 'Iniciar Grabación'}
+              {isRecording ? t('workflow.actions.stop_recording') : t('workflow.actions.start_recording')}
             </Button>
           </div>
         </div>
@@ -85,9 +85,9 @@ export default function MedicalAIDemo() {
         {/* Medical Workflow Steps Progress - EXACT Figma Design */}
         <div className="mt-4">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-medium text-slate-600">Flujo de Consulta Médica</h2>
+            <h2 className="text-sm font-medium text-slate-600">{t('workflow.consultation_flow')}</h2>
             <div className="text-sm text-slate-500">
-              Paso {currentStepIndex + 1} de {steps.length}
+              {t('workflow.step_of').replace('{current}', currentStepIndex + 1).replace('{total}', steps.length)}
             </div>
           </div>
           
@@ -132,30 +132,30 @@ export default function MedicalAIDemo() {
           <div className="p-6">
             {/* Patient Information Panel */}
             <div className="mb-8">
-              <h3 className="text-sm font-semibold text-slate-900 mb-4">INFORMACIÓN DEL PACIENTE</h3>
+              <h3 className="text-sm font-semibold text-slate-900 mb-4">{t('workflow.patient_info')}</h3>
               <div className="bg-white rounded-lg p-4 border border-slate-200">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
                     <User className="h-6 w-6 text-blue-600" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-slate-900">María García</h4>
-                    <p className="text-sm text-slate-600">32 años • Femenino</p>
+                    <h4 className="font-semibold text-slate-900">{t('workflow.patient.name')}</h4>
+                    <p className="text-sm text-slate-600">{t('workflow.patient.age')} • {t('workflow.patient.gender')}</p>
                   </div>
                 </div>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-slate-500">ID:</span>
+                    <span className="text-slate-500">{t('workflow.patient.id')}:</span>
                     <span className="text-slate-900">12345678</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-500">Fecha:</span>
+                    <span className="text-slate-500">{t('workflow.patient.date')}:</span>
                     <span className="text-slate-900">{new Date().toLocaleDateString('es-ES')}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-500">Estado:</span>
+                    <span className="text-slate-500">{t('workflow.patient.status')}:</span>
                     <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                      Estable
+                      {t('workflow.patient.status_stable')}
                     </Badge>
                   </div>
                 </div>
@@ -164,30 +164,30 @@ export default function MedicalAIDemo() {
 
             {/* Medical Navigation */}
             <div className="mb-8">
-              <h3 className="text-sm font-semibold text-slate-900 mb-4">NAVEGACIÓN MÉDICA</h3>
+              <h3 className="text-sm font-semibold text-slate-900 mb-4">{t('workflow.medical_navigation')}</h3>
               <nav className="space-y-2">
                 <button className="w-full flex items-center gap-3 px-4 py-3 bg-blue-50 text-blue-700 rounded-lg border border-blue-200">
                   <Users className="h-4 w-4" />
-                  <span className="text-sm font-medium">Ver Todos los Pacientes</span>
+                  <span className="text-sm font-medium">{t('workflow.navigation.view_all_patients')}</span>
                 </button>
                 <button className="w-full flex items-center gap-3 px-4 py-3 text-slate-700 rounded-lg hover:bg-white">
                   <FolderOpen className="h-4 w-4" />
-                  <span className="text-sm font-medium">Reportes Médicos</span>
+                  <span className="text-sm font-medium">{t('workflow.navigation.medical_reports')}</span>
                 </button>
                 <button className="w-full flex items-center gap-3 px-4 py-3 text-slate-700 rounded-lg hover:bg-white">
                   <FileText className="h-4 w-4" />
-                  <span className="text-sm font-medium">Historial Clínico</span>
+                  <span className="text-sm font-medium">{t('workflow.navigation.clinical_history')}</span>
                 </button>
                 <button className="w-full flex items-center gap-3 px-4 py-3 text-slate-700 rounded-lg hover:bg-white">
                   <Activity className="h-4 w-4" />
-                  <span className="text-sm font-medium">Nueva Consulta</span>
+                  <span className="text-sm font-medium">{t('workflow.navigation.new_consultation')}</span>
                 </button>
               </nav>
             </div>
 
             {/* Current Step Status */}
             <div className="bg-white rounded-lg p-4 border border-slate-200">
-              <h3 className="text-sm font-semibold text-slate-900 mb-2">PASO ACTUAL</h3>
+              <h3 className="text-sm font-semibold text-slate-900 mb-2">{t('workflow.current_step')}</h3>
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                   {React.createElement(steps[currentStepIndex].icon, { className: "h-4 w-4 text-blue-600" })}
@@ -195,11 +195,11 @@ export default function MedicalAIDemo() {
                 <span className="font-medium text-slate-900">{steps[currentStepIndex].label}</span>
               </div>
               <div className="text-sm text-slate-600">
-                {currentStepIndex === 0 && "Captura de conversación médica en tiempo real"}
-                {currentStepIndex === 1 && "Análisis del flujo de diálogo clínico"}
-                {currentStepIndex === 2 && "Generación de notas SOAP"}
-                {currentStepIndex === 3 && "Entrada de órdenes médicas"}
-                {currentStepIndex === 4 && "Resumen final y exportación"}
+                {currentStepIndex === 0 && t('workflow.step_descriptions.listen')}
+                {currentStepIndex === 1 && t('workflow.step_descriptions.review')}
+                {currentStepIndex === 2 && t('workflow.step_descriptions.notes')}
+                {currentStepIndex === 3 && t('workflow.step_descriptions.orders')}
+                {currentStepIndex === 4 && t('workflow.step_descriptions.summary')}
               </div>
             </div>
           </div>
