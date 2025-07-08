@@ -42,7 +42,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<Specialty
       patientContext: patientContext ? Object.keys(patientContext) : [],
       testMode,
       timestamp: new Date().toISOString()
-    } as Record<string, unknown>);
+    });
 
     // Validate required fields
     if (!specialty || typeof specialty !== 'string') {
@@ -61,7 +61,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<Specialty
         specialty,
         error: (serviceError as Error).message,
         stack: (serviceError as Error).stack
-      } as Record<string, unknown>);
+      });
 
       return NextResponse.json<SpecialtyResponse>({
         error: 'Failed to execute specialty service',
@@ -76,7 +76,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<Specialty
       processingTimeMs: processingTime,
       responseCount: result.responses ? result.responses.length : 0,
       timestamp: new Date().toISOString()
-    } as Record<string, unknown>);
+    });
 
     return NextResponse.json<SpecialtyResponse>({
       success: true,
@@ -98,7 +98,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<Specialty
       stack: err?.stack,
       processingTimeMs: processingTime,
       timestamp: new Date().toISOString()
-    } as Record<string, unknown>);
+    });
 
     return NextResponse.json<SpecialtyResponse>({
       error: 'Internal server error',

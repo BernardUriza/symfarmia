@@ -1,26 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useTranslation } from '../../providers/I18nProvider';
+import { useMicrophoneLevel } from '../../../hooks/useMicrophoneLevel';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { Mic, MicOff, Volume2, ChevronRight, Activity } from 'lucide-react';
 
 export function ConversationCapture({ onNext, isRecording, setIsRecording }) {
-  const [audioLevel, setAudioLevel] = useState(0);
-  const [transcriptSegments, setTranscriptSegments] = useState([
+  const { t } = useTranslation();
+  const audioLevel = useMicrophoneLevel(isRecording);
+  const [transcriptSegments] = useState([
     { speaker: 'Doctor', text: 'Buenos días, María. ¿Cómo se siente hoy?', time: '00:00:15' },
     { speaker: 'Paciente', text: 'He tenido este dolor de cabeza persistente durante los últimos tres días.', time: '00:00:22' },
     { speaker: 'Doctor', text: '¿Puede describir el dolor? ¿Es pulsátil, punzante o sordo?', time: '00:00:35' },
     { speaker: 'Paciente', text: 'Es más bien un dolor sordo y constante, especialmente en el lado derecho de mi cabeza.', time: '00:00:42' },
   ]);
 
-  useEffect(() => {
-    if (isRecording) {
-      const interval = setInterval(() => {
-        setAudioLevel(Math.random() * 100);
-      }, 200);
-      return () => clearInterval(interval);
-    }
-  }, [isRecording]);
+  // The useMicrophoneLevel hook handles microphone setup and cleanup
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -49,20 +45,20 @@ export function ConversationCapture({ onNext, isRecording, setIsRecording }) {
             </div>
             
             <div className="space-y-2">
-              <Badge 
+              <Badge
                 variant={isRecording ? "destructive" : "secondary"}
                 className="text-sm px-3 py-1"
               >
-                {isRecording ? 'Grabación Activa' : 'Listo para Grabar'}
+                {isRecording ? t('demo.recording_active') : t('transcription.ready_to_record')}
               </Badge>
               {isRecording && (
                 <div className="flex items-center gap-2 text-sm text-slate-600">
                   <Activity className="h-4 w-4" />
-                  <span>Nivel de Audio:</span>
+                  <span>{t('demo.audio_level')}:</span>
                   <div className="w-32 h-2 bg-slate-200 rounded-full overflow-hidden">
-                    <div 
+                    <div
                       className="h-full bg-green-500 transition-all duration-200"
-                      style={{ width: `${audioLevel}%` }}
+                      style={{ width: `${Math.min(100, (audioLevel / 255) * 100)}%` }}
                     />
                   </div>
                 </div>
@@ -78,12 +74,12 @@ export function ConversationCapture({ onNext, isRecording, setIsRecording }) {
               {isRecording ? (
                 <>
                   <MicOff className="h-5 w-5 mr-2" />
-                  Detener Grabación
+                  {t('transcription.stop_recording')}
                 </>
               ) : (
                 <>
                   <Mic className="h-5 w-5 mr-2" />
-                  Iniciar Grabación
+                  {t('transcription.start_recording')}
                 </>
               )}
             </Button>
@@ -96,9 +92,9 @@ export function ConversationCapture({ onNext, isRecording, setIsRecording }) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Volume2 className="h-5 w-5" />
-            Transcripción en Vivo
+            {t('demo.live_transcription')}
             <Badge variant="outline" className="ml-auto">
-              Impulsado por IA
+              {t('demo.powered_by_ai')}
             </Badge>
           </CardTitle>
         </CardHeader>
@@ -140,7 +136,7 @@ export function ConversationCapture({ onNext, isRecording, setIsRecording }) {
       <div className="flex justify-between items-center pt-4">
         <div />
         <Button onClick={onNext} className="flex items-center gap-2">
-          Revisar Flujo de Diálogo
+          {t('demo.review_dialog_flow')}
           <ChevronRight className="h-4 w-4" />
         </Button>
       </div>

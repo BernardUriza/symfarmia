@@ -1,4 +1,4 @@
-import { processMedicalQuery } from '@/app/services/MedicalAILogic.js';
+import { processMedicalQuery } from '@/app/services/MedicalAILogic';
 import { MedicalAIConfig } from '@/app/config/MedicalAIConfig.js';
 
 const MEDICAL_KEYWORDS = [

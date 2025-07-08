@@ -247,5 +247,15 @@
     "sent": "Sent",
     "not_delivered": "Not delivered",
     "sending": "Sending"
+  },
+  "demo": {
+    "demo_title": "Medical AI Demo",
+    "flow_steps": "Flow Steps",
+    "capture": "Capture",
+    "audio_level": "Audio Level",
+    "live_transcription": "Live Transcription",
+    "powered_by_ai": "Powered by AI",
+    "review_dialog_flow": "Review Dialog Flow",
+    "recording_active": "Recording Active"
   }
 }
