@@ -17,7 +17,7 @@ function start_server() {
     fi
     
     # Start new server with TypeScript check disabled
-    cd /workspaces/symfarmia
+    cd "$(dirname "$0")/.."
     SKIP_TYPE_CHECK=true PORT=$PERMANENT_PORT nohup npm run dev > "$LOGFILE" 2>&1 &
     echo $! > "$PIDFILE"
     

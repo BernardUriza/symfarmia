@@ -8,7 +8,7 @@
     "build": "node scripts/build-monitor.js build",
     "build:original": "npm run version:generate && npm run type-check && npx prisma generate && next build",
     "build:enhanced": "node scripts/enhanced-build.js",
-    "build:emergency": "node scripts/emergency-build.js",
+    "build:emergency": "node scripts/build-recovery.js emergency",
     "build:fast": "NODE_OPTIONS='--max-old-space-size=1024' WEBPACK_MINIMIZE=false next build --no-lint",
     "start": "next start",
     "lint": "next lint && npm run type-check",
@@ -56,7 +56,6 @@
     "build:summary": "node scripts/build-monitor.js summary",
     "build:recover": "node scripts/build-recovery.js recover",
     "build:detect": "node scripts/build-recovery.js detect",
-    "build:emergency": "node scripts/build-recovery.js emergency",
     "build:alerts": "node scripts/build-alerts.js monitor",
     "build:alerts:test": "node scripts/build-alerts.js test",
     "build:alerts:summary": "node scripts/build-alerts.js summary",
@@ -105,8 +104,7 @@
     "sonner": "^2.0.6",
     "tailwind-merge": "^3.3.1",
     "zod": "3.25.67",
-    "zustand": "^5.0.6",
-    "next-pwa": "^6.6.2"
+    "zustand": "^5.0.6"
   },
   "devDependencies": {
     "@faker-js/faker": "9.8.0",
