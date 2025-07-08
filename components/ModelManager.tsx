@@ -20,7 +20,7 @@ interface ModelItem {
 
 export default function ModelManager({ endpoint, fields, title }: Props) {
   const [items, setItems] = useState<ModelItem[]>([]);
-  const [form, setForm] = useState<Record<string, any>>({});
+  const [form, setForm] = useState<Record<string, string | number | boolean>>({});
   const [editingId, setEditingId] = useState<number | null>(null);
 
   const fieldDefs: FieldDef[] = fields.map(f =>
@@ -58,7 +58,7 @@ export default function ModelManager({ endpoint, fields, title }: Props) {
   };
 
   const editItem = (item: ModelItem) => {
-    const f: Record<string, any> = {};
+    const f: Record<string, string | number | boolean> = {};
     fieldDefs.forEach(fd => {
       const value = item[fd.name];
       f[fd.name] = value;

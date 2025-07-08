@@ -70,13 +70,14 @@ export async function POST(request: NextRequest): Promise<NextResponse<MedicalAI
 
     const response = generateContextualResponse(input);
     return NextResponse.json<MedicalAIResponse>({ success: true, response });
-  } catch (error: any) {
-    const errorStatus = error?.status || 500;
+  } catch (error: unknown) {
+    const err = error as { status?: number; message?: string };
+    const errorStatus = err?.status || 500;
     return NextResponse.json<MedicalAIResponse>(
       {
         success: false,
         error: getErrorMessage(errorStatus) || 'Internal server error',
-        details: error?.message || 'Unknown error',
+        details: err?.message || 'Unknown error',
         status: errorStatus
       },
       { status: errorStatus }
