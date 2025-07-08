@@ -5,7 +5,7 @@ interface AIAnalysisDisplayProps {
   analysis: MedicalAnalysis | null;
 }
 
-export const AIAnalysisDisplay: React.FC<AIAnalysisDisplayProps> = ({ analysis }) => {
+export const AIAnalysisDisplay = ({ analysis }: AIAnalysisDisplayProps) => {
   if (!analysis) return null;
   return (
     <div className="ai-analysis-display">

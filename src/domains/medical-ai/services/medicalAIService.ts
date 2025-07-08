@@ -18,7 +18,7 @@ import {
 
 export class MedicalAIService {
   private config: MedicalAIServiceConfig;
-  private activeSpecialty: MedicalSpecialty = MedicalSpecialty.GENERAL;
+  private activeSpecialty: MedicalSpecialty = 'general';
 
   constructor(config: MedicalAIServiceConfig) {
     this.config = config;
@@ -176,13 +176,11 @@ export class MedicalAIService {
     analysis: any,
     transcription: TranscriptionResult
   ): ConfidenceLevel {
-    return {
-      overall: this.calculateOverallConfidence(analysis, transcription),
-      transcription: transcription.confidence,
-      medicalAnalysis: this.calculateAnalysisConfidence(analysis),
-      termRecognition: this.calculateTermRecognitionConfidence(transcription),
-      contextAccuracy: this.calculateContextAccuracy(analysis)
-    };
+    const overall = this.calculateOverallConfidence(analysis, transcription);
+    
+    if (overall >= 0.8) return ConfidenceLevel.HIGH;
+    if (overall >= 0.6) return ConfidenceLevel.MEDIUM;
+    return ConfidenceLevel.LOW;
   }
 
   private assessUrgencyLevel(analysis: any): UrgencyLevel {
@@ -193,19 +191,19 @@ export class MedicalAIService {
     const text = JSON.stringify(analysis).toLowerCase();
     
     if (emergencyKeywords.some(keyword => text.includes(keyword))) {
-      return UrgencyLevel.CRITICAL;
+      return 'critical';
     }
     
     if (highUrgencyKeywords.some(keyword => text.includes(keyword))) {
-      return UrgencyLevel.HIGH;
+      return 'urgent';
     }
     
-    return UrgencyLevel.MEDIUM;
+    return 'urgent';
   }
 
   private extractMedicalTerms(text: string): string[] {
     // Medical term extraction logic
-    const medicalTerms = [];
+    const medicalTerms: string[] = [];
     const words = text.toLowerCase().split(/\s+/);
     
     // Simple medical term detection (expand with actual medical dictionary)
@@ -242,11 +240,11 @@ export class MedicalAIService {
     currentText: string
   ): Promise<string[]> {
     // Generate suggestions based on medical context
-    const suggestions = [];
+    const suggestions: string[] = [];
     
-    if (context.specialty === MedicalSpecialty.CARDIOLOGY) {
+    if (context.specialty === 'cardiology') {
       suggestions.push('blood pressure', 'heart rate', 'chest pain', 'ECG');
-    } else if (context.specialty === MedicalSpecialty.PEDIATRICS) {
+    } else if (context.specialty === 'pediatrics') {
       suggestions.push('growth chart', 'vaccination', 'development', 'fever');
     }
     
@@ -273,10 +271,10 @@ export class MedicalAIService {
       }
     }
     
-    if (urgencyScore >= 6) return UrgencyLevel.CRITICAL;
-    if (urgencyScore >= 4) return UrgencyLevel.HIGH;
-    if (urgencyScore >= 2) return UrgencyLevel.MEDIUM;
-    return UrgencyLevel.LOW;
+    if (urgencyScore >= 6) return 'critical';
+    if (urgencyScore >= 4) return 'emergency';
+    if (urgencyScore >= 2) return 'urgent';
+    return 'routine';
   }
 
   private generateTriageReasoning(symptoms: string[], urgency: UrgencyLevel): string {
@@ -285,7 +283,7 @@ export class MedicalAIService {
 
   private extractSymptoms(text: string): string[] {
     // Extract symptoms from text
-    const symptoms = [];
+    const symptoms: string[] = [];
     const commonSymptoms = [
       'fever', 'headache', 'nausea', 'vomiting', 'dizziness', 'fatigue',
       'chest pain', 'abdominal pain', 'back pain', 'difficulty breathing'
@@ -302,7 +300,7 @@ export class MedicalAIService {
 
   private suggestDiagnoses(symptoms: string[], context: MedicalContext): string[] {
     // Generate potential diagnoses
-    const diagnoses = [];
+    const diagnoses: string[] = [];
     
     if (symptoms.includes('fever') && symptoms.includes('headache')) {
       diagnoses.push('viral infection', 'influenza');
@@ -321,7 +319,7 @@ export class MedicalAIService {
     context: MedicalContext
   ): string[] {
     // Generate recommended actions
-    const actions = [];
+    const actions: string[] = [];
     
     if (symptoms.includes('fever')) {
       actions.push('monitor temperature', 'increase fluid intake');
@@ -369,5 +367,5 @@ export const medicalAIService = new MedicalAIService({
   timeout: 30000,
   retries: 3,
   medicalModel: 'medical-gpt-4',
-  specialty: MedicalSpecialty.GENERAL
+  specialty: 'general'
 });

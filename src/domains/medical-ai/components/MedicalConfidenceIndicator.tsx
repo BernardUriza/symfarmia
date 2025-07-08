@@ -4,7 +4,7 @@ interface MedicalConfidenceIndicatorProps {
   confidence: number;
 }
 
-export const MedicalConfidenceIndicator: React.FC<MedicalConfidenceIndicatorProps> = ({ confidence }) => (
+export const MedicalConfidenceIndicator = ({ confidence }: MedicalConfidenceIndicatorProps) => (
   <div className="medical-confidence-indicator">
     <span className="font-medium">Confianza:</span> {Math.round(confidence * 100)}%
   </div>

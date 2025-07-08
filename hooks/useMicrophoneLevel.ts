@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 
-export const useMicrophoneLevel = (active: boolean) => {
+export const useMicrophoneLevel = (active: boolean = false) => {
   const [level, setLevel] = useState(0);
   const streamRef = useRef<MediaStream | null>(null);
-  const rafRef = useRef<number>();
+  const rafRef = useRef<number | undefined>(undefined);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
 

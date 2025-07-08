@@ -235,7 +235,7 @@ export class GeneralMedicineStrategy implements DemoStrategy {
     };
   }
 
-  private generateResponse(userInput: string, context: any): string {
+  private generateResponse(userInput: string, _context: any): string {
     const input = userInput.toLowerCase();
     
     // Greetings and initial contact

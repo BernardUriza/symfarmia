@@ -5,20 +5,25 @@
  */
 
 import React from 'react';
-import { medicalTheme, getMedicalColor, getUrgencyColor } from '../../themes/medical.theme';
+import { getUrgencyColor } from '../../themes/medical.theme';
 
-export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps {
+  children?: any;
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'medical' | 'emergency';
   size?: 'sm' | 'md' | 'lg' | 'xl';
   urgency?: 'low' | 'medium' | 'high' | 'critical';
   loading?: boolean;
-  icon?: React.ReactNode;
+  icon?: any;
   iconPosition?: 'left' | 'right';
   fullWidth?: boolean;
   medicalContext?: boolean;
+  onClick?: () => void;
+  disabled?: boolean;
+  className?: string;
+  type?: 'button' | 'submit' | 'reset';
 }
 
-export const Button: React.FC<ButtonProps> = ({
+export const Button = ({
   children,
   variant = 'primary',
   size = 'md',
@@ -31,7 +36,7 @@ export const Button: React.FC<ButtonProps> = ({
   className = '',
   disabled,
   ...props
-}) => {
+}: ButtonProps) => {
   const getVariantStyles = () => {
     const baseStyles = 'inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2';
     
@@ -77,7 +82,7 @@ export const Button: React.FC<ButtonProps> = ({
   const getUrgencyStyles = () => {
     if (!urgency) return '';
     
-    const urgencyColor = getUrgencyColor(urgency);
+    const _urgencyColor = getUrgencyColor(urgency);
     
     switch (urgency) {
       case 'critical':

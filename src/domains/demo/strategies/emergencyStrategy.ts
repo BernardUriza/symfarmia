@@ -248,7 +248,7 @@ export class EmergencyStrategy implements DemoStrategy {
     };
   }
 
-  private generateEmergencyResponse(userInput: string, context: any): string {
+  private generateEmergencyResponse(userInput: string, _context: any): string {
     const input = userInput.toLowerCase();
     
     // Time-critical scenarios
@@ -482,7 +482,7 @@ export class EmergencyStrategy implements DemoStrategy {
     return { followingProtocol, recommendations };
   }
 
-  private calculateEmergencyConfidence(input: string, analysis: DemoMedicalAnalysis): number {
+  private calculateEmergencyConfidence(input: string, _analysis: DemoMedicalAnalysis): number {
     let confidence = 0.3; // Lower base for high-stakes scenario
     
     // Boost for emergency terms
@@ -519,7 +519,7 @@ export class EmergencyStrategy implements DemoStrategy {
     return Math.min(confidence, 0.85); // Cap at 85% for emergencies
   }
 
-  private generateEmergencyReasoning(symptoms: string[], diagnoses: string[], input: string): string {
+  private generateEmergencyReasoning(symptoms: string[], diagnoses: string[], _input: string): string {
     let reasoning = '🚨 EMERGENCIA MÉDICA: ';
     
     if (symptoms.length > 0) {

@@ -358,7 +358,12 @@ export function I18nProvider({ children }) {
 export function useTranslation() {
   const context = useContext(I18nContext);
   if (!context) {
-    throw new Error('useTranslation must be used within I18nProvider');
+    // Return default values for SSR compatibility
+    return {
+      t: (key) => key, // Return the key as fallback
+      locale: 'es',
+      setLocale: () => {}
+    };
   }
   return { t: context.t, locale: context.locale, setLocale: context.setLocale };
 }
