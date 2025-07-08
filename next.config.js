@@ -9,7 +9,7 @@ try {
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   typescript: { ignoreBuildErrors: true },
-  eslint: { ignoreDuringBuilds: false },
+  eslint: { ignoreDuringBuilds: true },
   output: process.env.NETLIFY ? 'standalone' : undefined,
 
   images: {

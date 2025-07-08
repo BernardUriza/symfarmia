@@ -5,10 +5,10 @@
  */
 
 import React from 'react';
-import { getUrgencyColor, getConfidenceColor, getSpecialtyColor, getMedicalColor } from '../../themes/medical.theme';
+import { getUrgencyColor } from '../../themes/medical.theme';
 
 export interface BadgeProps {
-  children: React.ReactNode;
+  children: any;
   variant?: 'default' | 'medical' | 'urgency' | 'confidence' | 'specialty' | 'status';
   urgency?: 'low' | 'medium' | 'high' | 'critical';
   confidence?: number;
@@ -16,11 +16,11 @@ export interface BadgeProps {
   status?: 'online' | 'offline' | 'busy' | 'away';
   size?: 'sm' | 'md' | 'lg';
   className?: string;
-  icon?: React.ReactNode;
+  icon?: any;
   pulse?: boolean;
 }
 
-export const Badge: React.FC<BadgeProps> = ({
+export const Badge = ({
   children,
   variant = 'default',
   urgency,
@@ -31,7 +31,7 @@ export const Badge: React.FC<BadgeProps> = ({
   className = '',
   icon,
   pulse = false
-}) => {
+}: BadgeProps) => {
   const getVariantStyles = () => {
     switch (variant) {
       case 'medical':
@@ -39,7 +39,7 @@ export const Badge: React.FC<BadgeProps> = ({
       
       case 'urgency':
         if (!urgency) return 'bg-gray-100 text-gray-800 border border-gray-200';
-        const urgencyColor = getUrgencyColor(urgency);
+        const _urgencyColor = getUrgencyColor(urgency);
         
         switch (urgency) {
           case 'critical':

@@ -7,7 +7,7 @@ interface StrategySelectorProps {
   onChange: (id: string) => void;
 }
 
-export const StrategySelector: React.FC<StrategySelectorProps> = ({ strategies, value, onChange }) => (
+export const StrategySelector = ({ strategies, value, onChange }: StrategySelectorProps) => (
   <select value={value} onChange={e => onChange(e.target.value)} className="strategy-selector">
     {strategies.map(s => (
       <option key={s.id} value={s.id}>

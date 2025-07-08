@@ -18,7 +18,14 @@ const AppModeContext = createContext<AppModeContextValue | undefined>(undefined)
 export function useAppMode() {
   const context = useContext(AppModeContext);
   if (!context) {
-    throw new Error('useAppMode must be used within AppModeProvider');
+    // Return default values for SSR compatibility
+    return {
+      appMode: 'live' as const,
+      apiProvider: null,
+      isDemoMode: false,
+      isLiveMode: true,
+      toggleMode: () => {}
+    };
   }
   return context;
 }

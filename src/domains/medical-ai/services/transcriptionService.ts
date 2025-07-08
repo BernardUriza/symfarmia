@@ -323,8 +323,8 @@ export class TranscriptionService {
     const medicalTerms = [
       { term: 'hipertensión', category: MedicalCategory.DIAGNOSIS },
       { term: 'diabetes', category: MedicalCategory.DIAGNOSIS },
-      { term: 'fiebre', category: MedicalCategory.SYMPTOMS },
-      { term: 'dolor', category: MedicalCategory.SYMPTOMS },
+      { term: 'fiebre', category: MedicalCategory.SYMPTOM },
+      { term: 'dolor', category: MedicalCategory.SYMPTOM },
       { term: 'medicamento', category: MedicalCategory.TREATMENT },
       { term: 'presión arterial', category: MedicalCategory.PROCEDURE }
     ];

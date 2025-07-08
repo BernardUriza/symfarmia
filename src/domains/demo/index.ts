@@ -23,7 +23,8 @@ export { useDemoSettings } from './hooks/useDemoSettings';
 // Services
 export { demoDataService } from './services/demoDataService';
 export { demoSimulationService } from './services/demoSimulationService';
-export { demoValidationService } from './services/demoValidationService';
+export { DemoValidationService } from './services/demoValidationService';
+export { DemoValidationService as demoValidationService } from './services/demoValidationService';
 
 // Strategies
 export { HIVPregnancyStrategy } from './strategies/hivPregnancyStrategy';

@@ -27,9 +27,11 @@ interface UseMedicalAIReturn {
   loading: boolean;
   error: string | null;
   suggestions: string[];
+  isAnalyzing: boolean;
   
   // Actions
   analyzeMedicalContent: (transcription: TranscriptionResult, context: MedicalContext) => Promise<void>;
+  analyzeSymptoms: (transcription: TranscriptionResult, context: MedicalContext) => Promise<void>;
   validateMedicalTerms: (text: string) => Promise<boolean>;
   generateSuggestions: (context: MedicalContext, text: string) => Promise<void>;
   triageAssessment: (context: MedicalContext, symptoms: string[]) => Promise<UrgencyLevel>;
