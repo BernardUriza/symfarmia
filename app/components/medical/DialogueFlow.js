@@ -5,55 +5,56 @@ import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { ChevronLeft, ChevronRight, User, UserCheck, Clock, Tag } from 'lucide-react';
 
-const dialogueStructure = [
+const getDialogueStructure = (t) => [
   {
-    section: 'Motivo de Consulta',
+    section: t('dialogue.sections.chief_complaint'),
     timestamp: '00:00:15',
     content: [
-      { speaker: 'Doctor', text: 'Buenos días, María. ¿Cómo se siente hoy?' },
-      { speaker: 'Paciente', text: 'He tenido este dolor de cabeza persistente durante los últimos tres días.' }
+      { speaker: t('conversation.doctor_speaker'), text: 'Buenos días, María. ¿Cómo se siente hoy?' },
+      { speaker: t('conversation.patient_speaker'), text: 'He tenido este dolor de cabeza persistente durante los últimos tres días.' }
     ],
-    tags: ['Síntoma Principal', 'Duración']
+    tags: [t('dialogue.tags.main_symptom'), t('dialogue.tags.duration')]
   },
   {
-    section: 'Historia de la Enfermedad Actual',
+    section: t('dialogue.sections.history_present_illness'),
     timestamp: '00:00:35',
     content: [
-      { speaker: 'Doctor', text: '¿Puede describir el dolor? ¿Es pulsátil, punzante o sordo?' },
-      { speaker: 'Paciente', text: 'Es más bien un dolor sordo y constante, especialmente en el lado derecho de mi cabeza.' },
-      { speaker: 'Doctor', text: 'En una escala del 1 al 10, ¿cómo calificaría el dolor?' },
-      { speaker: 'Paciente', text: 'Diría que es un 6 o 7. Definitivamente está afectando mis actividades diarias.' }
+      { speaker: t('conversation.doctor_speaker'), text: '¿Puede describir el dolor? ¿Es pulsátil, punzante o sordo?' },
+      { speaker: t('conversation.patient_speaker'), text: 'Es más bien un dolor sordo y constante, especialmente en el lado derecho de mi cabeza.' },
+      { speaker: t('conversation.doctor_speaker'), text: 'En una escala del 1 al 10, ¿cómo calificaría el dolor?' },
+      { speaker: t('conversation.patient_speaker'), text: 'Diría que es un 6 o 7. Definitivamente está afectando mis actividades diarias.' }
     ],
-    tags: ['Calidad del Dolor', 'Localización', 'Severidad', 'Impacto Funcional']
+    tags: [t('dialogue.tags.pain_quality'), t('dialogue.tags.location'), t('dialogue.tags.severity'), t('dialogue.tags.functional_impact')]
   },
   {
-    section: 'Síntomas Asociados',
+    section: t('dialogue.sections.associated_symptoms'),
     timestamp: '00:02:15',
     content: [
-      { speaker: 'Doctor', text: '¿Ha experimentado náuseas, vómitos o sensibilidad a la luz?' },
-      { speaker: 'Paciente', text: 'Sí, de hecho. Me siento un poco nauseosa, y las luces brillantes parecen empeorar el dolor.' }
+      { speaker: t('conversation.doctor_speaker'), text: '¿Ha experimentado náuseas, vómitos o sensibilidad a la luz?' },
+      { speaker: t('conversation.patient_speaker'), text: 'Sí, de hecho. Me siento un poco nauseosa, y las luces brillantes parecen empeorar el dolor.' }
     ],
-    tags: ['Síntomas Asociados', 'Fotofobia', 'Náuseas']
+    tags: [t('dialogue.tags.associated_symptoms'), t('dialogue.tags.photophobia'), t('dialogue.tags.nausea')]
   },
   {
-    section: 'Revisión por Sistemas',
+    section: t('dialogue.sections.system_review'),
     timestamp: '00:03:45',
     content: [
-      { speaker: 'Doctor', text: '¿Alguna fiebre, rigidez de cuello o cambios en la visión?' },
-      { speaker: 'Paciente', text: 'No hay fiebre, pero mi cuello se siente un poco rígido. No tengo problemas de visión.' }
+      { speaker: t('conversation.doctor_speaker'), text: '¿Alguna fiebre, rigidez de cuello o cambios en la visión?' },
+      { speaker: t('conversation.patient_speaker'), text: 'No hay fiebre, pero mi cuello se siente un poco rígido. No tengo problemas de visión.' }
     ],
-    tags: ['RPS', 'Rigidez de Cuello', 'Visión']
+    tags: [t('dialogue.tags.rps'), t('dialogue.tags.neck_stiffness'), t('dialogue.tags.vision')]
   }
 ];
 
 export function DialogueFlow({ onNext, onPrevious }) {
-  const { t: _t } = useTranslation();
+  const { t } = useTranslation();
+  const dialogueStructure = getDialogueStructure(t);
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="text-center mb-6">
-        <h1 className="text-2xl text-slate-900 mb-2">Análisis del Flujo de Diálogo</h1>
-        <p className="text-slate-600">La IA ha estructurado su conversación en secciones clínicas</p>
+        <h1 className="text-2xl text-slate-900 mb-2">{t('dialogue.title')}</h1>
+        <p className="text-slate-600">{t('dialogue.subtitle')}</p>
       </div>
 
       {/* Estadísticas Resumen */}
