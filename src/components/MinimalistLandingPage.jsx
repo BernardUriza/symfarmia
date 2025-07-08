@@ -9,7 +9,7 @@ import {
   UserIcon,
   StarIcon,
   HeartIcon
-} from '../../components/icons';
+} from './icons';
 import LanguageToggle from '../../components/LanguageToggle';
 import dynamic from 'next/dynamic';
 const DemoLoginModal = dynamic(() => import('../../components/DemoLoginModal'));
