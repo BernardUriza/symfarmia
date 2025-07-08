@@ -39,7 +39,7 @@ npm cache clean --force
 
 ### Stage 2: 📦 Fresh Dependencies (30s)
 ```bash
-npm ci --silent
+npm ci --silent --prefer-offline  # uses package-lock hash cache
 npm audit --audit-level=high  # Production only
 ```
 
@@ -261,7 +261,7 @@ The system tracks:
 
 ## 🚀 Future Enhancements
 
-- [ ] Build caching for faster incremental builds
+- [x] Build caching for faster incremental builds
 - [ ] Parallel builds for multiple branches
 - [ ] Analytics dashboard
 - [ ] Smart test selection
