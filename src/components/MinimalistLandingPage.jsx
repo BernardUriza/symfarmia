@@ -9,7 +9,7 @@ import {
   UserIcon,
   StarIcon,
   HeartIcon
-} from './icons';
+} from '@heroicons/react/24/outline';
 import LanguageToggle from '../../components/LanguageToggle';
 import dynamic from 'next/dynamic';
 const DemoLoginModal = dynamic(() => import('../../components/DemoLoginModal'));

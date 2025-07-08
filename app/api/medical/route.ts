@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { processMedicalQuery, getErrorMessage } from '@/app/services/MedicalAILogic.js';
+import { processMedicalQuery, getErrorMessage } from '@/app/services/MedicalAILogic';
 import { MedicalAIConfig } from '@/app/config/MedicalAIConfig.js';
 
 interface MedicalRequest {
