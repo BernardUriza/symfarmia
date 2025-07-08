@@ -76,7 +76,13 @@
       "Bash(npm run clean:*)",
       "Bash(./scripts/quick-setup.sh:*)",
       "Bash(npm run ci:status:*)",
-      "Bash(./scripts/concise-cicd-system.sh restart:*)"
+      "Bash(./scripts/concise-cicd-system.sh restart:*)",
+      "Bash(diff:*)",
+      "Bash(awk:*)",
+      "Bash(SKIP_TYPE_CHECK=true npm run build:fast)",
+      "Bash(PORT=3001 npm run dev)",
+      "Bash(npm run ci:restart:*)",
+      "Bash(npm run:*)"
     ],
     "deny": []
   }
