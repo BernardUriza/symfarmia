@@ -247,5 +247,15 @@
     "sent": "Enviado",
     "not_delivered": "No entregado",
     "sending": "Enviando"
+  },
+  "demo": {
+    "demo_title": "Escriba Médica IA - Demo",
+    "flow_steps": "Pasos del Flujo",
+    "capture": "Escuchar",
+    "audio_level": "Nivel de Audio",
+    "live_transcription": "Transcripción en Vivo",
+    "powered_by_ai": "Impulsado por IA",
+    "review_dialog_flow": "Revisar Flujo de Diálogo",
+    "recording_active": "Grabación Activa"
   }
 }
