@@ -5,11 +5,18 @@
 /**
  * Process medical query with AI
  */
-async function processMedicalQuery(query: string, type: string = 'general'): Promise<string> {
+async function processMedicalQuery(
+  queryData: { query: string; type?: string; context?: Record<string, unknown> } | string,
+  dependencies?: any
+): Promise<any> {
   try {
+    // Handle both string and object inputs for backwards compatibility
+    const query = typeof queryData === 'string' ? queryData : queryData.query;
+    const type = typeof queryData === 'string' ? 'general' : (queryData.type || 'general');
+    
     // Simulate medical AI processing
     const medicalResponse = `Basándome en la consulta médica "${query}", recomiendo una evaluación clínica completa con anamnesis detallada, exploración física dirigida y estudios complementarios según indicación médica.`;
-    return medicalResponse;
+    return { response: medicalResponse };
   } catch (error) {
     console.error('Error processing medical query:', error);
     throw error;
@@ -39,6 +46,13 @@ function getAvailableTypes(config: any): any[] {
 
 // ES6 exports for TypeScript
 export {
+  processMedicalQuery,
+  getErrorMessage,
+  getAvailableTypes
+};
+
+// Default export for backwards compatibility
+export default {
   processMedicalQuery,
   getErrorMessage,
   getAvailableTypes

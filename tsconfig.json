@@ -31,24 +31,46 @@
     "target": "ES2022",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"],
-      "@/components/*": ["./components/*"],
-      "@/hooks/*": ["./hooks/*"],
-      "@/utils/*": ["./utils/*"],
-      "@/types/*": ["./types/*"],
-      "@/app/*": ["./app/*"],
-      "@/providers/*": ["./app/providers/*"],
-      "@/services/*": ["./app/services/*"],
-      "@/providers/core/*": ["./app/providers/core/*"],
-      "@/providers/lazy/*": ["./app/providers/lazy/*"],
-      "@/services/core/*": ["./app/services/core/*"]
+      "@/*": [
+        "./*"
+      ],
+      "@/components/*": [
+        "./components/*"
+      ],
+      "@/hooks/*": [
+        "./hooks/*"
+      ],
+      "@/utils/*": [
+        "./utils/*"
+      ],
+      "@/types/*": [
+        "./types/*"
+      ],
+      "@/app/*": [
+        "./app/*"
+      ],
+      "@/providers/*": [
+        "./app/providers/*"
+      ],
+      "@/services/*": [
+        "./app/services/*"
+      ],
+      "@/providers/core/*": [
+        "./app/providers/core/*"
+      ],
+      "@/providers/lazy/*": [
+        "./app/providers/lazy/*"
+      ],
+      "@/services/core/*": [
+        "./app/services/core/*"
+      ]
     }
   },
   "include": [
     "next-env.d.ts",
-    ".next/types/**/*.ts",
     "**/*.ts",
-    "**/*.tsx"
+    "**/*.tsx",
+    ".next/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",
