@@ -8,8 +8,8 @@ import {
   CheckCircleIcon,
   UserIcon,
   StarIcon,
-  HeartIcon
-} from '../../components/icons';
+  HeartIcon,
+} from '@heroicons/react/24/outline';
 import LanguageToggle from '../../components/LanguageToggle';
 import dynamic from 'next/dynamic';
 const DemoLoginModal = dynamic(() => import('../../components/DemoLoginModal'));
