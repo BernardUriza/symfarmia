@@ -26,7 +26,7 @@ const DashboardCard = ({
 }: {
   title: string;
   description: string;
-  icon: any;
+  icon: React.ComponentType<any>;
   value: string;
   href: string;
   buttonText?: string;
@@ -81,7 +81,7 @@ const QuickActionCard = ({
 }: {
   title: string;
   description: string;
-  icon: any;
+  icon: React.ComponentType<any>;
   href: string;
   buttonText: string;
 }) => (

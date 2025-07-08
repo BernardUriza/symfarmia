@@ -6,7 +6,7 @@ import { Mic, MicOff, Volume2, ChevronRight, Activity } from 'lucide-react';
 
 export function ConversationCapture({ onNext, isRecording, setIsRecording }) {
   const [audioLevel, setAudioLevel] = useState(0);
-  const [transcriptSegments, setTranscriptSegments] = useState([
+  const [transcriptSegments] = useState([
     { speaker: 'Doctor', text: 'Buenos días, María. ¿Cómo se siente hoy?', time: '00:00:15' },
     { speaker: 'Paciente', text: 'He tenido este dolor de cabeza persistente durante los últimos tres días.', time: '00:00:22' },
     { speaker: 'Doctor', text: '¿Puede describir el dolor? ¿Es pulsátil, punzante o sordo?', time: '00:00:35' },
