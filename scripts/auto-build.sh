@@ -90,8 +90,16 @@ echo -e "${GREEN}✅ Cache obliterated successfully${NC}"
 echo -e "${BLUE}📦 Stage 2: FRESH DEPENDENCIES${NC}"
 echo "Installing dependencies with nuclear precision..."
 
-# Fresh install
-npm ci --silent --no-audit
+# Dependency caching based on package-lock.json hash
+HASH_FILE=".cicd/package-lock.hash"
+CURRENT_HASH=$(sha1sum package-lock.json | awk '{print $1}')
+
+if [ -d node_modules ] && [ -f "$HASH_FILE" ] && [ "$(cat $HASH_FILE)" = "$CURRENT_HASH" ]; then
+    echo "Dependencies unchanged. Skipping install."
+else
+    npm ci --silent --no-audit --prefer-offline
+    echo "$CURRENT_HASH" > "$HASH_FILE"
+fi
 
 # Security audit (only for production builds)
 if [ "$BUILD_TYPE" = "--production" ] || [ "$BUILD_TYPE" = "--medical-critical" ]; then
