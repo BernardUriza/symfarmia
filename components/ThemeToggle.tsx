@@ -14,8 +14,8 @@ export default function ThemeToggle({ className = '' }: { className?: string }) 
       aria-checked={isDark}
       aria-label={isDark ? t('light_mode') : t('dark_mode')}
       onClick={toggleTheme}
-      className={`relative inline-flex h-6 w-12 items-center rounded-full transition-colors duration-300 focus:outline-none ${
-        isDark ? 'bg-slate-700' : 'bg-yellow-300'
+      className={`relative inline-flex h-6 w-12 items-center rounded-full transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+        isDark ? 'bg-slate-600' : 'bg-amber-500'
       } ${className}`}
     >
       <span className="sr-only">{isDark ? t('light_mode') : t('dark_mode')}</span>
@@ -30,7 +30,7 @@ export default function ThemeToggle({ className = '' }: { className?: string }) 
           }`}
         />
         <MoonIcon
-          className={`absolute h-4 w-4 text-slate-700 transition-transform duration-300 ${
+          className={`absolute h-4 w-4 text-slate-700 dark:text-slate-200 transition-transform duration-300 ${
             isDark ? 'scale-100 rotate-0' : 'scale-0 -rotate-45'
           }`}
         />
