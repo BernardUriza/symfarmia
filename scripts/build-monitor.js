@@ -68,9 +68,9 @@ class BuildMonitor {
 
   async runBuildWithMonitoring() {
     this.buildStartTime = Date.now();
-    this.logEvent('INFO', 'Build started', { 
+    this.logEvent('INFO', 'Build started', {
       buildId: this.buildId,
-      command: 'npm run build'
+      command: 'npm run build:original'
     });
 
     return new Promise((resolve, reject) => {
@@ -99,7 +99,7 @@ class BuildMonitor {
       }, this.buildTimeoutMs);
 
       // Spawn build process
-      this.buildProcess = spawn('npm', ['run', 'build'], {
+      this.buildProcess = spawn('npm', ['run', 'build:original'], {
         cwd: process.cwd(),
         stdio: ['inherit', 'pipe', 'pipe']
       });

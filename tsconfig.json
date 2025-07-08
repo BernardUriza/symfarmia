@@ -63,6 +63,15 @@
       ],
       "@/services/core/*": [
         "./app/services/core/*"
+      ],
+      "@domains/*": [
+        "./src/domains/*"
+      ],
+      "@shared/*": [
+        "./src/shared/*"
+      ],
+      "@infrastructure/*": [
+        "./src/infrastructure/*"
       ]
     }
   },
