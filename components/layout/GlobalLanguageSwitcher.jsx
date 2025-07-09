@@ -65,6 +65,8 @@ const GlobalLanguageSwitcher = ({
   
   // Show floating button on scroll or when no header switcher is visible
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     const handleScroll = () => {
       const headerSwitcher = document.querySelector('[data-header-language-switcher]');
       if (headerSwitcher) {

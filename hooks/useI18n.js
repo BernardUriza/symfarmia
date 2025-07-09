@@ -57,9 +57,19 @@ export const useI18n = () => {
   
   if (!context) {
     // Fallback implementation when provider is not available
+    const fallbackSetLocale = (locale) => {
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem('preferredLanguage', locale);
+        } catch (error) {
+          console.warn('Could not save language preference:', error);
+        }
+      }
+    };
+    
     return {
       locale: 'es',
-      setLocale: () => {},
+      setLocale: fallbackSetLocale,
       t: (key, params = {}) => {
         const fallback = FALLBACK_TRANSLATIONS['es'][key] || key;
         return substituteParameters(fallback, params);

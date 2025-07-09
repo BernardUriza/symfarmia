@@ -1,7 +1,7 @@
 "use client";
 import { createContext, useContext, useEffect, useState } from 'react';
 
-const I18nContext = createContext();
+export const I18nContext = createContext();
 
 // Dynamic translations loader
 async function loadTranslations(locale) {

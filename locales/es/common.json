@@ -109,5 +109,23 @@
   "demo.demo_title": "Demo de IA Médica",
   "demo.patient_selector": "Seleccionar Paciente",
   "demo.patient_selector_subtitle": "Elige un paciente para comenzar la demo",
-  "demo.request_custom_demo": "Solicitar Demo Personalizada"
+  "demo.request_custom_demo": "Solicitar Demo Personalizada",
+  "update": "actualizar",
+  "create": "crear",
+  "language_switcher": {
+    "medical_certified": "médico certificado",
+    "medical": "médico",
+    "medical_grade": "grado médico",
+    "validated": "validado",
+    "current_language": "idioma actual"
+  },
+  "missing": {
+    "key": "clave faltante"
+  },
+  "key": "clave",
+  "orders": {
+    "priority": {
+      "${item.priority}": "prioridad variable"
+    }
+  }
 }
