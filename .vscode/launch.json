@@ -10,24 +10,17 @@
     {
       "splitTerminals": [
         {
+          "name": "run dev",
+          "commands": ["npm run dev"],
+          "shouldRunCommands": false
+        },
+        {
           "name": "claude",
           "commands": ["claude"]
         },
         {
           "name": "monitor-live",
           "commands": ["ccusage blocks --live"]
-        }
-      ]
-    },
-    {
-      "splitTerminals": [
-        {
-          "name": "ccusage-daily",
-          "commands": ["ccusage daily"]
-        },
-        {
-          "name": "ccusage-monthly",
-          "commands": ["ccusage monthly"]
         }
       ]
     }
