@@ -99,7 +99,7 @@ export default function MedicalAIDemo() {
 
               <div className="mt-6 pt-4 border-t border-gray-200">
                 <Link href="/contact" className="text-sm text-emerald-600 hover:text-emerald-700">
-                  {t('demo.add_new_patient')}
+                  {t('demo.request_custom_demo')}
                 </Link>
               </div>
             </div>

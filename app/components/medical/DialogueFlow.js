@@ -1,3 +1,5 @@
+"use client";
+
 import React from 'react';
 import { useTranslation } from '../../providers/I18nProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';

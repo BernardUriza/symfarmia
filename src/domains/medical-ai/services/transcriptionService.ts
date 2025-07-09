@@ -4,6 +4,48 @@
  * Handles medical transcription with real-time processing
  */
 
+// Web Speech API declarations
+interface SpeechRecognition extends EventTarget {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  start(): void;
+  stop(): void;
+  onresult: (event: SpeechRecognitionEvent) => void;
+  onerror: (event: any) => void;
+  onend: () => void;
+}
+
+interface SpeechRecognitionEvent extends Event {
+  resultIndex: number;
+  results: SpeechRecognitionResultList;
+}
+
+interface SpeechRecognitionResultList {
+  length: number;
+  item(index: number): SpeechRecognitionResult;
+  [index: number]: SpeechRecognitionResult;
+}
+
+interface SpeechRecognitionResult {
+  length: number;
+  isFinal: boolean;
+  item(index: number): SpeechRecognitionAlternative;
+  [index: number]: SpeechRecognitionAlternative;
+}
+
+interface SpeechRecognitionAlternative {
+  transcript: string;
+  confidence: number;
+}
+
+declare global {
+  interface Window {
+    SpeechRecognition: new() => SpeechRecognition;
+    webkitSpeechRecognition: new() => SpeechRecognition;
+  }
+}
+
 import {
   TranscriptionResult,
   TranscriptionSegment,
@@ -21,11 +63,13 @@ export class TranscriptionService {
   private currentTranscription: TranscriptionResult | null = null;
   private isRecording = false;
   private transcriptionCallback: ((result: TranscriptionResult) => void) | null = null;
+  private speechRecognition: SpeechRecognition | null = null;
 
   constructor() {
     // Only setup audio context on client side
     if (typeof window !== 'undefined') {
       this.setupAudioContext();
+      this.setupSpeechRecognition();
     }
   }
 
@@ -247,6 +291,12 @@ export class TranscriptionService {
       };
 
       this.mediaRecorder.start(1000); // Capture every 1 second
+      
+      // Start speech recognition
+      if (this.speechRecognition) {
+        this.speechRecognition.start();
+      }
+      
       this.isRecording = true;
 
     } catch (error) {
@@ -257,6 +307,12 @@ export class TranscriptionService {
   private stopRecording(): void {
     if (this.mediaRecorder && this.isRecording) {
       this.mediaRecorder.stop();
+      
+      // Stop speech recognition
+      if (this.speechRecognition) {
+        this.speechRecognition.stop();
+      }
+      
       this.isRecording = false;
       
       if (this.currentTranscription) {
@@ -267,32 +323,12 @@ export class TranscriptionService {
 
   private async processAudioData(audioBlob: Blob): Promise<void> {
     try {
-      const arrayBuffer = await audioBlob.arrayBuffer();
-      
-      // Simulate transcription processing
-      // In real implementation, this would send to transcription service
-      const mockText = this.generateMockTranscription();
-      
-      const segment: TranscriptionSegment = {
-        id: `segment-${Date.now()}`,
-        text: mockText,
-        startTime: Date.now(),
-        endTime: Date.now() + 1000,
-        confidence: 0.85,
-        speaker: 'doctor'
-      };
-
-      await this.processAudioChunk(arrayBuffer, {
-        sampleRate: 44100,
-        channels: 1,
-        bitDepth: 16,
-        format: 'webm' as any,
-        noiseReduction: true,
-        medicalOptimization: true,
-        realTimeProcessing: true,
-        maxDuration: 3600
-      });
-
+      // Web Speech API handles transcription directly
+      // This method is now primarily for audio level monitoring
+      if (this.speechRecognition) {
+        // Speech recognition handles text processing
+        // We just need to maintain the recording state
+      }
     } catch (error) {
       console.error('Error processing audio data:', error);
     }
@@ -302,13 +338,11 @@ export class TranscriptionService {
     audioData: ArrayBuffer,
     config: AudioConfig
   ): Promise<TranscriptionSegment> {
-    // Simulate transcription processing
-    // In real implementation, this would call the actual transcription service
-    const mockText = this.generateMockTranscription();
-    
+    // Web Speech API handles transcription in real-time
+    // This method creates segments from speech recognition results
     return {
       id: `segment-${Date.now()}`,
-      text: mockText,
+      text: '', // Will be populated by speech recognition
       startTime: Date.now(),
       endTime: Date.now() + 1000,
       confidence: 0.85,
@@ -389,17 +423,77 @@ export class TranscriptionService {
     }
   }
 
-  private generateMockTranscription(): string {
-    const mockPhrases = [
-      'El paciente presenta dolor abdominal',
-      'La presión arterial está elevada',
-      'Se recomienda realizar análisis de sangre',
-      'El paciente tiene fiebre de 38 grados',
-      'Se prescribe medicamento para la hipertensión',
-      'Los síntomas comenzaron hace dos días'
-    ];
-    
-    return mockPhrases[Math.floor(Math.random() * mockPhrases.length)];
+  private setupSpeechRecognition(): void {
+    try {
+      if (typeof window !== 'undefined') {
+        const SpeechRecognition = window.SpeechRecognition || (window as any).webkitSpeechRecognition;
+        
+        if (SpeechRecognition) {
+          this.speechRecognition = new SpeechRecognition();
+          this.speechRecognition.continuous = true;
+          this.speechRecognition.interimResults = true;
+          this.speechRecognition.lang = 'es-MX';
+          
+          this.speechRecognition.onresult = (event) => {
+            this.handleSpeechResult(event);
+          };
+          
+          this.speechRecognition.onerror = (event) => {
+            console.error('Speech recognition error:', event.error);
+          };
+          
+          this.speechRecognition.onend = () => {
+            if (this.isRecording) {
+              // Restart if still recording
+              this.speechRecognition?.start();
+            }
+          };
+        }
+      }
+    } catch (error) {
+      console.error('Failed to setup speech recognition:', error);
+    }
+  }
+
+  private handleSpeechResult(event: SpeechRecognitionEvent): void {
+    if (!this.currentTranscription) return;
+
+    let interimTranscript = '';
+    let finalTranscript = '';
+
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const transcript = event.results[i][0].transcript;
+      
+      if (event.results[i].isFinal) {
+        finalTranscript += transcript;
+        
+        // Create a new segment for final results
+        const segment: TranscriptionSegment = {
+          id: `segment-${Date.now()}`,
+          text: transcript,
+          startTime: Date.now(),
+          endTime: Date.now() + 1000,
+          confidence: event.results[i][0].confidence,
+          speaker: 'doctor'
+        };
+        
+        this.currentTranscription.segments.push(segment);
+        this.currentTranscription.text += ` ${transcript}`;
+        this.currentTranscription.medicalTerms.push(...this.extractMedicalTerms(transcript));
+      } else {
+        interimTranscript += transcript;
+      }
+    }
+
+    // Update confidence
+    this.currentTranscription.confidence = this.calculateOverallConfidence(
+      this.currentTranscription.segments
+    );
+
+    // Callback for real-time updates
+    if (this.transcriptionCallback) {
+      this.transcriptionCallback(this.currentTranscription);
+    }
   }
 }
 

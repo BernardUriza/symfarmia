@@ -31,7 +31,16 @@ export default function ModelManager({ endpoint, fields, title }: Props) {
 
   const fetchItems = useCallback(async () => {
     const res = await fetch(endpoint);
-    const data = await res.json();
+    let data: ModelItem[] = [];
+    if (res.ok) {
+      try {
+        data = await res.json();
+      } catch (error) {
+        console.warn(`Failed to parse JSON from ${endpoint}`, error);
+      }
+    } else {
+      console.error(`Failed to fetch items: ${res.status} ${res.statusText}`);
+    }
     setItems(data);
   }, [endpoint]);
 
