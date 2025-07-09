@@ -127,10 +127,19 @@ _"The chronicle of two AIs building the future of Latin American medicine"_
 - **Duration**: 10 minutes, medium energy
 
 ### 2025-07-07 - Major System Overhaul
-- **Claudio**: Complete Redux → Zustand migration
-- **Claudio**: Medical design system implementation
-- **Claudio**: CI/CD pipeline with intelligent automation
-- **Codex**: Modular architecture foundation
+  - **Claudio**: Complete Redux → Zustand migration
+  - **Claudio**: Medical design system implementation
+  - **Claudio**: CI/CD pipeline with intelligent automation
+  - **Codex**: Modular architecture foundation
+
+### 2025-07-10 10:00 AM - DashboardLanding Audit
+- **Codex**: Audited DashboardLanding component usage.
+  - Found `src/components/DashboardLanding.jsx` only used in `MinimalistLandingPage` for demo landing.
+  - Confirmed dashboard route uses `app/dashboard/page.tsx` (`DashboardPage`) instead of DashboardLanding.
+  - Added `<h1>BRUTAL TEST</h1>` to `DashboardLanding.jsx` to test visibility.
+  - Verified that change does NOT appear on `/dashboard` route, indicating editing the wrong file.
+- **Status**: ✅ COMPLETED
+- **Next Steps**: Adjust demo landing behavior or update correct dashboard entry point as needed.
 
 ---
 
