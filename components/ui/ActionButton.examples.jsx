@@ -11,7 +11,7 @@ import {
   UserPlusIcon, 
   UserIcon, 
   PlusIcon, 
-  FileTextIcon, 
+  DocumentTextIcon, 
   BeakerIcon, 
   CalendarIcon,
   ChartBarIcon,
@@ -93,21 +93,21 @@ const ActionButtonExamples = () => {
             <ActionButton
               onClick={() => {}}
               text="Filled Button"
-              icon={FileTextIcon}
+              icon={DocumentTextIcon}
               variant="filled"
               color="blue"
             />
             <ActionButton
               onClick={() => {}}
               text="Outline Button"
-              icon={FileTextIcon}
+              icon={DocumentTextIcon}
               variant="outline"
               color="blue"
             />
             <ActionButton
               onClick={() => {}}
               text="Ghost Button"
-              icon={FileTextIcon}
+              icon={DocumentTextIcon}
               variant="ghost"
               color="blue"
             />
@@ -204,7 +204,7 @@ const ActionButtonExamples = () => {
                 <ActionButton
                   onClick={() => {}}
                   text="Import Patients"
-                  icon={FileTextIcon}
+                  icon={DocumentTextIcon}
                   color="blue"
                   variant="outline"
                   fullWidth={true}
@@ -219,7 +219,7 @@ const ActionButtonExamples = () => {
                 <ActionButton
                   onClick={() => {}}
                   text="Generate Report"
-                  icon={FileTextIcon}
+                  icon={DocumentTextIcon}
                   color="blue"
                   size="sm"
                   fullWidth={true}
