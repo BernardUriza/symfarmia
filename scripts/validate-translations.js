@@ -1,89 +1,101 @@
+#!/usr/bin/env node
+/**
+ * validate-translations.js
+ *
+ * Validates that all translation keys used in source code exist in all locale JSON files.
+ * Exits with error and message if any keys are missing.
+ */
+
 const fs = require('fs');
 const path = require('path');
 
-const getAllJSXFiles = (dir) => {
+// Recursively collect all .js, .jsx, .ts, .tsx files under a directory.
+function getAllSourceFiles(dir) {
   const entries = fs.readdirSync(dir, { withFileTypes: true });
   let files = [];
-  entries.forEach((entry) => {
+  for (const entry of entries) {
     const fullPath = path.join(dir, entry.name);
     if (entry.isDirectory()) {
-      files = files.concat(getAllJSXFiles(fullPath));
+      files = files.concat(getAllSourceFiles(fullPath));
     } else if (/\.(js|jsx|ts|tsx)$/.test(entry.name)) {
       files.push(fullPath);
     }
-  });
+  }
   return files;
-};
+}
 
-const extractTranslationKeys = (directory) => {
-  const files = getAllJSXFiles(directory);
+// Extract translation keys by matching t('key') or t("key") or t(`key`)
+function extractTranslationKeys(srcDir) {
+  const files = getAllSourceFiles(srcDir);
   const keys = new Set();
-  files.forEach((file) => {
+  const regex = /\bt\(['"`]([^'"`]+)['"`]\)/g;
+  for (const file of files) {
     const content = fs.readFileSync(file, 'utf8');
-    const matches = content.match(/\bt\(['"`]([^'"`]+)['"`]\)/g);
-    if (matches) {
-      matches.forEach((match) => {
-        const key = match.match(/['"`]([^'"`]+)['"`]/)[1];
-        keys.add(key);
-      });
+    let match;
+    while ((match = regex.exec(content))) {
+      keys.add(match[1]);
     }
-  });
+  }
   return Array.from(keys);
-};
+}
 
-const addMissingTranslations = (missingKeys) => {
-  missingKeys.forEach(({ key, locale }) => {
-    const filePath = path.join(__dirname, `../locales/${locale}/common.json`);
-    const translations = require(filePath);
-    translations[key] = `TODO_TRANSLATE_${key.toUpperCase()}`;
-    fs.writeFileSync(filePath, JSON.stringify(translations, null, 2));
-    console.log(`➕ Added placeholder for ${locale}:${key}`);
-  });
-};
-
-const generateTranslationTests = (keys) => {
-  const esTranslations = require(path.join(__dirname, '../locales/es/common.json'));
-  const enTranslations = require(path.join(__dirname, '../locales/en/common.json'));
-  const testCases = keys
-    .map((key) => {
-      return `test('${key} translation exists', () => {\n  expect(esTranslations['${key}']).toBeDefined();\n  expect(enTranslations['${key}']).toBeDefined();\n  expect(esTranslations['${key}']).not.toMatch(/TODO_TRANSLATE/);\n});`;
-    })
-    .join('\n');
-  const content = `const esTranslations = require('../locales/es/common.json');\nconst enTranslations = require('../locales/en/common.json');\n\ndescribe('Auto Generated Translation Tests', () => {\n${testCases}\n});\n`;
-  fs.writeFileSync('./tests/auto-generated-translation.test.js', content);
-};
-
-const validateTranslations = () => {
-  const esTranslations = require(path.join(__dirname, '../locales/es/common.json'));
-  const enTranslations = require(path.join(__dirname, '../locales/en/common.json'));
-  const usedKeys = extractTranslationKeys('./src');
-  const missingKeys = [];
-
-  usedKeys.forEach((key) => {
-    if (!esTranslations[key]) {
-      missingKeys.push({ key, locale: 'es' });
+// Flatten nested objects into dot.notation keys
+function flattenObject(obj, prefix = '', res = {}) {
+  for (const [key, value] of Object.entries(obj)) {
+    const compositeKey = prefix ? `${prefix}.${key}` : key;
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      flattenObject(value, compositeKey, res);
+    } else {
+      res[compositeKey] = true;
     }
-    if (!enTranslations[key]) {
-      missingKeys.push({ key, locale: 'en' });
+  }
+  return res;
+}
+
+// Load translation files for a given locale and flatten keys
+function loadLocaleKeys(locale) {
+  const localeDir = path.join(__dirname, '../locales', locale);
+  const files = fs.readdirSync(localeDir).filter(f => f.endsWith('.json'));
+  const allKeys = {};
+  for (const file of files) {
+    const content = JSON.parse(fs.readFileSync(path.join(localeDir, file), 'utf8'));
+    flattenObject(content, '', allKeys);
+  }
+  return allKeys;
+}
+
+function validateTranslations() {
+  const srcDir = path.join(__dirname, '../src');
+  const usedKeys = extractTranslationKeys(srcDir);
+  const locales = ['es', 'en'];
+  const missing = {};
+
+  for (const locale of locales) {
+    const localeKeys = loadLocaleKeys(locale);
+    missing[locale] = usedKeys.filter(key => !localeKeys[key]);
+  }
+
+  const hasMissing = locales.some(locale => missing[locale].length > 0);
+  if (hasMissing) {
+    console.error('❌ Missing translation keys detected:\n');
+    for (const locale of locales) {
+      if (missing[locale].length > 0) {
+        console.error(
+          `  [${locale}] Missing keys:\n    - ${missing[locale].join('\n    - ')}\n`
+        );
+      }
     }
-  });
-
-  generateTranslationTests(usedKeys);
-
-  if (missingKeys.length > 0) {
-    console.error('❌ MISSING TRANSLATION KEYS:');
-    missingKeys.forEach(({ key, locale }) => {
-      console.error(`  ${locale}: "${key}"`);
-    });
-    addMissingTranslations(missingKeys);
+    console.error(
+      'Please add the missing keys to the appropriate locales JSON files and retry.'
+    );
     process.exit(1);
   }
 
   console.log('✅ All translation keys validated');
-};
+}
 
 if (require.main === module) {
   validateTranslations();
 }
 
-module.exports = { validateTranslations, extractTranslationKeys };
+module.exports = { validateTranslations };
