@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useCallback, type FormEvent } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from '../app/providers/I18nProvider';
 
 export interface FieldDef {
@@ -77,7 +77,7 @@ export default function ModelManager({ endpoint, fields, title }: Props) {
   return (
     <div className="p-4 border rounded-lg mb-6">
       <h2 className="text-xl font-bold mb-4">{title}</h2>
-      <form onSubmit={(e: FormEvent) => { e.preventDefault(); saveItem(); }} className="space-y-6 mb-8">
+      <form onSubmit={(e) => { e.preventDefault(); saveItem(); }} className="space-y-6 mb-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {fieldDefs.map(fd => (
             <div key={fd.name}>

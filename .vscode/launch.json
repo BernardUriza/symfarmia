@@ -1,28 +1,43 @@
 {
-  "WillLuke.nextjs.addTypesOnSave": true,
-  "WillLuke.nextjs.hasPrompted": true,
   "terminal.integrated.enablePersistentSessions": true,
-  "terminal.integrated.persistentSessionReviveProcess": "onExitAndWindowClose",
-  "restoreTerminals.showOnStartup": true,
-  "restoreTerminals.showOnStartupMessage": "Restoring terminals from last session",
-  "restoreTerminals.showOnStartupMessageTimeout": 5000,
   "restoreTerminals.terminals": [
     {
       "splitTerminals": [
         {
-          "name": "run dev",
-          "commands": ["npm run dev"],
-          "shouldRunCommands": false
-        },
-        {
-          "name": "claude",
-          "commands": ["claude"]
-        },
-        {
-          "name": "monitor-live",
+          "name": "🟢 Monitor",
+          "icon": "eye",
+          "color": "terminal.ansiGreen",
           "commands": ["ccusage blocks --live"]
+        },
+        {
+          "name": "🟦 Codex",
+          "icon": "book",
+          "color": "terminal.ansiBlue",
+          "commands": [
+            "export $(grep -v '^#' .env | xargs) && codex"
+          ]
+        },
+        {
+          "name": "🟠 Dev",
+          "icon": "rocket",
+          "color": "terminal.ansiYellow",
+          "commands": ["npm start"]
+        }
+      ]
+    },
+    {
+      "splitTerminals": [
+        {
+          "name": "🛠️ E2E",
+          "icon": "tools",
+          "commands": ["npm run build", "npm run e2e"],
+          "shouldRunCommands": false
         }
       ]
     }
-  ]
+  ],
+  "restoreTerminals.showOnStartup": true,
+  "restoreTerminals.autoRestore": true,
+  "restoreTerminals.autoRestoreDelay": 1000,
+  "restoreTerminals.autoRestoreOnFocusChange": true
 }

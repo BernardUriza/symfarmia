@@ -82,6 +82,7 @@ const DashboardCard = ({
 const DashboardLanding = () => {
   return (
     <div className="min-h-screen bg-gray-50">
+      <h1 className="text-red-600 text-6xl text-center my-8">BRUTAL TEST</h1>
       {/* Header */}
       <header className="bg-white border-b border-slate-200 px-6 py-4">
         <div className="flex items-center justify-between">
@@ -166,7 +167,7 @@ const DashboardLanding = () => {
           <div className="flex items-start gap-3">
             <div className="w-5 h-5 text-amber-600 mt-0.5">ℹ️</div>
             <div>
-              <h3 className="text-amber-800 font-semibold">Vista de Demostración</h3>
+              <h3 className="text-amber-800 font-semibold">Vista de Demostraciónsdfgsdf</h3>
               <p className="text-amber-700 text-sm mt-1">
                 Esta es una vista previa del sistema médico SYMFARMIA. En la versión completa, podrás gestionar pacientes, 
                 generar reportes médicos, programar estudios y mucho más.
