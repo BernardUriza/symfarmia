@@ -1,6 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useTranslation } from '../../providers/I18nProvider';
 import { useMicrophoneLevel } from '../../../hooks/useMicrophoneLevel';
+import { useTranscription } from '../../../src/domains/medical-ai/hooks/useTranscription';
+import { TranscriptionStatus } from '../../../src/domains/medical-ai/types';
+// Codex: integrated useTranscription for real-time Whisper transcription
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
@@ -8,51 +11,24 @@ import { Mic, MicOff, Volume2, ChevronRight, Activity } from 'lucide-react';
 
 export function ConversationCapture({ onNext, isRecording, setIsRecording }) {
   const { t } = useTranslation();
-  const audioLevel = useMicrophoneLevel(isRecording);
-  const [transcriptSegments, setTranscriptSegments] = useState([
-    { speaker: t('conversation.speakers.doctor'), text: t('conversation.sample_dialogue.doctor_greeting'), time: '00:00:15' },
-    { speaker: t('conversation.speakers.patient'), text: t('conversation.sample_dialogue.patient_complaint'), time: '00:00:22' },
-    { speaker: t('conversation.speakers.doctor'), text: t('conversation.sample_dialogue.doctor_inquiry'), time: '00:00:35' },
-    { speaker: t('conversation.speakers.patient'), text: t('conversation.sample_dialogue.patient_description'), time: '00:00:42' },
-  ]);
-  const [isProcessing, setIsProcessing] = useState(false);
+  const {
+    transcription,
+    status,
+    startTranscription,
+    stopTranscription,
+  } = useTranscription({ realTimeUpdates: true });
 
-  // Simulate AI processing and add new segments
-  useEffect(() => {
-    if (isRecording && !isProcessing) {
-      const timer = setTimeout(() => {
-        setIsProcessing(true);
-        // Simulate AI processing with medical-ai API
-        const simulateAIResponse = async () => {
-          try {
-            const response = await fetch('/api/medical-ai/demo', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ input: 'dolor de cabeza persistente' })
-            });
-            const data = await response.json();
-            
-            if (data.success) {
-              const newSegment = {
-                speaker: t('conversation.speakers.ai_medical'),
-                text: data.response || t('conversation.processing.ai_processing'),
-                time: new Date().toLocaleTimeString('es-ES', { hour12: false }).slice(0, 8)
-              };
-              setTranscriptSegments(prev => [...prev, newSegment]);
-            }
-          } catch (error) {
-            console.error('AI processing error:', error);
-          } finally {
-            setIsProcessing(false);
-          }
-        };
-        
-        simulateAIResponse();
-      }, 3000);
-      
-      return () => clearTimeout(timer);
+  const audioLevel = useMicrophoneLevel(isRecording);
+
+  const toggleRecording = async () => {
+    if (isRecording) {
+      await stopTranscription();
+      setIsRecording(false);
+    } else {
+      const started = await startTranscription();
+      if (started) setIsRecording(true);
     }
-  }, [isRecording, isProcessing, t]);
+  };
 
   // The useMicrophoneLevel hook handles microphone setup and cleanup
 
@@ -106,7 +82,7 @@ export function ConversationCapture({ onNext, isRecording, setIsRecording }) {
             <Button
               size="lg"
               variant={isRecording ? "destructive" : "default"}
-              onClick={() => setIsRecording(!isRecording)}
+              onClick={toggleRecording}
               className="px-8"
               aria-label={isRecording ? t('transcription.stop_recording') : t('transcription.start_recording')}
             >
@@ -139,36 +115,22 @@ export function ConversationCapture({ onNext, isRecording, setIsRecording }) {
         </CardHeader>
         <CardContent>
           <div className="space-y-4 max-h-96 overflow-y-auto" role="log" aria-live="polite" aria-label="Medical conversation transcript">
-            {transcriptSegments.map((segment, index) => (
+            {transcription?.segments.map((segment, index) => (
               <div key={index} className="flex gap-4 p-3 rounded-lg bg-slate-50" role="article" aria-labelledby={`speaker-${index}`}>
                 <div className="flex flex-col items-center">
-                  <Badge 
-                    variant={segment.speaker === 'Doctor' ? 'default' : 'secondary'}
+                  <Badge
+                    variant={segment.speaker === 'doctor' ? 'default' : 'secondary'}
                     className="text-xs mb-1"
                     id={`speaker-${index}`}
                   >
                     {segment.speaker}
                   </Badge>
-                  <span className="text-xs text-slate-500" aria-label={`Time: ${segment.time}`}>{segment.time}</span>
+                  <span className="text-xs text-slate-500" aria-label={`Time: ${new Date(segment.startTime).toLocaleTimeString('es-ES')}`}>{new Date(segment.startTime).toLocaleTimeString('es-ES')}</span>
                 </div>
                 <p className="flex-1 text-slate-700" aria-label={`${segment.speaker} says: ${segment.text}`}>{segment.text}</p>
               </div>
             ))}
-            {isRecording && (
-              <div className="flex gap-4 p-3 rounded-lg bg-blue-50 border border-blue-200">
-                <div className="flex flex-col items-center">
-                  <Badge variant="default" className="text-xs mb-1">
-                    {t('conversation.speakers.doctor')}
-                  </Badge>
-                  <span className="text-xs text-slate-500">00:01:05</span>
-                </div>
-                <p className="flex-1 text-slate-700">
-                  {t('conversation.sample_dialogue.doctor_followup')}
-                  <span className="animate-pulse">|</span>
-                </p>
-              </div>
-            )}
-            {isProcessing && (
+            {status === TranscriptionStatus.PROCESSING && (
               <div className="flex gap-4 p-3 rounded-lg bg-green-50 border border-green-200">
                 <div className="flex flex-col items-center">
                   <Badge variant="secondary" className="text-xs mb-1">
