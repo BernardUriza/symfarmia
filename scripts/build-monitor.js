@@ -89,7 +89,7 @@ class BuildMonitor {
   async runBuildWithMonitoring() {
     this.buildStartTime = Date.now();
     
-    await runI18nRevolutionOrFail();
+    await this.runI18nRevolutionOrFail();
 
     this.logEvent('INFO', 'Build started', {
       buildId: this.buildId,
