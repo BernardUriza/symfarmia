@@ -203,5 +203,11 @@
   "guadalajara_to_world": "From Guadalajara to the world - transforming medicine",
   "future_is_bright": "The future is bright, the future is now",
   "transformation_within_reach": "The transformation of Mexican medicine is within reach",
-  "join_renaissance": "Join the Renaissance"
+  "join_renaissance": "Join the Renaissance",
+  "conversation.capture.title": "Conversation Capture",
+  "conversation.capture.subtitle": "Record and transcribe medical consultations",
+  "conversation.capture.start": "Start Recording",
+  "conversation.capture.stop": "Stop Recording",
+  "medical.transcription.start": "Start Medical Transcription",
+  "medical.transcription.stop": "Stop Medical Transcription"
 }
