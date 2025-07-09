@@ -99,6 +99,10 @@
   "notes": "Notas",
   "update": "actualizar",
   "create": "crear",
+  "demo": "Demo",
+  "save": "Guardar",
+  "cancel": "Cancelar",
+  "recording_started": "Grabación Iniciada",
   "language_switcher": {
     "medical_certified": "médico certificado",
     "medical": "médico",

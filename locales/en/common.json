@@ -112,6 +112,10 @@
   "demo.request_custom_demo": "Request Custom Demo",
   "update": "update",
   "create": "create",
+  "demo": "Demo",
+  "save": "Save",
+  "cancel": "Cancel",
+  "recording_started": "Recording Started",
   "language_switcher": {
     "medical_certified": "medical certified",
     "medical": "medical",

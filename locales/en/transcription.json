@@ -1,0 +1,9 @@
+{
+  "transcription": {
+    "title": "Medical Transcription",
+    "ready_to_record": "Ready to Record",
+    "start_recording": "Start Recording",
+    "stop_recording": "Stop Recording",
+    "no_transcript_available": "No transcript available"
+  }
+}

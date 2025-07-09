@@ -1,0 +1,8 @@
+{
+  "demo": {
+    "demo_title": "Demo de IA Médica",
+    "patient_selector": "Selector de Paciente",
+    "patient_selector_subtitle": "Elige un paciente para demostración",
+    "request_custom_demo": "Solicitar Demo Personalizado"
+  }
+}
