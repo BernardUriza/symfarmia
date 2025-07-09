@@ -9,6 +9,7 @@
 const fs = require('fs');
 const path = require('path');
 const { spawn } = require('child_process');
+const { bulletproofValidation, nukeAndRebuildTranslations } = require('./revolutionary-i18n-generator');
 
 class BuildMonitor {
   constructor() {
@@ -65,9 +66,31 @@ class BuildMonitor {
       console.log(`${color}Data: ${JSON.stringify(data, null, 2)}${colors.RESET}`);
     }
   }
+  // 👇 REVOLUTIONARY I18N INTEGRATION
+
+  async runI18nRevolutionOrFail() {
+    try {
+      bulletproofValidation();
+      console.log('✅ Revolutionary i18n validation PASSED');
+    } catch (e) {
+      console.warn('⚡ Revolutionary i18n validation FAILED:', e.message);
+      console.warn('⚡ Attempting autofix...');
+      try {
+        nukeAndRebuildTranslations();
+        bulletproofValidation();
+        console.log('✅ Autofix successful. Revolutionary i18n validation PASSED');
+      } catch (e2) {
+        console.error('💀 Autofix failed. Build BLOCKED.');
+        process.exit(1);
+      }
+    }
+  }
 
   async runBuildWithMonitoring() {
     this.buildStartTime = Date.now();
+    
+    await runI18nRevolutionOrFail();
+
     this.logEvent('INFO', 'Build started', {
       buildId: this.buildId,
       command: 'npm run build:original'
