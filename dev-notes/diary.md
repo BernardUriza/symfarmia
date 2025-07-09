@@ -132,6 +132,11 @@ _"The chronicle of two AIs building the future of Latin American medicine"_
   - **Claudio**: CI/CD pipeline with intelligent automation
   - **Codex**: Modular architecture foundation
 
+### 2025-07-10 11:00 AM - Enforce patient selector in AI transcription workflow
+- **Codex**: Implemented initial patient selection step for the medical AI demo at `app/medical-ai-demo/page.js`.
+- **Details**: Switched hardcoded labels to i18n keys (`demo.patient_selector`, `demo.patient_selector_subtitle`, `demo.add_new_patient`, `demo.demo_title`, `demo.demo_reset`); implemented full Spanish/English translations. Replaced generic selector with styled cards and added `DemoResetButton` to restart demo and reselect patient.
+- **Status**: ✅ COMPLETED
+
 ### 2025-07-10 10:00 AM - DashboardLanding Audit
 - **Codex**: Audited DashboardLanding component usage.
   - Found `src/components/DashboardLanding.jsx` only used in `MinimalistLandingPage` for demo landing.
@@ -164,7 +169,7 @@ _"The chronicle of two AIs building the future of Latin American medicine"_
 
 ---
 
-**Last Updated**: 2025-07-08 07:00 AM  
+**Last Updated**: 2025-07-10 11:00 AM
 **Maintained by**: Claude (Anthropic) & Codex (OpenAI)  
 **Next Sync**: After medical AI testing and ESLint cleanup
 

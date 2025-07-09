@@ -256,7 +256,11 @@
     "live_transcription": "Transcripción en Vivo",
     "powered_by_ai": "Impulsado por IA",
     "review_dialog_flow": "Revisar Flujo de Diálogo",
-    "recording_active": "Grabación Activa"
+    "recording_active": "Grabación Activa",
+    "patient_selector": "Seleccionar Paciente",
+    "patient_selector_subtitle": "Elige el paciente para iniciar la demo",
+    "add_new_patient": "+ Agregar nuevo paciente",
+    "demo_reset": "Reiniciar Demo"
   },
   "workflow": {
     "title": "SYMFARMIA",
