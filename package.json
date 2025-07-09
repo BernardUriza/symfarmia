@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "NODE_OPTIONS='--max-old-space-size=1024 --no-warnings' next dev",
-    "dev:turbo": "NODE_OPTIONS='--max-old-space-size=4096' next dev --turbopack",
+    "predev": "node scripts/validate-turbo.js",
+    "dev": "NODE_OPTIONS='--max-old-space-size=4096 --no-warnings' next dev --turbo",
+    "validate-turbo": "node scripts/validate-turbo.js",
     "build": "node scripts/build-monitor.js build",
     "build:original": "npm run version:generate && npm run type-check && npx prisma generate && next build",
     "build:enhanced": "node scripts/enhanced-build.js",
