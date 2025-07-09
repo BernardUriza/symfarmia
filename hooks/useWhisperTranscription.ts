@@ -39,9 +39,14 @@ export function useWhisperTranscription(model = 'Xenova/whisper-small'): UseWhis
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       chunksRef.current = [];
       recorderRef.current = new MediaRecorder(stream, { mimeType: 'audio/webm' });
-      recorderRef.current.ondataavailable = e => chunksRef.current.push(e.data);
+      recorderRef.current.ondataavailable = e => {
+        if (chunksRef.current) {
+          chunksRef.current.push(e.data);
+        }
+      };
       recorderRef.current.onstop = async () => {
-        const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
+        const chunks = chunksRef.current || [];
+        const blob = new Blob(chunks, { type: 'audio/webm' });
         const buffer = await blob.arrayBuffer();
         const result = await modelRef.current(buffer);
         setTranscript(result.text);

@@ -4,14 +4,14 @@
     {
       "splitTerminals": [
         {
-          "name": "🟢 Monitor",
-          "icon": "eye",
+          "name": "Monitor",
+          "icon": "circle-filled",
           "color": "terminal.ansiGreen",
           "commands": ["ccusage blocks --live"]
         },
         {
-          "name": "🟦 Codex",
-          "icon": "book",
+          "name": "Codex",
+          "icon": "zap",
           "color": "terminal.ansiBlue",
           "commands": [
             "export $(grep -v '^#' .env.local | xargs) && codex"
@@ -22,15 +22,16 @@
     {
       "splitTerminals": [
         {
-          "name": "🛠️ E2E",
-          "icon": "tools",
+          "name": "E2E",
+          "icon": "gear",
+          "color": "terminal.ansiWhite",
           "commands": ["npm run build"],
           "shouldRunCommands": false
         },
         {
-          "name": "🟠 Dev",
-          "icon": "rocket",
-          "color": "terminal.ansiYellow",
+          "name": "Dev",
+          "icon": "flame",
+          "color": "terminal.ansiRed",
           "commands": ["npm start"]
         }
       ]
