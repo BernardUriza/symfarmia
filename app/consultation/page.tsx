@@ -1,0 +1,373 @@
+"use client";
+
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { 
+  ArrowLeft, 
+  User, 
+  Clock, 
+  Save, 
+  CheckCircle,
+  Mic
+} from 'lucide-react';
+import { TranscriptionPanel } from '../../src/domains/medical-ai/components/TranscriptionPanel';
+
+interface Patient {
+  id: string;
+  name: string;
+  age: number;
+  lastVisit: string;
+}
+
+interface ConsultationState {
+  patientId: string | null;
+  patientName: string;
+  transcriptionText: string;
+  status: 'idle' | 'recording' | 'completed' | 'saved';
+  duration: number;
+  autoSaveEnabled: boolean;
+  lastSaved: Date | null;
+}
+
+const ConsultationPage = () => {
+  const router = useRouter();
+  const [consultationState, setConsultationState] = useState<ConsultationState>({
+    patientId: null,
+    patientName: '',
+    transcriptionText: '',
+    status: 'idle',
+    duration: 0,
+    autoSaveEnabled: true,
+    lastSaved: null
+  });
+
+  // Demo patients - in real app, fetch from API
+  const [patients] = useState<Patient[]>([
+    { id: '1', name: 'María García López', age: 45, lastVisit: '2024-01-15' },
+    { id: '2', name: 'Juan Carlos Rodríguez', age: 62, lastVisit: '2024-01-10' },
+    { id: '3', name: 'Ana Patricia Morales', age: 28, lastVisit: '2024-01-08' },
+    { id: '4', name: 'Roberto Silva Medina', age: 35, lastVisit: '2024-01-05' },
+    { id: '5', name: 'Carmen Elena Vásquez', age: 51, lastVisit: '2024-01-03' }
+  ]);
+
+  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
+  const [showPatientSelector, setShowPatientSelector] = useState(true);
+
+  // Timer for consultation duration
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (consultationState.status === 'recording') {
+      interval = setInterval(() => {
+        setConsultationState(prev => ({
+          ...prev,
+          duration: prev.duration + 1
+        }));
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [consultationState.status]);
+
+  // Auto-save functionality
+  useEffect(() => {
+    let autoSaveInterval: NodeJS.Timeout;
+    if (consultationState.autoSaveEnabled && consultationState.transcriptionText.length > 0) {
+      autoSaveInterval = setInterval(() => {
+        handleAutoSave();
+      }, 30000); // Auto-save every 30 seconds
+    }
+    return () => clearInterval(autoSaveInterval);
+  }, [consultationState.autoSaveEnabled, consultationState.transcriptionText]);
+
+  const handlePatientSelect = (patient: Patient) => {
+    setSelectedPatient(patient);
+    setConsultationState(prev => ({
+      ...prev,
+      patientId: patient.id,
+      patientName: patient.name
+    }));
+    setShowPatientSelector(false);
+  };
+
+  const handleTranscriptionComplete = (text: string) => {
+    setConsultationState(prev => ({
+      ...prev,
+      transcriptionText: text,
+      status: 'completed'
+    }));
+  };
+
+  const handleAutoSave = async () => {
+    if (!selectedPatient || !consultationState.transcriptionText) return;
+    
+    try {
+      // In real app, save to API
+      console.log('Auto-saving consultation:', {
+        patientId: selectedPatient.id,
+        transcription: consultationState.transcriptionText,
+        timestamp: new Date()
+      });
+      
+      setConsultationState(prev => ({
+        ...prev,
+        lastSaved: new Date()
+      }));
+    } catch (error) {
+      console.error('Auto-save failed:', error);
+    }
+  };
+
+  const handleSaveConsultation = async () => {
+    if (!selectedPatient || !consultationState.transcriptionText) return;
+    
+    try {
+      // In real app, save to API and create medical report
+      console.log('Saving consultation:', {
+        patientId: selectedPatient.id,
+        transcription: consultationState.transcriptionText,
+        duration: consultationState.duration,
+        timestamp: new Date()
+      });
+      
+      setConsultationState(prev => ({
+        ...prev,
+        status: 'saved',
+        lastSaved: new Date()
+      }));
+      
+      // Redirect to medical reports after save
+      setTimeout(() => {
+        router.push('/dashboard/medicalReports');
+      }, 2000);
+    } catch (error) {
+      console.error('Save failed:', error);
+    }
+  };
+
+  const formatDuration = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  if (showPatientSelector) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        {/* Header */}
+        <header className="bg-white border-b border-gray-200 px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Link href="/" className="flex items-center text-gray-600 hover:text-gray-900">
+                <ArrowLeft className="h-5 w-5 mr-2" />
+                Dashboard
+              </Link>
+              <div className="w-px h-6 bg-gray-300"></div>
+              <h1 className="text-xl font-semibold text-gray-900">Nueva Consulta</h1>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <Mic className="h-4 w-4 text-emerald-600" />
+              Transcripción IA
+            </div>
+          </div>
+        </header>
+
+        {/* Patient Selection */}
+        <main className="p-6">
+          <div className="max-w-2xl mx-auto">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
+                  <User className="h-5 w-5 text-emerald-600" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-900">Seleccionar Paciente</h2>
+                  <p className="text-sm text-gray-600">Elige el paciente para iniciar la consulta</p>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                {patients.map((patient) => (
+                  <button
+                    key={patient.id}
+                    onClick={() => handlePatientSelect(patient)}
+                    className="w-full text-left p-4 border border-gray-200 rounded-lg hover:border-emerald-300 hover:bg-emerald-50 transition-colors"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="font-medium text-gray-900">{patient.name}</div>
+                        <div className="text-sm text-gray-500">{patient.age} años</div>
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        Última visita: {patient.lastVisit}
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              <div className="mt-6 pt-4 border-t border-gray-200">
+                <Link
+                  href="/dashboard/patients"
+                  className="text-sm text-emerald-600 hover:text-emerald-700"
+                >
+                  + Agregar nuevo paciente
+                </Link>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white border-b border-gray-200 px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setShowPatientSelector(true)}
+              className="flex items-center text-gray-600 hover:text-gray-900"
+            >
+              <ArrowLeft className="h-5 w-5 mr-2" />
+              Cambiar Paciente
+            </button>
+            <div className="w-px h-6 bg-gray-300"></div>
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
+                <User className="h-4 w-4 text-emerald-600" />
+              </div>
+              <div>
+                <h1 className="text-lg font-semibold text-gray-900">{selectedPatient?.name}</h1>
+                <p className="text-sm text-gray-600">{selectedPatient?.age} años</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            {/* Duration */}
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <Clock className="h-4 w-4" />
+              {formatDuration(consultationState.duration)}
+            </div>
+            
+            {/* Auto-save status */}
+            {consultationState.lastSaved && (
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <CheckCircle className="h-4 w-4 text-green-600" />
+                Auto-guardado
+              </div>
+            )}
+            
+            {/* Status */}
+            <div className={`px-3 py-1 rounded-full text-xs font-medium ${
+              consultationState.status === 'idle' ? 'bg-gray-100 text-gray-700' :
+              consultationState.status === 'recording' ? 'bg-green-100 text-green-700' :
+              consultationState.status === 'completed' ? 'bg-blue-100 text-blue-700' :
+              'bg-emerald-100 text-emerald-700'
+            }`}>
+              {consultationState.status === 'idle' && 'Lista'}
+              {consultationState.status === 'recording' && 'Grabando'}
+              {consultationState.status === 'completed' && 'Completada'}
+              {consultationState.status === 'saved' && 'Guardada'}
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="p-6">
+        <div className="max-w-4xl mx-auto">
+          {/* Consultation Info */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="text-sm text-gray-600">
+                  <span className="font-medium">Consulta:</span> {new Date().toLocaleDateString()}
+                </div>
+                <div className="text-sm text-gray-600">
+                  <span className="font-medium">Duración:</span> {formatDuration(consultationState.duration)}
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setConsultationState(prev => ({ ...prev, autoSaveEnabled: !prev.autoSaveEnabled }))}
+                  className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
+                    consultationState.autoSaveEnabled 
+                      ? 'bg-emerald-100 text-emerald-700' 
+                      : 'bg-gray-100 text-gray-700'
+                  }`}
+                >
+                  Auto-guardar {consultationState.autoSaveEnabled ? 'ON' : 'OFF'}
+                </button>
+                
+                {consultationState.status === 'completed' && (
+                  <button
+                    onClick={handleSaveConsultation}
+                    className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+                  >
+                    <Save className="h-4 w-4" />
+                    Guardar Consulta
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Transcription Panel */}
+          <TranscriptionPanel
+            specialty="general"
+            patientContext={{
+              patientId: selectedPatient?.id || '',
+              patientName: selectedPatient?.name || '',
+              age: selectedPatient?.age || 0,
+              medicalHistory: []
+            }}
+            onTranscriptionComplete={handleTranscriptionComplete}
+            className="mb-6"
+            medicalOptimization={true}
+            realTimeAnalysis={true}
+          />
+
+          {/* Quick Actions */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <h3 className="text-sm font-medium text-gray-900 mb-3">Acciones Rápidas</h3>
+            <div className="flex flex-wrap gap-2">
+              <button className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm hover:bg-blue-200 transition-colors">
+                Plantilla: Consulta General
+              </button>
+              <button className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm hover:bg-blue-200 transition-colors">
+                Plantilla: Seguimiento
+              </button>
+              <button className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm hover:bg-blue-200 transition-colors">
+                Plantilla: Dolor Torácico
+              </button>
+              <button className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm hover:bg-blue-200 transition-colors">
+                Exportar PDF
+              </button>
+            </div>
+          </div>
+
+          {/* Success Message */}
+          {consultationState.status === 'saved' && (
+            <div className="fixed top-4 right-4 bg-emerald-100 border border-emerald-200 rounded-lg p-4 shadow-lg">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-emerald-600" />
+                <span className="text-emerald-800 font-medium">
+                  Consulta guardada exitosamente
+                </span>
+              </div>
+              <p className="text-emerald-700 text-sm mt-1">
+                Redirigiendo a reportes médicos...
+              </p>
+            </div>
+          )}
+        </div>
+      </main>
+    </div>
+  );
+};
+
+export default ConsultationPage;

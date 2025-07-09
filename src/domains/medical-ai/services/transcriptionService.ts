@@ -23,7 +23,10 @@ export class TranscriptionService {
   private transcriptionCallback: ((result: TranscriptionResult) => void) | null = null;
 
   constructor() {
-    this.setupAudioContext();
+    // Only setup audio context on client side
+    if (typeof window !== 'undefined') {
+      this.setupAudioContext();
+    }
   }
 
   /**
@@ -188,13 +191,19 @@ export class TranscriptionService {
   // Private methods
   private async setupAudioContext(): Promise<void> {
     try {
-      this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      if (typeof window !== 'undefined' && window.AudioContext) {
+        this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      }
     } catch (error) {
       console.error('Failed to setup audio context:', error);
     }
   }
 
   private async getMediaStream(config: AudioConfig): Promise<MediaStream> {
+    if (typeof window === 'undefined' || !navigator.mediaDevices) {
+      throw new Error('Media devices not available');
+    }
+    
     const constraints = {
       audio: {
         sampleRate: config.sampleRate,
@@ -223,6 +232,10 @@ export class TranscriptionService {
 
   private async startRecording(stream: MediaStream, config: AudioConfig): Promise<void> {
     try {
+      if (typeof window === 'undefined' || !window.MediaRecorder) {
+        throw new Error('MediaRecorder not available');
+      }
+      
       this.mediaRecorder = new MediaRecorder(stream, {
         mimeType: this.getMimeType(config.format)
       });

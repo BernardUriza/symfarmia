@@ -257,5 +257,87 @@
     "powered_by_ai": "Impulsado por IA",
     "review_dialog_flow": "Revisar Flujo de Diálogo",
     "recording_active": "Grabación Activa"
+  },
+  "workflow": {
+    "title": "SYMFARMIA",
+    "subtitle": "Consulta Médica Profesional",
+    "patient_info": "INFORMACIÓN DEL PACIENTE",
+    "medical_navigation": "NAVEGACIÓN MÉDICA",
+    "current_step": "PASO ACTUAL",
+    "consultation_flow": "Flujo de Consulta Médica",
+    "step_of": "Paso {current} de {total}",
+    "steps": {
+      "listen": "Escuchar",
+      "review": "Revisar Flujo",
+      "notes": "Notas",
+      "orders": "Órdenes",
+      "summary": "Resumen"
+    },
+    "step_descriptions": {
+      "listen": "Captura de conversación médica en tiempo real",
+      "review": "Análisis del flujo de diálogo clínico",
+      "notes": "Generación de notas SOAP",
+      "orders": "Entrada de órdenes médicas",
+      "summary": "Resumen final y exportación"
+    },
+    "patient": {
+      "name": "María García",
+      "age": "32 años",
+      "gender": "Femenino",
+      "id": "ID",
+      "date": "Fecha",
+      "status": "Estado",
+      "status_stable": "Estable",
+      "birth_date": "FN: 15/03/1985"
+    },
+    "navigation": {
+      "view_all_patients": "Ver Todos los Pacientes",
+      "medical_reports": "Reportes Médicos",
+      "clinical_history": "Historial Clínico",
+      "new_consultation": "Nueva Consulta"
+    },
+    "actions": {
+      "start_recording": "Iniciar Grabación",
+      "stop_recording": "Detener Grabación"
+    }
+  },
+  "conversation": {
+    "title": "Captura de Conversación",
+    "subtitle": "La IA está escuchando y transcribiendo su consulta médica en tiempo real",
+    "ai_processing": "Analizando síntomas médicos...",
+    "ai_speaker": "IA Médica",
+    "doctor_speaker": "Doctor",
+    "patient_speaker": "Paciente",
+    "processing_status": "procesando..."
+  },
+  "dialogue": {
+    "title": "Análisis del Flujo de Diálogo",
+    "subtitle": "La IA ha estructurado su conversación en secciones clínicas",
+    "sections": {
+      "chief_complaint": "Motivo de Consulta",
+      "history_present_illness": "Historia de la Enfermedad Actual",
+      "associated_symptoms": "Síntomas Asociados",
+      "system_review": "Revisión por Sistemas"
+    },
+    "tags": {
+      "main_symptom": "Síntoma Principal",
+      "duration": "Duración",
+      "pain_quality": "Calidad del Dolor",
+      "location": "Localización",
+      "severity": "Severidad",
+      "functional_impact": "Impacto Funcional",
+      "associated_symptoms": "Síntomas Asociados",
+      "photophobia": "Fotofobia",
+      "nausea": "Náuseas",
+      "rps": "RPS",
+      "neck_stiffness": "Rigidez de Cuello",
+      "vision": "Visión"
+    },
+    "stats": {
+      "total_sections": "Secciones Totales",
+      "total_interactions": "Interacciones Totales",
+      "avg_response_time": "Tiempo Promedio de Respuesta",
+      "clinical_coverage": "Cobertura Clínica"
+    }
   }
 }

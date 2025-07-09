@@ -1,0 +1,76 @@
+{
+  "entry": {
+    "title": "Órdenes y Prescripciones",
+    "subtitle": "Seleccione las órdenes médicas recomendadas por la IA",
+    "selected_orders": "Órdenes Seleccionadas",
+    "no_orders_selected": "No hay órdenes seleccionadas",
+    "suggested_orders": "Órdenes Sugeridas por Categoría",
+    "custom_order": "Orden Personalizada",
+    "custom_order_placeholder": "Escriba aquí cualquier orden adicional o instrucciones especiales...",
+    "back_to_notes": "Volver a Notas",
+    "generate_summary": "Generar Resumen"
+  },
+  "categories": {
+    "medications": "Medicamentos",
+    "lab_tests": "Exámenes de Laboratorio",
+    "imaging": "Estudios de Imagen",
+    "consultations": "Interconsultas"
+  },
+  "medications": {
+    "ibuprofen": {
+      "name": "Ibuprofeno 400mg",
+      "dosage": "Cada 6 horas según necesidad",
+      "duration": "5 días"
+    },
+    "paracetamol": {
+      "name": "Paracetamol 500mg",
+      "dosage": "Cada 8 horas según necesidad",
+      "duration": "3 días"
+    },
+    "sumatriptan": {
+      "name": "Sumatriptán 50mg",
+      "dosage": "Una dosis al inicio del dolor",
+      "duration": "PRN"
+    }
+  },
+  "lab_tests": {
+    "complete_blood_count": {
+      "name": "Hemograma completo",
+      "reason": "Descartar proceso infeccioso"
+    },
+    "inflammatory_markers": {
+      "name": "PCR y VSG",
+      "reason": "Marcadores inflamatorios"
+    }
+  },
+  "imaging": {
+    "head_ct": {
+      "name": "TAC de cráneo simple",
+      "reason": "Descartar patología intracraneal"
+    },
+    "brain_mri": {
+      "name": "Resonancia magnética cerebral",
+      "reason": "Si persisten síntomas"
+    }
+  },
+  "consultations": {
+    "neurology": {
+      "name": "Neurología",
+      "reason": "Evaluación especializada de cefalea"
+    },
+    "ophthalmology": {
+      "name": "Oftalmología",
+      "reason": "Si hay síntomas visuales"
+    }
+  },
+  "priority": {
+    "high": "Alta",
+    "medium": "Media",
+    "low": "Baja"
+  },
+  "details": {
+    "dose": "Dosis",
+    "duration": "Duración",
+    "indication": "Indicación"
+  }
+}
