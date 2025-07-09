@@ -48,6 +48,20 @@ const fallbackTranslations = {
   'es': {
     // Core transcription functionality
     'transcription.title': 'Transcripción en Tiempo Real',
+    
+    // Language switcher translations
+    'language_switcher.current_language': 'Idioma actual: {language}',
+    'language_switcher.medical_certified': 'Certificado Médico',
+    'language_switcher.medical': 'Médico',
+    'language_switcher.medical_grade': 'Calidad Médica',
+    'language_switcher.validated': 'Validado',
+    'language_switcher.change_language': 'Cambiar idioma',
+    'language_switcher.select_language': 'Seleccionar idioma',
+    'spanish': 'Español',
+    'english': 'Inglés',
+    'spanish_abbr': 'ES',
+    'english_abbr': 'EN',
+    'clinical_language': 'Idioma Clínico',
     'transcription.ready_to_record': 'Listo para grabar',
     'transcription.start_recording': 'Iniciar Grabación',
     'transcription.stop_recording': 'Detener',
@@ -203,6 +217,19 @@ const fallbackTranslations = {
     'dr_ana_specialty': 'Pediatría',
     'dr_ana_location': 'Buenos Aires',
     
+    // Workflow steps
+    'workflow.steps.listen': 'Escuchar',
+    'workflow.steps.review': 'Revisar Flujo',
+    'workflow.steps.notes': 'Notas',
+    'workflow.steps.orders': 'Órdenes',
+    'workflow.steps.summary': 'Resumen',
+    
+    // Demo keys
+    'demo.demo_title': 'Demo de IA Médica',
+    'demo.patient_selector': 'Seleccionar Paciente',
+    'demo.patient_selector_subtitle': 'Elige un paciente para comenzar la demo',
+    'demo.request_custom_demo': 'Solicitar Demo Personalizada',
+    
     // Landing page feature cards - BRUTAL FIX for hardcoded English
     'Patient Management': 'Gestión de Pacientes',
     'Medical Reports': 'Reportes Médicos', 
@@ -223,6 +250,20 @@ const fallbackTranslations = {
     'transcription.start_recording': 'Start Recording',
     'transcription.stop_recording': 'Stop',
     'transcription.no_transcript_available': 'No transcript available',
+    
+    // Language switcher translations
+    'language_switcher.current_language': 'Current language: {language}',
+    'language_switcher.medical_certified': 'Medical Certified',
+    'language_switcher.medical': 'Medical',
+    'language_switcher.medical_grade': 'Medical Grade',
+    'language_switcher.validated': 'Validated',
+    'language_switcher.change_language': 'Change language',
+    'language_switcher.select_language': 'Select language',
+    'spanish': 'Spanish',
+    'english': 'English',
+    'spanish_abbr': 'ES',
+    'english_abbr': 'EN',
+    'clinical_language': 'Clinical Language',
     'transcription.no_transcript_description': 'Press "Start Recording" to begin transcribing your medical consultation',
     'transcription.service_label': 'Service',
     'transcription.service_browser': 'Browser',
@@ -270,7 +311,20 @@ const fallbackTranslations = {
     'footer_copy': '© 2024 SYMFARMIA • Made with 💙 for doctors in Mexico',
     'footer_privacy': 'Privacy',
     'footer_terms': 'Terms',
-    'footer_contact': 'Contact'
+    'footer_contact': 'Contact',
+    
+    // Workflow steps
+    'workflow.steps.listen': 'Listen',
+    'workflow.steps.review': 'Review Flow',
+    'workflow.steps.notes': 'Notes',
+    'workflow.steps.orders': 'Orders',
+    'workflow.steps.summary': 'Summary',
+    
+    // Demo keys
+    'demo.demo_title': 'Medical AI Demo',
+    'demo.patient_selector': 'Select Patient',
+    'demo.patient_selector_subtitle': 'Choose a patient to start the demo',
+    'demo.request_custom_demo': 'Request Custom Demo'
   }
 };
 

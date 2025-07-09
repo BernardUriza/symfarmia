@@ -18,6 +18,7 @@ import { I18nProvider } from "./providers/I18nProvider";
 import { PatientContextProvider } from "./providers/PatientContextProvider";
 import MedicalAssistant from "./components/MedicalAssistantWrapper";
 import VersionInfo from "./components/VersionInfo";
+import { HeaderLanguageSwitcher } from "../components/layout/GlobalLanguageSwitcher";
 import { SITE_CONFIG } from "./lib/site-config";
 
 // MEDICAL-GRADE Critical CSS with hydration safety
@@ -74,6 +75,33 @@ const MedicalCriticalCSS = `
     align-items: center !important;
     justify-content: center !important;
     font-family: system-ui, sans-serif !important;
+  }
+  
+  /* LANGUAGE SWITCHER STYLES */
+  .language-switcher-container {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 8px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+  
+  .language-switcher-floating {
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-5px); }
+  }
+  
+  .language-switcher-dropdown {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+  }
+  
+  .language-switcher-dropdown.open {
+    max-height: 300px;
   }
 `;
 
@@ -211,6 +239,13 @@ export default function RootLayout({ children }) {
                           {/* MEDICAL DEMO BANNER */}
                           <MedicalErrorBoundary context="Demo Banner" medicalWorkflow="Demo Mode">
                             <DemoModeBanner />
+                          </MedicalErrorBoundary>
+                          
+                          {/* GLOBAL LANGUAGE SWITCHER */}
+                          <MedicalErrorBoundary context="Language Switcher" medicalWorkflow="Language Selection">
+                            <div className="fixed top-4 right-4 z-50">
+                              <HeaderLanguageSwitcher />
+                            </div>
                           </MedicalErrorBoundary>
                           
                           {/* MAIN CONTENT AREA */}

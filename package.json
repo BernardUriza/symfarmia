@@ -71,7 +71,12 @@
     "build:diary:priorities": "node scripts/build-diary.js priorities",
     "build:diary:read": "node scripts/build-diary.js read",
     "build:fix-webpack": "node scripts/fix-webpack-import-error.js",
-    "build:diagnose": "node scripts/webpack-diagnostic.js"
+    "build:diagnose": "node scripts/webpack-diagnostic.js",
+    "i18n:nuclear": "node scripts/revolutionary-i18n-generator.js",
+    "i18n:validate": "node scripts/bulletproof-build-pipeline.js",
+    "i18n:optimize": "node scripts/performance-revolution.js",
+    "i18n:revolutionary": "node scripts/revolutionary-build.js",
+    "i18n:monitor": "node scripts/revolutionary-build.js && npm run build:monitor"
   },
   "dependencies": {
     "@auth0/nextjs-auth0": "^4.8.0",
