@@ -1,0 +1,28 @@
+{
+  "capture": {
+    "title": "Captura de Conversación",
+    "subtitle": "La IA está escuchando y transcribiendo su consulta médica en tiempo real",
+    "recording_active": "Grabación Activa",
+    "ready_to_record": "Listo para grabar",
+    "audio_level": "Nivel de Audio",
+    "live_transcription": "Transcripción en Vivo",
+    "powered_by_ai": "Impulsado por IA",
+    "review_dialog_flow": "Revisar Flujo de Diálogo"
+  },
+  "speakers": {
+    "doctor": "Doctor",
+    "patient": "Paciente",
+    "ai_medical": "IA Médica"
+  },
+  "processing": {
+    "ai_processing": "Analizando síntomas médicos...",
+    "processing_status": "procesando..."
+  },
+  "sample_dialogue": {
+    "doctor_greeting": "Buenos días, María. ¿Cómo se siente hoy?",
+    "patient_complaint": "He tenido este dolor de cabeza persistente durante los últimos tres días.",
+    "doctor_inquiry": "¿Puede describir el dolor? ¿Es pulsátil, punzante o sordo?",
+    "patient_description": "Es más bien un dolor sordo y constante, especialmente en el lado derecho de mi cabeza.",
+    "doctor_followup": "¿Ha probado algún medicamento o tratamiento..."
+  }
+}

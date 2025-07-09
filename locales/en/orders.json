@@ -1,0 +1,76 @@
+{
+  "entry": {
+    "title": "Orders and Prescriptions",
+    "subtitle": "Select the AI-recommended medical orders",
+    "selected_orders": "Selected Orders",
+    "no_orders_selected": "No orders selected",
+    "suggested_orders": "Suggested Orders by Category",
+    "custom_order": "Custom Order",
+    "custom_order_placeholder": "Write here any additional orders or special instructions...",
+    "back_to_notes": "Back to Notes",
+    "generate_summary": "Generate Summary"
+  },
+  "categories": {
+    "medications": "Medications",
+    "lab_tests": "Laboratory Tests",
+    "imaging": "Imaging Studies",
+    "consultations": "Consultations"
+  },
+  "medications": {
+    "ibuprofen": {
+      "name": "Ibuprofen 400mg",
+      "dosage": "Every 6 hours as needed",
+      "duration": "5 days"
+    },
+    "paracetamol": {
+      "name": "Paracetamol 500mg",
+      "dosage": "Every 8 hours as needed",
+      "duration": "3 days"
+    },
+    "sumatriptan": {
+      "name": "Sumatriptan 50mg",
+      "dosage": "One dose at onset of pain",
+      "duration": "PRN"
+    }
+  },
+  "lab_tests": {
+    "complete_blood_count": {
+      "name": "Complete Blood Count",
+      "reason": "Rule out infectious process"
+    },
+    "inflammatory_markers": {
+      "name": "CRP and ESR",
+      "reason": "Inflammatory markers"
+    }
+  },
+  "imaging": {
+    "head_ct": {
+      "name": "Head CT scan",
+      "reason": "Rule out intracranial pathology"
+    },
+    "brain_mri": {
+      "name": "Brain MRI",
+      "reason": "If symptoms persist"
+    }
+  },
+  "consultations": {
+    "neurology": {
+      "name": "Neurology",
+      "reason": "Specialized headache evaluation"
+    },
+    "ophthalmology": {
+      "name": "Ophthalmology",
+      "reason": "If visual symptoms present"
+    }
+  },
+  "priority": {
+    "high": "High",
+    "medium": "Medium",
+    "low": "Low"
+  },
+  "details": {
+    "dose": "Dose",
+    "duration": "Duration",
+    "indication": "Indication"
+  }
+}

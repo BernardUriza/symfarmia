@@ -1,0 +1,39 @@
+{
+  "buttons": {
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "back": "Volver",
+    "continue": "Continuar",
+    "finish": "Finalizar",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "close": "Cerrar",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "add": "Agregar",
+    "remove": "Quitar",
+    "select": "Seleccionar",
+    "deselect": "Deseleccionar"
+  },
+  "workflow": {
+    "back_to_conversation": "Volver a Conversación",
+    "back_to_dialogue": "Volver a Diálogo",
+    "back_to_notes": "Volver a Notas",
+    "back_to_orders": "Volver a Órdenes",
+    "proceed_to_dialogue": "Proceder a Diálogo",
+    "proceed_to_notes": "Proceder a Notas",
+    "proceed_to_orders": "Proceder a Órdenes",
+    "proceed_to_summary": "Proceder a Resumen",
+    "generate_notes": "Generar Notas",
+    "generate_orders": "Generar Órdenes",
+    "generate_summary": "Generar Resumen",
+    "export_summary": "Exportar Resumen"
+  },
+  "sections": {
+    "conversation": "Conversación",
+    "dialogue": "Diálogo",
+    "notes": "Notas",
+    "orders": "Órdenes",
+    "summary": "Resumen"
+  }
+}

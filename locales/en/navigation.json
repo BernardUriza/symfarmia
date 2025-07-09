@@ -1,0 +1,39 @@
+{
+  "buttons": {
+    "previous": "Previous",
+    "next": "Next",
+    "back": "Back",
+    "continue": "Continue",
+    "finish": "Finish",
+    "save": "Save",
+    "cancel": "Cancel",
+    "close": "Close",
+    "edit": "Edit",
+    "delete": "Delete",
+    "add": "Add",
+    "remove": "Remove",
+    "select": "Select",
+    "deselect": "Deselect"
+  },
+  "workflow": {
+    "back_to_conversation": "Back to Conversation",
+    "back_to_dialogue": "Back to Dialogue",
+    "back_to_notes": "Back to Notes",
+    "back_to_orders": "Back to Orders",
+    "proceed_to_dialogue": "Proceed to Dialogue",
+    "proceed_to_notes": "Proceed to Notes",
+    "proceed_to_orders": "Proceed to Orders",
+    "proceed_to_summary": "Proceed to Summary",
+    "generate_notes": "Generate Notes",
+    "generate_orders": "Generate Orders",
+    "generate_summary": "Generate Summary",
+    "export_summary": "Export Summary"
+  },
+  "sections": {
+    "conversation": "Conversation",
+    "dialogue": "Dialogue",
+    "notes": "Notes",
+    "orders": "Orders",
+    "summary": "Summary"
+  }
+}

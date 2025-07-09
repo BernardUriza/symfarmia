@@ -9,6 +9,11 @@ async function loadTranslations(locale) {
     const modules = await Promise.all([
       import(`../../locales/${locale}/common.json`),
       import(`../../locales/${locale}/medical.json`),
+      import(`../../locales/${locale}/clinical.json`),
+      import(`../../locales/${locale}/orders.json`),
+      import(`../../locales/${locale}/navigation.json`),
+      import(`../../locales/${locale}/conversation.json`),
+      import(`../../locales/${locale}/status.json`),
       import(`../../locales/${locale}/landing.json`),
       import(`../../locales/${locale}/dashboard.json`),
     ]);
