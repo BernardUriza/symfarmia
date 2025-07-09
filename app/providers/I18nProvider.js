@@ -11,6 +11,8 @@ async function loadTranslations(locale) {
       import(`../../locales/${locale}/medical.json`),
       import(`../../locales/${locale}/landing.json`),
       import(`../../locales/${locale}/dashboard.json`),
+      import(`../../locales/${locale}/conversation.json`),
+      import(`../../locales/${locale}/navigation.json`),
     ]);
     
     // Flatten nested objects for easier access

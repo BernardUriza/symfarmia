@@ -1,0 +1,8 @@
+{
+  "segments": {
+    "doctor_greeting": "Good morning, Maria. How are you feeling today?",
+    "patient_symptom": "I've had this persistent headache for the last three days.",
+    "doctor_question": "Can you describe the pain? Is it throbbing, stabbing or dull?",
+    "patient_description": "It's more of a dull and constant pain, especially on the right side of my head."
+  }
+}

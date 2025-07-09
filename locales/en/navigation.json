@@ -1,0 +1,19 @@
+{
+  "orders": {
+    "title": "Orders and Prescriptions",
+    "description": "Select the medical orders recommended by the AI",
+    "selected": "Selected Orders",
+    "none": "No orders selected",
+    "custom_title": "Custom Order",
+    "custom_placeholder": "Write any additional order or special instructions here...",
+    "back_to_notes": "Back to Notes",
+    "generate_summary": "Generate Summary",
+    "dosage_label": "Dosage:",
+    "duration_label": "Duration:",
+    "reason_label": "Indication:",
+    "category_medications": "Medications",
+    "category_labs": "Lab Tests",
+    "category_imaging": "Imaging Studies",
+    "category_consults": "Referrals"
+  }
+}

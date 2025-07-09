@@ -1,0 +1,8 @@
+{
+  "segments": {
+    "doctor_greeting": "Buenos días, María. ¿Cómo se siente hoy?",
+    "patient_symptom": "He tenido este dolor de cabeza persistente durante los últimos tres días.",
+    "doctor_question": "¿Puede describir el dolor? ¿Es pulsátil, punzante o sordo?",
+    "patient_description": "Es más bien un dolor sordo y constante, especialmente en el lado derecho de mi cabeza."
+  }
+}

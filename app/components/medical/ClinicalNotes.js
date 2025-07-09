@@ -6,65 +6,35 @@ import { Textarea } from '../ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { ChevronLeft, ChevronRight, Edit3, Check, FileText, Sparkles, Copy } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslation } from '../../providers/I18nProvider';
 
 export function ClinicalNotes({ onNext, onPrevious }) {
+  const { t } = useTranslation();
   const [editMode, setEditMode] = useState(false);
   const [notes, setNotes] = useState({
-    subjective: `Motivo de Consulta: Paciente presenta dolor de cabeza persistente durante 3 días.
-
-Historia de la Enfermedad Actual: Mujer de 32 años refiere inicio de cefalea unilateral hace 3 días, descrita como dolor sordo y constante que afecta principalmente el lado derecho de la cabeza. Intensidad del dolor calificada 6-7/10. Paciente refiere náuseas asociadas y fotofobia. Los síntomas están afectando las actividades diarias. No refiere fiebre. Paciente nota rigidez cervical leve. Sin cambios visuales.
-
-Revisión por Sistemas: Positivo para cefalea, náuseas, fotofobia, rigidez cervical. Negativo para fiebre, cambios visuales, vómitos.`,
-    
-    objective: `Signos Vitales: No documentados en este encuentro
-Examen Físico: No realizado en este encuentro
-    
-Nota: Esta fue una consulta virtual/telefónica enfocada en la toma de historia clínica.`,
-    
-    assessment: `Diagnóstico Principal: Cefalea, no especificada (R51)
-
-Diagnóstico Diferencial:
-1. Migraña - apoyado por localización unilateral, intensidad moderada, náuseas y fotofobia asociadas
-2. Cefalea tensional - rigidez cervical puede sugerir componente muscular
-3. Cefalea secundaria - requeriría evaluación adicional si los síntomas persisten
-
-Impresión Clínica: Paciente presenta características clínicas compatibles con trastorno de cefalea primaria, muy probablemente migraña vs cefalea tensional. No se identifican síntomas de alarma.`,
-    
-    plan: `1. Manejo Farmacológico:
-   - Prueba con AINEs (ibuprofeno 400mg c/6h PRN) para alivio sintomático
-   - Considerar terapia con triptanes si se confirma diagnóstico de migraña
-
-2. Medidas no farmacológicas:
-   - Reposo en ambiente oscuro y silencioso
-   - Hidratación adecuada
-   - Compresas frías en área afectada
-
-3. Seguimiento:
-   - Cita de control en 1 semana si síntomas persisten o empeoran
-   - Atención médica inmediata si desarrolla fiebre, rigidez cervical severa o síntomas neurológicos
-
-4. Educación al Paciente:
-   - Se discutieron desencadenantes de cefalea y modificaciones del estilo de vida
-   - Se proporcionó información sobre cuándo buscar atención urgente`
+    subjective: t('clinical_notes.subjective_template'),
+    objective: t('clinical_notes.objective_template'),
+    assessment: t('clinical_notes.assessment_template'),
+    plan: t('clinical_notes.plan_template')
   });
 
   const handleCopyNote = () => {
     const fullNote = `SUBJETIVO:\n${notes.subjective}\n\nOBJETIVO:\n${notes.objective}\n\nEVALUACIÓN:\n${notes.assessment}\n\nPLAN:\n${notes.plan}`;
     navigator.clipboard.writeText(fullNote);
-    toast("Nota clínica copiada al portapapeles");
+    toast(t('clinical_notes.copied_toast'));
   };
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl text-slate-900 mb-2">Borrador de Nota Clínica</h1>
-          <p className="text-slate-600">Nota SOAP generada por IA lista para revisión</p>
+          <h1 className="text-2xl text-slate-900 mb-2">{t('clinical_notes.draft_title')}</h1>
+          <p className="text-slate-600">{t('clinical_notes.draft_subtitle')}</p>
         </div>
         <div className="flex items-center gap-2">
           <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
             <Sparkles className="h-3 w-3 mr-1" />
-            Generado por IA
+            {t('clinical_notes.generated_by_ai')}
           </Badge>
           <Button
             variant="outline"
@@ -73,7 +43,7 @@ Impresión Clínica: Paciente presenta características clínicas compatibles co
             className="flex items-center gap-2"
           >
             {editMode ? <Check className="h-4 w-4" /> : <Edit3 className="h-4 w-4" />}
-            {editMode ? 'Guardar Cambios' : 'Editar Nota'}
+            {editMode ? t('clinical_notes.save_changes') : t('clinical_notes.edit_note')}
           </Button>
           <Button
             variant="outline"
@@ -82,7 +52,7 @@ Impresión Clínica: Paciente presenta características clínicas compatibles co
             className="flex items-center gap-2"
           >
             <Copy className="h-4 w-4" />
-            Copiar
+            {t('copy')}
           </Button>
         </div>
       </div>
@@ -220,13 +190,12 @@ Impresión Clínica: Paciente presenta características clínicas compatibles co
       <div className="flex justify-between items-center pt-4">
         <Button variant="outline" onClick={onPrevious} className="flex items-center gap-2">
           <ChevronLeft className="h-4 w-4" />
-          Volver a Revisión de Flujo
+          {t('clinical_notes.back_to_dialogue')}
         </Button>
         <Button onClick={onNext} className="flex items-center gap-2">
-          Generar Órdenes
+          {t('clinical_notes.generate_orders')}
           <ChevronRight className="h-4 w-4" />
         </Button>
       </div>
     </div>
-  );
-}
+  );}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useTranslation } from '../../providers/I18nProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
@@ -6,9 +6,9 @@ import { Badge } from '../ui/badge';
 import { Textarea } from '../ui/textarea';
 import { ChevronLeft, ChevronRight, Pill, Calendar, AlertCircle, Check } from 'lucide-react';
 
-const suggestedOrders = [
+const baseOrders = [
   {
-    category: 'Medicamentos',
+    key: 'category_medications',
     items: [
       { name: 'Ibuprofeno 400mg', dosage: 'Cada 6 horas según necesidad', duration: '5 días', priority: 'high' },
       { name: 'Paracetamol 500mg', dosage: 'Cada 8 horas según necesidad', duration: '3 días', priority: 'medium' },
@@ -16,21 +16,21 @@ const suggestedOrders = [
     ]
   },
   {
-    category: 'Exámenes de Laboratorio',
+    key: 'category_labs',
     items: [
       { name: 'Hemograma completo', reason: 'Descartar proceso infeccioso', priority: 'medium' },
       { name: 'PCR y VSG', reason: 'Marcadores inflamatorios', priority: 'low' }
     ]
   },
   {
-    category: 'Estudios de Imagen',
+    key: 'category_imaging',
     items: [
       { name: 'TAC de cráneo simple', reason: 'Descartar patología intracraneal', priority: 'high' },
       { name: 'Resonancia magnética cerebral', reason: 'Si persisten síntomas', priority: 'low' }
     ]
   },
   {
-    category: 'Interconsultas',
+    key: 'category_consults',
     items: [
       { name: 'Neurología', reason: 'Evaluación especializada de cefalea', priority: 'medium' },
       { name: 'Oftalmología', reason: 'Si hay síntomas visuales', priority: 'low' }
@@ -42,6 +42,9 @@ export function OrderEntry({ onNext, onPrevious }) {
   const { t } = useTranslation();
   const [selectedOrders, setSelectedOrders] = useState([]);
   const [customOrder, setCustomOrder] = useState('');
+
+  const suggestedOrders = useMemo(() =>
+    baseOrders.map(o => ({ ...o, category: t(`orders.${o.key}`) })), [t]);
 
   const toggleOrder = (categoryIndex, itemIndex) => {
     const orderId = `${categoryIndex}-${itemIndex}`;
@@ -64,8 +67,8 @@ export function OrderEntry({ onNext, onPrevious }) {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="text-center mb-6">
-        <h1 className="text-2xl text-slate-900 mb-2">Órdenes y Prescripciones</h1>
-        <p className="text-slate-600">Seleccione las órdenes médicas recomendadas por la IA</p>
+        <h1 className="text-2xl text-slate-900 mb-2">{t('orders.title')}</h1>
+        <p className="text-slate-600">{t('orders.description')}</p>
       </div>
 
       {/* Resumen de Órdenes Seleccionadas */}
@@ -73,12 +76,12 @@ export function OrderEntry({ onNext, onPrevious }) {
         <CardHeader>
           <CardTitle className="text-blue-900 flex items-center gap-2">
             <Check className="h-5 w-5" />
-            Órdenes Seleccionadas ({selectedOrders.length})
+            {t('orders.selected')} ({selectedOrders.length})
           </CardTitle>
         </CardHeader>
         <CardContent>
           {selectedOrders.length === 0 ? (
-            <p className="text-blue-600 text-sm">No hay órdenes seleccionadas</p>
+            <p className="text-blue-600 text-sm">{t('orders.none')}</p>
           ) : (
             <div className="space-y-2">
               {selectedOrders.map((orderId, index) => {
@@ -131,17 +134,17 @@ export function OrderEntry({ onNext, onPrevious }) {
                           <h4 className="font-medium text-slate-900">{item.name}</h4>
                           {item.dosage && (
                             <p className="text-sm text-slate-600 mt-1">
-                              <strong>Dosis:</strong> {item.dosage}
+                              <strong>{t('orders.dosage_label')}</strong> {item.dosage}
                             </p>
                           )}
                           {item.duration && (
                             <p className="text-sm text-slate-600">
-                              <strong>Duración:</strong> {item.duration}
+                              <strong>{t('orders.duration_label')}</strong> {item.duration}
                             </p>
                           )}
                           {item.reason && (
                             <p className="text-sm text-slate-600">
-                              <strong>Indicación:</strong> {item.reason}
+                              <strong>{t('orders.reason_label')}</strong> {item.reason}
                             </p>
                           )}
                         </div>
@@ -168,14 +171,14 @@ export function OrderEntry({ onNext, onPrevious }) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <AlertCircle className="h-5 w-5" />
-            Orden Personalizada
+            {t('orders.custom_title')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <Textarea
             value={customOrder}
             onChange={(e) => setCustomOrder(e.target.value)}
-            placeholder="Escriba aquí cualquier orden adicional o instrucciones especiales..."
+            placeholder={t('orders.custom_placeholder')}
             className="min-h-24"
           />
         </CardContent>
@@ -185,13 +188,12 @@ export function OrderEntry({ onNext, onPrevious }) {
       <div className="flex justify-between items-center pt-4">
         <Button variant="outline" onClick={onPrevious} className="flex items-center gap-2">
           <ChevronLeft className="h-4 w-4" />
-          Volver a Notas
+          {t('orders.back_to_notes')}
         </Button>
         <Button onClick={onNext} className="flex items-center gap-2">
-          Generar Resumen
+          {t('orders.generate_summary')}
           <ChevronRight className="h-4 w-4" />
         </Button>
       </div>
     </div>
-  );
-}
+  );}

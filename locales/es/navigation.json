@@ -1,0 +1,19 @@
+{
+  "orders": {
+    "title": "Órdenes y Prescripciones",
+    "description": "Seleccione las órdenes médicas recomendadas por la IA",
+    "selected": "Órdenes Seleccionadas",
+    "none": "No hay órdenes seleccionadas",
+    "custom_title": "Orden Personalizada",
+    "custom_placeholder": "Escriba aquí cualquier orden adicional o instrucciones especiales...",
+    "back_to_notes": "Volver a Notas",
+    "generate_summary": "Generar Resumen",
+    "dosage_label": "Dosis:",
+    "duration_label": "Duración:",
+    "reason_label": "Indicación:",
+    "category_medications": "Medicamentos",
+    "category_labs": "Exámenes de Laboratorio",
+    "category_imaging": "Estudios de Imagen",
+    "category_consults": "Interconsultas"
+  }
+}

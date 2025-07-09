@@ -337,7 +337,21 @@
       "total_sections": "Secciones Totales",
       "total_interactions": "Interacciones Totales",
       "avg_response_time": "Tiempo Promedio de Respuesta",
-      "clinical_coverage": "Cobertura Clínica"
-    }
+    "clinical_coverage": "Cobertura Clínica"
+  }
+  ,
+  "clinical_notes": {
+    "draft_title": "Borrador de Nota Clínica",
+    "draft_subtitle": "Nota SOAP generada por IA lista para revisión",
+    "generated_by_ai": "Generado por IA",
+    "save_changes": "Guardar Cambios",
+    "edit_note": "Editar Nota",
+    "copied_toast": "Nota clínica copiada al portapapeles",
+    "back_to_dialogue": "Volver a Revisión de Flujo",
+    "generate_orders": "Generar Órdenes",
+    "subjective_template": "Motivo de Consulta: Paciente presenta dolor de cabeza persistente durante 3 días.\n\nHistoria de la Enfermedad Actual: Mujer de 32 años refiere inicio de cefalea unilateral hace 3 días, descrita como dolor sordo y constante que afecta principalmente el lado derecho de la cabeza. Intensidad del dolor calificada 6-7/10. Paciente refiere náuseas asociadas y fotofobia. Los síntomas están afectando las actividades diarias. No refiere fiebre. Paciente nota rigidez cervical leve. Sin cambios visuales.\n\nRevisión por Sistemas: Positivo para cefalea, náuseas, fotofobia, rigidez cervical. Negativo para fiebre, cambios visuales, vómitos.",
+    "objective_template": "Signos Vitales: No documentados en este encuentro\nExamen Físico: No realizado en este encuentro\n\nNota: Esta fue una consulta virtual/telefónica enfocada en la toma de historia clínica.",
+    "assessment_template": "Diagnóstico Principal: Cefalea, no especificada (R51)\n\nDiagnóstico Diferencial:\n1. Migraña - apoyado por localización unilateral, intensidad moderada, náuseas y fotofobia asociadas\n2. Cefalea tensional - rigidez cervical puede sugerir componente muscular\n3. Cefalea secundaria - requeriría evaluación adicional si los síntomas persisten\n\nImpresión Clínica: Paciente presenta características clínicas compatibles con trastorno de cefalea primaria, muy probablemente migraña vs cefalea tensional. No se identifican síntomas de alarma.",
+    "plan_template": "1. Manejo Farmacológico:\n   - Prueba con AINEs (ibuprofeno 400mg c/6h PRN) para alivio sintomático\n   - Considerar terapia con triptanes si se confirma diagnóstico de migraña\n\n2. Medidas no farmacológicas:\n   - Reposo en ambiente oscuro y silencioso\n   - Hidratación adecuada\n   - Compresas frías en área afectada\n\n3. Seguimiento:\n   - Cita de control en 1 semana si síntomas persisten o empeoran\n   - Atención médica inmediata si desarrolla fiebre, rigidez cervical severa o síntomas neurológicos\n\n4. Educación al Paciente:\n   - Se discutieron desencadenantes de cefalea y modificaciones del estilo de vida\n   - Se proporcionó información sobre cuándo buscar atención urgente"
   }
 }

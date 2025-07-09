@@ -10,10 +10,26 @@ export function ConversationCapture({ onNext, isRecording, setIsRecording }) {
   const { t } = useTranslation();
   const audioLevel = useMicrophoneLevel(isRecording);
   const [transcriptSegments, setTranscriptSegments] = useState([
-    { speaker: t('conversation.doctor_speaker'), text: 'Buenos días, María. ¿Cómo se siente hoy?', time: '00:00:15' },
-    { speaker: t('conversation.patient_speaker'), text: 'He tenido este dolor de cabeza persistente durante los últimos tres días.', time: '00:00:22' },
-    { speaker: t('conversation.doctor_speaker'), text: '¿Puede describir el dolor? ¿Es pulsátil, punzante o sordo?', time: '00:00:35' },
-    { speaker: t('conversation.patient_speaker'), text: 'Es más bien un dolor sordo y constante, especialmente en el lado derecho de mi cabeza.', time: '00:00:42' },
+    {
+      speaker: t('conversation.doctor_speaker'),
+      text: t('segments.doctor_greeting'),
+      time: '00:00:15'
+    },
+    {
+      speaker: t('conversation.patient_speaker'),
+      text: t('segments.patient_symptom'),
+      time: '00:00:22'
+    },
+    {
+      speaker: t('conversation.doctor_speaker'),
+      text: t('segments.doctor_question'),
+      time: '00:00:35'
+    },
+    {
+      speaker: t('conversation.patient_speaker'),
+      text: t('segments.patient_description'),
+      time: '00:00:42'
+    },
   ]);
   const [isProcessing, setIsProcessing] = useState(false);
 
