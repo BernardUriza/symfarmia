@@ -8,6 +8,8 @@ try {
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Allow cross-origin dev requests to Next.js assets (for local dev /_next requests)
+  allowedDevOrigins: ['http://127.0.0.1:3000', 'http://localhost:3000'],
   typescript: { ignoreBuildErrors: true },
   eslint: { ignoreDuringBuilds: true },
   output: process.env.NETLIFY ? 'standalone' : undefined,
