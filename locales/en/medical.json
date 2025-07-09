@@ -259,7 +259,7 @@
     "recording_active": "Recording Active",
     "patient_selector": "Select Patient",
     "patient_selector_subtitle": "Choose a patient to start the demo",
-    "add_new_patient": "+ Add New Patient",
+    "request_custom_demo": "Request Custom Demo",
     "demo_reset": "Reset Demo"
   },
   "workflow": {

@@ -1,3 +1,5 @@
+"use client";
+
 import React from 'react';
 import { useTranslation } from '../../providers/I18nProvider';
 import { useMicrophoneLevel } from '../../../hooks/useMicrophoneLevel';
@@ -35,12 +37,12 @@ export function ConversationCapture({ onNext, isRecording, setIsRecording }) {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="text-center mb-6">
-        <h1 className="text-2xl text-slate-900 mb-2">{t('conversation.capture.title')}</h1>
-        <p className="text-slate-600">{t('conversation.capture.subtitle')}</p>
+        <h1 className="text-2xl font-medium text-gray-900 mb-2">{t('conversation.capture.title')}</h1>
+        <p className="text-gray-700 bg-white">{t('conversation.capture.subtitle')}</p>
       </div>
 
       {/* Tarjeta de Estado de Grabación */}
-      <Card className="border-2 border-dashed border-blue-200 bg-blue-50/50">
+      <Card className="border-2 border-dashed border-blue-200 bg-white shadow-sm">
         <CardContent className="p-8 text-center">
           <div className="flex flex-col items-center space-y-4">
             <div className={`relative w-24 h-24 rounded-full flex items-center justify-center transition-all duration-300 ${
@@ -108,6 +110,11 @@ export function ConversationCapture({ onNext, isRecording, setIsRecording }) {
           <CardTitle className="flex items-center gap-2">
             <Volume2 className="h-5 w-5" />
             {t('conversation.capture.live_transcription')}
+            {isRecording && (
+              <Badge variant="destructive" className="animate-pulse text-blue-600">
+                LIVE
+              </Badge>
+            )}
             <Badge variant="outline" className="ml-auto">
               {t('conversation.capture.powered_by_ai')}
             </Badge>
@@ -116,18 +123,18 @@ export function ConversationCapture({ onNext, isRecording, setIsRecording }) {
         <CardContent>
           <div className="space-y-4 max-h-96 overflow-y-auto" role="log" aria-live="polite" aria-label="Medical conversation transcript">
             {transcription?.segments.map((segment, index) => (
-              <div key={index} className="flex gap-4 p-3 rounded-lg bg-slate-50" role="article" aria-labelledby={`speaker-${index}`}>
+              <div key={index} className="flex gap-4 p-3 rounded-lg bg-slate-50 shadow-sm border-2 leading-relaxed" role="article" aria-labelledby={`speaker-${index}`}>
                 <div className="flex flex-col items-center">
                   <Badge
                     variant={segment.speaker === 'doctor' ? 'default' : 'secondary'}
-                    className="text-xs mb-1"
+                    className="text-xs mb-1 font-semibold"
                     id={`speaker-${index}`}
                   >
                     {segment.speaker}
                   </Badge>
                   <span className="text-xs text-slate-500" aria-label={`Time: ${new Date(segment.startTime).toLocaleTimeString('es-ES')}`}>{new Date(segment.startTime).toLocaleTimeString('es-ES')}</span>
                 </div>
-                <p className="flex-1 text-slate-700" aria-label={`${segment.speaker} says: ${segment.text}`}>{segment.text}</p>
+                <p className="flex-1 text-slate-700 font-medium" aria-label={`${segment.speaker} says: ${segment.text}`}>{segment.text}</p>
               </div>
             ))}
             {status === TranscriptionStatus.PROCESSING && (

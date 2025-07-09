@@ -88,7 +88,11 @@
       "WebFetch(domain:localhost)",
       "Bash(PORT=3002 npm run dev)",
       "Bash(git checkout:*)",
-      "Bash(timeout:*)"
+      "Bash(timeout:*)",
+      "Bash(for file in /workspaces/symfarmia/app/components/medical/*.js)",
+      "Bash(do echo \"=== $file ===\")",
+      "Bash(head:*)",
+      "Bash(done)"
     ],
     "deny": []
   }
