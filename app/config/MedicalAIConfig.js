@@ -7,7 +7,8 @@
 
 export class MedicalAIConfig {
   static BASE_URL = 'https://api-inference.huggingface.co/models';
-  static TIMEOUT = 30000; // 30 seconds
+  static TIMEOUT = 10000; // 10 seconds
+  static RETRY_ATTEMPTS = 3;
   static USER_AGENT = 'SYMFARMIA-Medical-Assistant/1.0';
   
   // MEDICAL MODELS - TEXT GENERATION FOR REAL RESPONSES
@@ -82,6 +83,10 @@ export class MedicalAIConfig {
    */
   static getTimeout() {
     return this.TIMEOUT;
+  }
+
+  static getRetryAttempts() {
+    return this.RETRY_ATTEMPTS;
   }
 
   /**

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { processMedicalQuery, getErrorMessage } from '@/app/services/MedicalAILogic';
 import { MedicalAIConfig } from '@/app/config/MedicalAIConfig.js';
+import { withAuth } from '@/lib/middleware/auth';
 
 interface MedicalRequest {
   query: string;
@@ -32,7 +33,7 @@ const dependencies = {
   }
 };
 
-export async function POST(request: NextRequest): Promise<NextResponse> {
+export const POST = withAuth(async (request: NextRequest): Promise<NextResponse> => {
   try {
     const body = await request.json() as MedicalRequest;
     const { query, type = 'diagnosis' } = body;
@@ -44,7 +45,18 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
     
-    const result = await processMedicalQuery({ query, type, context: body.context || {} }, dependencies);
+    let attempt = 0;
+    let result;
+    const retries = MedicalAIConfig.getRetryAttempts();
+    while (attempt <= retries) {
+      try {
+        result = await processMedicalQuery({ query, type, context: body.context || {} }, dependencies);
+        break;
+      } catch (err) {
+        attempt++;
+        if (attempt > retries) throw err;
+      }
+    }
     return NextResponse.json(result);
   } catch (error) {
     const medicalError = error as MedicalError;
@@ -55,7 +67,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       status: medicalError.status,
       type: medicalError.type,
       details: medicalError.details,
-      stack: medicalError.stack,
+      ...(process.env.NODE_ENV !== 'production' && { stack: medicalError.stack }),
       ...(medicalError.response && { response: medicalError.response })
     });
 
@@ -67,7 +79,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           status: medicalError.status,
           details: medicalError.details,
           message: medicalError.message,
-          stack: medicalError.stack,
+          ...(process.env.NODE_ENV !== 'production' && { stack: medicalError.stack }),
         },
         { status: medicalError.status || 502 }
       );
@@ -103,7 +115,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           error: 'Request timeout',
           type: 'timeout_error',
           message: 'Request to Hugging Face API timed out',
-          stack: medicalError.stack,
+          ...(process.env.NODE_ENV !== 'production' && { stack: medicalError.stack }),
         },
         { status: 408 }
       );
@@ -116,7 +128,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           error: 'Network error',
           type: 'network_error',
           message: 'Unable to connect to Hugging Face API',
-          stack: medicalError.stack,
+          ...(process.env.NODE_ENV !== 'production' && { stack: medicalError.stack }),
         },
         { status: 503 }
       );
@@ -128,13 +140,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         error: getErrorMessage(medicalError.status || 500) || 'Internal server error',
         type: medicalError.type || 'server_error',
         details: medicalError.details || medicalError.message,
-        stack: medicalError.stack,
+        ...(process.env.NODE_ENV !== 'production' && { stack: medicalError.stack }),
         status: medicalError.status || 500,
       },
       { status: medicalError.status || 500 }
     );
   }
-}
+});
 
 export async function GET(): Promise<NextResponse> {
   return NextResponse.json(
@@ -145,5 +157,4 @@ export async function GET(): Promise<NextResponse> {
       service: 'SYMFARMIA Medical AI Service v1.0'
     },
     { status: 200 }
-  );
-}
+  );}
