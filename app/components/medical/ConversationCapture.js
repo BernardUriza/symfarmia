@@ -10,10 +10,10 @@ export function ConversationCapture({ onNext, isRecording, setIsRecording }) {
   const { t } = useTranslation();
   const audioLevel = useMicrophoneLevel(isRecording);
   const [transcriptSegments, setTranscriptSegments] = useState([
-    { speaker: t('conversation.doctor_speaker'), text: 'Buenos días, María. ¿Cómo se siente hoy?', time: '00:00:15' },
-    { speaker: t('conversation.patient_speaker'), text: 'He tenido este dolor de cabeza persistente durante los últimos tres días.', time: '00:00:22' },
-    { speaker: t('conversation.doctor_speaker'), text: '¿Puede describir el dolor? ¿Es pulsátil, punzante o sordo?', time: '00:00:35' },
-    { speaker: t('conversation.patient_speaker'), text: 'Es más bien un dolor sordo y constante, especialmente en el lado derecho de mi cabeza.', time: '00:00:42' },
+    { speaker: t('conversation.speakers.doctor'), text: t('conversation.sample_dialogue.doctor_greeting'), time: '00:00:15' },
+    { speaker: t('conversation.speakers.patient'), text: t('conversation.sample_dialogue.patient_complaint'), time: '00:00:22' },
+    { speaker: t('conversation.speakers.doctor'), text: t('conversation.sample_dialogue.doctor_inquiry'), time: '00:00:35' },
+    { speaker: t('conversation.speakers.patient'), text: t('conversation.sample_dialogue.patient_description'), time: '00:00:42' },
   ]);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -34,8 +34,8 @@ export function ConversationCapture({ onNext, isRecording, setIsRecording }) {
             
             if (data.success) {
               const newSegment = {
-                speaker: t('conversation.ai_speaker'),
-                text: data.response || t('conversation.ai_processing'),
+                speaker: t('conversation.speakers.ai_medical'),
+                text: data.response || t('conversation.processing.ai_processing'),
                 time: new Date().toLocaleTimeString('es-ES', { hour12: false }).slice(0, 8)
               };
               setTranscriptSegments(prev => [...prev, newSegment]);
@@ -52,15 +52,15 @@ export function ConversationCapture({ onNext, isRecording, setIsRecording }) {
       
       return () => clearTimeout(timer);
     }
-  }, [isRecording, isProcessing]);
+  }, [isRecording, isProcessing, t]);
 
   // The useMicrophoneLevel hook handles microphone setup and cleanup
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="text-center mb-6">
-        <h1 className="text-2xl text-slate-900 mb-2">{t('conversation.title')}</h1>
-        <p className="text-slate-600">{t('conversation.subtitle')}</p>
+        <h1 className="text-2xl text-slate-900 mb-2">{t('conversation.capture.title')}</h1>
+        <p className="text-slate-600">{t('conversation.capture.subtitle')}</p>
       </div>
 
       {/* Tarjeta de Estado de Grabación */}
@@ -87,12 +87,12 @@ export function ConversationCapture({ onNext, isRecording, setIsRecording }) {
                 variant={isRecording ? "destructive" : "secondary"}
                 className="text-sm px-3 py-1"
               >
-                {isRecording ? t('demo.recording_active') : t('transcription.ready_to_record')}
+                {isRecording ? t('conversation.capture.recording_active') : t('conversation.capture.ready_to_record')}
               </Badge>
               {isRecording && (
                 <div className="flex items-center gap-2 text-sm text-slate-600">
                   <Activity className="h-4 w-4" />
-                  <span>{t('demo.audio_level')}:</span>
+                  <span>{t('conversation.capture.audio_level')}:</span>
                   <div className="w-32 h-2 bg-slate-200 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-green-500 transition-all duration-200"
@@ -108,6 +108,7 @@ export function ConversationCapture({ onNext, isRecording, setIsRecording }) {
               variant={isRecording ? "destructive" : "default"}
               onClick={() => setIsRecording(!isRecording)}
               className="px-8"
+              aria-label={isRecording ? t('transcription.stop_recording') : t('transcription.start_recording')}
             >
               {isRecording ? (
                 <>
@@ -130,38 +131,39 @@ export function ConversationCapture({ onNext, isRecording, setIsRecording }) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Volume2 className="h-5 w-5" />
-            {t('demo.live_transcription')}
+            {t('conversation.capture.live_transcription')}
             <Badge variant="outline" className="ml-auto">
-              {t('demo.powered_by_ai')}
+              {t('conversation.capture.powered_by_ai')}
             </Badge>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4 max-h-96 overflow-y-auto">
+          <div className="space-y-4 max-h-96 overflow-y-auto" role="log" aria-live="polite" aria-label="Medical conversation transcript">
             {transcriptSegments.map((segment, index) => (
-              <div key={index} className="flex gap-4 p-3 rounded-lg bg-slate-50">
+              <div key={index} className="flex gap-4 p-3 rounded-lg bg-slate-50" role="article" aria-labelledby={`speaker-${index}`}>
                 <div className="flex flex-col items-center">
                   <Badge 
                     variant={segment.speaker === 'Doctor' ? 'default' : 'secondary'}
                     className="text-xs mb-1"
+                    id={`speaker-${index}`}
                   >
                     {segment.speaker}
                   </Badge>
-                  <span className="text-xs text-slate-500">{segment.time}</span>
+                  <span className="text-xs text-slate-500" aria-label={`Time: ${segment.time}`}>{segment.time}</span>
                 </div>
-                <p className="flex-1 text-slate-700">{segment.text}</p>
+                <p className="flex-1 text-slate-700" aria-label={`${segment.speaker} says: ${segment.text}`}>{segment.text}</p>
               </div>
             ))}
             {isRecording && (
               <div className="flex gap-4 p-3 rounded-lg bg-blue-50 border border-blue-200">
                 <div className="flex flex-col items-center">
                   <Badge variant="default" className="text-xs mb-1">
-                    {t('conversation.doctor_speaker')}
+                    {t('conversation.speakers.doctor')}
                   </Badge>
                   <span className="text-xs text-slate-500">00:01:05</span>
                 </div>
                 <p className="flex-1 text-slate-700">
-                  ¿Ha probado algún medicamento o tratamiento...
+                  {t('conversation.sample_dialogue.doctor_followup')}
                   <span className="animate-pulse">|</span>
                 </p>
               </div>
@@ -170,12 +172,12 @@ export function ConversationCapture({ onNext, isRecording, setIsRecording }) {
               <div className="flex gap-4 p-3 rounded-lg bg-green-50 border border-green-200">
                 <div className="flex flex-col items-center">
                   <Badge variant="secondary" className="text-xs mb-1">
-                    {t('conversation.ai_speaker')}
+                    {t('conversation.speakers.ai_medical')}
                   </Badge>
-                  <span className="text-xs text-slate-500">{t('conversation.processing_status')}</span>
+                  <span className="text-xs text-slate-500">{t('conversation.processing.processing_status')}</span>
                 </div>
                 <p className="flex-1 text-slate-700">
-                  {t('conversation.ai_processing')}
+                  {t('conversation.processing.ai_processing')}
                   <span className="animate-pulse">|</span>
                 </p>
               </div>
@@ -187,8 +189,8 @@ export function ConversationCapture({ onNext, isRecording, setIsRecording }) {
       {/* Navegación */}
       <div className="flex justify-between items-center pt-4">
         <div />
-        <Button onClick={onNext} className="flex items-center gap-2">
-          {t('demo.review_dialog_flow')}
+        <Button onClick={onNext} className="flex items-center gap-2" aria-label={t('conversation.capture.review_dialog_flow')}>
+          {t('conversation.capture.review_dialog_flow')}
           <ChevronRight className="h-4 w-4" />
         </Button>
       </div>

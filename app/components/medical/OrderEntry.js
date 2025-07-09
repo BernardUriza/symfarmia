@@ -4,36 +4,75 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { Textarea } from '../ui/textarea';
-import { ChevronLeft, ChevronRight, Pill, Calendar, AlertCircle, Check } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Pill, AlertCircle, Check } from 'lucide-react';
 
-const suggestedOrders = [
+const getSuggestedOrders = (t) => [
   {
-    category: 'Medicamentos',
+    category: t('orders.categories.medications'),
     items: [
-      { name: 'Ibuprofeno 400mg', dosage: 'Cada 6 horas según necesidad', duration: '5 días', priority: 'high' },
-      { name: 'Paracetamol 500mg', dosage: 'Cada 8 horas según necesidad', duration: '3 días', priority: 'medium' },
-      { name: 'Sumatriptán 50mg', dosage: 'Una dosis al inicio del dolor', duration: 'PRN', priority: 'low' }
+      { 
+        name: t('orders.medications.ibuprofen.name'),
+        dosage: t('orders.medications.ibuprofen.dosage'),
+        duration: t('orders.medications.ibuprofen.duration'),
+        priority: 'high'
+      },
+      { 
+        name: t('orders.medications.paracetamol.name'),
+        dosage: t('orders.medications.paracetamol.dosage'),
+        duration: t('orders.medications.paracetamol.duration'),
+        priority: 'medium'
+      },
+      { 
+        name: t('orders.medications.sumatriptan.name'),
+        dosage: t('orders.medications.sumatriptan.dosage'),
+        duration: t('orders.medications.sumatriptan.duration'),
+        priority: 'low'
+      }
     ]
   },
   {
-    category: 'Exámenes de Laboratorio',
+    category: t('orders.categories.lab_tests'),
     items: [
-      { name: 'Hemograma completo', reason: 'Descartar proceso infeccioso', priority: 'medium' },
-      { name: 'PCR y VSG', reason: 'Marcadores inflamatorios', priority: 'low' }
+      { 
+        name: t('orders.lab_tests.complete_blood_count.name'),
+        reason: t('orders.lab_tests.complete_blood_count.reason'),
+        priority: 'medium'
+      },
+      { 
+        name: t('orders.lab_tests.inflammatory_markers.name'),
+        reason: t('orders.lab_tests.inflammatory_markers.reason'),
+        priority: 'low'
+      }
     ]
   },
   {
-    category: 'Estudios de Imagen',
+    category: t('orders.categories.imaging'),
     items: [
-      { name: 'TAC de cráneo simple', reason: 'Descartar patología intracraneal', priority: 'high' },
-      { name: 'Resonancia magnética cerebral', reason: 'Si persisten síntomas', priority: 'low' }
+      { 
+        name: t('orders.imaging.head_ct.name'),
+        reason: t('orders.imaging.head_ct.reason'),
+        priority: 'high'
+      },
+      { 
+        name: t('orders.imaging.brain_mri.name'),
+        reason: t('orders.imaging.brain_mri.reason'),
+        priority: 'low'
+      }
     ]
   },
   {
-    category: 'Interconsultas',
+    category: t('orders.categories.consultations'),
     items: [
-      { name: 'Neurología', reason: 'Evaluación especializada de cefalea', priority: 'medium' },
-      { name: 'Oftalmología', reason: 'Si hay síntomas visuales', priority: 'low' }
+      { 
+        name: t('orders.consultations.neurology.name'),
+        reason: t('orders.consultations.neurology.reason'),
+        priority: 'medium'
+      },
+      { 
+        name: t('orders.consultations.ophthalmology.name'),
+        reason: t('orders.consultations.ophthalmology.reason'),
+        priority: 'low'
+      }
     ]
   }
 ];
@@ -42,6 +81,7 @@ export function OrderEntry({ onNext, onPrevious }) {
   const { t } = useTranslation();
   const [selectedOrders, setSelectedOrders] = useState([]);
   const [customOrder, setCustomOrder] = useState('');
+  const suggestedOrders = getSuggestedOrders(t);
 
   const toggleOrder = (categoryIndex, itemIndex) => {
     const orderId = `${categoryIndex}-${itemIndex}`;
@@ -64,8 +104,8 @@ export function OrderEntry({ onNext, onPrevious }) {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="text-center mb-6">
-        <h1 className="text-2xl text-slate-900 mb-2">Órdenes y Prescripciones</h1>
-        <p className="text-slate-600">Seleccione las órdenes médicas recomendadas por la IA</p>
+        <h1 className="text-2xl text-slate-900 mb-2">{t('orders.entry.title')}</h1>
+        <p className="text-slate-600">{t('orders.entry.subtitle')}</p>
       </div>
 
       {/* Resumen de Órdenes Seleccionadas */}
@@ -73,12 +113,12 @@ export function OrderEntry({ onNext, onPrevious }) {
         <CardHeader>
           <CardTitle className="text-blue-900 flex items-center gap-2">
             <Check className="h-5 w-5" />
-            Órdenes Seleccionadas ({selectedOrders.length})
+            {t('orders.entry.selected_orders')} ({selectedOrders.length})
           </CardTitle>
         </CardHeader>
         <CardContent>
           {selectedOrders.length === 0 ? (
-            <p className="text-blue-600 text-sm">No hay órdenes seleccionadas</p>
+            <p className="text-blue-600 text-sm">{t('orders.entry.no_orders_selected')}</p>
           ) : (
             <div className="space-y-2">
               {selectedOrders.map((orderId, index) => {
@@ -92,7 +132,7 @@ export function OrderEntry({ onNext, onPrevious }) {
                       <span className="text-sm text-slate-500 ml-2">({category.category})</span>
                     </div>
                     <Badge className={getPriorityColor(item.priority)}>
-                      {item.priority}
+                      {t(`orders.priority.${item.priority}`)}
                     </Badge>
                   </div>
                 );
@@ -125,29 +165,38 @@ export function OrderEntry({ onNext, onPrevious }) {
                         isSelected ? 'border-blue-500 bg-blue-50' : 'border-slate-200 hover:border-slate-300'
                       }`}
                       onClick={() => toggleOrder(categoryIndex, itemIndex)}
+                      role="button"
+                      tabIndex={0}
+                      aria-label={`${isSelected ? 'Deselect' : 'Select'} ${item.name}`}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          toggleOrder(categoryIndex, itemIndex);
+                        }
+                      }}
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
                           <h4 className="font-medium text-slate-900">{item.name}</h4>
                           {item.dosage && (
                             <p className="text-sm text-slate-600 mt-1">
-                              <strong>Dosis:</strong> {item.dosage}
+                              <strong>{t('orders.details.dose')}:</strong> {item.dosage}
                             </p>
                           )}
                           {item.duration && (
                             <p className="text-sm text-slate-600">
-                              <strong>Duración:</strong> {item.duration}
+                              <strong>{t('orders.details.duration')}:</strong> {item.duration}
                             </p>
                           )}
                           {item.reason && (
                             <p className="text-sm text-slate-600">
-                              <strong>Indicación:</strong> {item.reason}
+                              <strong>{t('orders.details.indication')}:</strong> {item.reason}
                             </p>
                           )}
                         </div>
                         <div className="flex items-center gap-2">
                           <Badge className={getPriorityColor(item.priority)}>
-                            {item.priority}
+                            {t(`orders.priority.${item.priority}`)}
                           </Badge>
                           {isSelected && (
                             <Check className="h-5 w-5 text-blue-600" />
@@ -168,14 +217,14 @@ export function OrderEntry({ onNext, onPrevious }) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <AlertCircle className="h-5 w-5" />
-            Orden Personalizada
+            {t('orders.entry.custom_order')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <Textarea
             value={customOrder}
             onChange={(e) => setCustomOrder(e.target.value)}
-            placeholder="Escriba aquí cualquier orden adicional o instrucciones especiales..."
+            placeholder={t('orders.entry.custom_order_placeholder')}
             className="min-h-24"
           />
         </CardContent>
@@ -183,12 +232,12 @@ export function OrderEntry({ onNext, onPrevious }) {
 
       {/* Navegación */}
       <div className="flex justify-between items-center pt-4">
-        <Button variant="outline" onClick={onPrevious} className="flex items-center gap-2">
+        <Button variant="outline" onClick={onPrevious} className="flex items-center gap-2" aria-label={t('orders.entry.back_to_notes')}>
           <ChevronLeft className="h-4 w-4" />
-          Volver a Notas
+          {t('orders.entry.back_to_notes')}
         </Button>
-        <Button onClick={onNext} className="flex items-center gap-2">
-          Generar Resumen
+        <Button onClick={onNext} className="flex items-center gap-2" aria-label={t('orders.entry.generate_summary')}>
+          {t('orders.entry.generate_summary')}
           <ChevronRight className="h-4 w-4" />
         </Button>
       </div>
