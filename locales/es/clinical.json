@@ -1,0 +1,61 @@
+{
+  "notes": {
+    "title": "Borrador de Nota Clínica",
+    "subtitle": "Nota SOAP generada por IA lista para revisión",
+    "generated_by_ai": "Generado por IA",
+    "edit_note": "Editar Nota",
+    "save_changes": "Guardar Cambios",
+    "copy": "Copiar",
+    "copied_to_clipboard": "Nota clínica copiada al portapapeles",
+    "soap_note": "Nota SOAP",
+    "ai_suggestions": "Sugerencias de IA",
+    "back_to_review": "Volver a Revisión de Flujo",
+    "generate_orders": "Generar Órdenes"
+  },
+  "quality_indicators": {
+    "completeness": "Completitud",
+    "rating": "Calificación",
+    "icd_codes": "Códigos CIE-10",
+    "generation_time": "Tiempo Generación"
+  },
+  "soap_sections": {
+    "subjective": "Subjetivo",
+    "objective": "Objetivo",
+    "assessment": "Evaluación",
+    "plan": "Plan"
+  },
+  "suggestions": {
+    "title": "💡 Sugerencias de IA",
+    "vital_signs": "• Considerar agregar documentación de signos vitales para completitud",
+    "physical_exam": "• Los hallazgos del examen físico fortalecerían la evaluación",
+    "headache_diary": "• Podría incluir recomendación de diario de cefaleas en educación al paciente",
+    "drug_allergies": "• Considerar documentar alergias a medicamentos si no están ya registradas"
+  },
+  "templates": {
+    "chief_complaint": "Motivo de Consulta: Paciente presenta dolor de cabeza persistente durante 3 días.",
+    "history_present_illness": "Historia de la Enfermedad Actual: Mujer de 32 años refiere inicio de cefalea unilateral hace 3 días, descrita como dolor sordo y constante que afecta principalmente el lado derecho de la cabeza. Intensidad del dolor calificada 6-7/10. Paciente refiere náuseas asociadas y fotofobia. Los síntomas están afectando las actividades diarias. No refiere fiebre. Paciente nota rigidez cervical leve. Sin cambios visuales.",
+    "systems_review": "Revisión por Sistemas: Positivo para cefalea, náuseas, fotofobia, rigidez cervical. Negativo para fiebre, cambios visuales, vómitos.",
+    "vital_signs": "Signos Vitales: No documentados en este encuentro",
+    "physical_exam": "Examen Físico: No realizado en este encuentro",
+    "virtual_consultation": "Nota: Esta fue una consulta virtual/telefónica enfocada en la toma de historia clínica.",
+    "primary_diagnosis": "Diagnóstico Principal: Cefalea, no especificada (R51)",
+    "differential_diagnosis": "Diagnóstico Diferencial:",
+    "migraine": "1. Migraña - apoyado por localización unilateral, intensidad moderada, náuseas y fotofobia asociadas",
+    "tension_headache": "2. Cefalea tensional - rigidez cervical puede sugerir componente muscular",
+    "secondary_headache": "3. Cefalea secundaria - requeriría evaluación adicional si los síntomas persisten",
+    "clinical_impression": "Impresión Clínica: Paciente presenta características clínicas compatibles con trastorno de cefalea primaria, muy probablemente migraña vs cefalea tensional. No se identifican síntomas de alarma.",
+    "pharmacological_management": "1. Manejo Farmacológico:",
+    "nsaid_trial": "   - Prueba con AINEs (ibuprofeno 400mg c/6h PRN) para alivio sintomático",
+    "triptan_therapy": "   - Considerar terapia con triptanes si se confirma diagnóstico de migraña",
+    "non_pharmacological": "2. Medidas no farmacológicas:",
+    "rest": "   - Reposo en ambiente oscuro y silencioso",
+    "hydration": "   - Hidratación adecuada",
+    "cold_compress": "   - Compresas frías en área afectada",
+    "followup": "3. Seguimiento:",
+    "control_appointment": "   - Cita de control en 1 semana si síntomas persisten o empeoran",
+    "urgent_care": "   - Atención médica inmediata si desarrolla fiebre, rigidez cervical severa o síntomas neurológicos",
+    "patient_education": "4. Educación al Paciente:",
+    "triggers": "   - Se discutieron desencadenantes de cefalea y modificaciones del estilo de vida",
+    "urgent_signs": "   - Se proporcionó información sobre cuándo buscar atención urgente"
+  }
+}

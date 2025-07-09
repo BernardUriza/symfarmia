@@ -257,5 +257,87 @@
     "powered_by_ai": "Powered by AI",
     "review_dialog_flow": "Review Dialog Flow",
     "recording_active": "Recording Active"
+  },
+  "workflow": {
+    "title": "SYMFARMIA",
+    "subtitle": "Professional Medical Consultation",
+    "patient_info": "PATIENT INFORMATION",
+    "medical_navigation": "MEDICAL NAVIGATION",
+    "current_step": "CURRENT STEP",
+    "consultation_flow": "Medical Consultation Flow",
+    "step_of": "Step {current} of {total}",
+    "steps": {
+      "listen": "Listen",
+      "review": "Review Flow",
+      "notes": "Notes",
+      "orders": "Orders",
+      "summary": "Summary"
+    },
+    "step_descriptions": {
+      "listen": "Real-time medical conversation capture",
+      "review": "Clinical dialogue flow analysis",
+      "notes": "SOAP notes generation",
+      "orders": "Medical order entry",
+      "summary": "Final summary and export"
+    },
+    "patient": {
+      "name": "María García",
+      "age": "32 years",
+      "gender": "Female",
+      "id": "ID",
+      "date": "Date",
+      "status": "Status",
+      "status_stable": "Stable",
+      "birth_date": "DOB: 15/03/1985"
+    },
+    "navigation": {
+      "view_all_patients": "View All Patients",
+      "medical_reports": "Medical Reports",
+      "clinical_history": "Clinical History",
+      "new_consultation": "New Consultation"
+    },
+    "actions": {
+      "start_recording": "Start Recording",
+      "stop_recording": "Stop Recording"
+    }
+  },
+  "conversation": {
+    "title": "Conversation Capture",
+    "subtitle": "AI is listening and transcribing your medical consultation in real-time",
+    "ai_processing": "Analyzing medical symptoms...",
+    "ai_speaker": "Medical AI",
+    "doctor_speaker": "Doctor",
+    "patient_speaker": "Patient",
+    "processing_status": "processing..."
+  },
+  "dialogue": {
+    "title": "Dialogue Flow Analysis",
+    "subtitle": "AI has structured your conversation into clinical sections",
+    "sections": {
+      "chief_complaint": "Chief Complaint",
+      "history_present_illness": "History of Present Illness",
+      "associated_symptoms": "Associated Symptoms",
+      "system_review": "Review of Systems"
+    },
+    "tags": {
+      "main_symptom": "Main Symptom",
+      "duration": "Duration",
+      "pain_quality": "Pain Quality",
+      "location": "Location",
+      "severity": "Severity",
+      "functional_impact": "Functional Impact",
+      "associated_symptoms": "Associated Symptoms",
+      "photophobia": "Photophobia",
+      "nausea": "Nausea",
+      "rps": "ROS",
+      "neck_stiffness": "Neck Stiffness",
+      "vision": "Vision"
+    },
+    "stats": {
+      "total_sections": "Total Sections",
+      "total_interactions": "Total Interactions",
+      "avg_response_time": "Average Response Time",
+      "clinical_coverage": "Clinical Coverage"
+    }
   }
 }

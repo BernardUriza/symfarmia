@@ -1,0 +1,37 @@
+{
+  "recording": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "starting": "Starting",
+    "stopping": "Stopping",
+    "paused": "Paused",
+    "ready": "Ready",
+    "error": "Error"
+  },
+  "processing": {
+    "analyzing": "Analyzing",
+    "transcribing": "Transcribing",
+    "generating": "Generating",
+    "processing": "Processing",
+    "loading": "Loading",
+    "saving": "Saving",
+    "complete": "Complete",
+    "failed": "Failed"
+  },
+  "connection": {
+    "connected": "Connected",
+    "disconnected": "Disconnected",
+    "connecting": "Connecting",
+    "reconnecting": "Reconnecting",
+    "timeout": "Timeout",
+    "stable": "Stable",
+    "unstable": "Unstable"
+  },
+  "quality": {
+    "excellent": "Excellent",
+    "good": "Good",
+    "fair": "Fair",
+    "poor": "Poor",
+    "unknown": "Unknown"
+  }
+}

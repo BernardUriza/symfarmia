@@ -82,7 +82,13 @@
       "Bash(SKIP_TYPE_CHECK=true npm run build:fast)",
       "Bash(PORT=3001 npm run dev)",
       "Bash(npm run ci:restart:*)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(sudo fuser:*)",
+      "Bash(ss:*)",
+      "WebFetch(domain:localhost)",
+      "Bash(PORT=3002 npm run dev)",
+      "Bash(git checkout:*)",
+      "Bash(timeout:*)"
     ],
     "deny": []
   }

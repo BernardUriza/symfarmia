@@ -94,7 +94,7 @@ export default function DemoSection() {
 
             <div className="mt-8 space-y-4">
               <Link
-                href="/consultation?demo=true"
+                href="/medical-ai-demo"
                 className="block w-full bg-blue-600 text-white text-center px-6 py-3 rounded-md hover:bg-blue-700 transition-colors"
               >
                 Probar Demo Interactivo
