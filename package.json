@@ -3,7 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "predev": "node scripts/validate-turbo.js",
+    "prebuild": "npm run validate:translations",
+    "predev": "npm run validate:translations && node scripts/validate-turbo.js",
+    "validate:translations": "node scripts/validate-translations.js",
+    "test:translations": "jest tests/medical-components/translations.test.js",
     "dev": "NODE_OPTIONS='--max-old-space-size=4096 --no-warnings' next dev --turbo",
     "validate-turbo": "node scripts/validate-turbo.js",
     "build": "npm run test:transcription-components && node scripts/build-monitor.js build",
