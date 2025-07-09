@@ -1,0 +1,34 @@
+{
+  "workflow": {
+    "title": "Medical Workflow",
+    "subtitle": "Streamlined consultation process",
+    "consultation_flow": "Consultation Flow",
+    "step_of": "Step {current} of {total}",
+    "current_step": "Current Step",
+    "medical_navigation": "Medical Navigation",
+    "steps": {
+      "listen": "Listen",
+      "review": "Review",
+      "notes": "Notes",
+      "orders": "Orders",
+      "summary": "Summary"
+    },
+    "step_descriptions": {
+      "listen": "Listen to patient conversation",
+      "review": "Review transcribed information",
+      "notes": "Generate clinical notes",
+      "orders": "Create medical orders",
+      "summary": "Review final summary"
+    },
+    "actions": {
+      "start_recording": "Start Recording",
+      "stop_recording": "Stop Recording"
+    },
+    "navigation": {
+      "view_all_patients": "View All Patients",
+      "medical_reports": "Medical Reports",
+      "clinical_history": "Clinical History",
+      "new_consultation": "New Consultation"
+    }
+  }
+}

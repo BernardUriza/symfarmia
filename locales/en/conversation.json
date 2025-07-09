@@ -22,6 +22,8 @@
     "patient": "Patient",
     "ai_medical": "Medical AI"
   },
+  "doctor_speaker": "Doctor",
+  "patient_speaker": "Patient",
   "processing": {
     "ai_processing": "Analyzing medical symptoms...",
     "processing_status": "processing..."

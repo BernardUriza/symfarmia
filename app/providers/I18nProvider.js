@@ -16,6 +16,12 @@ async function loadTranslations(locale) {
       import(`../../locales/${locale}/status.json`),
       import(`../../locales/${locale}/landing.json`),
       import(`../../locales/${locale}/dashboard.json`),
+      import(`../../locales/${locale}/workflow.json`),
+      import(`../../locales/${locale}/demo.json`),
+      import(`../../locales/${locale}/dialogue.json`),
+      import(`../../locales/${locale}/transcription.json`),
+      import(`../../locales/${locale}/language_switcher.json`),
+      import(`../../locales/${locale}/auto_generated.json`),
     ]);
     
     // Flatten nested objects for easier access

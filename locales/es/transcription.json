@@ -1,0 +1,9 @@
+{
+  "transcription": {
+    "title": "Transcripción Médica",
+    "ready_to_record": "Listo para Grabar",
+    "start_recording": "Iniciar Grabación",
+    "stop_recording": "Detener Grabación",
+    "no_transcript_available": "No hay transcripción disponible"
+  }
+}

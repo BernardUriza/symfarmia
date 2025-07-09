@@ -1,0 +1,26 @@
+{
+  "dialogue": {
+    "title": "Medical Dialogue",
+    "subtitle": "Patient-Doctor Conversation",
+    "sections": {
+      "chief_complaint": "Chief Complaint",
+      "history_present_illness": "History of Present Illness",
+      "associated_symptoms": "Associated Symptoms",
+      "system_review": "System Review"
+    },
+    "tags": {
+      "main_symptom": "Main Symptom",
+      "duration": "Duration",
+      "pain_quality": "Pain Quality",
+      "location": "Location",
+      "severity": "Severity",
+      "functional_impact": "Functional Impact",
+      "associated_symptoms": "Associated Symptoms",
+      "photophobia": "Photophobia",
+      "nausea": "Nausea",
+      "rps": "RPS",
+      "neck_stiffness": "Neck Stiffness",
+      "vision": "Vision"
+    }
+  }
+}

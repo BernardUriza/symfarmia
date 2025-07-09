@@ -127,7 +127,9 @@
       "ready_to_record": "Ready to Record",
       "audio_level": "Audio Level",
       "powered_by_ai": "Powered by AI",
-      "review_dialog_flow": "Review Dialog Flow"
+      "review_dialog_flow": "Review Dialog Flow",
+      "title": "Conversation Capture",
+      "subtitle": "Record and transcribe medical consultations"
     },
     "speakers": {
       "ai_medical": "Medical AI"
@@ -135,7 +137,9 @@
     "processing": {
       "processing_status": "Processing Status",
       "ai_processing": "AI Processing"
-    }
+    },
+    "doctor_speaker": "Doctor",
+    "patient_speaker": "Patient"
   },
   "navigation": {
     "dashboard": "Dashboard"
@@ -295,5 +299,97 @@
       "duration": "Duration",
       "indication": "Indication"
     }
-  }
+  },
+  "demo_mode_active": "Demo Mode Active",
+  "switch_live_mode": "Switch to Live Mode",
+  "demo": "Demo",
+  "theme": "Theme",
+  "medical_reports_management": "Medical Reports Management",
+  "demo_login": "Demo Login",
+  "auto_fill_demo": "We will fill demo credentials for you automatically",
+  "email": "Email",
+  "password": "Password",
+  "login_demo": "Enter Demo",
+  "demo_mode_full_access": "Demo mode shows all features using sample data",
+  "english": "English",
+  "spanish": "Spanish",
+  "clinical_language": "Clinical Language",
+  "english_abbr": "EN",
+  "spanish_abbr": "ES",
+  "update": "Update",
+  "create": "Create",
+  "actions": "Actions",
+  "edit": "Edit",
+  "delete": "Delete",
+  "light_mode": "Light Mode",
+  "dark_mode": "Dark Mode",
+  "language_switcher": {
+    "medical_certified": "Medical Certified",
+    "medical": "Medical",
+    "medical_grade": "Medical Grade",
+    "validated": "Validated"
+  },
+  "recording_started": "Recording Started",
+  "workflow": {
+    "steps": {
+      "listen": "Listen",
+      "review": "Review",
+      "notes": "Notes",
+      "orders": "Orders",
+      "summary": "Summary"
+    },
+    "title": "Medical Workflow",
+    "subtitle": "Streamlined medical consultation process",
+    "actions": {
+      "stop_recording": "Stop Recording",
+      "start_recording": "Start Recording"
+    },
+    "consultation_flow": "Consultation Flow",
+    "step_of": "Step {current} of {total}",
+    "medical_navigation": "Medical Navigation",
+    "navigation": {
+      "view_all_patients": "View All Patients",
+      "medical_reports": "Medical Reports",
+      "clinical_history": "Clinical History",
+      "new_consultation": "New Consultation"
+    },
+    "current_step": "Current Step",
+    "step_descriptions": {
+      "listen": "Record patient consultation",
+      "review": "Review conversation and dialogue",
+      "notes": "Generate clinical notes",
+      "orders": "Create medical orders",
+      "summary": "Complete consultation summary"
+    }
+  },
+  "transcription": {
+    "stop_recording": "Stop Recording",
+    "start_recording": "Start Recording"
+  },
+  "dialogue": {
+    "title": "Dialogue Flow",
+    "subtitle": "Structured medical conversation",
+    "sections": {
+      "chief_complaint": "Chief Complaint",
+      "history_present_illness": "History of Present Illness",
+      "associated_symptoms": "Associated Symptoms",
+      "system_review": "System Review"
+    },
+    "tags": {
+      "main_symptom": "Main Symptom",
+      "duration": "Duration",
+      "pain_quality": "Pain Quality",
+      "location": "Location",
+      "severity": "Severity",
+      "functional_impact": "Functional Impact",
+      "associated_symptoms": "Associated Symptoms",
+      "photophobia": "Photophobia",
+      "nausea": "Nausea",
+      "rps": "RPS",
+      "neck_stiffness": "Neck Stiffness",
+      "vision": "Vision"
+    }
+  },
+  "pdf": "PDF",
+  "docx": "DOCX"
 }

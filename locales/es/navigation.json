@@ -35,5 +35,8 @@
     "notes": "Notas",
     "orders": "Órdenes",
     "summary": "Resumen"
+  },
+  "navigation": {
+    "dashboard": "Panel de Control"
   }
 }
