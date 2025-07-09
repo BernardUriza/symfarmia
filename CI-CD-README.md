@@ -45,6 +45,8 @@ npm audit --audit-level=high  # Production only
 
 ### Stage 3: 🔍 Code Quality (45s)
 ```bash
+# Validate translation keys
+npm run validate:translations
 npm run lint -- --fix
 npm run type-check
 npm test -- --coverage --silent  # Skip for medical-critical
