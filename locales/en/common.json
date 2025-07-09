@@ -109,5 +109,23 @@
   "demo.demo_title": "Medical AI Demo",
   "demo.patient_selector": "Select Patient",
   "demo.patient_selector_subtitle": "Choose a patient to start the demo",
-  "demo.request_custom_demo": "Request Custom Demo"
+  "demo.request_custom_demo": "Request Custom Demo",
+  "update": "update",
+  "create": "create",
+  "language_switcher": {
+    "medical_certified": "medical certified",
+    "medical": "medical",
+    "medical_grade": "medical grade",
+    "validated": "validated",
+    "current_language": "current language"
+  },
+  "missing": {
+    "key": "missing key"
+  },
+  "key": "key",
+  "orders": {
+    "priority": {
+      "${item.priority}": "priority variable"
+    }
+  }
 }

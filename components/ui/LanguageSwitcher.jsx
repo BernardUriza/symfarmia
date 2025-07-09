@@ -70,8 +70,7 @@ const LanguageSwitcher = ({
   showFlag = true, 
   showCountry = false,
   showMedicalIndicator = false,
-  className = '',
-  position = 'bottom-right'
+  className = ''
 }) => {
   const { locale, setLocale, t } = useI18n();
   const [isOpen, setIsOpen] = useState(false);
@@ -88,13 +87,17 @@ const LanguageSwitcher = ({
     setLocale(languageCode);
     setIsOpen(false);
     
-    // Announce change for accessibility
+    // Announce change for accessibility (only in browser)
     if (typeof window !== 'undefined' && window.speechSynthesis) {
-      const currentLang = SUPPORTED_LANGUAGES.find(lang => lang.code === languageCode);
-      const announcement = `Language changed to ${currentLang?.name}`;
-      const utterance = new SpeechSynthesisUtterance(announcement);
-      utterance.volume = 0.1;
-      window.speechSynthesis.speak(utterance);
+      try {
+        const currentLang = SUPPORTED_LANGUAGES.find(lang => lang.code === languageCode);
+        const announcement = `Language changed to ${currentLang?.name}`;
+        const utterance = new SpeechSynthesisUtterance(announcement);
+        utterance.volume = 0.1;
+        window.speechSynthesis.speak(utterance);
+      } catch (error) {
+        console.warn('Speech synthesis failed:', error);
+      }
     }
   };
   

@@ -1,0 +1,13 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+echo "🔍 Running revolutionary translation validation..."
+npm run validate:translations:revolutionary
+
+if [ $? -ne 0 ]; then
+  echo "❌ COMMIT BLOCKED: Translation validation failed!"
+  echo "🔧 Fix translations with: npm run translations:auto-fix"
+  exit 1
+fi
+
+echo "✅ Translation validation passed!"
