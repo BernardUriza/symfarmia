@@ -1,0 +1,30 @@
+{
+  "page": {
+    "title": "New Consultation",
+    "subtitle": "AI Transcription"
+  },
+  "patient_selector": {
+    "title": "Select Patient",
+    "subtitle": "Choose a patient to start the consultation",
+    "add_new": "+ Add new patient"
+  },
+  "buttons": {
+    "change_patient": "Change Patient",
+    "save_consultation": "Save Consultation"
+  },
+  "actions": {
+    "quick_actions": "Quick Actions",
+    "template_general": "Template: General Consultation",
+    "template_followup": "Template: Follow-up",
+    "template_chest_pain": "Template: Chest Pain",
+    "export_pdf": "Export PDF"
+  },
+  "status": {
+    "saved_success": "Consultation saved successfully",
+    "redirect_notice": "Redirecting to medical reports..."
+  },
+  "labels": {
+    "consultation": "Consultation",
+    "duration": "Duration"
+  }
+}
