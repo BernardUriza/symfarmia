@@ -86,7 +86,8 @@
       "Bash(sudo fuser:*)",
       "Bash(ss:*)",
       "WebFetch(domain:localhost)",
-      "Bash(PORT=3002 npm run dev)"
+      "Bash(PORT=3002 npm run dev)",
+      "Bash(git checkout:*)"
     ],
     "deny": []
   }
