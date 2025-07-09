@@ -343,5 +343,26 @@
       "avg_response_time": "Tiempo Promedio de Respuesta",
       "clinical_coverage": "Cobertura Clínica"
     }
+  },
+  "transcription": {
+    "title": "Transcripción en Tiempo Real",
+    "start": "Iniciar Transcripción Médica",
+    "stop": "Detener Transcripción Médica",
+    "start_recording": "Iniciar Grabación",
+    "stop_recording": "Detener Grabación",
+    "reset_demo": "Reiniciar Demo",
+    "final_transcript": "Transcripción Final",
+    "service_label": "Servicio",
+    "medical_ai_active": "IA Médica Activa",
+    "words_count": "palabras",
+    "recording": "Grabando",
+    "ready_to_record": "Listo para grabar",
+    "transcribing": "Transcribiendo...",
+    "demo_empty_state": "🐾 ¡Aún no hay transcripción! Graba tu primera consulta.",
+    "no_transcript_available": "No hay transcripción disponible",
+    "no_transcript_description": "Presiona \"Iniciar Grabación\" para comenzar a transcribir tu consulta médica",
+    "service_browser": "Navegador",
+    "service_whisper": "Whisper",
+    "ai_active": "IA Activa"
   }
 }

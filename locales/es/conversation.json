@@ -1,4 +1,12 @@
 {
+  "conversation": {
+    "capture": {
+      "title": "Captura de Conversación",
+      "subtitle": "Graba y transcribe consultas médicas",
+      "start": "Iniciar Grabación",
+      "stop": "Detener Grabación"
+    }
+  },
   "capture": {
     "title": "Captura de Conversación",
     "subtitle": "La IA está escuchando y transcribiendo su consulta médica en tiempo real",
