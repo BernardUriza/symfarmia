@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { processMedicalQuery, getErrorMessage } from '@/app/services/MedicalAILogic';
 import { MedicalAIConfig } from '@/app/config/MedicalAIConfig.js';
+import { withAuth } from '@/lib/middleware/auth';
 
 interface MedicalAIRequest {
   input: string;
@@ -46,7 +47,7 @@ function generateContextualResponse(text: string): string {
   return 'Cuéntame más sobre tu consulta médica.';
 }
 
-export async function POST(request: NextRequest): Promise<NextResponse<MedicalAIResponse>> {
+export const POST = withAuth(async (request: NextRequest): Promise<NextResponse<MedicalAIResponse>> => {
   try {
     const body = await request.json() as MedicalAIRequest;
     const { input } = body;
@@ -83,12 +84,12 @@ export async function POST(request: NextRequest): Promise<NextResponse<MedicalAI
       { status: errorStatus }
     );
   }
-}
+});
 
-export async function GET(): Promise<NextResponse> {
+export const GET = withAuth(async (): Promise<NextResponse> => {
   return NextResponse.json({
     message: 'Medical AI Demo endpoint',
     usage: 'POST { input: string }',
     success: true
   });
-}
+});

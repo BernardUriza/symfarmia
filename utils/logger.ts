@@ -95,9 +95,6 @@ class Logger {
     if (Logger.isDevelopment) {
       console.group(`${Logger.prefix} API] ${method} ${endpoint}`);
       
-      if (data) {
-        console.log('Data:', data);
-      }
       
       if (responseTime) {
         console.log('Response Time:', `${responseTime}ms`);

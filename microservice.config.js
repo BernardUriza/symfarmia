@@ -31,7 +31,7 @@ export const microserviceConfig = {
   externalServices: {
     huggingFace: {
       baseUrl: 'https://api-inference.huggingface.co/models',
-      timeout: 30000,
+      timeout: 10000,
       rateLimits: {
         requests: 100,
         period: 60000 // 1 minute
@@ -63,7 +63,7 @@ export const microserviceConfig = {
       origins: process.env.ALLOWED_ORIGINS?.split(',') || ['*']
     },
     authentication: {
-      required: false, // Internal service
+      required: true, // Internal service
       method: 'apiKey'
     },
     rateLimiting: {
