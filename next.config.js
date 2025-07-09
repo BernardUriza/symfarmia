@@ -37,17 +37,70 @@ const nextConfig = {
   experimental: {
     // Emergency: Disable optimizations that cause hanging
     optimizeCss: false,
-    // Turbopack configuration for medical-grade performance
-    turbo: {
-      rules: {
-        // Font handling for slick-carousel and medical icons
-        '*.{svg,eot,ttf,woff,woff2}': {
-          loaders: ['@vercel/turbopack-loader-font'],
-          as: 'font'
-        }
-      },
-      resolveAlias: {
-        // Medical-grade path resolution for Turbopack
+    // Turbopack for development only
+    ...(process.env.NODE_ENV === 'development' && {
+      turbo: {
+        rules: {
+          // Font handling for slick-carousel and medical icons
+          '*.{svg,eot,ttf,woff,woff2}': {
+            loaders: ['@vercel/turbopack-loader-font'],
+            as: 'font'
+          }
+        },
+        resolveAlias: {
+          // Medical-grade path resolution for Turbopack
+          '@': '/workspaces/symfarmia',
+          '@/components': '/workspaces/symfarmia/src/components',
+          '@/app': '/workspaces/symfarmia/app',
+          '@/hooks': '/workspaces/symfarmia/hooks',
+          '@/lib': '/workspaces/symfarmia/lib',
+          '@/utils': '/workspaces/symfarmia/src/utils',
+          '@/services': '/workspaces/symfarmia/app/services',
+          '@/providers': '/workspaces/symfarmia/app/providers'
+        },
+        resolveExtensions: ['.tsx', '.ts', '.jsx', '.js', '.json', '.mjs', '.cjs']
+      }
+    })
+  },
+
+  // Webpack configuration for production builds only
+  // (Development uses Turbopack exclusively)
+  ...(process.env.NODE_ENV === 'production' && {
+    webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
+      // Only apply webpack optimizations in production
+      if (!dev) {
+        // Font handling for production builds
+        config.module.rules.push({
+          test: /\.(woff|woff2|eot|ttf|otf)$/i,
+          type: 'asset/resource',
+          generator: {
+            filename: 'static/fonts/[name].[hash][ext]'
+          }
+        });
+
+        // Optimize bundle splitting
+        config.optimization.splitChunks = {
+          chunks: 'all',
+          cacheGroups: {
+            vendor: {
+              test: /[\\/]node_modules[\\/]/,
+              name: 'vendors',
+              priority: 10,
+              reuseExistingChunk: true
+            },
+            medical: {
+              test: /[\\/]src[\\/]domains[\\/]medical-ai[\\/]/,
+              name: 'medical-ai',
+              priority: 20,
+              reuseExistingChunk: true
+            }
+          }
+        };
+      }
+
+      // Path resolution for production builds
+      config.resolve.alias = {
+        ...config.resolve.alias,
         '@': '/workspaces/symfarmia',
         '@/components': '/workspaces/symfarmia/src/components',
         '@/app': '/workspaces/symfarmia/app',
@@ -56,10 +109,11 @@ const nextConfig = {
         '@/utils': '/workspaces/symfarmia/src/utils',
         '@/services': '/workspaces/symfarmia/app/services',
         '@/providers': '/workspaces/symfarmia/app/providers'
-      },
-      resolveExtensions: ['.tsx', '.ts', '.jsx', '.js', '.json', '.mjs', '.cjs']
+      };
+
+      return config;
     }
-  },
+  }),
   
   // serverExternalPackages: ['prisma'], // Not available in Next.js 14
 
