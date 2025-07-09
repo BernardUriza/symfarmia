@@ -10,7 +10,7 @@
     "test:translations": "jest tests/medical-components/translations.test.js",
     "dev": "NODE_OPTIONS='--max-old-space-size=4096 --no-warnings' next dev --turbo",
     "validate-turbo": "node scripts/validate-turbo.js",
-    "build": "npm run i18n:revolutionary && node scripts/build-monitor.js build",
+    "build": "node scripts/build-monitor.js build",
     "build:original": "npm run version:generate && npm run type-check && npx prisma generate && next build",
     "build:enhanced": "node scripts/enhanced-build.js",
     "build:emergency": "node scripts/build-recovery.js emergency",
