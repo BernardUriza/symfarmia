@@ -14,14 +14,8 @@
           "icon": "book",
           "color": "terminal.ansiBlue",
           "commands": [
-            "export $(grep -v '^#' .env | xargs) && codex"
+            "export $(grep -v '^#' .env.local | xargs) && codex"
           ]
-        },
-        {
-          "name": "🟠 Dev",
-          "icon": "rocket",
-          "color": "terminal.ansiYellow",
-          "commands": ["npm start"]
         }
       ]
     },
@@ -30,8 +24,14 @@
         {
           "name": "🛠️ E2E",
           "icon": "tools",
-          "commands": ["npm run build", "npm run e2e"],
+          "commands": ["npm run build"],
           "shouldRunCommands": false
+        },
+        {
+          "name": "🟠 Dev",
+          "icon": "rocket",
+          "color": "terminal.ansiYellow",
+          "commands": ["npm start"]
         }
       ]
     }
