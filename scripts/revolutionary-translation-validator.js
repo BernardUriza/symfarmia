@@ -163,6 +163,7 @@ class RevolutionaryTranslationValidator {
       this.missingKeys[locale] = [];
       
       for (const key of this.usedKeys) {
+        //console.log(`Checking key: ${key}`, this.localeData[locale][key] ? '✅'+this.localeData[locale][key]  : '❌');
         if (!this.localeData[locale][key]) {
           this.missingKeys[locale].push(key);
         }
