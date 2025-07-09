@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import useWhisperTranscription from './useWhisperTranscription';
 import { useConsultation } from '../src/contexts/ConsultationContext';
 import Logger from '../src/utils/logger';
 import { useMicrophoneDiagnostics } from './useMicrophoneDiagnostics';
@@ -20,6 +21,13 @@ export function useTranscription() {
   } = useConsultation();
 
   const { micPermission, checkMicrophonePermission, runMicrophoneDiagnostics, setMicPermission } = useMicrophoneDiagnostics();
+
+  const {
+    start: startWhisper,
+    stop: stopWhisper,
+    transcript: whisperTranscript,
+    isLoading: whisperLoading,
+  } = useWhisperTranscription();
 
   const [recordingTime, setRecordingTime] = useState(0);
   const [audioLevel, setAudioLevel] = useState(0);
@@ -52,6 +60,12 @@ export function useTranscription() {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
   }, [isRecording, isPaused]);
+
+  useEffect(() => {
+    if (transcriptionService === 'whisper' && whisperTranscript) {
+      finalizeTranscript(whisperTranscript);
+    }
+  }, [whisperTranscript, transcriptionService, finalizeTranscript]);
 
   const setupAudioAnalysis = useCallback((stream: MediaStream) => {
     audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -145,12 +159,19 @@ export function useTranscription() {
 
   const handleStartRecording = useCallback(async () => {
     try {
+      if (transcriptionService === 'whisper') {
+        await startWhisper();
+        setMicPermission('granted');
+        startRecording();
+        setRecordingTime(0);
+        logEvent('recording_started', { service: transcriptionService, time: new Date().toISOString() });
+        return;
+      }
+
       const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, sampleRate: 44100 } });
       setMicPermission('granted');
       setupAudioAnalysis(stream);
-      if (transcriptionService === 'browser') {
-        setupBrowserTranscription();
-      }
+      setupBrowserTranscription();
       mediaRecorderRef.current = new MediaRecorder(stream, { mimeType: 'audio/webm' });
       audioChunksRef.current = [];
       mediaRecorderRef.current.ondataavailable = (e: BlobEvent) => { 
@@ -184,6 +205,12 @@ export function useTranscription() {
   }, [setupAudioAnalysis, setupBrowserTranscription, startRecording, logEvent, transcriptionService, setMicPermission]);
 
   const handleStopRecording = useCallback(() => {
+    if (transcriptionService === 'whisper') {
+      stopWhisper();
+      stopRecording(recordingTime);
+      logEvent('recording_stopped', { duration: recordingTime, transcript_length: whisperTranscript.length });
+      return;
+    }
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
       if (recognitionRef.current) recognitionRef.current.stop();
@@ -192,7 +219,7 @@ export function useTranscription() {
       setAudioLevel(0);
       logEvent('recording_stopped', { duration: recordingTime, transcript_length: finalTranscript.length });
     }
-  }, [isRecording, recordingTime, stopRecording, finalTranscript.length, logEvent]);
+  }, [isRecording, recordingTime, stopRecording, finalTranscript.length, logEvent, transcriptionService, stopWhisper, whisperTranscript.length]);
 
   return {
     isRecording,
