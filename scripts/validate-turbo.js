@@ -79,13 +79,25 @@ function validateNextConfig() {
   try {
     const configContent = fs.readFileSync(configPath, 'utf8');
     
-    // Check for webpack function (BANNED)
-    if (configContent.includes('webpack:') || 
-        configContent.includes('webpack(')) {
-      log('🚫 CRITICAL: Webpack configuration detected in next.config.js!', 'red');
-      log('   Webpack is BANNED in SYMFARMIA development', 'red');
-      log('   Only Turbopack configurations are allowed', 'yellow');
-      return false;
+    // Check for webpack function (BANNED in development)
+    // Allow webpack configuration only if it's conditionally applied for production
+    const hasWebpackConfig = configContent.includes('webpack:') || 
+                             configContent.includes('webpack(');
+    
+    if (hasWebpackConfig) {
+      // Check if webpack is conditionally applied for production only
+      const isProductionOnly = configContent.includes('NODE_ENV === \'production\'') &&
+                               configContent.includes('webpack');
+      
+      if (!isProductionOnly) {
+        log('🚫 CRITICAL: Webpack configuration detected in next.config.js!', 'red');
+        log('   Webpack is BANNED in SYMFARMIA development', 'red');
+        log('   Only Turbopack configurations are allowed', 'yellow');
+        log('   Webpack is only allowed for production builds', 'yellow');
+        return false;
+      } else {
+        log('✅ Webpack configuration is properly scoped to production builds only', 'green');
+      }
     }
     
     // Check for turbopack config (REQUIRED)

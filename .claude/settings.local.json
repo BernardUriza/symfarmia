@@ -92,7 +92,10 @@
       "Bash(for file in /workspaces/symfarmia/app/components/medical/*.js)",
       "Bash(do echo \"=== $file ===\")",
       "Bash(head:*)",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(NODE_ENV=production npm run build)",
+      "Bash(NODE_ENV=development npm run dev --turbo)",
+      "Bash(NODE_ENV=development npm run dev)"
     ],
     "deny": []
   }
