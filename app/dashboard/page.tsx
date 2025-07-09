@@ -2,7 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import ThemeToggle from '../../components/ThemeToggle';
 import ActionButton from '../../components/ui/ActionButton';
-import { UserPlusIcon, FileTextIcon, ActivityIcon } from '@heroicons/react/24/outline';
+import { UserPlusIcon, DocumentTextIcon, ChartBarIcon } from '@heroicons/react/24/outline';
 import { 
   Users, 
   FileText, 
@@ -247,7 +247,7 @@ export default function DashboardPage() {
                   <ActionButton
                     onClick={() => window.location.href = '/dashboard/medicalReports?action=new'}
                     text="Crear Reporte"
-                    icon={FileTextIcon}
+                    icon={DocumentTextIcon}
                     color="blue"
                     size="md"
                     variant="filled"
@@ -261,7 +261,7 @@ export default function DashboardPage() {
                   <ActionButton
                     onClick={() => window.location.href = '/dashboard/studies?action=new'}
                     text="Programar Estudio"
-                    icon={ActivityIcon}
+                    icon={ChartBarIcon}
                     color="purple"
                     size="md"
                     variant="filled"
