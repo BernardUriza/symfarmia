@@ -2,8 +2,8 @@
   "failed": true,
   "stage": "validation",
   "error": "💥 QUALITY GATES FAILED - BUILD TERMINATED",
-  "timestamp": "2025-07-09T21:38:55.089Z",
-  "buildTime": 45,
+  "timestamp": "2025-07-09T22:38:34.836Z",
+  "buildTime": 52,
   "partialResults": {
     "nuclear": {
       "success": true,
