@@ -37,15 +37,8 @@ const CONFIG = {
     /i18n\.t\(['"`]([^'"`]+)['"`]\)/g,       // i18n.t('key')
     /translate\(['"`]([^'"`]+)['"`]\)/g,     // translate('key')
   ],
-  medicalKeywords: [
-    'medical', 'clinical', 'diagnosis', 'treatment', 'patient', 'doctor',
-    'consultation', 'prescription', 'symptom', 'condition', 'therapy',
-    'medication', 'procedure', 'examination', 'test', 'result', 'report'
-  ],
-  criticalKeys: [
-    'error', 'warning', 'success', 'confirm', 'cancel', 'save', 'delete',
-    'login', 'logout', 'submit', 'close', 'open', 'edit', 'create', 'update'
-  ]
+  medicalKeywords: [], // Will be populated from local JSON files
+  criticalKeys: []   // Will be populated from local JSON files
 };
 
 class RevolutionaryTranslationValidator {
@@ -62,17 +55,24 @@ class RevolutionaryTranslationValidator {
       criticalMissing: 0,
       medicalMissing: 0
     };
+    this.searchLabels = {
+      medical: new Set(),
+      critical: new Set()
+    };
   }
 
   /**
    * MAIN VALIDATION ENTRY POINT
    */
-  async validateTranslations() {
+  async validateTranslations(skipExit = false) {
     console.log('🚀 REVOLUTIONARY TRANSLATION VALIDATOR STARTING...\n');
     
     try {
       // Step 1: Load all translation files
       await this.loadTranslationFiles();
+      
+      // Step 1.5: Extract search labels from local JSON files
+      await this.extractSearchLabels();
       
       // Step 2: Extract all translation keys from source code
       await this.extractTranslationKeys();
@@ -90,11 +90,12 @@ class RevolutionaryTranslationValidator {
       await this.generateReport();
       
       // Step 7: Exit with appropriate code
-      return this.exitWithResults();
+      return this.exitWithResults(skipExit);
       
     } catch (error) {
       console.error('❌ REVOLUTIONARY VALIDATOR FAILED:', error.message);
-      process.exit(1);
+      if (!skipExit) process.exit(1);
+      throw error;
     }
   }
 
@@ -127,6 +128,54 @@ class RevolutionaryTranslationValidator {
       
       console.log(`  ✅ Loaded ${Object.keys(this.localeData[locale]).length} keys for ${locale}`);
     }
+  }
+
+  /**
+   * Extract search labels from local JSON files for validation
+   */
+  async extractSearchLabels() {
+    console.log('🏷️  Extracting search labels from local JSON files...');
+    
+    // Medical keywords that suggest medical content
+    const medicalKeywords = [
+      'medical', 'clinical', 'diagnosis', 'treatment', 'patient', 'doctor',
+      'consultation', 'prescription', 'symptom', 'condition', 'therapy',
+      'medication', 'procedure', 'examination', 'test', 'result', 'report',
+      'ai_assistant', 'transcription', 'microphone', 'documentation', 'workflow',
+      'conversation', 'dialogue', 'forms', 'navigation', 'demo'
+    ];
+    
+    // Critical system keywords that suggest critical functionality
+    const criticalKeywords = [
+      'error', 'warning', 'success', 'confirm', 'cancel', 'save', 'delete',
+      'login', 'logout', 'submit', 'close', 'open', 'edit', 'create', 'update',
+      'start', 'stop', 'recording', 'active', 'inactive', 'permissions'
+    ];
+    
+    // Extract from all loaded locale data
+    for (const locale of CONFIG.supportedLocales) {
+      if (this.localeData[locale]) {
+        const keys = Object.keys(this.localeData[locale]);
+        
+        // Check each key against medical keywords
+        for (const key of keys) {
+          const keyLower = key.toLowerCase();
+          
+          // Check if key contains medical keywords
+          if (medicalKeywords.some(keyword => keyLower.includes(keyword))) {
+            this.searchLabels.medical.add(key);
+          }
+          
+          // Check if key contains critical keywords
+          if (criticalKeywords.some(keyword => keyLower.includes(keyword))) {
+            this.searchLabels.critical.add(key);
+          }
+        }
+      }
+    }
+    
+    console.log(`  ✅ Extracted ${this.searchLabels.medical.size} medical search labels`);
+    console.log(`  ✅ Extracted ${this.searchLabels.critical.size} critical search labels`);
   }
 
   /**
@@ -184,8 +233,9 @@ class RevolutionaryTranslationValidator {
   async validateMedicalTerminology() {
     console.log('🏥 Validating medical terminology consistency...');
     
+    // Use the extracted medical search labels instead of hardcoded keywords
     const medicalKeys = Array.from(this.usedKeys).filter(key => 
-      CONFIG.medicalKeywords.some(keyword => key.toLowerCase().includes(keyword))
+      this.searchLabels.medical.has(key)
     );
     
     for (const locale of CONFIG.supportedLocales) {
@@ -196,6 +246,8 @@ class RevolutionaryTranslationValidator {
         this.errors.push(`CRITICAL: Missing medical translations in ${locale}: ${missingMedical.join(', ')}`);
       }
     }
+    
+    console.log(`  ✅ Validated ${medicalKeys.length} medical terminology keys`);
   }
 
   /**
@@ -204,8 +256,9 @@ class RevolutionaryTranslationValidator {
   async validateCriticalKeys() {
     console.log('⚠️  Validating critical system keys...');
     
+    // Use the extracted critical search labels instead of hardcoded keywords
     const criticalKeys = Array.from(this.usedKeys).filter(key => 
-      CONFIG.criticalKeys.some(keyword => key.toLowerCase().includes(keyword))
+      this.searchLabels.critical.has(key)
     );
     
     for (const locale of CONFIG.supportedLocales) {
@@ -216,6 +269,8 @@ class RevolutionaryTranslationValidator {
         this.errors.push(`CRITICAL: Missing critical translations in ${locale}: ${missingCritical.join(', ')}`);
       }
     }
+    
+    console.log(`  ✅ Validated ${criticalKeys.length} critical system keys`);
   }
 
   /**
@@ -232,6 +287,8 @@ class RevolutionaryTranslationValidator {
     console.log(`  Missing Translations: ${this.stats.missingTranslations}`);
     console.log(`  Critical Missing: ${this.stats.criticalMissing}`);
     console.log(`  Medical Missing: ${this.stats.medicalMissing}`);
+    console.log(`  Medical Search Labels: ${this.searchLabels.medical.size}`);
+    console.log(`  Critical Search Labels: ${this.searchLabels.critical.size}`);
     
     // Missing keys by locale
     if (this.stats.missingTranslations > 0) {
@@ -263,18 +320,20 @@ class RevolutionaryTranslationValidator {
   /**
    * Exit with appropriate code based on validation results
    */
-  exitWithResults() {
+  exitWithResults(skipExit = false) {
     const hasCriticalIssues = this.errors.length > 0 || this.stats.missingTranslations > 0;
     
     if (hasCriticalIssues) {
       console.log('\n💥 VALIDATION FAILED - BLOCKING BUILD/DEV SERVER');
       console.log('🚫 Fix all translation issues before proceeding!');
-      process.exit(1);
+      if (!skipExit) process.exit(1);
     } else {
       console.log('\n✅ ALL TRANSLATIONS VALIDATED SUCCESSFULLY');
       console.log('🚀 Build/Dev server can proceed!');
-      process.exit(0);
+      if (!skipExit) process.exit(0);
     }
+    
+    return hasCriticalIssues;
   }
 
   /**
@@ -359,10 +418,19 @@ async function main() {
   // Check if auto-fix is requested
   if (process.argv.includes('--auto-fix')) {
     try {
-      await validator.validateTranslations();
-      const autoFixer = new TranslationAutoFixer(validator);
-      await autoFixer.autoFix();
-      console.log('✅ Auto-fix completed. Re-run validation to verify.');
+      await validator.validateTranslations(true); // Skip exit for auto-fix
+      
+      // Only proceed with auto-fix if there are missing translations
+      if (validator.stats.missingTranslations > 0) {
+        console.log('\n🔧 AUTO-FIXING MISSING TRANSLATIONS...');
+        const autoFixer = new TranslationAutoFixer(validator);
+        await autoFixer.autoFix();
+        console.log('✅ Auto-fix completed. Re-validating...\n');
+        
+        // Re-validate after auto-fix
+        const newValidator = new RevolutionaryTranslationValidator();
+        await newValidator.validateTranslations();
+      }
     } catch (error) {
       console.error('❌ Auto-fix failed:', error.message);
       process.exit(1);
