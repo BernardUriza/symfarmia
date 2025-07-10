@@ -3,7 +3,41 @@ import { createContext, useContext, useEffect, useState } from 'react';
 
 export const I18nContext = createContext();
 
-// Dynamic translations loader
+// Critical fallback translations to prevent app crashes
+const fallbackTranslations = {
+  'es': {
+    'demo_mode_active': 'Modo Demo Activo',
+    'demo_mode_desc': 'Estás visualizando SYMFARMIA con datos de ejemplo',
+    'exit_demo': 'Salir del demo',
+    'switch_live_mode': 'Cambiar a modo real',
+    'light_mode': 'Modo Claro',
+    'dark_mode': 'Modo Oscuro',
+    'theme_toggle_light': 'Modo Claro',
+    'theme_toggle_dark': 'Modo Oscuro',
+    'language_switcher': 'Cambiar idioma',
+    'language_switcher.medical_grade': 'Cambio de idioma grado médico',
+    'error_boundary_title': 'Error del Sistema',
+    'error_boundary_desc': 'Se detectó un error inesperado',
+    'try_again': 'Intentar de nuevo'
+  },
+  'en': {
+    'demo_mode_active': 'Demo Mode Active',
+    'demo_mode_desc': 'You are viewing SYMFARMIA with sample data',
+    'exit_demo': 'Exit demo',
+    'switch_live_mode': 'Switch to live mode',
+    'light_mode': 'Light Mode',
+    'dark_mode': 'Dark Mode',
+    'theme_toggle_light': 'Light Mode',
+    'theme_toggle_dark': 'Dark Mode',
+    'language_switcher': 'Switch language',
+    'language_switcher.medical_grade': 'Medical grade language switch',
+    'error_boundary_title': 'System Error',
+    'error_boundary_desc': 'An unexpected error was detected',
+    'try_again': 'Try again'
+  }
+};
+
+// Dynamic translations loader with enhanced error handling
 async function loadTranslations(locale) {
   try {
     const modules = await Promise.all([
@@ -41,10 +75,12 @@ async function loadTranslations(locale) {
       Object.assign(combinedTranslations, flattenObject(module.default || module));
     });
 
-    return combinedTranslations;
+    // Merge with fallbacks to ensure no missing keys
+    return { ...fallbackTranslations[locale], ...combinedTranslations };
   } catch (error) {
     console.error(`Failed to load translations for ${locale}:`, error);
-    return {};
+    // Return fallbacks with error logging
+    return fallbackTranslations[locale] || fallbackTranslations['es'];
   }
 }
 
