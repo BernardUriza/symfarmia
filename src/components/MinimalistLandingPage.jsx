@@ -91,6 +91,10 @@ const MinimalistLandingPage = ({ isDemo = false }) => {
             </p>
 
             <div className="mb-8">
+            <span itemscope itemtype="image/png"
+                itemprop="image"> 
+              <a itemprop="url" href="/banner1.png"/> 
+            </span>
               <Image
                 src="/banner1.png"
                 alt="SYMFARMIA Medical Platform"
