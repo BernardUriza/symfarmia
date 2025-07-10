@@ -21,7 +21,6 @@ async function loadTranslations(locale) {
       import(`../../locales/${locale}/dialogue.json`),
       import(`../../locales/${locale}/transcription.json`),
       import(`../../locales/${locale}/language_switcher.json`),
-      import(`../../locales/${locale}/auto_generated.json`),
     ]);
     
     // Flatten nested objects for easier access

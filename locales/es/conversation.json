@@ -2,20 +2,16 @@
   "conversation": {
     "capture": {
       "title": "Captura de Conversación",
-      "subtitle": "Graba y transcribe consultas médicas",
+      "subtitle": "La IA está escuchando y transcribiendo su consulta médica en tiempo real",
+      "recording_active": "Grabación Activa",
+      "ready_to_record": "Listo para grabar",
+      "audio_level": "Nivel de Audio",
+      "live_transcription": "Transcripción en Vivo",
+      "powered_by_ai": "Impulsado por IA",
+      "review_dialog_flow": "Revisar Flujo de Diálogo",
       "start": "Iniciar Grabación",
       "stop": "Detener Grabación"
     }
-  },
-  "capture": {
-    "title": "Captura de Conversación",
-    "subtitle": "La IA está escuchando y transcribiendo su consulta médica en tiempo real",
-    "recording_active": "Grabación Activa",
-    "ready_to_record": "Listo para grabar",
-    "audio_level": "Nivel de Audio",
-    "live_transcription": "Transcripción en Vivo",
-    "powered_by_ai": "Impulsado por IA",
-    "review_dialog_flow": "Revisar Flujo de Diálogo"
   },
   "speakers": {
     "doctor": "Doctor",
