@@ -38,13 +38,13 @@ export default function MedicalAIDemo() {
 
   if (showPatientSelector) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <header className="bg-white border-b border-gray-200 px-6 py-4">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setShowPatientSelector(false)}
-                className="flex items-center text-gray-600 hover:text-gray-900"
+                className="flex items-center text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
               >
                 <ArrowLeft className="h-5 w-5 mr-2" />
                 {t('demo.demo_title')}
@@ -61,16 +61,16 @@ export default function MedicalAIDemo() {
 
         <main className="p-6">
           <div className="max-w-2xl mx-auto">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
-                  <User className="h-5 w-5 text-emerald-600" />
+                <div className="w-10 h-10 bg-emerald-100 dark:bg-emerald-900 rounded-lg flex items-center justify-center">
+                  <User className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold text-gray-900">
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                     {t('demo.patient_selector')}
                   </h2>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
                     {t('demo.patient_selector_subtitle')}
                   </p>
                 </div>
@@ -84,21 +84,21 @@ export default function MedicalAIDemo() {
                       selectPatient(patient.id);
                       setShowPatientSelector(false);
                     }}
-                    className="w-full text-left p-4 border border-gray-200 rounded-lg hover:border-emerald-300 hover:bg-emerald-50 transition-colors"
+                    className="w-full text-left p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-emerald-300 dark:hover:border-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors"
                   >
                     <div className="flex items-center justify-between">
                       <div>
-                        <div className="font-medium text-gray-900">{patient.name}</div>
-                        <div className="text-sm text-gray-500">{patient.age} años</div>
+                        <div className="font-medium text-gray-900 dark:text-white">{patient.name}</div>
+                        <div className="text-sm text-gray-500 dark:text-gray-400">{patient.age} años</div>
                       </div>
-                      <div className="text-sm text-gray-500">{patient.gender}</div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">{patient.gender}</div>
                     </div>
                   </button>
                 ))}
               </div>
 
-              <div className="mt-6 pt-4 border-t border-gray-200">
-                <Link href="/contact" className="text-sm text-emerald-600 hover:text-emerald-700">
+              <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <Link href="/contact" className="text-sm text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300">
                   {t('demo.request_custom_demo')}
                 </Link>
               </div>
@@ -124,9 +124,9 @@ export default function MedicalAIDemo() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white dark:bg-gray-900">
       {/* Professional Medical Header - María García Patient Context */}
-      <header className="bg-white border-b border-slate-200 px-6 py-4">
+      <header className="bg-white dark:bg-gray-800 border-b border-slate-200 dark:border-gray-700 px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-3">
@@ -134,23 +134,23 @@ export default function MedicalAIDemo() {
                 <Stethoscope className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-semibold text-slate-900">{t('workflow.title')}</h1>
-                <p className="text-sm text-slate-600">{t('workflow.subtitle')}</p>
+                <h1 className="text-xl font-semibold text-slate-900 dark:text-white">{t('workflow.title')}</h1>
+                <p className="text-sm text-slate-600 dark:text-gray-400">{t('workflow.subtitle')}</p>
               </div>
             </div>
           </div>
 
           {/* Patient Context Header */}
           <div className="flex items-center gap-6">
-            <div className="flex items-center gap-3 px-4 py-2 bg-blue-50 rounded-lg border border-blue-200">
-              <User className="h-4 w-4 text-blue-600" />
-              <span className="font-medium text-slate-900">
+            <div className="flex items-center gap-3 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700">
+              <User className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              <span className="font-medium text-slate-900 dark:text-white">
                 {patient ? `${patient.name}, ${patient.age} años` : ''}
               </span>
             </div>
-            <div className="flex items-center gap-3 px-4 py-2 bg-green-50 rounded-lg border border-green-200">
-              <Clock className="h-4 w-4 text-green-600" />
-              <span className="font-medium text-slate-900">{encounterTime}</span>
+            <div className="flex items-center gap-3 px-4 py-2 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-700">
+              <Clock className="h-4 w-4 text-green-600 dark:text-green-400" />
+              <span className="font-medium text-slate-900 dark:text-white">{encounterTime}</span>
             </div>
             <DemoResetButton
               onReset={() => {
@@ -173,8 +173,8 @@ export default function MedicalAIDemo() {
         {/* Medical Workflow Steps Progress - EXACT Figma Design */}
         <div className="mt-4">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-medium text-slate-600">{t('workflow.consultation_flow')}</h2>
-            <div className="text-sm text-slate-500">
+            <h2 className="text-sm font-medium text-slate-600 dark:text-gray-400">{t('workflow.consultation_flow')}</h2>
+            <div className="text-sm text-slate-500 dark:text-gray-400">
               {t('workflow.step_of').replace('{current}', currentStepIndex + 1).replace('{total}', steps.length)}
             </div>
           </div>
@@ -193,8 +193,8 @@ export default function MedicalAIDemo() {
                       isActive 
                         ? 'bg-blue-600 text-white' 
                         : isCompleted
-                        ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                        : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                        ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-900/50'
+                        : 'bg-slate-100 dark:bg-gray-700 text-slate-500 dark:text-gray-400 hover:bg-slate-200 dark:hover:bg-gray-600'
                     }`}
                   >
                     <Icon className="h-4 w-4" />
@@ -202,7 +202,7 @@ export default function MedicalAIDemo() {
                   </button>
                   {index < steps.length - 1 && (
                     <div className={`w-8 h-0.5 ${
-                      index < currentStepIndex ? 'bg-green-500' : 'bg-slate-300'
+                      index < currentStepIndex ? 'bg-green-500' : 'bg-slate-300 dark:bg-gray-600'
                     }`} />
                   )}
                 </div>
@@ -216,26 +216,26 @@ export default function MedicalAIDemo() {
 
       <div className="flex">
         {/* Professional Medical Navigation Sidebar */}
-        <div className="w-80 bg-slate-50 border-r border-slate-200 min-h-screen">
+        <div className="w-80 bg-slate-50 dark:bg-gray-800 border-r border-slate-200 dark:border-gray-700 min-h-screen">
           <div className="p-6">
             {/* Patient Information Panel */}
             <div className="mb-8">
-              <h3 className="text-sm font-semibold text-slate-900 mb-4">Información del Paciente</h3>
-              <div className="bg-white rounded-lg p-4 border border-slate-200">
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-4">Información del Paciente</h3>
+              <div className="bg-white dark:bg-gray-700 rounded-lg p-4 border border-slate-200 dark:border-gray-600">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                    <User className="h-6 w-6 text-blue-600" />
+                  <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+                    <User className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-slate-900">{patient?.name}</h4>
-                    <p className="text-sm text-slate-600">{patient?.age} años</p>
+                    <h4 className="font-semibold text-slate-900 dark:text-white">{patient?.name}</h4>
+                    <p className="text-sm text-slate-600 dark:text-gray-400">{patient?.age} años</p>
                   </div>
                 </div>
                 {patient?.gender && (
-                  <div className="text-sm text-slate-600 mb-2">{patient.gender}</div>
+                  <div className="text-sm text-slate-600 dark:text-gray-400 mb-2">{patient.gender}</div>
                 )}
                 {patient?.medicalHistory && patient.medicalHistory.length > 0 && (
-                  <div className="text-sm text-slate-600">
+                  <div className="text-sm text-slate-600 dark:text-gray-400">
                     <span className="font-medium">Historial:</span> {patient.medicalHistory.join(', ')}
                   </div>
                 )}
@@ -244,21 +244,21 @@ export default function MedicalAIDemo() {
 
             {/* Medical Navigation */}
             <div className="mb-8">
-              <h3 className="text-sm font-semibold text-slate-900 mb-4">{t('workflow.medical_navigation')}</h3>
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-4">{t('workflow.medical_navigation')}</h3>
               <nav className="space-y-2">
-                <button className="w-full flex items-center gap-3 px-4 py-3 bg-blue-50 text-blue-700 rounded-lg border border-blue-200">
+                <button className="w-full flex items-center gap-3 px-4 py-3 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-lg border border-blue-200 dark:border-blue-700">
                   <Users className="h-4 w-4" />
                   <span className="text-sm font-medium">{t('workflow.navigation.view_all_patients')}</span>
                 </button>
-                <button className="w-full flex items-center gap-3 px-4 py-3 text-slate-700 rounded-lg hover:bg-white">
+                <button className="w-full flex items-center gap-3 px-4 py-3 text-slate-700 dark:text-gray-300 rounded-lg hover:bg-white dark:hover:bg-gray-700">
                   <FolderOpen className="h-4 w-4" />
                   <span className="text-sm font-medium">{t('workflow.navigation.medical_reports')}</span>
                 </button>
-                <button className="w-full flex items-center gap-3 px-4 py-3 text-slate-700 rounded-lg hover:bg-white">
+                <button className="w-full flex items-center gap-3 px-4 py-3 text-slate-700 dark:text-gray-300 rounded-lg hover:bg-white dark:hover:bg-gray-700">
                   <FileText className="h-4 w-4" />
                   <span className="text-sm font-medium">{t('workflow.navigation.clinical_history')}</span>
                 </button>
-                <button className="w-full flex items-center gap-3 px-4 py-3 text-slate-700 rounded-lg hover:bg-white">
+                <button className="w-full flex items-center gap-3 px-4 py-3 text-slate-700 dark:text-gray-300 rounded-lg hover:bg-white dark:hover:bg-gray-700">
                   <Activity className="h-4 w-4" />
                   <span className="text-sm font-medium">{t('workflow.navigation.new_consultation')}</span>
                 </button>
@@ -266,15 +266,15 @@ export default function MedicalAIDemo() {
             </div>
 
             {/* Current Step Status */}
-            <div className="bg-white rounded-lg p-4 border border-slate-200">
-              <h3 className="text-sm font-semibold text-slate-900 mb-2">{t('workflow.current_step')}</h3>
+            <div className="bg-white dark:bg-gray-700 rounded-lg p-4 border border-slate-200 dark:border-gray-600">
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-2">{t('workflow.current_step')}</h3>
               <div className="flex items-center gap-2 mb-2">
-                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                  {React.createElement(steps[currentStepIndex].icon, { className: "h-4 w-4 text-blue-600" })}
+                <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+                  {React.createElement(steps[currentStepIndex].icon, { className: "h-4 w-4 text-blue-600 dark:text-blue-400" })}
                 </div>
-                <span className="font-medium text-slate-900">{steps[currentStepIndex].label}</span>
+                <span className="font-medium text-slate-900 dark:text-white">{steps[currentStepIndex].label}</span>
               </div>
-              <div className="text-sm text-slate-600">
+              <div className="text-sm text-slate-600 dark:text-gray-400">
                 {currentStepIndex === 0 && t('workflow.step_descriptions.listen')}
                 {currentStepIndex === 1 && t('workflow.step_descriptions.review')}
                 {currentStepIndex === 2 && t('workflow.step_descriptions.notes')}
@@ -286,7 +286,7 @@ export default function MedicalAIDemo() {
         </div>
 
         {/* Professional Medical Consultation Workspace */}
-        <main className="flex-1 bg-white">
+        <main className="flex-1 bg-white dark:bg-gray-900">
           <div className="p-8">
             <CurrentComponent 
               onNext={goToNextStep}

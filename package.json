@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "prebuild": "node scripts/build-guardian.js --build",
-    "predev": "node scripts/build-guardian.js --dev",
+    "prebuild": "node scripts/build-guardian.js --build && node scripts/validate-i18n-structure.js",
+    "predev": "node scripts/build-guardian.js --dev && node scripts/validate-i18n-structure.js",
+    "validate:i18n": "node scripts/validate-i18n-structure.js",
     "validate:translations": "node scripts/validate-translations.js",
     "validate:translations:revolutionary": "node scripts/revolutionary-translation-validator.js",
     "test:translations": "jest tests/medical-components/translations.test.js",

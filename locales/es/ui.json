@@ -1,0 +1,27 @@
+{
+  "theme": {
+    "toggle_light": "Modo Claro",
+    "toggle_dark": "Modo Oscuro",
+    "switch_theme": "Cambiar tema",
+    "light_mode": "Modo Claro",
+    "dark_mode": "Modo Oscuro"
+  },
+  "demo": {
+    "mode_active": "Modo Demo Activo",
+    "mode_desc": "Estás visualizando SYMFARMIA con datos de ejemplo",
+    "exit_demo": "Salir del demo",
+    "switch_live_mode": "Cambiar a modo real"
+  },
+  "language": {
+    "switcher": "Cambiar idioma",
+    "medical_grade": "Cambio de idioma grado médico",
+    "medical_certified": "Cambio de idioma certificado médico",
+    "medical": "Cambio de idioma médico",
+    "validated": "Cambio de idioma validado",
+    "english": "Inglés",
+    "spanish": "Español",
+    "clinical_language": "Idioma clínico",
+    "english_abbr": "EN",
+    "spanish_abbr": "ES"
+  }
+}
