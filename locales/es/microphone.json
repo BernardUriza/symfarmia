@@ -1,0 +1,17 @@
+{
+  "microphone": {
+    "status": {
+      "problem_with_microphone": "Llamar al administrador para llenar este valor",
+      "problems_detected": "Llamar al administrador para llenar este valor",
+      "recommended_solutions": "Llamar al administrador para llenar este valor",
+      "detected_devices": "Llamar al administrador para llenar este valor",
+      "technical_details": "Llamar al administrador para llenar este valor",
+      "need_access": "Llamar al administrador para llenar este valor"
+    },
+    "actions": {
+      "diagnose": "Llamar al administrador para llenar este valor",
+      "retry": "Llamar al administrador para llenar este valor",
+      "test_access": "Llamar al administrador para llenar este valor"
+    }
+  }
+}
