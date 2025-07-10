@@ -65,5 +65,106 @@
   "demographics": "Demografía",
   "outcomes": "Resultados",
   "revenue": "Ingresos",
-  "online": "En línea"
+  "online": "En línea",
+  
+  "title": "Dashboard Médico",
+  "subtitle": "Sistema integral de gestión médica",
+  "system_active": "Sistema Activo",
+  
+  "cards": {
+    "patients": {
+      "title": "Pacientes",
+      "description": "Organiza perfiles e historial clínico",
+      "button": "Ver Pacientes",
+      "total_label": "Total:",
+      "active_label": "Activos",
+      "new_today_label": "Nuevos hoy"
+    },
+    "reports": {
+      "title": "Reportes Médicos",
+      "description": "Informes y resultados médicos",
+      "button": "Ver Reportes",
+      "pending_label": "Pendientes",
+      "completed_label": "Completados"
+    },
+    "studies": {
+      "title": "Estudios Médicos",
+      "description": "Estudios y análisis realizados",
+      "button": "Ver Estudios",
+      "this_month_label": "Este mes",
+      "scheduled_label": "Programados"
+    },
+    "transcription": {
+      "title": "Transcripción IA",
+      "description": "Dictado médico inteligente",
+      "status_ready": "Listo",
+      "consultations_today": "Consultas Hoy",
+      "time_saved": "Tiempo Ahorrado",
+      "new_consultation": "Nueva Consulta",
+      "view_transcriptions": "Ver Transcripciones"
+    }
+  },
+  
+  "sidebar": {
+    "quick_actions": {
+      "title": "Acciones Rápidas",
+      "new_patient": "Nuevo Paciente",
+      "new_report": "Nuevo Reporte",
+      "new_consultation": "Nueva Consulta"
+    },
+    "recent_activity": {
+      "title": "Actividad Reciente",
+      "new_patient_registered": "Nuevo paciente registrado",
+      "consultation_transcribed": "Consulta transcrita",
+      "study_completed": "Estudio completado",
+      "ago_2_minutes": "Hace 2 minutos",
+      "ago_15_minutes": "Hace 15 minutos",
+      "ago_30_minutes": "Hace 30 minutos"
+    },
+    "system_status": {
+      "title": "Estado del Sistema",
+      "api_medical": "API Médica",
+      "database": "Base de Datos",
+      "backups": "Respaldos",
+      "status_active": "Activa",
+      "status_connected": "Conectada",
+      "status_scheduled": "Programado"
+    }
+  },
+  
+  "analytics": {
+    "daily_analysis": "Análisis del Día",
+    "consultations_completed": "Consultas Completadas",
+    "system_efficiency": "Eficiencia del Sistema",
+    "average_time": "Tiempo Promedio"
+  },
+  
+  "activity": {
+    "new_patient_registered": "Nuevo paciente registrado",
+    "medical_report_generated": "Reporte médico generado",
+    "study_completed": "Estudio completado",
+    "view_all_activity": "Ver toda la actividad",
+    "patient_data": "María García - ID: 2543",
+    "blood_test_data": "Análisis de sangre - Dr. Rodríguez",
+    "mri_data": "Resonancia magnética - Sala 3",
+    "ago_5_min": "hace 5 min",
+    "ago_15_min": "hace 15 min",
+    "ago_30_min": "hace 30 min"
+  },
+  
+  "system_management": {
+    "title": "Gestión del Sistema",
+    "categories": {
+      "title": "Categorías",
+      "description": "Gestionar categorías médicas"
+    },
+    "study_types": {
+      "title": "Tipos de Estudio",
+      "description": "Configurar tipos de estudios"
+    },
+    "configuration": {
+      "title": "Configuración",
+      "description": "Ajustes del sistema"
+    }
+  }
 }
