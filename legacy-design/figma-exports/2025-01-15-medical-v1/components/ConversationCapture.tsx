@@ -31,7 +31,7 @@ export function ConversationCapture({ onNext, isRecording, setIsRecording }: Con
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="text-center mb-6">
-        <h1 className="text-2xl text-slate-900 mb-2">Captura de Conversación</h1>
+        <h1 className="text-2xl text-slate-900 mb-2">Captura de Conversjmación</h1>
         <p className="text-slate-600">La IA está escuchando y transcribiendo su consulta médica en tiempo real</p>
       </div>
 

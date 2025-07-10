@@ -18,7 +18,10 @@ import { I18nProvider } from "./providers/I18nProvider";
 import { PatientContextProvider } from "./providers/PatientContextProvider";
 import MedicalAssistant from "./components/MedicalAssistantWrapper";
 import VersionInfo from "./components/VersionInfo";
+import { HeaderLanguageSwitcher } from "../components/layout/GlobalLanguageSwitcher";
 import { SITE_CONFIG } from "./lib/site-config";
+import ThemeToggle from "../components/ThemeToggle";
+import BraveCacheBuster from "../components/BraveCacheBuster";
 
 // MEDICAL-GRADE Critical CSS with hydration safety
 const MedicalCriticalCSS = `
@@ -74,6 +77,33 @@ const MedicalCriticalCSS = `
     align-items: center !important;
     justify-content: center !important;
     font-family: system-ui, sans-serif !important;
+  }
+  
+  /* LANGUAGE SWITCHER STYLES */
+  .language-switcher-container {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 8px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+  
+  .language-switcher-floating {
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-5px); }
+  }
+  
+  .language-switcher-dropdown {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+  }
+  
+  .language-switcher-dropdown.open {
+    max-height: 300px;
   }
 `;
 
@@ -157,6 +187,22 @@ export const metadata = {
     description: SITE_CONFIG.description,
     images: [SITE_CONFIG.image],
   },
+  // 🦁 BRAVE BROWSER SPECIFIC CACHE DESTRUCTION HEADERS
+  other: {
+    // Force no-cache for Brave's aggressive caching
+    'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
+    'Pragma': 'no-cache',
+    'Expires': '0',
+    // Brave shields configuration for development
+    'brave-shields': 'allow-all',
+    'brave-ads': 'allow',
+    'brave-trackers': 'allow',
+    'brave-fingerprinting': 'allow',
+    // Medical system identification
+    'medical-system': 'SYMFARMIA',
+    'medical-reliability': '99.9%',
+    'error-recovery': 'automatic',
+  },
 };
 
 /**
@@ -213,6 +259,14 @@ export default function RootLayout({ children }) {
                             <DemoModeBanner />
                           </MedicalErrorBoundary>
                           
+                          {/* GLOBAL UI CONTROLS */}
+                          <MedicalErrorBoundary context="Global UI Controls" medicalWorkflow="Theme and Language">
+                            <div className="fixed top-4 right-4 z-50 flex items-center gap-3">
+                              <ThemeToggle />
+                              <HeaderLanguageSwitcher />
+                            </div>
+                          </MedicalErrorBoundary>
+                          
                           {/* MAIN CONTENT AREA */}
                           <MedicalErrorBoundary context="Main Content" medicalWorkflow="Primary UI">
                             {children}
@@ -228,6 +282,11 @@ export default function RootLayout({ children }) {
                             <div className="fixed bottom-2 left-2 z-40">
                               <VersionInfo />
                             </div>
+                          </MedicalErrorBoundary>
+
+                          {/* BRAVE CACHE BUSTER - DEVELOPMENT ONLY */}
+                          <MedicalErrorBoundary context="Brave Cache Buster" medicalWorkflow="Development Cache Management">
+                            <BraveCacheBuster />
                           </MedicalErrorBoundary>
                           
                         </AppModeProvider>

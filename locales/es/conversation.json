@@ -1,19 +1,25 @@
 {
-  "capture": {
-    "title": "Captura de Conversación",
-    "subtitle": "La IA está escuchando y transcribiendo su consulta médica en tiempo real",
-    "recording_active": "Grabación Activa",
-    "ready_to_record": "Listo para grabar",
-    "audio_level": "Nivel de Audio",
-    "live_transcription": "Transcripción en Vivo",
-    "powered_by_ai": "Impulsado por IA",
-    "review_dialog_flow": "Revisar Flujo de Diálogo"
+  "conversation": {
+    "capture": {
+      "title": "Captura de Conversación",
+      "subtitle": "La IA está escuchando y transcribiendo su consulta médica en tiempo real",
+      "recording_active": "Grabación Activa",
+      "ready_to_record": "Listo para grabar",
+      "audio_level": "Nivel de Audio",
+      "live_transcription": "Transcripción en Vivo",
+      "powered_by_ai": "Impulsado por IA",
+      "review_dialog_flow": "Revisar Flujo de Diálogo",
+      "start": "Iniciar Grabación",
+      "stop": "Detener Grabación"
+    }
   },
   "speakers": {
     "doctor": "Doctor",
     "patient": "Paciente",
     "ai_medical": "IA Médica"
   },
+  "doctor_speaker": "Doctor",
+  "patient_speaker": "Paciente",
   "processing": {
     "ai_processing": "Analizando síntomas médicos...",
     "processing_status": "procesando..."

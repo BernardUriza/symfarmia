@@ -1,0 +1,26 @@
+{
+  "dialogue": {
+    "title": "Diálogo Médico",
+    "subtitle": "Conversación Paciente-Doctor",
+    "sections": {
+      "chief_complaint": "Motivo de Consulta",
+      "history_present_illness": "Historia de Enfermedad Actual",
+      "associated_symptoms": "Síntomas Asociados",
+      "system_review": "Revisión por Sistemas"
+    },
+    "tags": {
+      "main_symptom": "Síntoma Principal",
+      "duration": "Duración",
+      "pain_quality": "Calidad del Dolor",
+      "location": "Localización",
+      "severity": "Severidad",
+      "functional_impact": "Impacto Funcional",
+      "associated_symptoms": "Síntomas Asociados",
+      "photophobia": "Fotofobia",
+      "nausea": "Náusea",
+      "rps": "RPS",
+      "neck_stiffness": "Rigidez de Cuello",
+      "vision": "Visión"
+    }
+  }
+}

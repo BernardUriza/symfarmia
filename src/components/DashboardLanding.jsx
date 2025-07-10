@@ -1,6 +1,7 @@
 "use client";
 import React from 'react';
 import Link from 'next/link';
+// Codex: cleaned demo artifacts and removed test header
 import { 
   Users, 
   FileText, 

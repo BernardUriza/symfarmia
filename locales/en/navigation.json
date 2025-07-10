@@ -35,5 +35,8 @@
     "notes": "Notes",
     "orders": "Orders",
     "summary": "Summary"
+  },
+  "navigation": {
+    "dashboard": "Dashboard"
   }
 }

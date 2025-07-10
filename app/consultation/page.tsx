@@ -11,7 +11,11 @@ import {
   CheckCircle,
   Mic
 } from 'lucide-react';
+import ThemeToggle from '../../components/ThemeToggle';
+import ActionButton from '../../components/ui/ActionButton';
+import { UserPlusIcon } from '@heroicons/react/24/outline';
 import { TranscriptionPanel } from '../../src/domains/medical-ai/components/TranscriptionPanel';
+import { useTranslation } from '../providers/I18nProvider';
 
 interface Patient {
   id: string;
@@ -31,6 +35,7 @@ interface ConsultationState {
 }
 
 const ConsultationPage = () => {
+  const { t } = useTranslation();
   const router = useRouter();
   const [consultationState, setConsultationState] = useState<ConsultationState>({
     patientId: null,
@@ -157,16 +162,20 @@ const ConsultationPage = () => {
         <header className="bg-white border-b border-gray-200 px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Link href="/" className="flex items-center text-gray-600 hover:text-gray-900">
-                <ArrowLeft className="h-5 w-5 mr-2" />
-                Dashboard
-              </Link>
+          <Link href="/" className="flex items-center text-gray-600 hover:text-gray-900">
+            <ArrowLeft className="h-5 w-5 mr-2" />
+            {t('navigation.dashboard')}
+          </Link>
               <div className="w-px h-6 bg-gray-300"></div>
-              <h1 className="text-xl font-semibold text-gray-900">Nueva Consulta</h1>
+              <h1 className="text-xl font-semibold text-gray-900">{t('consultation.page.title')}</h1>
             </div>
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <Mic className="h-4 w-4 text-emerald-600" />
-              Transcripción IA
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <Mic className="h-4 w-4 text-emerald-600" />
+                {t('consultation.page.subtitle')}
+              </div>
+              <div className="w-px h-6 bg-gray-300 dark:bg-gray-600"></div>
+              <ThemeToggle className="ml-2" />
             </div>
           </div>
         </header>
@@ -180,8 +189,8 @@ const ConsultationPage = () => {
                   <User className="h-5 w-5 text-emerald-600" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold text-gray-900">Seleccionar Paciente</h2>
-                  <p className="text-sm text-gray-600">Elige el paciente para iniciar la consulta</p>
+                  <h2 className="text-lg font-semibold text-gray-900">{t('consultation.patient_selector.title')}</h2>
+                  <p className="text-sm text-gray-600">{t('consultation.patient_selector.subtitle')}</p>
                 </div>
               </div>
 
@@ -205,13 +214,17 @@ const ConsultationPage = () => {
                 ))}
               </div>
 
-              <div className="mt-6 pt-4 border-t border-gray-200">
-                <Link
-                  href="/dashboard/patients"
-                  className="text-sm text-emerald-600 hover:text-emerald-700"
-                >
-                  + Agregar nuevo paciente
-                </Link>
+              <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <ActionButton
+                  onClick={() => router.push('/dashboard/patients')}
+                  text={t('consultation.patient_selector.add_new')}
+                  icon={UserPlusIcon}
+                  color="emerald"
+                  size="md"
+                  variant="outline"
+                  fullWidth={true}
+                  ariaLabel="Add new patient to the system"
+                />
               </div>
             </div>
           </div>
@@ -226,13 +239,13 @@ const ConsultationPage = () => {
       <header className="bg-white border-b border-gray-200 px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <button
-              onClick={() => setShowPatientSelector(true)}
-              className="flex items-center text-gray-600 hover:text-gray-900"
-            >
-              <ArrowLeft className="h-5 w-5 mr-2" />
-              Cambiar Paciente
-            </button>
+                <button
+                  onClick={() => setShowPatientSelector(true)}
+                  className="flex items-center text-gray-600 hover:text-gray-900"
+                >
+                  <ArrowLeft className="h-5 w-5 mr-2" />
+                  {t('consultation.buttons.change_patient')}
+                </button>
             <div className="w-px h-6 bg-gray-300"></div>
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
@@ -251,6 +264,10 @@ const ConsultationPage = () => {
               <Clock className="h-4 w-4" />
               {formatDuration(consultationState.duration)}
             </div>
+            
+            {/* Theme Toggle */}
+            <div className="w-px h-6 bg-gray-300 dark:bg-gray-600"></div>
+            <ThemeToggle className="ml-2" />
             
             {/* Auto-save status */}
             {consultationState.lastSaved && (
@@ -304,13 +321,13 @@ const ConsultationPage = () => {
                 </button>
                 
                 {consultationState.status === 'completed' && (
-                  <button
-                    onClick={handleSaveConsultation}
-                    className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
-                  >
-                    <Save className="h-4 w-4" />
-                    Guardar Consulta
-                  </button>
+                <button
+                  onClick={handleSaveConsultation}
+                  className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+                >
+                  <Save className="h-4 w-4" />
+                  {t('consultation.buttons.save_consultation')}
+                </button>
                 )}
               </div>
             </div>
@@ -333,19 +350,19 @@ const ConsultationPage = () => {
 
           {/* Quick Actions */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <h3 className="text-sm font-medium text-gray-900 mb-3">Acciones Rápidas</h3>
+            <h3 className="text-sm font-medium text-gray-900 mb-3">{t('consultation.actions.quick_actions')}</h3>
             <div className="flex flex-wrap gap-2">
               <button className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm hover:bg-blue-200 transition-colors">
-                Plantilla: Consulta General
+                {t('consultation.actions.template_general')}
               </button>
               <button className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm hover:bg-blue-200 transition-colors">
-                Plantilla: Seguimiento
+                {t('consultation.actions.template_followup')}
               </button>
               <button className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm hover:bg-blue-200 transition-colors">
-                Plantilla: Dolor Torácico
+                {t('consultation.actions.template_chest_pain')}
               </button>
               <button className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm hover:bg-blue-200 transition-colors">
-                Exportar PDF
+                {t('consultation.actions.export_pdf')}
               </button>
             </div>
           </div>
@@ -355,12 +372,12 @@ const ConsultationPage = () => {
             <div className="fixed top-4 right-4 bg-emerald-100 border border-emerald-200 rounded-lg p-4 shadow-lg">
               <div className="flex items-center gap-2">
                 <CheckCircle className="h-5 w-5 text-emerald-600" />
-                <span className="text-emerald-800 font-medium">
-                  Consulta guardada exitosamente
-                </span>
+              <span className="text-emerald-800 font-medium">
+                {t('consultation.status.saved_success')}
+              </span>
               </div>
               <p className="text-emerald-700 text-sm mt-1">
-                Redirigiendo a reportes médicos...
+                {t('consultation.status.redirect_notice')}
               </p>
             </div>
           )}

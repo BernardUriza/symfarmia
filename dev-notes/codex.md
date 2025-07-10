@@ -24,6 +24,10 @@
 - [CODEX] ❌ FillMask error; fix sanitize parameter max_length → top_k, top_p
 - [CODEX] ✅ Modular architecture foundation laid
 
+### 2025-07-10 10:00 AM - DashboardLanding Audit
+- **Status**: ✅ COMPLETED
+- **Activity**: Audited `src/components/DashboardLanding.jsx` usage, traced imports, confirmed dashboard entrypoint uses `app/dashboard/page.tsx`, added `<h1>BRUTAL TEST</h1>` test change, updated development diary.
+
 ## Collaboration Notes
 
 ### For Claudio:

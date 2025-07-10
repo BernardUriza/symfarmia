@@ -1,19 +1,25 @@
 {
-  "capture": {
-    "title": "Conversation Capture",
-    "subtitle": "AI is listening and transcribing your medical consultation in real-time",
-    "recording_active": "Recording Active",
-    "ready_to_record": "Ready to record",
-    "audio_level": "Audio Level",
-    "live_transcription": "Live Transcription",
-    "powered_by_ai": "Powered by AI",
-    "review_dialog_flow": "Review Dialog Flow"
+  "conversation": {
+    "capture": {
+      "title": "Conversation Capture",
+      "subtitle": "AI is listening and transcribing your medical consultation in real-time",
+      "recording_active": "Recording Active",
+      "ready_to_record": "Ready to Record",
+      "audio_level": "Audio Level",
+      "live_transcription": "Live Transcription",
+      "powered_by_ai": "Powered by AI",
+      "review_dialog_flow": "Review Dialog Flow",
+      "start": "Start Recording",
+      "stop": "Stop Recording"
+    }
   },
   "speakers": {
     "doctor": "Doctor",
     "patient": "Patient",
     "ai_medical": "Medical AI"
   },
+  "doctor_speaker": "Doctor",
+  "patient_speaker": "Patient",
   "processing": {
     "ai_processing": "Analyzing medical symptoms...",
     "processing_status": "processing..."
