@@ -120,7 +120,18 @@ class RevolutionaryTranslationValidator {
         const filePath = path.join(localeDir, file);
         try {
           const content = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-          this.localeData[locale] = { ...this.localeData[locale], ...this.flattenObject(content) };
+          const fileName = path.basename(file, '.json');
+          
+          // Flatten the content and add both with and without file prefix
+          const flattenedContent = this.flattenObject(content);
+          
+          // Add keys without file prefix (e.g., 'templates.chief_complaint')
+          Object.assign(this.localeData[locale], flattenedContent);
+          
+          // Add keys with file prefix (e.g., 'clinical.templates.chief_complaint')
+          for (const [key, value] of Object.entries(flattenedContent)) {
+            this.localeData[locale][`${fileName}.${key}`] = value;
+          }
         } catch (error) {
           this.errors.push(`Invalid JSON in ${filePath}: ${error.message}`);
         }
