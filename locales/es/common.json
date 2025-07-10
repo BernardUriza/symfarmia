@@ -108,7 +108,7 @@
     "medical": "médico",
     "medical_grade": "grado médico",
     "validated": "validado",
-    "current_language": "idioma actual"
+    "current_language": "Idioma actual: {language}"
   },
   "missing": {
     "key": "clave faltante"

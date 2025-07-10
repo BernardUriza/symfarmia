@@ -108,7 +108,7 @@
     "medical": "medical",
     "medical_grade": "medical grade",
     "validated": "validated",
-    "current_language": "current language"
+    "current_language": "Current language: {language}"
   },
   "missing": {
     "key": "missing key"

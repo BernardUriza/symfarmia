@@ -14,13 +14,16 @@ export default function ThemeToggle({ className = '' }: { className?: string }) 
       aria-checked={isDark}
       aria-label={isDark ? t('light_mode') : t('dark_mode')}
       onClick={toggleTheme}
-      className={`relative inline-flex h-6 w-12 items-center rounded-full transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-        isDark ? 'bg-slate-600' : 'bg-amber-500'
+      className={`relative inline-flex h-8 w-14 items-center rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 backdrop-blur-sm border shadow-lg hover:shadow-xl ${
+        isDark 
+          ? 'bg-slate-700/80 border-slate-600 hover:bg-slate-600/80' 
+          : 'bg-amber-500/90 border-amber-400 hover:bg-amber-400/90'
       } ${className}`}
+      title={isDark ? t('light_mode') : t('dark_mode')}
     >
       <span className="sr-only">{isDark ? t('light_mode') : t('dark_mode')}</span>
       <span
-        className={`absolute left-0.5 top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-white dark:bg-slate-800 shadow transform transition-all duration-300 ${
+        className={`absolute left-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-white dark:bg-slate-800 shadow-md transform transition-all duration-300 ${
           isDark ? 'translate-x-6' : 'translate-x-0'
         } hover:scale-110`}
       >
