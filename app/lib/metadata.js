@@ -29,6 +29,7 @@ export function generateMetadata({
           width: 1200,
           height: 630,
           alt: finalTitle,
+          itemprop: "image" 
         },
       ],
       locale: 'es_ES',
