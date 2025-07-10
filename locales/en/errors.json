@@ -1,0 +1,15 @@
+{
+  "system": {
+    "boundary_title": "System Error",
+    "boundary_desc": "An unexpected error was detected",
+    "try_again": "Try again",
+    "refresh_page": "Refresh page"
+  },
+  "translation": {
+    "loading_failed": "Failed to load translations",
+    "key_missing": "Missing translation key",
+    "fallback_used": "Using fallback translation",
+    "locale_invalid": "Invalid locale specified",
+    "json_parse_error": "Error parsing translation JSON file"
+  }
+}

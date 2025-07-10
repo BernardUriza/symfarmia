@@ -14,8 +14,8 @@ function DemoBannerContent() {
   return (
     <div className="demo-banner">
       <span className="demo-emoji" role="img" aria-label="demo">🧪</span>
-      <span className="demo-text">{t('demo_mode_active')}</span>
-      <button onClick={toggleMode} title={t('switch_live_mode')}>×</button>
+      <span className="demo-text">{t('demo.mode_active')}</span>
+      <button onClick={toggleMode} title={t('demo.switch_live_mode')}>×</button>
     </div>
   );
 }
