@@ -4,6 +4,18 @@
     "ready_to_record": "Listo para Grabar",
     "start_recording": "Iniciar Grabación",
     "stop_recording": "Detener Grabación",
-    "no_transcript_available": "No hay transcripción disponible"
+    "no_transcript_available": "No hay transcripción disponible",
+    "reset_demo": "Llamar al administrador para llenar este valor",
+    "final_transcript": "Llamar al administrador para llenar este valor",
+    "service_label": "Llamar al administrador para llenar este valor",
+    "medical_ai_active": "Llamar al administrador para llenar este valor",
+    "words_count": "Llamar al administrador para llenar este valor",
+    "recording": "Llamar al administrador para llenar este valor",
+    "transcribing": "Llamar al administrador para llenar este valor",
+    "demo_empty_state": "Llamar al administrador para llenar este valor",
+    "no_transcript_description": "Llamar al administrador para llenar este valor",
+    "service_browser": "Llamar al administrador para llenar este valor",
+    "service_whisper": "Llamar al administrador para llenar este valor",
+    "ai_active": "Llamar al administrador para llenar este valor"
   }
 }

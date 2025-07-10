@@ -1,0 +1,17 @@
+{
+  "microphone": {
+    "status": {
+      "problem_with_microphone": "Call administrator to fill this value",
+      "problems_detected": "Call administrator to fill this value",
+      "recommended_solutions": "Call administrator to fill this value",
+      "detected_devices": "Call administrator to fill this value",
+      "technical_details": "Call administrator to fill this value",
+      "need_access": "Call administrator to fill this value"
+    },
+    "actions": {
+      "diagnose": "Call administrator to fill this value",
+      "retry": "Call administrator to fill this value",
+      "test_access": "Call administrator to fill this value"
+    }
+  }
+}
