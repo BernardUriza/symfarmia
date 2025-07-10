@@ -1,10 +1,9 @@
 #!/usr/bin/env node
 /**
- * BUILD GUARDIAN - TRANSLATION ENFORCEMENT SYSTEM
+ * BUILD GUARDIAN - TRANSLATION EXECUTIONER
  * 
- * This script acts as a guardian that prevents builds and dev server startup
- * when translations are incomplete. It's IMPLACABLE and will NOT allow
- * any bypass of translation validation.
+ * This guardian does NOT negotiate with incomplete translations.
+ * If one key falta, TODO truena. Build/server bloqueado.
  */
 
 const { exec } = require('child_process');
@@ -25,30 +24,26 @@ class BuildGuardian {
   async guard() {
     console.log('🛡️  BUILD GUARDIAN ACTIVATED');
     console.log(`⚡ Mode: ${this.isDevMode ? 'DEV SERVER' : 'BUILD'}`);
-    
     try {
-      // Check if translations are locked (validation failed recently)
       await this.checkTranslationLock();
-      
-      // Run revolutionary validation
       await this.runRevolutionaryValidation();
-      
-      // Clear any existing lock
       await this.clearTranslationLock();
-      
       console.log('✅ BUILD GUARDIAN: All checks passed');
       console.log('🚀 Allowing build/dev server to proceed...');
-      
     } catch (error) {
       console.error('🚨 BUILD GUARDIAN: BLOCKING OPERATION');
+      // Print full error details, not just the message
+      if (error.stdout || error.stderr) {
+        if (error.stdout) {
+          console.error('--- STDOUT ---\n' + error.stdout);
+        }
+        if (error.stderr) {
+          console.error('--- STDERR ---\n' + error.stderr);
+        }
+      }
       console.error(`❌ Reason: ${error.message}`);
-      
-      // Create lock file to prevent future attempts
       await this.createTranslationLock(error.message);
-      
-      // Show fix instructions
       this.showFixInstructions();
-      
       process.exit(1);
     }
   }
@@ -58,11 +53,9 @@ class BuildGuardian {
       const lockData = JSON.parse(fs.readFileSync(this.lockFile, 'utf8'));
       const timeDiff = Date.now() - lockData.timestamp;
       const hoursDiff = timeDiff / (1000 * 60 * 60);
-      
-      if (hoursDiff < 1) { // Lock expires after 1 hour
+      if (hoursDiff < 1) {
         throw new Error(`Translation lock active. Last failure: ${lockData.reason}`);
       } else {
-        // Lock expired, remove it
         fs.unlinkSync(this.lockFile);
       }
     }
@@ -70,21 +63,22 @@ class BuildGuardian {
 
   async runRevolutionaryValidation() {
     console.log('🔍 Running revolutionary translation validation...');
-    
-    try {
-      const { stdout, stderr } = await execAsync(`node "${this.validationScript}"`);
-      
-      if (stderr && stderr.includes('VALIDATION FAILED')) {
-        throw new Error('Translation validation failed');
-      }
-      
-      console.log('✅ Revolutionary validation passed');
-      return true;
-      
-    } catch (error) {
-      // If validation script exits with non-zero code, it means validation failed
-      throw new Error(`Translation validation failed: ${error.message}`);
-    }
+    // NOTA: Utiliza exec (callback), no execAsync, para máxima compatibilidad con output largo.
+    return new Promise((resolve, reject) => {
+      exec(`node "${this.validationScript}"`, { maxBuffer: 1024 * 1024 * 10 }, (error, stdout, stderr) => {
+        if (stdout) process.stdout.write(stdout);
+        if (stderr) process.stderr.write(stderr);
+
+        if (error) {
+          // Attach output to error object for brutal reporting
+          error.stdout = stdout;
+          error.stderr = stderr;
+          return reject(error);
+        }
+        console.log('✅ Revolutionary validation passed');
+        resolve(true);
+      });
+    });
   }
 
   async createTranslationLock(reason) {
@@ -94,7 +88,6 @@ class BuildGuardian {
       mode: this.isDevMode ? 'dev' : 'build',
       message: 'Translation validation failed. Fix all missing translations before proceeding.'
     };
-    
     fs.writeFileSync(this.lockFile, JSON.stringify(lockData, null, 2));
     console.log('🔒 Translation lock created');
   }
@@ -110,24 +103,19 @@ class BuildGuardian {
     console.log('\n🔧 HOW TO FIX TRANSLATION ISSUES:');
     console.log('━'.repeat(50));
     console.log('1. Auto-fix missing translations:');
-    console.log('   npm run translations:auto-fix');
-    console.log('');
+    console.log('   npm run translations:auto-fix\n');
     console.log('2. Validate translations manually:');
-    console.log('   npm run translations:validate-strict');
-    console.log('');
+    console.log('   npm run translations:validate-strict\n');
     console.log('3. Validate and auto-fix in one command:');
-    console.log('   npm run translations:validate-and-fix');
-    console.log('');
+    console.log('   npm run translations:validate-and-fix\n');
     console.log('4. Check specific missing keys:');
-    console.log('   npm run validate:translations');
-    console.log('');
+    console.log('   npm run validate:translations\n');
     console.log('⚠️  IMPORTANT: The build/dev server is BLOCKED until ALL');
     console.log('   translations are complete. No exceptions!');
     console.log('━'.repeat(50));
   }
 }
 
-// Execute guardian
 async function main() {
   const guardian = new BuildGuardian();
   await guardian.guard();
