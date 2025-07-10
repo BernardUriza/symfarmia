@@ -13,7 +13,7 @@ import {
 import LanguageToggle from '../../components/LanguageToggle';
 import dynamic from 'next/dynamic';
 const DemoLoginModal = dynamic(() => import('../../components/DemoLoginModal'));
-const DashboardLanding = dynamic(() => import('./DashboardLanding'));
+// Removed DashboardLanding import - redirecting to main dashboard
 import { useTranslation } from '../../app/providers/I18nProvider';
 import { useAppMode } from '../../app/providers/AppModeProvider';
 
@@ -53,10 +53,20 @@ const MinimalistLandingPage = ({ isDemo = false }) => {
     window.location.href = window.location.pathname + '?demo=true';
   };
 
-  // If in demo mode, render the dashboard instead
+  // If in demo mode, redirect to main dashboard
   if (isDemoMode) {
-    console.log('MinimalistLandingPage: Rendering DashboardLanding');
-    return <DashboardLanding />;
+    console.log('MinimalistLandingPage: Redirecting to main dashboard');
+    if (typeof window !== 'undefined') {
+      window.location.href = '/dashboard';
+    }
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p>Redirecting to dashboard...</p>
+        </div>
+      </div>
+    );
   }
   
   console.log('MinimalistLandingPage: Rendering normal landing page');
@@ -91,6 +101,10 @@ const MinimalistLandingPage = ({ isDemo = false }) => {
             </p>
 
             <div className="mb-8">
+            <span itemscope itemtype="image/png"
+                itemprop="image"> 
+              <a itemprop="url" href="/banner1.png"/> 
+            </span>
               <Image
                 src="/banner1.png"
                 alt="SYMFARMIA Medical Platform"

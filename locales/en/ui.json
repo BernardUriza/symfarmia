@@ -1,0 +1,27 @@
+{
+  "theme": {
+    "toggle_light": "Light Mode",
+    "toggle_dark": "Dark Mode",
+    "switch_theme": "Switch theme",
+    "light_mode": "Light Mode",
+    "dark_mode": "Dark Mode"
+  },
+  "demo": {
+    "mode_active": "Demo Mode Active",
+    "mode_desc": "You are viewing SYMFARMIA with sample data",
+    "exit_demo": "Exit demo",
+    "switch_live_mode": "Switch to live mode"
+  },
+  "language": {
+    "switcher": "Switch language",
+    "medical_grade": "Medical grade language switch",
+    "medical_certified": "Medical certified language switch",
+    "medical": "Medical language switch",
+    "validated": "Validated language switch",
+    "english": "English",
+    "spanish": "Spanish",
+    "clinical_language": "Clinical language",
+    "english_abbr": "EN",
+    "spanish_abbr": "ES"
+  }
+}
