@@ -21,10 +21,10 @@ export default function BraveCacheBuster() {
         
         // Method 2: Check for brave API with proper binding
         let braveApiCheck = false
-        if (navigator.brave) {
+        if ((navigator as any).brave) {
           try {
             // Properly bind the context to avoid "Illegal invocation" error
-            const isBraveMethod = navigator.brave.isBrave.bind(navigator.brave)
+            const isBraveMethod = (navigator as any).brave.isBrave.bind((navigator as any).brave)
             braveApiCheck = await isBraveMethod()
           } catch (e) {
             console.log('Brave API check failed:', e)

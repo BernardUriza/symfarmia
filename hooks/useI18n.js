@@ -40,8 +40,7 @@ export const useI18n = () => {
       locale: 'es',
       setLocale: fallbackSetLocale,
       t: (key, params = {}) => {
-        const fallback = FALLBACK_TRANSLATIONS['es'][key] || key;
-        return substituteParameters(fallback, params);
+        return substituteParameters(key, params);
       },
       isLoading: false
     };
@@ -52,16 +51,10 @@ export const useI18n = () => {
   // Enhanced translation function
   const t = (key, params = {}) => {
     try {
-      // First try to get from main translations
+      // Get translation from main translations
       let translation = translations[key];
       
-      // If not found, try fallback translations
-      if (!translation) {
-        const fallbackTranslations = FALLBACK_TRANSLATIONS[locale] || FALLBACK_TRANSLATIONS['es'];
-        translation = fallbackTranslations[key];
-      }
-      
-      // If still not found, use intelligent fallback
+      // If not found, use intelligent fallback
       if (!translation) {
         translation = getIntelligentFallback(key, locale);
       }
