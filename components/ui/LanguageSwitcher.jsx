@@ -140,7 +140,7 @@ const LanguageSwitcher = ({
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
         aria-haspopup="true"
-        aria-label={t('language_switcher.current_language', { language: selectedLanguage.name })}
+        aria-label={t('language.switcher')}
       >
         {/* Globe Icon */}
         <GlobeAltIcon className="w-4 h-4 mr-2 text-gray-500" />
@@ -160,7 +160,7 @@ const LanguageSwitcher = ({
         {/* Medical Indicator */}
         {showMedicalIndicator && selectedLanguage.medical && (
           <span className="ml-2 px-2 py-1 text-xs font-medium text-green-700 bg-green-100 rounded-full">
-            {t('language_switcher.medical_certified')}
+            {t('language.medical_certified')}
           </span>
         )}
         
@@ -213,7 +213,7 @@ const LanguageSwitcher = ({
                   {/* Medical Indicator */}
                   {showMedicalIndicator && language.medical && (
                     <span className="ml-2 px-2 py-1 text-xs font-medium text-green-700 bg-green-100 rounded-full">
-                      {t('language_switcher.medical')}
+                      {t('language.medical')}
                     </span>
                   )}
                 </div>
@@ -230,12 +230,12 @@ const LanguageSwitcher = ({
           <div className="px-4 py-3 border-t border-gray-200 bg-gray-50">
             <div className="flex items-center justify-between">
               <span className="text-xs text-gray-500">
-                {t('language_switcher.medical_grade')}
+                {t('language.medical_grade')}
               </span>
               <div className="flex items-center">
                 <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
                 <span className="text-xs text-gray-500">
-                  {t('language_switcher.validated')}
+                  {t('language.validated')}
                 </span>
               </div>
             </div>

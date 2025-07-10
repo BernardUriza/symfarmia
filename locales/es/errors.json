@@ -1,0 +1,15 @@
+{
+  "system": {
+    "boundary_title": "Error del Sistema",
+    "boundary_desc": "Se detectó un error inesperado",
+    "try_again": "Intentar de nuevo",
+    "refresh_page": "Refrescar página"
+  },
+  "translation": {
+    "loading_failed": "Error cargando traducciones",
+    "key_missing": "Clave de traducción faltante",
+    "fallback_used": "Usando traducción de respaldo",
+    "locale_invalid": "Locale inválido especificado",
+    "json_parse_error": "Error al parsear archivo JSON de traducción"
+  }
+}

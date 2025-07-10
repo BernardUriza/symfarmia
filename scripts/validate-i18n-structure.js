@@ -24,7 +24,8 @@ const CRITICAL_TRANSLATION_KEYS = [
   'theme_toggle_light',
   'theme_toggle_dark',
   'language_switcher',
-  'language_switcher.medical_grade'
+  'language_switcher.medical_grade',
+  'language_switcher.medical_certified'
 ];
 
 /**
@@ -82,15 +83,40 @@ function validateI18nProvider() {
 }
 
 /**
+ * Automatically discover all components using translation keys
+ */
+function findAllComponentsUsingTranslations() {
+  const componentFiles = [];
+  
+  // Search patterns for different component locations
+  const searchPatterns = [
+    'components/**/*.{js,jsx,ts,tsx}',
+    'app/components/**/*.{js,jsx,ts,tsx}',
+    'src/components/**/*.{js,jsx,ts,tsx}',
+    'app/**/*.{js,jsx,ts,tsx}'
+  ];
+  
+  searchPatterns.forEach(pattern => {
+    try {
+      const files = glob.globSync(pattern, { cwd: process.cwd() });
+      componentFiles.push(...files);
+    } catch (error) {
+      // Pattern might not match, continue
+    }
+  });
+  
+  return [...new Set(componentFiles)]; // Remove duplicates
+}
+
+/**
  * Validates components using translation keys
  */
 function validateComponentTranslations() {
   console.log('🔍 Validating component translation usage...');
   
-  const componentPaths = [
-    'components/ThemeToggle.tsx',
-    'app/components/DemoModeBanner.js'
-  ];
+  const componentPaths = findAllComponentsUsingTranslations();
+  const allUsedKeys = new Set();
+  let componentsWithTranslations = 0;
   
   componentPaths.forEach(componentPath => {
     const fullPath = path.join(process.cwd(), componentPath);
@@ -101,12 +127,14 @@ function validateComponentTranslations() {
       const translationUsage = content.match(/t\(['"`]([^'"`]+)['"`]\)/g) || [];
       
       if (translationUsage.length > 0) {
+        componentsWithTranslations++;
         console.log(`📋 Component ${componentPath} uses ${translationUsage.length} translation keys`);
         
         translationUsage.forEach(usage => {
           const keyMatch = usage.match(/['"`]([^'"`]+)['"`]/);
           if (keyMatch) {
             const key = keyMatch[1];
+            allUsedKeys.add(key);
             if (CRITICAL_TRANSLATION_KEYS.includes(key)) {
               console.log(`   ✅ Critical key: ${key}`);
             } else {
@@ -115,10 +143,28 @@ function validateComponentTranslations() {
           }
         });
       }
-    } else {
-      console.log(`⚠️  Component not found: ${componentPath}`);
     }
   });
+  
+  console.log(`\n📊 Translation usage summary:`);
+  console.log(`   - Components scanned: ${componentPaths.length}`);
+  console.log(`   - Components using translations: ${componentsWithTranslations}`);
+  console.log(`   - Unique translation keys found: ${allUsedKeys.size}`);
+  
+  // Check for missing keys in fallback translations
+  const missingKeys = [];
+  allUsedKeys.forEach(key => {
+    if (!CRITICAL_TRANSLATION_KEYS.includes(key)) {
+      missingKeys.push(key);
+    }
+  });
+  
+  if (missingKeys.length > 0) {
+    console.log(`\n⚠️  WARNING: Found ${missingKeys.length} translation keys not in critical fallbacks:`);
+    missingKeys.forEach(key => {
+      console.log(`   - ${key}`);
+    });
+  }
   
   console.log('✅ Component translation usage validated');
 }

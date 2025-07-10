@@ -3,41 +3,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 
 export const I18nContext = createContext();
 
-// Critical fallback translations to prevent app crashes
-const fallbackTranslations = {
-  'es': {
-    'demo_mode_active': 'Modo Demo Activo',
-    'demo_mode_desc': 'Estás visualizando SYMFARMIA con datos de ejemplo',
-    'exit_demo': 'Salir del demo',
-    'switch_live_mode': 'Cambiar a modo real',
-    'light_mode': 'Modo Claro',
-    'dark_mode': 'Modo Oscuro',
-    'theme_toggle_light': 'Modo Claro',
-    'theme_toggle_dark': 'Modo Oscuro',
-    'language_switcher': 'Cambiar idioma',
-    'language_switcher.medical_grade': 'Cambio de idioma grado médico',
-    'error_boundary_title': 'Error del Sistema',
-    'error_boundary_desc': 'Se detectó un error inesperado',
-    'try_again': 'Intentar de nuevo'
-  },
-  'en': {
-    'demo_mode_active': 'Demo Mode Active',
-    'demo_mode_desc': 'You are viewing SYMFARMIA with sample data',
-    'exit_demo': 'Exit demo',
-    'switch_live_mode': 'Switch to live mode',
-    'light_mode': 'Light Mode',
-    'dark_mode': 'Dark Mode',
-    'theme_toggle_light': 'Light Mode',
-    'theme_toggle_dark': 'Dark Mode',
-    'language_switcher': 'Switch language',
-    'language_switcher.medical_grade': 'Medical grade language switch',
-    'error_boundary_title': 'System Error',
-    'error_boundary_desc': 'An unexpected error was detected',
-    'try_again': 'Try again'
-  }
-};
-
-// Dynamic translations loader with enhanced error handling
+// Professional JSON-only translations loader
 async function loadTranslations(locale) {
   try {
     const modules = await Promise.all([
@@ -55,6 +21,8 @@ async function loadTranslations(locale) {
       import(`../../locales/${locale}/dialogue.json`),
       import(`../../locales/${locale}/transcription.json`),
       import(`../../locales/${locale}/language_switcher.json`),
+      import(`../../locales/${locale}/ui.json`),
+      import(`../../locales/${locale}/errors.json`),
     ]);
     
     // Flatten nested objects for easier access
@@ -75,12 +43,10 @@ async function loadTranslations(locale) {
       Object.assign(combinedTranslations, flattenObject(module.default || module));
     });
 
-    // Merge with fallbacks to ensure no missing keys
-    return { ...fallbackTranslations[locale], ...combinedTranslations };
+    return combinedTranslations;
   } catch (error) {
     console.error(`Failed to load translations for ${locale}:`, error);
-    // Return fallbacks with error logging
-    return fallbackTranslations[locale] || fallbackTranslations['es'];
+    throw new Error(`Translation loading failed for locale: ${locale}`);
   }
 }
 
@@ -105,14 +71,23 @@ export function I18nProvider({ children }) {
   const [hasHydrated, setHasHydrated] = useState(false);
   const [translations, setTranslations] = useState({});
   const [isLoadingTranslations, setIsLoadingTranslations] = useState(true);
+  const [loadError, setLoadError] = useState(null);
 
   // Load translations when locale changes
   useEffect(() => {
     async function loadAndSetTranslations() {
       setIsLoadingTranslations(true);
-      const loadedTranslations = await loadTranslations(locale);
-      setTranslations(loadedTranslations);
-      setIsLoadingTranslations(false);
+      setLoadError(null);
+      
+      try {
+        const loadedTranslations = await loadTranslations(locale);
+        setTranslations(loadedTranslations);
+      } catch (error) {
+        setLoadError(error);
+        console.error('Translation loading error:', error);
+      } finally {
+        setIsLoadingTranslations(false);
+      }
     }
     
     loadAndSetTranslations();
@@ -136,20 +111,37 @@ export function I18nProvider({ children }) {
   }, [locale]);
 
   const t = (key) => {
-    // Get translation from loaded translations
-    let translation = translations[key];
+    if (isLoadingTranslations) return key; // Show key while loading
+    if (loadError) return `[ERROR:${key}]`; // Clear error indication
     
-    // If no translation found, console.warn and return key
+    const translation = translations[key];
     if (!translation) {
       if (process.env.NODE_ENV === 'development') {
-        console.warn(`[TRANSLATION MISSING] Missing key: "${key}" - returning key itself`);
+        console.warn(`Missing translation key: ${key}`);
       }
-      return key;
+      return `[MISSING:${key}]`; // Clear missing key indication
     }
     
     return translation;
   };
 
+  if (loadError) {
+    // Show proper error UI instead of crashing
+    return (
+      <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+        <h2 className="text-red-800 font-bold">Translation System Error</h2>
+        <p className="text-red-600">
+          Failed to load translations for locale: {locale}
+        </p>
+        <button 
+          onClick={() => window.location.reload()}
+          className="mt-2 bg-red-600 text-white px-4 py-2 rounded"
+        >
+          Refresh Page
+        </button>
+      </div>
+    );
+  }
 
   return (
     <I18nContext.Provider value={{ locale, setLocale, t, isLoadingTranslations }}>
@@ -163,10 +155,16 @@ export function useTranslation() {
   if (!context) {
     // Return default values for SSR compatibility
     return {
-      t: (key) => key, // Return the key as fallback
+      t: (key) => `[SSR:${key}]`, // Clear SSR indication
       locale: 'es',
-      setLocale: () => {}
+      setLocale: () => {},
+      isLoadingTranslations: false
     };
   }
-  return { t: context.t, locale: context.locale, setLocale: context.setLocale };
+  return { 
+    t: context.t, 
+    locale: context.locale, 
+    setLocale: context.setLocale,
+    isLoadingTranslations: context.isLoadingTranslations 
+  };
 }
