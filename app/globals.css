@@ -49,6 +49,113 @@
   margin: 0;
 }
 
+/* Dashboard Desktop Optimization */
+@media (min-width: 1024px) {
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 2rem;
+    min-height: calc(100vh - 120px);
+  }
+  
+  .dashboard-main-content {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    align-content: start;
+  }
+  
+  .dashboard-card {
+    @apply bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700;
+    transition: all 0.2s ease-in-out;
+  }
+  
+  .dashboard-card:hover {
+    @apply shadow-md transform translate-y-[-2px];
+  }
+}
+
+@media (min-width: 1280px) {
+  .dashboard-main-content {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Enhanced Dark Mode Transitions */
+.dark-mode-transition {
+  transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+/* Medical Dashboard Specific Styles */
+.medical-dashboard {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+.dark .medical-dashboard {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+}
+
+/* Dashboard Card Hover Effects */
+.dashboard-card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dashboard-card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.dark .dashboard-card-hover:hover {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive Grid System */
+@media (max-width: 768px) {
+  .dashboard-mobile {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 1rem;
+  }
+}
+
+/* Theme Toggle Animation */
+.theme-toggle-animation {
+  transition: transform 0.3s ease-in-out;
+}
+
+.theme-toggle-animation:hover {
+  transform: rotate(180deg);
+}
+
+/* Status Indicators */
+.status-indicator {
+  position: relative;
+  display: inline-block;
+}
+
+.status-indicator::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: currentColor;
+  transform: translate(-50%, -50%);
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: .5;
+  }
+}
+
 html,
 body {
   max-width: 100vw;
@@ -239,6 +346,75 @@ a {
     margin-left: 0;
     width: 100%;
   }
+}
+
+/* Dashboard Z-Index Management */
+.dashboard-container {
+  position: relative;
+  z-index: 1;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 50;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.floating-elements {
+  position: fixed;
+  z-index: 40;
+}
+
+.dashboard-card-hover {
+  transition: all 0.2s ease-in-out;
+}
+
+.dashboard-card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.dark-mode-transition {
+  transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+/* Ensure proper spacing in dashboard grid */
+.dashboard-grid {
+  gap: 1.5rem;
+  padding: 1.5rem;
+}
+
+/* Recording states for transcription */
+.recording-active .microphone-icon {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Prevent overlapping UI elements */
+.medical-dashboard {
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.medical-dashboard > * {
+  position: relative;
+  z-index: auto;
+}
   
   /* Status bar mobile */
   .transcription-area > div:last-child {
@@ -778,4 +954,123 @@ div[role="menu"] div:hover {
   background: #111827;
   margin-left: 2px;
   animation: blink 1s step-start infinite;
+}
+
+/* Medical UI Components - Dark Mode Utilities */
+@layer utilities {
+  .medical-card {
+    @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg;
+  }
+  
+  .medical-text {
+    @apply text-gray-900 dark:text-white;
+  }
+  
+  .medical-text-secondary {
+    @apply text-gray-600 dark:text-gray-400;
+  }
+  
+  .medical-text-muted {
+    @apply text-gray-500 dark:text-gray-500;
+  }
+  
+  .medical-button-primary {
+    @apply bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white transition-colors;
+  }
+  
+  .medical-button-secondary {
+    @apply bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors;
+  }
+  
+  .medical-input {
+    @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400;
+  }
+  
+  .medical-surface {
+    @apply bg-gray-50 dark:bg-gray-900;
+  }
+  
+  .medical-surface-elevated {
+    @apply bg-white dark:bg-gray-800;
+  }
+  
+  .medical-border {
+    @apply border-gray-200 dark:border-gray-700;
+  }
+  
+  .medical-hover {
+    @apply hover:bg-gray-100 dark:hover:bg-gray-700;
+  }
+  
+  .medical-focus {
+    @apply focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-opacity-50;
+  }
+  
+  .medical-badge-primary {
+    @apply bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400 border border-blue-200 dark:border-blue-700;
+  }
+  
+  .medical-badge-success {
+    @apply bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400 border border-green-200 dark:border-green-700;
+  }
+  
+  .medical-badge-warning {
+    @apply bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400 border border-yellow-200 dark:border-yellow-700;
+  }
+  
+  .medical-badge-error {
+    @apply bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400 border border-red-200 dark:border-red-700;
+  }
+  
+  .medical-alert-info {
+    @apply bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 text-blue-900 dark:text-blue-200;
+  }
+  
+  .medical-alert-success {
+    @apply bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 text-green-900 dark:text-green-200;
+  }
+  
+  .medical-alert-warning {
+    @apply bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 text-yellow-900 dark:text-yellow-200;
+  }
+  
+  .medical-alert-error {
+    @apply bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 text-red-900 dark:text-red-200;
+  }
+  
+  .medical-icon-primary {
+    @apply text-blue-600 dark:text-blue-400;
+  }
+  
+  .medical-icon-secondary {
+    @apply text-gray-600 dark:text-gray-400;
+  }
+  
+  .medical-icon-success {
+    @apply text-green-600 dark:text-green-400;
+  }
+  
+  .medical-icon-warning {
+    @apply text-yellow-600 dark:text-yellow-400;
+  }
+  
+  .medical-icon-error {
+    @apply text-red-600 dark:text-red-400;
+  }
+  
+  .medical-divider {
+    @apply border-gray-200 dark:border-gray-700;
+  }
+  
+  .medical-shadow {
+    @apply shadow-sm dark:shadow-gray-900/30;
+  }
+  
+  .medical-shadow-md {
+    @apply shadow-md dark:shadow-gray-900/40;
+  }
+  
+  .medical-shadow-lg {
+    @apply shadow-lg dark:shadow-gray-900/50;
+  }
 }

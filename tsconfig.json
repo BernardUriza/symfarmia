@@ -85,6 +85,7 @@
     "node_modules",
     "legacy_core",
     "legacy-design/figma-exports/**/*",
+    "docs/legacy/**/*",
     "src/stores/**/*"
   ]
 }
