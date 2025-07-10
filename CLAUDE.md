@@ -111,8 +111,8 @@ This repository uses two cooperating agents: **Claudio** and **Codex**. To keep 
 4. Merge into `dev` with fast‑forward when possible.
 
 ### Project Conventions
-- Keep agent notes under `dev-notes/claudo.md` and `dev-notes/codex.md`.
-- Document synchronization errors in `chronicles/dev-sync.md`.
+- Keep agent notes under `docs/development/dev-notes/claudo.md` and `docs/development/dev-notes/codex.md`.
+- Document synchronization errors in `docs/development/chronicles/dev-sync.md`.
 - Start each Claude session with `claude --resume` and save context using `Save your current context to a file`.
 
 ## Loop Synchronization
@@ -126,3 +126,16 @@ npm test
 curl localhost:3000/api/medical
 ```
 Resolve conflicts if they occur and record the outcome in the dev notes.
+
+## 📚 Documentation
+
+Complete project documentation is now organized in the [`docs/`](./docs/) directory:
+
+- **[📖 Documentation Hub](./docs/README.md)** - Complete documentation index
+- **[🏗️ Architecture](./docs/architecture/)** - System design and structure  
+- **[🚀 Deployment](./docs/deployment/)** - Production deployment guides
+- **[🛠️ Development](./docs/development/)** - Developer guides and fixes
+- **[🔌 API](./docs/api/)** - API endpoints and usage
+- **[🏛️ Legacy](./docs/legacy/)** - Original system documentation
+- **[🔄 Workflows](./docs/workflows/)** - Process and workflow docs
+- **[📝 Changelog](./docs/changelog/)** - Version history and updates

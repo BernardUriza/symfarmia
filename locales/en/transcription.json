@@ -4,6 +4,18 @@
     "ready_to_record": "Ready to Record",
     "start_recording": "Start Recording",
     "stop_recording": "Stop Recording",
-    "no_transcript_available": "No transcript available"
+    "no_transcript_available": "No transcript available",
+    "reset_demo": "Call administrator to fill this value",
+    "final_transcript": "Call administrator to fill this value",
+    "service_label": "Call administrator to fill this value",
+    "medical_ai_active": "Call administrator to fill this value",
+    "words_count": "Call administrator to fill this value",
+    "recording": "Call administrator to fill this value",
+    "transcribing": "Call administrator to fill this value",
+    "demo_empty_state": "Call administrator to fill this value",
+    "no_transcript_description": "Call administrator to fill this value",
+    "service_browser": "Call administrator to fill this value",
+    "service_whisper": "Call administrator to fill this value",
+    "ai_active": "Call administrator to fill this value"
   }
 }
