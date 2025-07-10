@@ -125,8 +125,7 @@ jspm_packages/
 tmp/
 temp/
 
-# Editor directories and files
-.vscode/
+# Editor directories and files /.vscode/
 .idea/
 *.swp
 *.swo

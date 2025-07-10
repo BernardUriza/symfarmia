@@ -256,7 +256,11 @@
     "live_transcription": "Live Transcription",
     "powered_by_ai": "Powered by AI",
     "review_dialog_flow": "Review Dialog Flow",
-    "recording_active": "Recording Active"
+    "recording_active": "Recording Active",
+    "patient_selector": "Select Patient",
+    "patient_selector_subtitle": "Choose a patient to start the demo",
+    "request_custom_demo": "Request Custom Demo",
+    "demo_reset": "Reset Demo"
   },
   "workflow": {
     "title": "SYMFARMIA",
@@ -339,5 +343,26 @@
       "avg_response_time": "Average Response Time",
       "clinical_coverage": "Clinical Coverage"
     }
+  },
+  "transcription": {
+    "title": "Real-time Transcription",
+    "start": "Start Medical Transcription",
+    "stop": "Stop Medical Transcription",
+    "start_recording": "Start Recording",
+    "stop_recording": "Stop Recording",
+    "reset_demo": "Reset Demo",
+    "final_transcript": "Final Transcript",
+    "service_label": "Service",
+    "medical_ai_active": "Medical AI Active",
+    "words_count": "words",
+    "recording": "Recording",
+    "ready_to_record": "Ready to record",
+    "transcribing": "Transcribing...",
+    "demo_empty_state": "🐾 No transcript yet! Record your first consultation.",
+    "no_transcript_available": "No transcript available",
+    "no_transcript_description": "Press \"Start Recording\" to begin transcribing your medical consultation",
+    "service_browser": "Browser",
+    "service_whisper": "Whisper",
+    "ai_active": "AI Active"
   }
 }

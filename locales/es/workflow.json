@@ -1,0 +1,34 @@
+{
+  "workflow": {
+    "title": "Flujo de Trabajo Médico",
+    "subtitle": "Proceso de consulta optimizado",
+    "consultation_flow": "Flujo de Consulta",
+    "step_of": "Paso {current} de {total}",
+    "current_step": "Paso Actual",
+    "medical_navigation": "Navegación Médica",
+    "steps": {
+      "listen": "Escuchar",
+      "review": "Revisar",
+      "notes": "Notas",
+      "orders": "Órdenes",
+      "summary": "Resumen"
+    },
+    "step_descriptions": {
+      "listen": "Escuchar conversación del paciente",
+      "review": "Revisar información transcrita",
+      "notes": "Generar notas clínicas",
+      "orders": "Crear órdenes médicas",
+      "summary": "Revisar resumen final"
+    },
+    "actions": {
+      "start_recording": "Iniciar Grabación",
+      "stop_recording": "Detener Grabación"
+    },
+    "navigation": {
+      "view_all_patients": "Ver Todos los Pacientes",
+      "medical_reports": "Reportes Médicos",
+      "clinical_history": "Historia Clínica",
+      "new_consultation": "Nueva Consulta"
+    }
+  }
+}
