@@ -10,37 +10,6 @@
 import { useContext } from 'react';
 import { I18nContext } from '../app/providers/I18nProvider';
 
-// 🎯 FALLBACK TRANSLATIONS FOR LANGUAGE SWITCHER
-const FALLBACK_TRANSLATIONS = {
-  es: {
-    'language_switcher.current_language': 'Idioma actual: {language}',
-    'language_switcher.medical_certified': 'Certificado Médico',
-    'language_switcher.medical': 'Médico',
-    'language_switcher.medical_grade': 'Calidad Médica',
-    'language_switcher.validated': 'Validado',
-    'language_switcher.change_language': 'Cambiar idioma',
-    'language_switcher.select_language': 'Seleccionar idioma',
-    'spanish': 'Español',
-    'english': 'Inglés',
-    'spanish_abbr': 'ES',
-    'english_abbr': 'EN',
-    'clinical_language': 'Idioma Clínico'
-  },
-  en: {
-    'language_switcher.current_language': 'Current language: {language}',
-    'language_switcher.medical_certified': 'Medical Certified',
-    'language_switcher.medical': 'Medical',
-    'language_switcher.medical_grade': 'Medical Grade',
-    'language_switcher.validated': 'Validated',
-    'language_switcher.change_language': 'Change language',
-    'language_switcher.select_language': 'Select language',
-    'spanish': 'Spanish',
-    'english': 'English',
-    'spanish_abbr': 'ES',
-    'english_abbr': 'EN',
-    'clinical_language': 'Clinical Language'
-  }
-};
 
 // 🔄 PARAMETER SUBSTITUTION
 const substituteParameters = (text, params = {}) => {
