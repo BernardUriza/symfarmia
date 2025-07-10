@@ -390,24 +390,11 @@ class TranslationAutoFixer {
   }
 
   async generateMissingKeys(locale, missingKeys) {
-    const autoGenFile = path.join(CONFIG.localesDir, locale, 'auto_generated.json');
-    let existingKeys = {};
-    
-    // Load existing auto-generated keys
-    if (fs.existsSync(autoGenFile)) {
-      existingKeys = JSON.parse(fs.readFileSync(autoGenFile, 'utf8'));
-    }
-    
-    // Generate new keys
-    for (const key of missingKeys) {
-      if (!existingKeys[key]) {
-        existingKeys[key] = `[AUTO] ${key}`;
-      }
-    }
-    
-    // Write back to file
-    fs.writeFileSync(autoGenFile, JSON.stringify(existingKeys, null, 2));
-    console.log(`  ✅ Generated ${missingKeys.length} missing keys for ${locale}`);
+    console.log(`  ❌ auto_generated.json has been disabled. Missing keys for ${locale}:`);
+    missingKeys.forEach(key => {
+      console.log(`    - ${key}`);
+    });
+    console.log(`  ℹ️  Please add these keys to the appropriate JSON files in locales/${locale}/`);
   }
 }
 
