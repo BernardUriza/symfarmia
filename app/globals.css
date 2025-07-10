@@ -49,6 +49,113 @@
   margin: 0;
 }
 
+/* Dashboard Desktop Optimization */
+@media (min-width: 1024px) {
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 2rem;
+    min-height: calc(100vh - 120px);
+  }
+  
+  .dashboard-main-content {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    align-content: start;
+  }
+  
+  .dashboard-card {
+    @apply bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700;
+    transition: all 0.2s ease-in-out;
+  }
+  
+  .dashboard-card:hover {
+    @apply shadow-md transform translate-y-[-2px];
+  }
+}
+
+@media (min-width: 1280px) {
+  .dashboard-main-content {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Enhanced Dark Mode Transitions */
+.dark-mode-transition {
+  transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+/* Medical Dashboard Specific Styles */
+.medical-dashboard {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+.dark .medical-dashboard {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+}
+
+/* Dashboard Card Hover Effects */
+.dashboard-card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dashboard-card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.dark .dashboard-card-hover:hover {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive Grid System */
+@media (max-width: 768px) {
+  .dashboard-mobile {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 1rem;
+  }
+}
+
+/* Theme Toggle Animation */
+.theme-toggle-animation {
+  transition: transform 0.3s ease-in-out;
+}
+
+.theme-toggle-animation:hover {
+  transform: rotate(180deg);
+}
+
+/* Status Indicators */
+.status-indicator {
+  position: relative;
+  display: inline-block;
+}
+
+.status-indicator::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: currentColor;
+  transform: translate(-50%, -50%);
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: .5;
+  }
+}
+
 html,
 body {
   max-width: 100vw;
@@ -239,6 +346,75 @@ a {
     margin-left: 0;
     width: 100%;
   }
+}
+
+/* Dashboard Z-Index Management */
+.dashboard-container {
+  position: relative;
+  z-index: 1;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 50;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.floating-elements {
+  position: fixed;
+  z-index: 40;
+}
+
+.dashboard-card-hover {
+  transition: all 0.2s ease-in-out;
+}
+
+.dashboard-card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.dark-mode-transition {
+  transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+/* Ensure proper spacing in dashboard grid */
+.dashboard-grid {
+  gap: 1.5rem;
+  padding: 1.5rem;
+}
+
+/* Recording states for transcription */
+.recording-active .microphone-icon {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Prevent overlapping UI elements */
+.medical-dashboard {
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.medical-dashboard > * {
+  position: relative;
+  z-index: auto;
+}
   
   /* Status bar mobile */
   .transcription-area > div:last-child {
