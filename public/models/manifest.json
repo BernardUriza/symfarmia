@@ -111,7 +111,6 @@
     "medicalSpecialty": "whisper-small"
   },
   "notes": {
-    "setup": "Run 'npm run whisper:setup' to download models and configure the system",
     "testing": "Run 'npm run whisper:test' to verify the setup",
     "performance": "Base models are recommended for real-time transcription, small models for batch processing",
     "memory": "Ensure at least 1GB of available RAM for base models, 2GB for small models",

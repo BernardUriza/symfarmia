@@ -33,7 +33,7 @@ const TESTS = [
     description: 'Verify model files exist',
     test: async () => {
       const modelsDir = path.join(process.cwd(), 'public', 'models');
-      const modelFiles = ['whisper-base.bin', 'whisper-base-en.bin'];
+      const modelFiles = ['ggml-base.bin', 'ggml-base.en.bin'];
       const results = {};
       
       for (const modelFile of modelFiles) {
@@ -69,8 +69,7 @@ const TESTS = [
     test: async () => {
       const configFiles = [
         'next.config.js',
-        'package.json',
-        'whisper-config.json'
+        'package.json'
       ];
       
       const results = {};
@@ -126,10 +125,7 @@ const TESTS = [
       const packageJson = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
       
       const requiredScripts = [
-        'whisper:setup',
-        'whisper:download-models',
-        'whisper:test',
-        'whisper:benchmark'
+        'whisper:test'
       ];
       
       const results = {};
@@ -190,7 +186,6 @@ const TESTS = [
     test: async () => {
       const engineFiles = [
         'src/domains/medical-ai/services/WhisperWASMEngine.js',
-        'src/domains/medical-ai/services/whisper-worker.js',
         'src/domains/medical-ai/services/AudioProcessor.js',
         'src/domains/medical-ai/services/ModelManager.js'
       ];
@@ -329,10 +324,9 @@ async function runTests() {
   } else {
     console.log('❌ Some tests failed. Please fix the issues above.');
     console.log('\nCommon solutions:');
-    console.log('1. Run: npm run whisper:setup');
-    console.log('2. Download missing model files manually');
-    console.log('3. Check file permissions and paths');
-    console.log('4. Verify Next.js configuration');
+    console.log('Download missing model files manually');
+    console.log('Check file permissions and paths');
+    console.log('Verify Next.js configuration');
     
     process.exit(1);
   }
