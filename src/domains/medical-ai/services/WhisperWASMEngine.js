@@ -6,6 +6,7 @@
  */
 
 import { TranscriptionStatus } from '../types';
+import { loadRemotePromise, getModelSize, checkStorageQuota } from '../utils/whisperUtils';
 
 export class WhisperWASMEngine {
   constructor(config = {}) {
@@ -173,22 +174,55 @@ export class WhisperWASMEngine {
   }
 
   /**
-   * Load model into WASM filesystem
+   * Load model into WASM filesystem with caching
    */
   async loadModel() {
     try {
-      console.log('Loading model:', this.config.modelPath);
+      console.log('Loading model with cache:', this.config.modelPath);
       
-      // Fetch model file
-      const response = await fetch(this.config.modelPath);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch model: ${response.status}`);
+      // Check storage quota before loading
+      const storageInfo = await checkStorageQuota();
+      const modelSize = getModelSize(this.config.modelName);
+      const requiredSpace = modelSize * 1024 * 1024; // Convert MB to bytes
+      
+      if (storageInfo.available < requiredSpace) {
+        console.warn(`Storage warning: Required ${modelSize}MB, Available ${Math.round(storageInfo.available / 1024 / 1024)}MB`);
       }
       
-      const modelData = await response.arrayBuffer();
-      const modelBuffer = new Uint8Array(modelData);
+      // Load model with caching and progress feedback
+      const result = await loadRemotePromise(
+        this.config.modelPath,
+        this.config.modelName,
+        {
+          size: modelSize,
+          onProgress: (progress) => {
+            console.log(`Model loading progress: ${progress.percentage}%`);
+            
+            // Emit progress event if callbacks are available
+            if (this.currentSession?.callbacks?.onProgress) {
+              this.currentSession.callbacks.onProgress({
+                stage: 'model_loading',
+                progress: progress.progress,
+                percentage: progress.percentage,
+                message: `Loading ${this.config.modelName} model... ${progress.percentage}%`
+              });
+            }
+          },
+          onMessage: (message) => {
+            console.log(`Model loading: ${message}`);
+            
+            // Emit message event if callbacks are available
+            if (this.currentSession?.callbacks?.onMessage) {
+              this.currentSession.callbacks.onMessage({
+                stage: 'model_loading',
+                message: message
+              });
+            }
+          }
+        }
+      );
       
-      // Store model in WASM filesystem
+      const modelBuffer = result.data;
       const modelFilename = 'whisper.bin';
       
       // Remove existing model file if it exists
@@ -198,12 +232,14 @@ export class WhisperWASMEngine {
         // Ignore if file doesn't exist
       }
       
-      // Create new model file
+      // Create new model file in WASM filesystem
       this.Module.FS_createDataFile('/', modelFilename, modelBuffer, true, true);
       
       console.log('Model loaded successfully:', {
         filename: modelFilename,
-        size: modelBuffer.length
+        size: modelBuffer.length,
+        cached: true,
+        modelName: this.config.modelName
       });
       
       this.modelFilename = modelFilename;
@@ -749,6 +785,60 @@ export class WhisperWASMEngine {
    */
   getCurrentSession() {
     return this.currentSession;
+  }
+
+  /**
+   * Get model cache information
+   */
+  async getModelCacheInfo() {
+    try {
+      const storageInfo = await checkStorageQuota();
+      const { getCachedModels } = await import('../utils/whisperUtils');
+      const cachedModels = await getCachedModels();
+      
+      return {
+        storage: {
+          quota: Math.round(storageInfo.quota / 1024 / 1024),
+          usage: Math.round(storageInfo.usage / 1024 / 1024),
+          available: Math.round(storageInfo.available / 1024 / 1024)
+        },
+        cachedModels: cachedModels,
+        currentModel: {
+          name: this.config.modelName,
+          path: this.config.modelPath,
+          estimatedSize: getModelSize(this.config.modelName)
+        }
+      };
+    } catch (error) {
+      console.error('Failed to get cache info:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Clear model cache
+   */
+  async clearModelCache() {
+    try {
+      const { clearCache } = await import('../utils/whisperUtils');
+      return await clearCache();
+    } catch (error) {
+      console.error('Failed to clear cache:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Remove specific model from cache
+   */
+  async removeModelFromCache(modelUrl) {
+    try {
+      const { removeFromCache } = await import('../utils/whisperUtils');
+      return await removeFromCache(modelUrl);
+    } catch (error) {
+      console.error('Failed to remove model from cache:', error);
+      throw error;
+    }
   }
 
   /**
