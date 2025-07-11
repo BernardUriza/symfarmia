@@ -1,7 +1,11 @@
 let withPWA = (config) => config;
 try {
   const pwa = require('next-pwa');
-  withPWA = pwa({ dest: 'public', disable: process.env.NODE_ENV === 'development' });
+  withPWA = pwa({
+    dest: 'public',
+    disable: process.env.NODE_ENV === 'development',
+    buildExcludes: [/app-build-manifest\.json$/]
+  });
 } catch (err) {
   console.warn('next-pwa not available, skipping PWA setup');
 }
