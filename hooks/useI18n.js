@@ -51,12 +51,19 @@ export const useI18n = () => {
   // Enhanced translation function
   const t = (key, params = {}) => {
     try {
+      // Validate that translations are loaded
+      if (!translations) {
+        console.error('Translations not loaded');
+        return key;
+      }
+      
       // Get translation from main translations
       let translation = translations[key];
       
-      // If not found, use intelligent fallback
+      // If not found, log warning and return key
       if (!translation) {
-        translation = getIntelligentFallback(key, locale);
+        console.warn(`Missing translation key: ${key}`);
+        return key;
       }
       
       // Apply parameter substitution
@@ -81,71 +88,5 @@ export const useI18n = () => {
   };
 };
 
-// 🧠 INTELLIGENT FALLBACK
-const getIntelligentFallback = (key, locale) => {
-  // Extract meaningful text from the key
-  const parts = key.split('.');
-  const lastPart = parts[parts.length - 1];
-  
-  // Convert camelCase/snake_case to human readable
-  const humanReadable = lastPart
-    .replace(/([A-Z])/g, ' $1')
-    .replace(/_/g, ' ')
-    .replace(/\b\w/g, l => l.toUpperCase())
-    .trim();
-  
-  // Medical context intelligent fallbacks
-  const medicalFallbacks = {
-    'es': {
-      'language': 'Idioma',
-      'medical': 'Médico',
-      'clinical': 'Clínico',
-      'patient': 'Paciente',
-      'doctor': 'Médico',
-      'consultation': 'Consulta',
-      'diagnosis': 'Diagnóstico',
-      'treatment': 'Tratamiento',
-      'medication': 'Medicamento',
-      'prescription': 'Receta',
-      'current': 'actual',
-      'change': 'cambiar',
-      'select': 'seleccionar',
-      'certified': 'certificado',
-      'validated': 'validado',
-      'grade': 'calidad'
-    },
-    'en': {
-      'language': 'Language',
-      'medical': 'Medical',
-      'clinical': 'Clinical',
-      'patient': 'Patient',
-      'doctor': 'Doctor',
-      'consultation': 'Consultation',
-      'diagnosis': 'Diagnosis',
-      'treatment': 'Treatment',
-      'medication': 'Medication',
-      'prescription': 'Prescription',
-      'current': 'current',
-      'change': 'change',
-      'select': 'select',
-      'certified': 'certified',
-      'validated': 'validated',
-      'grade': 'grade'
-    }
-  };
-  
-  // Check for medical context fallbacks
-  const lowerKey = key.toLowerCase();
-  const localeFallbacks = medicalFallbacks[locale] || medicalFallbacks['en'];
-  
-  for (const [term, fallback] of Object.entries(localeFallbacks)) {
-    if (lowerKey.includes(term)) {
-      return fallback;
-    }
-  }
-  
-  // Return human readable version
-  return humanReadable || key;
-};
 
 export default useI18n;
