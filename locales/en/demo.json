@@ -1,8 +1,13 @@
 {
   "demo": {
-    "demo_title": "Medical AI Demo",
-    "patient_selector": "Patient Selector",
-    "patient_selector_subtitle": "Choose a patient for demonstration",
-    "request_custom_demo": "Request Custom Demo"
+  "demo_title": "Medical AI Demo",
+  "patient_selector": "Patient Selector",
+  "patient_selector_subtitle": "Choose a patient for demonstration",
+  "request_custom_demo": "Request Custom Demo",
+  "medical_transcription_title": "Live Medical Transcription",
+  "see_it_working": "See it working",
+  "start_medical_demo": "Start Medical Demo",
+  "continue_to_dashboard": "Continue to Dashboard",
+  "experience_ai_doctor": "Experience the AI Doctor"
   }
 }

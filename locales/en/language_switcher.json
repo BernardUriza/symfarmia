@@ -6,6 +6,7 @@
     "medical_grade": "Medical Grade",
     "validated": "Validated",
     "change_language": "Change Language",
-    "select_language": "Select Language"
+    "select_language": "Select Language",
+    "switcher": "Language Switcher"
   }
 }
