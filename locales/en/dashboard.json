@@ -243,5 +243,25 @@
     "efficiency_level": "Efficiency Level",
     "excellent": "Excellent",
     "error_loading_chart": "Error loading chart"
+  },
+  
+  "metrics": {
+    "priority_critical": "CRITICAL",
+    "pending_consultations": "Pending Consultations",
+    "require_immediate_attention": "Require immediate attention",
+    "critical_alerts": "Critical Alerts",
+    "patients_critical_condition": "Patients in critical condition",
+    "average_time": "Average Time",
+    "per_medical_consultation": "Per medical consultation",
+    "consultations_today": "Consultations Today",
+    "completed_successfully": "Successfully completed",
+    "urgent_patients": "Urgent Patients",
+    "high_priority": "High priority",
+    "system_efficiency": "System Efficiency",
+    "operational_performance": "Operational performance",
+    "system_active_last_update": "System Active - Last update:",
+    "api_connected": "API: Connected",
+    "db_stable": "DB: Stable",
+    "monitoring_active": "Monitoring: Active"
   }
 }

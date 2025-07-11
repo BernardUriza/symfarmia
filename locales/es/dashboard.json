@@ -243,5 +243,25 @@
     "efficiency_level": "Nivel de Eficiencia",
     "excellent": "Excelente",
     "error_loading_chart": "Error al cargar gráfico"
+  },
+  
+  "metrics": {
+    "priority_critical": "CRÍTICO",
+    "pending_consultations": "Consultas Pendientes",
+    "require_immediate_attention": "Requieren atención inmediata",
+    "critical_alerts": "Alertas Críticas",
+    "patients_critical_condition": "Pacientes en estado crítico",
+    "average_time": "Tiempo Promedio",
+    "per_medical_consultation": "Por consulta médica",
+    "consultations_today": "Consultas Hoy",
+    "completed_successfully": "Completadas exitosamente",
+    "urgent_patients": "Pacientes Urgentes",
+    "high_priority": "Prioridad alta",
+    "system_efficiency": "Eficiencia Sistema",
+    "operational_performance": "Rendimiento operacional",
+    "system_active_last_update": "Sistema Activo - Última actualización:",
+    "api_connected": "API: Conectado",
+    "db_stable": "DB: Estable",
+    "monitoring_active": "Monitoreo: Activo"
   }
 }

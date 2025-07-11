@@ -11,6 +11,7 @@ import {
   Heart,
   Timer
 } from 'lucide-react';
+import { useTranslation } from '../../providers/I18nProvider';
 
 const MetricCard = ({ 
   title, 
@@ -22,6 +23,7 @@ const MetricCard = ({
   description,
   priority = "normal"
 }) => {
+  const { t } = useTranslation();
   const colorClasses = {
     blue: "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800",
     red: "bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800",
@@ -53,7 +55,7 @@ const MetricCard = ({
         {priority === "high" && (
           <div className="flex items-center space-x-1">
             <AlertTriangle className="h-4 w-4 text-red-500" />
-            <span className="text-xs text-red-600 dark:text-red-400 font-medium">CRÍTICO</span>
+            <span className="text-xs text-red-600 dark:text-red-400 font-medium">{t('metrics.priority_critical')}</span>
           </div>
         )}
       </div>
@@ -78,6 +80,7 @@ const MetricCard = ({
 };
 
 const DashboardMetrics = () => {
+  const { t } = useTranslation();
   const [metrics, setMetrics] = useState({
     pendingConsultations: 0,
     criticalAlerts: 0,
@@ -145,33 +148,33 @@ const DashboardMetrics = () => {
       {/* Critical Metrics Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <MetricCard
-          title="Consultas Pendientes"
+          title={t('metrics.pending_consultations')}
           value={metrics.pendingConsultations}
           icon={Calendar}
           color="yellow"
-          description="Requieren atención inmediata"
+          description={t('metrics.require_immediate_attention')}
           priority={metrics.pendingConsultations > 20 ? "high" : "normal"}
           trend={metrics.pendingConsultations > 20 ? "up" : "down"}
           trendValue={`${metrics.pendingConsultations > 20 ? '+' : '-'}${Math.abs(metrics.pendingConsultations - 20)}`}
         />
         
         <MetricCard
-          title="Alertas Críticas"
+          title={t('metrics.critical_alerts')}
           value={metrics.criticalAlerts}
           icon={AlertTriangle}
           color="red"
-          description="Pacientes en estado crítico"
+          description={t('metrics.patients_critical_condition')}
           priority={metrics.criticalAlerts > 0 ? "high" : "normal"}
           trend={metrics.criticalAlerts > 3 ? "up" : "down"}
           trendValue={`${metrics.criticalAlerts}`}
         />
         
         <MetricCard
-          title="Tiempo Promedio"
+          title={t('metrics.average_time')}
           value={`${metrics.averageTime} min`}
           icon={Timer}
           color="blue"
-          description="Por consulta médica"
+          description={t('metrics.per_medical_consultation')}
           trend={metrics.averageTime < 15 ? "down" : "up"}
           trendValue={`${metrics.averageTime < 15 ? '-' : '+'}${Math.abs(metrics.averageTime - 15).toFixed(1)} min`}
         />
@@ -180,32 +183,32 @@ const DashboardMetrics = () => {
       {/* Operational Metrics Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <MetricCard
-          title="Consultas Hoy"
+          title={t('metrics.consultations_today')}
           value={metrics.todayConsultations}
           icon={Heart}
           color="green"
-          description="Completadas exitosamente"
+          description={t('metrics.completed_successfully')}
           trend="up"
           trendValue={`+${Math.floor(metrics.todayConsultations * 0.1)}`}
         />
         
         <MetricCard
-          title="Pacientes Urgentes"
+          title={t('metrics.urgent_patients')}
           value={metrics.urgentPatients}
           icon={Users}
           color="purple"
-          description="Prioridad alta"
+          description={t('metrics.high_priority')}
           priority={metrics.urgentPatients > 10 ? "medium" : "normal"}
           trend={metrics.urgentPatients > 5 ? "up" : "down"}
           trendValue={`${metrics.urgentPatients}`}
         />
         
         <MetricCard
-          title="Eficiencia Sistema"
+          title={t('metrics.system_efficiency')}
           value={`${metrics.systemEfficiency}%`}
           icon={Activity}
           color="green"
-          description="Rendimiento operacional"
+          description={t('metrics.operational_performance')}
           trend={metrics.systemEfficiency > 95 ? "up" : "down"}
           trendValue={`${metrics.systemEfficiency}%`}
         />
@@ -217,13 +220,13 @@ const DashboardMetrics = () => {
           <div className="flex items-center space-x-3">
             <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
             <span className="text-sm font-medium text-gray-900 dark:text-white">
-              Sistema Activo - Última actualización: {new Date().toLocaleTimeString()}
+              {t('metrics.system_active_last_update')} {new Date().toLocaleTimeString()}
             </span>
           </div>
           <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
-            <span>API: Conectado</span>
-            <span>DB: Estable</span>
-            <span>Monitoreo: Activo</span>
+            <span>{t('metrics.api_connected')}</span>
+            <span>{t('metrics.db_stable')}</span>
+            <span>{t('metrics.monitoring_active')}</span>
           </div>
         </div>
       </div>
