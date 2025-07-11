@@ -177,3 +177,8 @@ docker-compose.override.yml
 .cache/
 .vscode/
 .idea/
+
+# Large model files
+public/models/*.bin
+*.ggml
+*.gguf
