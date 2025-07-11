@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import { logWarn, logError } from '../utils/logger/ProductionLogger'
 
 /**
@@ -12,47 +12,57 @@ export default function BraveCacheBuster() {
   const [isBrave, setIsBrave] = useState(false)
   const [showInstructions, setShowInstructions] = useState(false)
   
+  // Memoize the detection logic to prevent unnecessary re-runs
+  const detectBrave = useCallback(async () => {
+    try {
+      // Method 1: Check user agent
+      const userAgentCheck = navigator.userAgent.includes('Brave')
+      
+      // Method 2: Check for brave API with proper binding
+      let braveApiCheck = false
+      if ((navigator as any).brave) {
+        try {
+          // Properly bind the context to avoid "Illegal invocation" error
+          const isBraveMethod = (navigator as any).brave.isBrave.bind((navigator as any).brave)
+          braveApiCheck = await isBraveMethod()
+        } catch (e) {
+          logWarn('Brave API check failed', { error: e.message })
+        }
+      }
+      
+      const isBraveDetected = userAgentCheck || braveApiCheck
+      setIsBrave(isBraveDetected)
+      
+      return isBraveDetected
+    } catch (error) {
+      logWarn('Brave detection failed', { error: error.message })
+      setIsBrave(false)
+      return false
+    }
+  }, [])
+  
   useEffect(() => {
     if (typeof window === 'undefined') return
     
-    const detectBrave = async () => {
-      try {
-        // Method 1: Check user agent
-        const userAgentCheck = navigator.userAgent.includes('Brave')
-        
-        // Method 2: Check for brave API with proper binding
-        let braveApiCheck = false
-        if ((navigator as any).brave) {
-          try {
-            // Properly bind the context to avoid "Illegal invocation" error
-            const isBraveMethod = (navigator as any).brave.isBrave.bind((navigator as any).brave)
-            braveApiCheck = await isBraveMethod()
-          } catch (e) {
-            logWarn('Brave API check failed', { error: e.message })
-          }
-        }
-        
-        const isBraveDetected = userAgentCheck || braveApiCheck
-        setIsBrave(isBraveDetected)
-        
-        return isBraveDetected
-      } catch (error) {
-        logWarn('Brave detection failed', { error: error.message })
-        setIsBrave(false)
-        return false
-      }
-    }
+    let timeoutId: NodeJS.Timeout
     
     detectBrave().then(isBraveDetected => {
       if (isBraveDetected && process.env.NODE_ENV === 'development') {
         logWarn('BRAVE BROWSER DETECTED - cache bust tools enabled')
         // Show instructions after a delay
-        setTimeout(() => setShowInstructions(true), 2000)
+        timeoutId = setTimeout(() => setShowInstructions(true), 2000)
       }
     })
-  }, [])
+    
+    // Cleanup timeout on unmount
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId)
+      }
+    }
+  }, [detectBrave])
 
-  const destroyAllCaches = async () => {
+  const destroyAllCaches = useCallback(async () => {
     try {
       logWarn('DESTROYING ALL BRAVE CACHES')
       
@@ -120,9 +130,9 @@ export default function BraveCacheBuster() {
     } catch (error) {
       logError('CACHE DESTRUCTION FAILED', error)
     }
-  }
+  }, [])
 
-  const forceReloadInBrave = () => {
+  const forceReloadInBrave = useCallback(() => {
     logWarn('FORCE RELOADING IN BRAVE')
     
     // Multiple reload strategies for Brave
@@ -147,9 +157,9 @@ export default function BraveCacheBuster() {
     strategies.forEach((strategy, index) => {
       setTimeout(strategy, index * 1000)
     })
-  }
+  }, [])
 
-  const openIncognito = () => {
+  const openIncognito = useCallback(() => {
     alert(`🕵️ Para desarrollo sin cache en Brave:
     
 1. Presiona Ctrl+Shift+N (Ventana incógnita)
@@ -157,9 +167,9 @@ export default function BraveCacheBuster() {
 3. Navega a: ${window.location.origin}
 
 ¡El modo incógnito evita todos los problemas de cache!`)
-  }
+  }, [])
 
-  const showBraveDevHelp = () => {
+  const showBraveDevHelp = useCallback(() => {
     alert(`🦁 BRAVE DEVELOPMENT SETUP:
 
 1. 🛠️ Abrir Developer Tools (F12)
@@ -172,10 +182,15 @@ export default function BraveCacheBuster() {
 5. 🔄 Usar Ctrl+Shift+R para recarga forzada
 
 ¡O simplemente usa modo incógnito! 🕵️`)
-  }
+  }, [])
 
+  // Memoize the conditional rendering to prevent unnecessary re-renders
+  const shouldRender = useMemo(() => {
+    return process.env.NODE_ENV === 'development' && isBrave
+  }, [isBrave])
+  
   // Only render in development and if Brave is detected
-  if (process.env.NODE_ENV !== 'development' || !isBrave) {
+  if (!shouldRender) {
     return null
   }
 
