@@ -26,5 +26,11 @@
   "labels": {
     "consultation": "Consulta",
     "duration": "Duración"
+  },
+  "consultation_types": {
+    "general": "Consulta General",
+    "urgent": "Consulta Urgente",
+    "general_description": "Revisión rutinaria",
+    "urgent_description": "Atención prioritaria"
   }
 }
