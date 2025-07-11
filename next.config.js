@@ -142,13 +142,22 @@ const nextConfig = {
 
   async headers() {
     return [
+      // GLOBAL HEADERS FOR WHISPER WASM/WEBGPU SUPPORT
+      {
+        source: '/(.*)',
+        headers: [
+          { key: 'Cross-Origin-Embedder-Policy', value: 'require-corp' },
+          { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
+          { key: 'Cross-Origin-Resource-Policy', value: 'cross-origin' },
+        ],
+      },
       {
         source: '/((?!__nextjs_original-stack-frames|_next/webpack-hmr|_next/turbopack-hmr).*)',
         headers: [
           { key: 'X-Frame-Options', value: 'DENY' },
           { key: 'X-Content-Type-Options', value: 'nosniff' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
-          { key: 'Permissions-Policy', value: 'geolocation=(), microphone=(self), camera=()' },
+          { key: 'Permissions-Policy', value: 'geolocation=(), microphone=(self), camera=(self)' },
         ],
       },
       {
