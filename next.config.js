@@ -69,7 +69,9 @@ const nextConfig = {
         },
         resolveExtensions: ['.tsx', '.ts', '.jsx', '.js', '.json', '.mjs', '.cjs']
       }
-    })
+    }),
+    // Force turbopack for dev mode
+    turbo: process.env.NODE_ENV === 'development' ? {} : undefined
   },
 
   // Webpack configuration for production builds only
@@ -129,6 +131,8 @@ const nextConfig = {
   env: {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
     APP_VERSION: process.env.npm_package_version,
+    // OpenAI API Configuration
+    OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     // Medical-grade environment variables (Next.js compatible naming)
     MEDICAL_ERROR_REPORTING: 'true',
     MEDICAL_SYSTEM_VERSION: process.env.npm_package_version || '1.0.0',
@@ -140,7 +144,7 @@ const nextConfig = {
   async headers() {
     return [
       {
-        source: '/(.*)',
+        source: '/((?!__nextjs_original-stack-frames|_next/webpack-hmr|_next/turbopack-hmr).*)',
         headers: [
           { key: 'X-Frame-Options', value: 'DENY' },
           { key: 'X-Content-Type-Options', value: 'nosniff' },

@@ -68,16 +68,33 @@ export class WhisperWASMEngine {
   checkWebAssemblySupport() {
     try {
       if (!('WebAssembly' in window)) {
+        console.warn('WebAssembly not available in window');
         return false;
       }
       
-      // Test basic WebAssembly functionality
-      const module = new WebAssembly.Module(new Uint8Array([
-        0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00
-      ]));
+      // Test basic WebAssembly functionality with a minimal valid module
+      const wasmCode = new Uint8Array([
+        0x00, 0x61, 0x73, 0x6d, // WASM magic number
+        0x01, 0x00, 0x00, 0x00  // WASM version
+      ]);
       
-      return WebAssembly.validate(module);
+      // Try to validate the minimal WASM module
+      const isValid = WebAssembly.validate(wasmCode);
+      
+      if (!isValid) {
+        console.warn('WebAssembly validation failed');
+        return false;
+      }
+      
+      // Additional check: try to create a module
+      const module = new WebAssembly.Module(wasmCode);
+      const instance = new WebAssembly.Instance(module);
+      
+      console.log('WebAssembly support verified successfully');
+      return true;
+      
     } catch (error) {
+      console.warn('WebAssembly support check failed:', error);
       return false;
     }
   }

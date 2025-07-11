@@ -10,7 +10,7 @@ import { TranscriptionStatus } from '../types';
 export class OpenAIWhisperBackend {
   constructor(config = {}) {
     this.config = {
-      apiKey: config.apiKey || process.env.OPENAI_API_KEY,
+      apiKey: config.apiKey || (typeof process !== 'undefined' && process.env?.OPENAI_API_KEY) || null,
       model: config.model || 'whisper-1',
       language: config.language || 'es',
       temperature: config.temperature || 0.0,
@@ -41,7 +41,8 @@ export class OpenAIWhisperBackend {
       
       // Validate API key
       if (!this.config.apiKey) {
-        throw new Error('OpenAI API key not provided');
+        console.warn('OpenAI API key not configured. Create a .env file with OPENAI_API_KEY=your_key_here or pass apiKey in config.');
+        throw new Error('OpenAI API key not provided. Please configure OPENAI_API_KEY environment variable or pass apiKey in config.');
       }
       
       // Initialize audio compression manager

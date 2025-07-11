@@ -44,18 +44,38 @@ export class WhisperClientEngine {
       // Import transformers.js
       const { pipeline, env } = await import('@xenova/transformers');
       
-      // Configure transformers.js environment
-      env.allowRemoteModels = true;
-      env.allowLocalModels = true;
-      env.backends.onnx.wasm.numThreads = navigator.hardwareConcurrency || 4;
+      // Configure transformers.js environment with null checks
+      if (env) {
+        env.allowRemoteModels = true;
+        env.allowLocalModels = true;
+        
+        // Ensure backends object exists
+        if (!env.backends) {
+          env.backends = {};
+        }
+        
+        // Ensure onnx backend exists
+        if (!env.backends.onnx) {
+          env.backends.onnx = {};
+        }
+        
+        // Ensure wasm backend exists
+        if (!env.backends.onnx.wasm) {
+          env.backends.onnx.wasm = {};
+        }
+        
+        env.backends.onnx.wasm.numThreads = navigator.hardwareConcurrency || 4;
+      }
       
       // Set backend preference
-      if (this.webGPUDevice) {
-        env.backends.onnx.webgpu = true;
-        console.log('WebGPU backend enabled for Whisper');
-      } else {
-        env.backends.onnx.webgl = true;
-        console.log('WebGL backend enabled for Whisper');
+      if (env && env.backends && env.backends.onnx) {
+        if (this.webGPUDevice) {
+          env.backends.onnx.webgpu = true;
+          console.log('WebGPU backend enabled for Whisper');
+        } else {
+          env.backends.onnx.webgl = true;
+          console.log('WebGL backend enabled for Whisper');
+        }
       }
       
       // Initialize model cache manager
