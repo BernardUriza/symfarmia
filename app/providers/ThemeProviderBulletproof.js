@@ -10,6 +10,7 @@
  */
 
 import { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
+import { logError, logCritical, logWarn } from '../../utils/logger/ProductionLogger';
 
 // Medical-grade error logging
 const logMedicalError = (error, context) => {
@@ -22,7 +23,8 @@ const logMedicalError = (error, context) => {
     url: typeof window !== 'undefined' ? window.location.href : 'unknown'
   };
   
-  console.error('🚨 MEDICAL SOFTWARE ERROR:', errorReport);
+  // Use ProductionLogger for critical medical errors
+  logCritical('MEDICAL SOFTWARE ERROR', errorReport);
   
   // Store for medical compliance audit trail
   if (typeof window !== 'undefined') {
@@ -33,7 +35,7 @@ const logMedicalError = (error, context) => {
       const recentErrors = existingErrors.slice(-50);
       localStorage.setItem('medical_errors', JSON.stringify(recentErrors));
     } catch (storageError) {
-      console.error('🚨 CRITICAL: Cannot store medical error for audit trail:', storageError);
+      logCritical('Cannot store medical error for audit trail', storageError);
     }
   }
 };
@@ -107,7 +109,7 @@ export function ThemeProvider({ children }) {
   
   // MEDICAL-GRADE ERROR RECOVERY
   const errorRecovery = useCallback(() => {
-    console.log('🏥 INITIATING MEDICAL ERROR RECOVERY PROTOCOL...');
+    logCritical('INITIATING MEDICAL ERROR RECOVERY PROTOCOL');
     
     try {
       // Reset to safe state
@@ -129,10 +131,10 @@ export function ThemeProvider({ children }) {
       errorCount.current = 0;
       lastErrorTime.current = 0;
       
-      console.log('✅ MEDICAL ERROR RECOVERY COMPLETED');
+      logCritical('MEDICAL ERROR RECOVERY COMPLETED');
     } catch (recoveryError) {
       logMedicalError(recoveryError, 'Error Recovery Failed');
-      console.error('🚨 CRITICAL: Error recovery failed - manual intervention required');
+      logCritical('Error recovery failed - manual intervention required');
     }
   }, []);
   
@@ -150,7 +152,7 @@ export function ThemeProvider({ children }) {
       // Update storage with error handling
       const stored = safeLocalStorage.set('theme', newTheme);
       if (!stored) {
-        console.warn('⚠️ MEDICAL WARNING: Theme not persisted to storage');
+        logWarn('Theme not persisted to storage');
       }
       
       // Update DOM immediately for doctor experience
@@ -170,7 +172,7 @@ export function ThemeProvider({ children }) {
       
       // Circuit breaker: if too many errors, trigger recovery
       if (errorCount.current > 3) {
-        console.error('🚨 MEDICAL CIRCUIT BREAKER TRIGGERED');
+        logCritical('MEDICAL CIRCUIT BREAKER TRIGGERED');
         setHasError(true);
       }
     }
@@ -211,8 +213,6 @@ export function ThemeProvider({ children }) {
       
       // CRITICAL: Mark as hydrated to prevent SSR mismatch
       setIsHydrated(true);
-      
-      console.log('✅ MEDICAL THEME PROVIDER: Hydration completed safely');
       
     } catch (error) {
       logMedicalError(error, 'Theme Provider Initialization');
@@ -348,8 +348,8 @@ export function useTheme() {
     // Return safe fallback instead of throwing
     return {
       theme: 'light',
-      setTheme: () => console.warn('⚠️ Theme setter unavailable - provider missing'),
-      toggleTheme: () => console.warn('⚠️ Theme toggle unavailable - provider missing'),
+      setTheme: () => logWarn('Theme setter unavailable - provider missing'),
+      toggleTheme: () => logWarn('Theme toggle unavailable - provider missing'),
       isHydrated: true,
       hasError: true,
       errorRecovery: () => window.location.reload()

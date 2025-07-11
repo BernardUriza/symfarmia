@@ -103,13 +103,6 @@
   "save": "Save",
   "cancel": "Cancel",
   "recording_started": "Recording Started",
-  "language_switcher": {
-    "medical_certified": "medical certified",
-    "medical": "medical",
-    "medical_grade": "medical grade",
-    "validated": "validated",
-    "current_language": "Current language: {language}"
-  },
   "missing": {
     "key": "missing key"
   },

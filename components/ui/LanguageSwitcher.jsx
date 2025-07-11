@@ -16,6 +16,7 @@
 import React, { useState, useEffect } from 'react';
 import { useI18n } from '../../hooks/useI18n';
 import { GlobeAltIcon, ChevronDownIcon, CheckIcon } from '@heroicons/react/24/outline';
+import { useTranslation } from '@/app/providers/I18nProvider';
 
 // 🌍 SUPPORTED LANGUAGES
 const SUPPORTED_LANGUAGES = [
@@ -72,7 +73,8 @@ const LanguageSwitcher = ({
   showMedicalIndicator = false,
   className = ''
 }) => {
-  const { locale, setLocale, t } = useI18n();
+  const { locale, setLocale, } = useI18n();
+  const { t } = useTranslation('language_switcher');
   const [isOpen, setIsOpen] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState(null);
   
@@ -140,7 +142,7 @@ const LanguageSwitcher = ({
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
         aria-haspopup="true"
-        aria-label={t('language.switcher')}
+        aria-label={t('language_switcher.switcher')}
       >
         {/* Globe Icon */}
         <GlobeAltIcon className="w-4 h-4 mr-2 text-gray-500" />
@@ -160,7 +162,7 @@ const LanguageSwitcher = ({
         {/* Medical Indicator */}
         {showMedicalIndicator && selectedLanguage.medical && (
           <span className="ml-2 px-2 py-1 text-xs font-medium text-green-700 bg-green-100 rounded-full">
-            {t('language.medical_certified')}
+            {t('language_switcher.medical_certified')}
           </span>
         )}
         
@@ -213,7 +215,7 @@ const LanguageSwitcher = ({
                   {/* Medical Indicator */}
                   {showMedicalIndicator && language.medical && (
                     <span className="ml-2 px-2 py-1 text-xs font-medium text-green-700 bg-green-100 rounded-full">
-                      {t('language.medical')}
+                      {t('language_switcher.medical')}
                     </span>
                   )}
                 </div>
@@ -230,12 +232,12 @@ const LanguageSwitcher = ({
           <div className="px-4 py-3 border-t border-gray-200 bg-gray-50">
             <div className="flex items-center justify-between">
               <span className="text-xs text-gray-500">
-                {t('language.medical_grade')}
+                {t('language_switcher.medical_grade')}
               </span>
               <div className="flex items-center">
                 <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
                 <span className="text-xs text-gray-500">
-                  {t('language.validated')}
+                  {t('language_switcher.validated')}
                 </span>
               </div>
             </div>

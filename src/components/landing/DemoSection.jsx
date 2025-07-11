@@ -1,10 +1,12 @@
 "use client";
 import React, { useState } from 'react';
+import { useTranslation } from '../../app/providers/I18nProvider';
 import { motion } from 'framer-motion';
 import { PlayIcon, PauseIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 
 export default function DemoSection() {
+  const { t } = useTranslation();
   const [isPlaying, setIsPlaying] = useState(false);
 
   const togglePlay = () => {
@@ -16,10 +18,10 @@ export default function DemoSection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center">
           <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
-            Prueba SYMFARMIA
+            {t('demo.medical_transcription_title')}
           </h2>
           <p className="mt-4 text-lg text-gray-600">
-            Experimenta el poder de la inteligencia artificial médica
+            {t('demo.see_it_working')}
           </p>
         </div>
 
@@ -66,8 +68,8 @@ export default function DemoSection() {
                   <div className="w-2 h-2 bg-white rounded-full"></div>
                 </div>
                 <div>
-                  <h4 className="font-medium text-gray-900">Transcripción en Tiempo Real</h4>
-                  <p className="text-gray-600">Convierte automáticamente el habla en texto médico estructurado</p>
+                  <h4 className="font-medium text-gray-900">{t('demo.start_medical_demo')}</h4>
+                  <p className="text-gray-600">{t('demo.experience_ai_doctor')}</p>
                 </div>
               </div>
               
@@ -97,14 +99,14 @@ export default function DemoSection() {
                 href="/medical-ai-demo"
                 className="block w-full bg-blue-600 text-white text-center px-6 py-3 rounded-md hover:bg-blue-700 transition-colors"
               >
-                Probar Demo Interactivo
+                {t('demo.start_medical_demo')}
               </Link>
               
               <Link
-                href="/contact"
+                href="/dashboard"
                 className="block w-full border border-blue-600 text-blue-600 text-center px-6 py-3 rounded-md hover:bg-blue-50 transition-colors"
               >
-                Solicitar Demo Personalizado
+                {t('demo.continue_to_dashboard')}
               </Link>
             </div>
           </motion.div>

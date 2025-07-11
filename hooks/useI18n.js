@@ -7,7 +7,7 @@
 
 'use client';
 
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { I18nContext } from '../app/providers/I18nProvider';
 
 
@@ -46,17 +46,42 @@ export const useI18n = () => {
     };
   }
   
-  const { locale, setLocale, translations, isLoading } = context;
+  const { locale, setLocale, translations: ctxTranslations, isLoading } = context;
+
+  const [demoTranslations, setDemoTranslations] = useState({});
+
+  useEffect(() => {
+    import(`../locales/${locale}/demo.json`)
+      .then(mod => {
+        const data = mod.default?.demo || mod.default || {};
+        setDemoTranslations(Object.keys(data).reduce((acc, key) => {
+          acc[`demo.${key}`] = data[key];
+          return acc;
+        }, {}));
+      })
+      .catch(() => {
+        setDemoTranslations({});
+      });
+  }, [locale]);
+
+  const translations = { ...demoTranslations, ...ctxTranslations };
   
   // Enhanced translation function
   const t = (key, params = {}) => {
     try {
+      // Validate that translations are loaded
+      if (!translations) {
+        console.error('Translations not loaded');
+        return key;
+      }
+      
       // Get translation from main translations
       let translation = translations[key];
       
-      // If not found, use intelligent fallback
+      // If not found, log warning and return key
       if (!translation) {
-        translation = getIntelligentFallback(key, locale);
+        console.warn(`Missing translation key: ${key}`);
+        return key;
       }
       
       // Apply parameter substitution
@@ -81,71 +106,5 @@ export const useI18n = () => {
   };
 };
 
-// 🧠 INTELLIGENT FALLBACK
-const getIntelligentFallback = (key, locale) => {
-  // Extract meaningful text from the key
-  const parts = key.split('.');
-  const lastPart = parts[parts.length - 1];
-  
-  // Convert camelCase/snake_case to human readable
-  const humanReadable = lastPart
-    .replace(/([A-Z])/g, ' $1')
-    .replace(/_/g, ' ')
-    .replace(/\b\w/g, l => l.toUpperCase())
-    .trim();
-  
-  // Medical context intelligent fallbacks
-  const medicalFallbacks = {
-    'es': {
-      'language': 'Idioma',
-      'medical': 'Médico',
-      'clinical': 'Clínico',
-      'patient': 'Paciente',
-      'doctor': 'Médico',
-      'consultation': 'Consulta',
-      'diagnosis': 'Diagnóstico',
-      'treatment': 'Tratamiento',
-      'medication': 'Medicamento',
-      'prescription': 'Receta',
-      'current': 'actual',
-      'change': 'cambiar',
-      'select': 'seleccionar',
-      'certified': 'certificado',
-      'validated': 'validado',
-      'grade': 'calidad'
-    },
-    'en': {
-      'language': 'Language',
-      'medical': 'Medical',
-      'clinical': 'Clinical',
-      'patient': 'Patient',
-      'doctor': 'Doctor',
-      'consultation': 'Consultation',
-      'diagnosis': 'Diagnosis',
-      'treatment': 'Treatment',
-      'medication': 'Medication',
-      'prescription': 'Prescription',
-      'current': 'current',
-      'change': 'change',
-      'select': 'select',
-      'certified': 'certified',
-      'validated': 'validated',
-      'grade': 'grade'
-    }
-  };
-  
-  // Check for medical context fallbacks
-  const lowerKey = key.toLowerCase();
-  const localeFallbacks = medicalFallbacks[locale] || medicalFallbacks['en'];
-  
-  for (const [term, fallback] of Object.entries(localeFallbacks)) {
-    if (lowerKey.includes(term)) {
-      return fallback;
-    }
-  }
-  
-  // Return human readable version
-  return humanReadable || key;
-};
 
 export default useI18n;
