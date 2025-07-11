@@ -7,7 +7,7 @@
 
 'use client';
 
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { I18nContext } from '../app/providers/I18nProvider';
 
 
@@ -46,7 +46,25 @@ export const useI18n = () => {
     };
   }
   
-  const { locale, setLocale, translations, isLoading } = context;
+  const { locale, setLocale, translations: ctxTranslations, isLoading } = context;
+
+  const [demoTranslations, setDemoTranslations] = useState({});
+
+  useEffect(() => {
+    import(`../locales/${locale}/demo.json`)
+      .then(mod => {
+        const data = mod.default?.demo || mod.default || {};
+        setDemoTranslations(Object.keys(data).reduce((acc, key) => {
+          acc[`demo.${key}`] = data[key];
+          return acc;
+        }, {}));
+      })
+      .catch(() => {
+        setDemoTranslations({});
+      });
+  }, [locale]);
+
+  const translations = { ...demoTranslations, ...ctxTranslations };
   
   // Enhanced translation function
   const t = (key, params = {}) => {
