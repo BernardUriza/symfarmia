@@ -45,11 +45,7 @@ export default function BraveCacheBuster() {
     
     detectBrave().then(isBraveDetected => {
       if (isBraveDetected && process.env.NODE_ENV === 'development') {
-        logWarn('BRAVE BROWSER DETECTED - INITIATING NUCLEAR CACHE DESTRUCTION')
-        
-        // Nuclear cache destruction
-        destroyAllCaches()
-        
+        logWarn('BRAVE BROWSER DETECTED - cache bust tools enabled')
         // Show instructions after a delay
         setTimeout(() => setShowInstructions(true), 2000)
       }
