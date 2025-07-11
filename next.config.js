@@ -23,7 +23,8 @@ const nextConfig = {
   ],
   typescript: { ignoreBuildErrors: true },
   eslint: { ignoreDuringBuilds: true },
-  output: process.env.NETLIFY ? 'standalone' : undefined,
+  output: process.env.NETLIFY ? 'export' : undefined,
+  trailingSlash: true,
 
   images: {
     formats: ['image/webp', 'image/avif'],

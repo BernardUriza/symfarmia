@@ -1,0 +1,28 @@
+# Medical app SPA routing rules for Netlify
+
+# API routes (server-side)
+/api/*  /api/:splat  200
+
+# Authentication routes
+/auth/login  /auth/login  200
+/auth/*  /auth/:splat  200
+
+# Medical app routes (client-side)
+/medical  /index.html  200
+/medical/*  /index.html  200
+/patients  /index.html  200
+/patients/*  /index.html  200
+/reports  /index.html  200
+/reports/*  /index.html  200
+/studies  /index.html  200
+/studies/*  /index.html  200
+/categories  /index.html  200
+/categories/*  /index.html  200
+
+# Legacy routes
+/legacy  /index.html  200
+/dashboard  /legacy  302
+/home  /  301
+
+# Default SPA fallback (must be last)
+/*  /index.html  200

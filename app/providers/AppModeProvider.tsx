@@ -1,9 +1,10 @@
 "use client"
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { DemoAPIProvider } from './DemoAPIProvider';
 import { LiveAPIProvider } from './LiveAPIProvider';
 import { createDatabase } from '../infrastructure/database';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 interface AppModeContextValue {
   appMode: 'live' | 'demo';
@@ -31,58 +32,122 @@ export function useAppMode() {
 }
 
 export function AppModeProvider({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [appMode, setAppMode] = useLocalStorage<'live' | 'demo'>('appMode', 'live');
   const [apiProvider, setApiProvider] = useState<DemoAPIProvider | LiveAPIProvider | null>(null);
   const [mounted, setMounted] = useState(false);
 
+  // Detect mode from URL parameters or environment
+  const detectMode = useCallback(() => {
+    // Check URL parameters first
+    const demoParam = searchParams?.get('demo');
+    if (demoParam === 'true') {
+      return 'demo';
+    }
+    
+    // Check environment variable
+    const envMode = process.env.NEXT_PUBLIC_APP_MODE;
+    if (envMode === 'demo') {
+      return 'demo';
+    }
+    
+    // Check localStorage as fallback
+    if (typeof window !== 'undefined') {
+      const storedMode = localStorage.getItem('appMode');
+      if (storedMode) {
+        try {
+          const parsedMode = JSON.parse(storedMode);
+          if (parsedMode === 'demo' || parsedMode === 'live') {
+            return parsedMode;
+          }
+        } catch (e) {
+          console.error('Error parsing stored app mode:', e);
+        }
+      }
+    }
+    
+    return 'live';
+  }, [searchParams]);
+
+  // Initial setup
   useEffect(() => {
     setMounted(true);
-    const detectMode = () => {
-      if (typeof window === 'undefined') return 'live';
-      const urlParams = new URLSearchParams(window.location.search);
-      const demoParam = urlParams.get('demo');
-      const envMode = process.env.NEXT_PUBLIC_APP_MODE;
-      if (demoParam === 'true' || envMode === 'demo') {
-        return 'demo';
-      }
-      return 'live';
-    };
-    setAppMode(detectMode());
-    // run once on mount
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    const initialMode = detectMode();
+    setAppMode(initialMode);
+  }, [detectMode, setAppMode]);
 
+  // Handle URL parameter changes
   useEffect(() => {
+    if (!mounted) return;
+    
+    const currentMode = detectMode();
+    if (currentMode !== appMode) {
+      setAppMode(currentMode);
+    }
+  }, [searchParams, detectMode, appMode, setAppMode, mounted]);
+
+  // Update API provider and URL when mode changes
+  useEffect(() => {
+    if (!mounted) return;
+    
     console.log('AppModeProvider: appMode changed to:', appMode);
     const db = typeof window === 'undefined' ? createDatabase() : undefined;
+    
     if (appMode === 'demo') {
       setApiProvider(new DemoAPIProvider(db));
-      if (typeof window !== 'undefined') {
-        const url = new URL(window.location.toString());
-        // Only set demo=true if it's not already present
-        if (url.searchParams.get('demo') !== 'true') {
-          url.searchParams.set('demo', 'true');
+      
+      // In production, preserve demo parameter in URL
+      if (typeof window !== 'undefined' && process.env.NODE_ENV === 'production') {
+        const currentUrl = new URL(window.location.toString());
+        const currentDemo = currentUrl.searchParams.get('demo');
+        
+        // Only update URL if demo parameter is not already set
+        if (currentDemo !== 'true') {
+          currentUrl.searchParams.set('demo', 'true');
           console.log('AppModeProvider: Setting demo=true in URL');
-          window.history.replaceState({}, '', url);
+          window.history.replaceState({}, '', currentUrl.toString());
         }
       }
     } else {
       setApiProvider(new LiveAPIProvider(db));
-      if (typeof window !== 'undefined') {
-        // TEMPORARY: Comment out URL parameter removal to fix dashboard redirect
-        // const url = new URL(window.location.toString());
-        // url.searchParams.delete('demo');
-        // console.log('AppModeProvider: Removing demo parameter from URL');
-        // window.history.replaceState({}, '', url);
-        console.log('AppModeProvider: Would remove demo parameter, but disabled for dashboard fix');
+      
+      // In production, remove demo parameter from URL when switching to live mode
+      if (typeof window !== 'undefined' && process.env.NODE_ENV === 'production') {
+        const currentUrl = new URL(window.location.toString());
+        const hasDemo = currentUrl.searchParams.has('demo');
+        
+        // Only update URL if demo parameter exists
+        if (hasDemo) {
+          currentUrl.searchParams.delete('demo');
+          console.log('AppModeProvider: Removing demo parameter from URL');
+          window.history.replaceState({}, '', currentUrl.toString());
+        }
       }
     }
-  }, [appMode]);
+  }, [appMode, mounted]);
 
-  const toggleMode = () => {
+  const toggleMode = useCallback(() => {
     const newMode = appMode === 'live' ? 'demo' : 'live';
     setAppMode(newMode);
-  };
+    
+    // Update URL to reflect new mode
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.toString());
+      if (newMode === 'demo') {
+        url.searchParams.set('demo', 'true');
+      } else {
+        url.searchParams.delete('demo');
+      }
+      
+      // Use router.push for better Next.js integration in production
+      if (process.env.NODE_ENV === 'production') {
+        router.push(url.pathname + url.search);
+      } else {
+        window.history.replaceState({}, '', url.toString());
+      }
+    }
+  }, [appMode, setAppMode, router]);
 
   const value = {
     appMode,

@@ -10,6 +10,7 @@
 
 import "./globals.css";
 import MedicalErrorBoundary from "../src/components/MedicalErrorBoundary";
+import RouteErrorBoundary from "./components/RouteErrorBoundary";
 import { ThemeProvider } from "./providers/ThemeProviderBulletproof";
 import { Auth0Provider } from "@auth0/nextjs-auth0";
 import { AppModeProvider } from "./providers/AppModeProvider";
@@ -269,7 +270,9 @@ export default function RootLayout({ children }) {
                           
                           {/* MAIN CONTENT AREA */}
                           <MedicalErrorBoundary context="Main Content" medicalWorkflow="Primary UI">
-                            {children}
+                            <RouteErrorBoundary>
+                              {children}
+                            </RouteErrorBoundary>
                           </MedicalErrorBoundary>
                           
                           {/* MEDICAL ASSISTANT */}
