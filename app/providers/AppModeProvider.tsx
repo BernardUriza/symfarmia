@@ -59,9 +59,12 @@ export function AppModeProvider({ children }: { children: React.ReactNode }) {
       setApiProvider(new DemoAPIProvider(db));
       if (typeof window !== 'undefined') {
         const url = new URL(window.location.toString());
-        url.searchParams.set('demo', 'true');
-        console.log('AppModeProvider: Setting demo=true in URL');
-        window.history.replaceState({}, '', url);
+        // Only set demo=true if it's not already present
+        if (url.searchParams.get('demo') !== 'true') {
+          url.searchParams.set('demo', 'true');
+          console.log('AppModeProvider: Setting demo=true in URL');
+          window.history.replaceState({}, '', url);
+        }
       }
     } else {
       setApiProvider(new LiveAPIProvider(db));

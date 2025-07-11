@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from '../../app/providers/I18nProvider';
 import { useAppMode } from '../../app/providers/AppModeProvider';
-import LanguageToggle from '../../components/LanguageToggle';
 import ThemeToggle from '../../components/ThemeToggle';
 import MedicalKPICards from './MedicalKPICards';
 import MedicalCharts from './MedicalCharts';
@@ -54,7 +53,6 @@ const AnalyticsDashboard = () => {
                   Demo Mode
                 </div>
               )}
-              <LanguageToggle variant="medical" />
               <ThemeToggle />
             </div>
           </div>

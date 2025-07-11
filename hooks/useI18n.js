@@ -78,10 +78,12 @@ export const useI18n = () => {
       // Get translation from main translations
       let translation = translations[key];
       
-      // If not found, log warning and return key
+      // If not found, log warning and return readable fallback
       if (!translation) {
         console.warn(`Missing translation key: ${key}`);
-        return key;
+        // Return a readable fallback text for medical professionals
+        const fallbackText = key.split('.').pop().replace(/_/g, ' ').replace(/([A-Z])/g, ' $1').trim();
+        return fallbackText.charAt(0).toUpperCase() + fallbackText.slice(1);
       }
       
       // Apply parameter substitution
