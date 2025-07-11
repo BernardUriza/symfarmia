@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
+import { logWarn, logError } from '../utils/logger/ProductionLogger'
 
 /**
  * 🦁 BRAVE CACHE BUSTER - Nuclear Cache Destruction for Development
@@ -27,7 +28,7 @@ export default function BraveCacheBuster() {
             const isBraveMethod = (navigator as any).brave.isBrave.bind((navigator as any).brave)
             braveApiCheck = await isBraveMethod()
           } catch (e) {
-            console.log('Brave API check failed:', e)
+            logWarn('Brave API check failed', { error: e.message })
           }
         }
         
@@ -36,7 +37,7 @@ export default function BraveCacheBuster() {
         
         return isBraveDetected
       } catch (error) {
-        console.log('Brave detection failed:', error)
+        logWarn('Brave detection failed', { error: error.message })
         setIsBrave(false)
         return false
       }
@@ -44,7 +45,7 @@ export default function BraveCacheBuster() {
     
     detectBrave().then(isBraveDetected => {
       if (isBraveDetected && process.env.NODE_ENV === 'development') {
-        console.log('🦁 BRAVE BROWSER DETECTED - INITIATING NUCLEAR CACHE DESTRUCTION')
+        logWarn('BRAVE BROWSER DETECTED - INITIATING NUCLEAR CACHE DESTRUCTION')
         
         // Nuclear cache destruction
         destroyAllCaches()
@@ -57,7 +58,7 @@ export default function BraveCacheBuster() {
 
   const destroyAllCaches = async () => {
     try {
-      console.log('🔥 DESTROYING ALL BRAVE CACHES...')
+      logWarn('DESTROYING ALL BRAVE CACHES')
       
       // 1. Clear all storage types
       const storageTypes = ['localStorage', 'sessionStorage']
@@ -65,10 +66,9 @@ export default function BraveCacheBuster() {
         try {
           if (window[storageType as keyof Window]) {
             (window[storageType as keyof Window] as Storage).clear()
-            console.log(`✅ Cleared ${storageType}`)
           }
         } catch (e) {
-          console.log(`❌ Failed to clear ${storageType}:`, e)
+          logWarn(`Failed to clear ${storageType}`, { error: e.message })
         }
       })
       
@@ -76,10 +76,10 @@ export default function BraveCacheBuster() {
       try {
         if ('indexedDB' in window) {
           // Get all databases and clear them
-          console.log('🔥 Clearing IndexedDB...')
+          logWarn('Clearing IndexedDB')
         }
       } catch (e) {
-        console.log('❌ Failed to clear IndexedDB:', e)
+        logWarn('Failed to clear IndexedDB', { error: e.message })
       }
       
       // 3. Unregister all service workers
@@ -87,13 +87,13 @@ export default function BraveCacheBuster() {
         try {
           const registrations = await navigator.serviceWorker.getRegistrations()
           const promises = registrations.map(registration => {
-            console.log('🔥 Unregistering service worker:', registration.scope)
+            logWarn('Unregistering service worker', { scope: registration.scope })
             return registration.unregister()
           })
           await Promise.all(promises)
-          console.log('✅ All service workers unregistered')
+          logWarn('All service workers unregistered')
         } catch (e) {
-          console.log('❌ Failed to unregister service workers:', e)
+          logWarn('Failed to unregister service workers', { error: e.message })
         }
       }
       
@@ -102,13 +102,13 @@ export default function BraveCacheBuster() {
         try {
           const cacheNames = await caches.keys()
           const promises = cacheNames.map(cacheName => {
-            console.log(`🔥 Destroying cache: ${cacheName}`)
+            logWarn('Destroying cache', { cacheName })
             return caches.delete(cacheName)
           })
           await Promise.all(promises)
-          console.log('✅ All caches destroyed via Cache API')
+          logWarn('All caches destroyed via Cache API')
         } catch (e) {
-          console.log('❌ Failed to clear caches:', e)
+          logWarn('Failed to clear caches', { error: e.message })
         }
       }
       
@@ -116,18 +116,18 @@ export default function BraveCacheBuster() {
       // @ts-ignore - gc is available in some dev environments
       if (window.gc) {
         window.gc()
-        console.log('✅ Garbage collection forced')
+        logWarn('Garbage collection forced')
       }
       
-      console.log('🦁 BRAVE CACHE NUCLEAR DESTRUCTION COMPLETE!')
+      logWarn('BRAVE CACHE NUCLEAR DESTRUCTION COMPLETE')
       
     } catch (error) {
-      console.error('💥 CACHE DESTRUCTION FAILED:', error)
+      logError('CACHE DESTRUCTION FAILED', error)
     }
   }
 
   const forceReloadInBrave = () => {
-    console.log('🔄 FORCE RELOADING IN BRAVE...')
+    logWarn('FORCE RELOADING IN BRAVE')
     
     // Multiple reload strategies for Brave
     const strategies = [
