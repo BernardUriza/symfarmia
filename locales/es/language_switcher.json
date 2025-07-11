@@ -6,6 +6,7 @@
     "medical_grade": "Grado Médico",
     "validated": "Validado",
     "change_language": "Cambiar Idioma",
-    "select_language": "Seleccionar Idioma"
+    "select_language": "Seleccionar Idioma",
+    "switcher": "Selector de Idioma"
   }
 }
