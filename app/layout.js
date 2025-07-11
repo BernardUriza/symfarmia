@@ -261,7 +261,7 @@ export default function RootLayout({ children }) {
                           
                           {/* GLOBAL UI CONTROLS */}
                           <MedicalErrorBoundary context="Global UI Controls" medicalWorkflow="Theme and Language">
-                            <div className="fixed top-4 right-4 z-50 flex items-center gap-3">
+                            <div className="fixed bottom-4 right-4 z-50 flex items-center gap-3">
                               <ThemeToggle />
                               <HeaderLanguageSwitcher />
                             </div>

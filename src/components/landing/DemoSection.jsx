@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from 'react';
-import { useTranslation } from '../../app/providers/I18nProvider';
+import { useTranslation } from '../../../app/providers/I18nProvider';
 import { motion } from 'framer-motion';
 import { PlayIcon, PauseIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';

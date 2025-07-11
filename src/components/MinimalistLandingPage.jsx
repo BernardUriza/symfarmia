@@ -10,7 +10,6 @@ import {
   StarIcon,
   HeartIcon
 } from '@heroicons/react/24/outline';
-import LanguageToggle from '../../components/LanguageToggle';
 import dynamic from 'next/dynamic';
 const DemoLoginModal = dynamic(() => import('../../components/DemoLoginModal'));
 // Removed DashboardLanding import - redirecting to main dashboard
@@ -74,11 +73,7 @@ const MinimalistLandingPage = ({ isDemo = false }) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-blue-900 text-gray-900 dark:text-gray-100 font-sans">
-      {/* Header */}
-      <header className="fixed top-0 right-0 p-6 z-50">
-        <LanguageToggle variant="minimal" />
-      </header>
-      
+
       {/* Demo Mode Banner */}
       {isDemoMode && (
         <div className="demo-banner">

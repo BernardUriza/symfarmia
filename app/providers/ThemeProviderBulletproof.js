@@ -10,7 +10,7 @@
  */
 
 import { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
-import { logError, logCritical, logWarn } from '../../utils/logger/ProductionLogger';
+import { logCritical, logWarn } from '../../utils/logger/ProductionLogger';
 
 // Medical-grade error logging
 const logMedicalError = (error, context) => {
@@ -131,7 +131,10 @@ export function ThemeProvider({ children }) {
       errorCount.current = 0;
       lastErrorTime.current = 0;
       
-      logCritical('MEDICAL ERROR RECOVERY COMPLETED');
+      // Only log completion in dev mode
+      if (process.env.NODE_ENV === 'development') {
+        logCritical('MEDICAL ERROR RECOVERY COMPLETED');
+      }
     } catch (recoveryError) {
       logMedicalError(recoveryError, 'Error Recovery Failed');
       logCritical('Error recovery failed - manual intervention required');

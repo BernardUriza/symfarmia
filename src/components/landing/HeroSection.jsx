@@ -2,7 +2,6 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { HeartIcon, SunIcon } from '@heroicons/react/24/outline';
 import MedicalBrainIcon from '../MedicalBrainIcon';
-import LanguageToggle from '../../../components/LanguageToggle';
 import ParticleField from './ParticleField';
 
 const HeroSection = React.memo(({ t, textY, particleY, mousePosition }) => (
@@ -101,11 +100,6 @@ const HeroSection = React.memo(({ t, textY, particleY, mousePosition }) => (
         </div>
       </motion.div>
     </motion.div>
-    
-    {/* Language Toggle */}
-    <div className="absolute top-6 right-6 z-20">
-      <LanguageToggle variant="prominent" />
-    </div>
     
     {/* Scroll Indicator */}
     <motion.div

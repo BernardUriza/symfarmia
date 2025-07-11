@@ -8,6 +8,7 @@ import QuickActions from './QuickActions';
 import PatientWorkflow from '../patient/PatientWorkflow';
 import { useI18n } from '../../../hooks/useI18n';
 import { Activity } from 'lucide-react';
+import HydrationSafeDateDisplay from '../../../src/components/HydrationSafeDateDisplay';
 
 const DashboardLanding = () => {
   const { t } = useI18n();
@@ -35,22 +36,18 @@ const DashboardLanding = () => {
                   {t('dashboard.system_active') || 'Sistema Activo'}
                 </span>
               </div>
-              <div className="text-right">
-                <div className="text-sm text-gray-900 dark:text-white font-medium">
-                  {new Date().toLocaleDateString('es-ES', { 
-                    weekday: 'long', 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
-                  })}
-                </div>
-                <div className="text-xs text-gray-500 dark:text-gray-400">
-                  {new Date().toLocaleTimeString('es-ES', { 
-                    hour: '2-digit', 
-                    minute: '2-digit' 
-                  })}
-                </div>
-              </div>
+              <HydrationSafeDateDisplay 
+                locale="es-ES"
+                showTime={true}
+                className="text-right"
+                fallback={
+                  <div className="text-right">
+                    <div className="text-sm text-gray-500 dark:text-gray-400">
+                      Cargando fecha...
+                    </div>
+                  </div>
+                }
+              />
             </div>
           </div>
         </div>
