@@ -344,7 +344,6 @@ export const RevolutionaryI18nProvider = ({ children }) => {
       const modules = await Promise.all([
         import(`../../locales/${newLocale}/auto_generated.json`),
         import(`../../locales/${newLocale}/common.json`),
-        import(`../../locales/${newLocale}/medical.json`),
         import(`../../locales/${newLocale}/clinical.json`),
         import(`../../locales/${newLocale}/orders.json`),
         import(`../../locales/${newLocale}/navigation.json`),
