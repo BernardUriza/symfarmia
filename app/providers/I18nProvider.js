@@ -8,7 +8,6 @@ async function loadTranslations(locale) {
   try {
     const modules = await Promise.all([
       import(`../../locales/${locale}/common.json`),
-      import(`../../locales/${locale}/medical.json`),
       import(`../../locales/${locale}/clinical.json`),
       import(`../../locales/${locale}/orders.json`),
       import(`../../locales/${locale}/navigation.json`),
