@@ -369,6 +369,140 @@ export class WebSpeechEngine {
   }
 
   /**
+   * Open circuit breaker to prevent further retries
+   */
+  openCircuitBreaker() {
+    this.isCircuitBreakerOpen = true;
+    this.circuitBreakerOpenTime = Date.now();
+    console.warn('Circuit breaker opened due to consecutive errors');
+  }
+
+  /**
+   * Check if circuit breaker should be reset
+   */
+  checkCircuitBreakerReset() {
+    if (this.isCircuitBreakerOpen) {
+      const timeSinceOpen = Date.now() - this.circuitBreakerOpenTime;
+      if (timeSinceOpen >= this.circuitBreakerResetTime) {
+        this.resetCircuitBreaker();
+      }
+    }
+  }
+
+  /**
+   * Reset circuit breaker and error counters
+   */
+  resetCircuitBreaker() {
+    this.isCircuitBreakerOpen = false;
+    this.consecutiveErrors = 0;
+    this.retryCount = 0;
+    console.log('Circuit breaker reset, ready to retry');
+  }
+
+  /**
+   * Check if we should retry restart
+   */
+  shouldRetryRestart() {
+    // Don't retry if circuit breaker is open
+    if (this.isCircuitBreakerOpen) {
+      return false;
+    }
+    
+    // Don't retry if we've exceeded max retries
+    if (this.retryCount >= this.config.maxRetries) {
+      return false;
+    }
+    
+    // Don't retry too quickly (minimum 1 second between attempts)
+    const timeSinceLastError = Date.now() - this.lastErrorTime;
+    if (timeSinceLastError < 1000) {
+      return false;
+    }
+    
+    return true;
+  }
+
+  /**
+   * Schedule restart with exponential backoff
+   */
+  scheduleRestart() {
+    // Clear any existing timeout
+    if (this.retryTimeout) {
+      clearTimeout(this.retryTimeout);
+    }
+    
+    // Calculate delay with exponential backoff
+    const baseDelay = this.config.retryDelay;
+    const exponentialDelay = baseDelay * Math.pow(2, this.retryCount);
+    const delay = Math.min(exponentialDelay, this.config.maxRetryDelay);
+    
+    this.retryCount++;
+    
+    console.log(`Scheduling speech recognition restart in ${delay}ms (attempt ${this.retryCount})`);
+    
+    this.retryTimeout = setTimeout(() => {
+      this.retryTimeout = null;
+      this.attemptRestart();
+    }, delay);
+  }
+
+  /**
+   * Attempt to restart speech recognition
+   */
+  attemptRestart() {
+    if (!this.isTranscribing) {
+      return;
+    }
+    
+    try {
+      console.log('Attempting to restart speech recognition...');
+      this.speechRecognition.start();
+      
+      // Reset consecutive errors on successful start
+      this.consecutiveErrors = 0;
+      
+    } catch (error) {
+      console.error('Failed to restart speech recognition:', error);
+      this.handleSpeechError({ error: 'restart-failed' });
+    }
+  }
+
+  /**
+   * Stop transcription due to unrecoverable error
+   */
+  stopTranscriptionDueToError() {
+    console.warn('Stopping transcription due to unrecoverable error');
+    
+    // Clear any pending timeouts
+    if (this.retryTimeout) {
+      clearTimeout(this.retryTimeout);
+      this.retryTimeout = null;
+    }
+    
+    // Mark as not transcribing to prevent restart attempts
+    this.isTranscribing = false;
+    
+    // Stop speech recognition
+    if (this.speechRecognition) {
+      try {
+        this.speechRecognition.stop();
+      } catch (error) {
+        console.error('Error stopping speech recognition:', error);
+      }
+    }
+    
+    // Notify session of failure
+    if (this.currentSession && this.currentSession.callbacks.onError) {
+      this.currentSession.callbacks.onError({
+        error: 'fatal_error',
+        engine: 'web-speech',
+        recoverable: false,
+        message: 'Speech recognition stopped due to repeated failures'
+      });
+    }
+  }
+
+  /**
    * Set medical context for optimization
    */
   setMedicalContext(context) {
@@ -401,6 +535,12 @@ export class WebSpeechEngine {
         await this.stopTranscription();
       }
       
+      // Clear any pending retry timeout
+      if (this.retryTimeout) {
+        clearTimeout(this.retryTimeout);
+        this.retryTimeout = null;
+      }
+      
       // Clear speech recognition
       if (this.speechRecognition) {
         this.speechRecognition.onresult = null;
@@ -413,6 +553,9 @@ export class WebSpeechEngine {
       // Reset state
       this.isInitialized = false;
       this.currentSession = null;
+      this.retryCount = 0;
+      this.consecutiveErrors = 0;
+      this.isCircuitBreakerOpen = false;
       
       console.log('WebSpeechEngine cleanup completed');
       
