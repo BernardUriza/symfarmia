@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { 
   Search, 
   Users, 
@@ -13,6 +14,7 @@ import {
   BookOpen
 } from 'lucide-react';
 import PatientQuickSearch from './PatientQuickSearch';
+import NewPatientModal from './NewPatientModal';
 
 const WorkflowStep = ({ 
   step, 
@@ -64,8 +66,11 @@ const WorkflowStep = ({
 };
 
 const PatientWorkflow = () => {
+  const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedPatient, setSelectedPatient] = useState(null);
+  const [isNewPatientModalOpen, setIsNewPatientModalOpen] = useState(false);
+  const [isSavingPatient, setIsSavingPatient] = useState(false);
   const [, setWorkflowData] = useState({
     patient: null,
     consultation: null,
@@ -128,13 +133,87 @@ const PatientWorkflow = () => {
     nextStep();
   };
 
+  const handleNewPatientClick = () => {
+    setIsNewPatientModalOpen(true);
+  };
+
+  const handleSaveNewPatient = async (patientData) => {
+    setIsSavingPatient(true);
+    try {
+      // TODO: Implement actual API call to save patient
+      // For now, simulate API call
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Create a mock patient object with an ID
+      const newPatient = {
+        id: `PAT-${Date.now()}`,
+        ...patientData
+      };
+      
+      // Select the newly created patient
+      setSelectedPatient(newPatient);
+      setWorkflowData(prev => ({ ...prev, patient: newPatient }));
+      
+      // Close modal and move to next step
+      setIsNewPatientModalOpen(false);
+      nextStep();
+      
+      // Show success notification (you can implement toast here)
+      console.log('Patient saved successfully:', newPatient);
+    } catch (error) {
+      console.error('Error saving patient:', error);
+      // Show error notification
+    } finally {
+      setIsSavingPatient(false);
+    }
+  };
+
+  const handleCloseNewPatientModal = () => {
+    setIsNewPatientModalOpen(false);
+  };
+
+  const handleConsultaGeneral = () => {
+    if (selectedPatient) {
+      const patientData = {
+        id: selectedPatient.id,
+        name: selectedPatient.name,
+        age: selectedPatient.age || 'N/A',
+        gender: selectedPatient.gender || 'N/A',
+        medicalHistory: selectedPatient.medicalHistory || []
+      };
+      
+      router.push(`/medical-ai-demo?bypass=true&patientData=${encodeURIComponent(JSON.stringify(patientData))}&type=general`);
+    } else {
+      router.push('/medical-ai-demo');
+    }
+  };
+
+  const handleConsultaUrgente = () => {
+    if (selectedPatient) {
+      const patientData = {
+        id: selectedPatient.id,
+        name: selectedPatient.name,
+        age: selectedPatient.age || 'N/A',
+        gender: selectedPatient.gender || 'N/A',
+        medicalHistory: selectedPatient.medicalHistory || []
+      };
+      
+      router.push(`/medical-ai-demo?bypass=true&patientData=${encodeURIComponent(JSON.stringify(patientData))}&type=urgent`);
+    } else {
+      router.push('/medical-ai-demo');
+    }
+  };
+
   const PatientSearchStep = () => (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
           Paso 1: Buscar Paciente
         </h3>
-        <button className="flex items-center space-x-2 text-blue-600 hover:text-blue-700 text-sm">
+        <button 
+          onClick={handleNewPatientClick}
+          className="flex items-center space-x-2 text-blue-600 hover:text-blue-700 text-sm transition-colors"
+        >
           <Plus className="h-4 w-4" />
           <span>Nuevo Paciente</span>
         </button>
@@ -189,12 +268,12 @@ const PatientWorkflow = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <button className="p-3 bg-white dark:bg-gray-800 rounded-lg border border-blue-200 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-900/40 transition-colors">
+            <button onClick={handleConsultaGeneral} className="p-3 bg-white dark:bg-gray-800 rounded-lg border border-blue-200 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-900/40 transition-colors">
               <div className="text-sm font-medium text-gray-900 dark:text-white">Consulta General</div>
               <div className="text-xs text-gray-500 dark:text-gray-400">Revisión rutinaria</div>
             </button>
             
-            <button className="p-3 bg-white dark:bg-gray-800 rounded-lg border border-yellow-200 dark:border-yellow-800 hover:bg-yellow-50 dark:hover:bg-yellow-900/40 transition-colors">
+            <button onClick={handleConsultaUrgente} className="p-3 bg-white dark:bg-gray-800 rounded-lg border border-yellow-200 dark:border-yellow-800 hover:bg-yellow-50 dark:hover:bg-yellow-900/40 transition-colors">
               <div className="text-sm font-medium text-gray-900 dark:text-white">Consulta Urgente</div>
               <div className="text-xs text-gray-500 dark:text-gray-400">Atención prioritaria</div>
             </button>
@@ -376,6 +455,14 @@ const PatientWorkflow = () => {
           {renderCurrentStep()}
         </div>
       </div>
+      
+      {/* New Patient Modal */}
+      <NewPatientModal 
+        isOpen={isNewPatientModalOpen}
+        onClose={handleCloseNewPatientModal}
+        onSave={handleSaveNewPatient}
+        isLoading={isSavingPatient}
+      />
     </div>
   );
 };

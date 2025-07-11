@@ -26,5 +26,11 @@
   "labels": {
     "consultation": "Consultation",
     "duration": "Duration"
+  },
+  "consultation_types": {
+    "general": "General Consultation",
+    "urgent": "Urgent Consultation",
+    "general_description": "Routine checkup",
+    "urgent_description": "Priority care"
   }
 }

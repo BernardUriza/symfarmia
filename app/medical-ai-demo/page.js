@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from '../providers/I18nProvider';
 import { ConversationCapture } from '../components/medical/ConversationCapture';
 import { DialogueFlow } from '../components/medical/DialogueFlow';
@@ -28,13 +28,33 @@ export default function MedicalAIDemo() {
   const { t } = useTranslation();
   const { patients, selectedPatient, loading, selectPatient, getSelectedPatient } = useDemoPatients();
   const [showPatientSelector, setShowPatientSelector] = useState(true);
+  const [externalPatient, setExternalPatient] = useState(null);
   const steps = MedicalWorkflowSteps(t);
   const [currentStep, setCurrentStep] = useState('escuchar');
   const [isRecording, setIsRecording] = useState(false);
   const [encounterTime] = useState('00:08:23');
   
   const currentStepIndex = steps.findIndex(step => step.id === currentStep);
-  const patient = getSelectedPatient();
+  const patient = externalPatient || getSelectedPatient();
+
+  // Handle bypass from PatientWorkflow
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const bypass = urlParams.get('bypass');
+      const patientData = urlParams.get('patientData');
+      
+      if (bypass === 'true' && patientData) {
+        try {
+          const patient = JSON.parse(decodeURIComponent(patientData));
+          setExternalPatient(patient);
+          setShowPatientSelector(false);
+        } catch (error) {
+          console.error('Error parsing patient data:', error);
+        }
+      }
+    }
+  }, []);
 
   if (showPatientSelector) {
     return (
