@@ -17,7 +17,9 @@ const nextConfig = {
     'http://127.0.0.1:3000', 
     'http://localhost:3000',
     'http://127.0.0.1:3002',
-    'http://localhost:3002'
+    'http://localhost:3002',
+    'http://127.0.0.1:*',
+    'http://localhost:*'
   ],
   typescript: { ignoreBuildErrors: true },
   eslint: { ignoreDuringBuilds: true },
@@ -43,35 +45,32 @@ const nextConfig = {
     pagesBufferLength: 2,
   },
 
+  // Turbopack configuration (stable)
+  turbopack: process.env.NODE_ENV === 'development' ? {
+    rules: {
+      // Font handling for slick-carousel and medical icons
+      '*.{svg,eot,ttf,woff,woff2}': {
+        loaders: ['@vercel/turbopack-loader-font'],
+        as: 'font'
+      }
+    },
+    resolveAlias: {
+      // Medical-grade path resolution for Turbopack
+      '@': '/workspaces/symfarmia',
+      '@/components': '/workspaces/symfarmia/src/components',
+      '@/app': '/workspaces/symfarmia/app',
+      '@/hooks': '/workspaces/symfarmia/hooks',
+      '@/lib': '/workspaces/symfarmia/lib',
+      '@/utils': '/workspaces/symfarmia/src/utils',
+      '@/services': '/workspaces/symfarmia/app/services',
+      '@/providers': '/workspaces/symfarmia/app/providers'
+    },
+    resolveExtensions: ['.tsx', '.ts', '.jsx', '.js', '.json', '.mjs', '.cjs']
+  } : undefined,
+
   experimental: {
     // Emergency: Disable optimizations that cause hanging
     optimizeCss: false,
-    // Turbopack for development only
-    ...(process.env.NODE_ENV === 'development' && {
-      turbo: {
-        rules: {
-          // Font handling for slick-carousel and medical icons
-          '*.{svg,eot,ttf,woff,woff2}': {
-            loaders: ['@vercel/turbopack-loader-font'],
-            as: 'font'
-          }
-        },
-        resolveAlias: {
-          // Medical-grade path resolution for Turbopack
-          '@': '/workspaces/symfarmia',
-          '@/components': '/workspaces/symfarmia/src/components',
-          '@/app': '/workspaces/symfarmia/app',
-          '@/hooks': '/workspaces/symfarmia/hooks',
-          '@/lib': '/workspaces/symfarmia/lib',
-          '@/utils': '/workspaces/symfarmia/src/utils',
-          '@/services': '/workspaces/symfarmia/app/services',
-          '@/providers': '/workspaces/symfarmia/app/providers'
-        },
-        resolveExtensions: ['.tsx', '.ts', '.jsx', '.js', '.json', '.mjs', '.cjs']
-      }
-    }),
-    // Force turbopack for dev mode
-    turbo: process.env.NODE_ENV === 'development' ? {} : undefined
   },
 
   // Webpack configuration for production builds only
@@ -159,6 +158,26 @@ const nextConfig = {
       {
         source: '/_next/static/(.*)',
         headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
+      },
+      // WASM files configuration
+      {
+        source: '/:path*.wasm',
+        headers: [
+          { key: 'Content-Type', value: 'application/wasm' },
+          { key: 'Cross-Origin-Embedder-Policy', value: 'require-corp' },
+          { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+        ],
+      },
+      // Model files configuration
+      {
+        source: '/models/:path*.bin',
+        headers: [
+          { key: 'Content-Type', value: 'application/octet-stream' },
+          { key: 'Cross-Origin-Embedder-Policy', value: 'require-corp' },
+          { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+        ],
       },
     ];
   },

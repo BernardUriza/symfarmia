@@ -14,6 +14,9 @@ export class WebSpeechEngine {
       continuous: config.continuous !== false,
       interimResults: config.interimResults !== false,
       maxAlternatives: config.maxAlternatives || 1,
+      maxRetries: config.maxRetries || 5,
+      retryDelay: config.retryDelay || 1000,
+      maxRetryDelay: config.maxRetryDelay || 10000,
       ...config
     };
 
@@ -22,6 +25,14 @@ export class WebSpeechEngine {
     this.isTranscribing = false;
     this.currentSession = null;
     this.medicalContext = null;
+    
+    // Error handling and retry management
+    this.retryCount = 0;
+    this.consecutiveErrors = 0;
+    this.lastErrorTime = 0;
+    this.isCircuitBreakerOpen = false;
+    this.retryTimeout = null;
+    this.circuitBreakerResetTime = 30000; // 30 seconds
   }
 
   /**
@@ -220,14 +231,40 @@ export class WebSpeechEngine {
    * Handle speech recognition errors
    */
   handleSpeechError(event) {
-    console.error('Web Speech recognition error:', event.error);
+    const errorType = event.error || event;
+    console.error('Web Speech recognition error:', errorType);
+    
+    this.consecutiveErrors++;
+    this.lastErrorTime = Date.now();
+    
+    // Check if we should open circuit breaker
+    if (this.consecutiveErrors >= this.config.maxRetries) {
+      this.openCircuitBreaker();
+    }
+    
+    // Clear any pending retry timeout
+    if (this.retryTimeout) {
+      clearTimeout(this.retryTimeout);
+      this.retryTimeout = null;
+    }
+    
+    const isRecoverable = this.isRecoverableError(errorType) && !this.isCircuitBreakerOpen;
     
     if (this.currentSession && this.currentSession.callbacks.onError) {
       this.currentSession.callbacks.onError({
-        error: event.error,
+        error: errorType,
         engine: 'web-speech',
-        recoverable: this.isRecoverableError(event.error)
+        recoverable: isRecoverable,
+        retryCount: this.retryCount,
+        consecutiveErrors: this.consecutiveErrors,
+        circuitBreakerOpen: this.isCircuitBreakerOpen
       });
+    }
+    
+    // If not recoverable or circuit breaker is open, stop transcription
+    if (!isRecoverable) {
+      console.warn('Web Speech API error not recoverable or circuit breaker open, stopping transcription');
+      this.stopTranscriptionDueToError();
     }
   }
 
@@ -235,14 +272,25 @@ export class WebSpeechEngine {
    * Handle speech recognition end
    */
   handleSpeechEnd() {
-    if (this.isTranscribing) {
-      // Restart recognition if we're still transcribing
-      try {
-        this.speechRecognition.start();
-      } catch (error) {
-        console.error('Failed to restart speech recognition:', error);
-        this.handleSpeechError({ error: 'restart-failed' });
+    if (!this.isTranscribing) {
+      return;
+    }
+    
+    // Check circuit breaker status
+    if (this.isCircuitBreakerOpen) {
+      this.checkCircuitBreakerReset();
+      if (this.isCircuitBreakerOpen) {
+        console.warn('Circuit breaker is open, not restarting speech recognition');
+        return;
       }
+    }
+    
+    // Check if we should restart (with retry logic)
+    if (this.shouldRetryRestart()) {
+      this.scheduleRestart();
+    } else {
+      console.warn('Maximum retries reached, stopping transcription');
+      this.stopTranscriptionDueToError();
     }
   }
 

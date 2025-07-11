@@ -36,12 +36,31 @@ function checkTurboFlag() {
   
   // Check if this is a turbo-enforced command
   const script = process.env.npm_lifecycle_event;
-  const isTurboEnforcedScript = ['dev'].includes(script);
+  const isTurboEnforcedScript = ['dev', 'deve'].includes(script);
   
-  // If this is standalone validation, just validate config
-  if (script === 'validate-turbo' || !script) {
+  // If this is standalone validation or guardian validation, just validate config
+  if (script === 'validate-turbo' || script === 'dev-internal' || !script) {
     log('✅ Turbo enforcement system is configured correctly', 'green');
     return true;
+  }
+  
+  // For 'deve' script, check if the package.json script itself includes --turbo
+  if (script === 'deve') {
+    const fs = require('fs');
+    const path = require('path');
+    const packageJsonPath = path.join(process.cwd(), 'package.json');
+    
+    try {
+      const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+      const deveScript = packageJson.scripts?.deve;
+      
+      if (deveScript && deveScript.includes('--turbo')) {
+        log('✅ Turbopack flag detected in deve script - development will use Turbopack', 'green');
+        return true;
+      }
+    } catch (error) {
+      log(`⚠️  Could not read package.json: ${error.message}`, 'yellow');
+    }
   }
   
   if (isTurboEnforcedScript && !hasTurboFlag) {

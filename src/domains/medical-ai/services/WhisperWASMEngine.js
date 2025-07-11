@@ -1,8 +1,8 @@
 /**
  * WhisperWASMEngine
  * 
- * WebAssembly-based Whisper transcription engine for browsers without WebGPU support
- * Optimized for Brave browser and older browser compatibility
+ * Real Whisper.cpp WebAssembly implementation for browser-based medical transcription
+ * Uses Web Worker for non-blocking audio processing
  */
 
 import { TranscriptionStatus } from '../types';
@@ -12,24 +12,34 @@ export class WhisperWASMEngine {
     this.config = {
       modelName: config.modelName || 'whisper-base',
       language: config.language || 'es',
-      threads: config.threads || Math.min(navigator.hardwareConcurrency || 4, 4),
       sampleRate: config.sampleRate || 16000,
+      chunkSize: config.chunkSize || 1024,
       medicalMode: config.medicalMode || true,
       wasmPath: config.wasmPath || '/whisper.wasm',
-      modelPath: config.modelPath || '/models/',
+      modelPath: config.modelPath || '/models/whisper-base.bin',
+      n_threads: config.n_threads || Math.min(navigator.hardwareConcurrency || 4, 8),
+      translate: config.translate || false,
+      no_context: config.no_context || false,
+      single_segment: config.single_segment || false,
+      print_timestamps: config.print_timestamps || true,
+      maxAudioLength: config.maxAudioLength || 30, // seconds
       ...config
     };
 
-    this.whisperModule = null;
-    this.context = null;
+    this.worker = null;
     this.isInitialized = false;
     this.isTranscribing = false;
     this.currentSession = null;
-    this.audioBuffer = new Float32Array(0);
+    this.audioBuffer = [];
+    this.audioContext = null;
+    this.mediaRecorder = null;
+    this.audioStream = null;
     this.processingQueue = [];
-    this.worker = null;
-    this.modelCache = null;
+    this.messageId = 0;
+    this.pendingMessages = new Map();
     this.medicalContext = null;
+    this.errorCount = 0;
+    this.maxErrors = 5;
   }
 
   /**
@@ -41,20 +51,31 @@ export class WhisperWASMEngine {
       
       // Check WebAssembly support
       if (!this.checkWebAssemblySupport()) {
-        throw new Error('WebAssembly not supported');
+        throw new Error('WebAssembly not supported in this browser');
       }
       
-      // Initialize model cache
-      await this.initializeModelCache();
+      // Check SharedArrayBuffer support for optimal performance
+      if (!this.checkSharedArrayBufferSupport()) {
+        console.warn('SharedArrayBuffer not available, performance may be reduced');
+      }
       
-      // Initialize Web Worker for WASM processing
+      // Initialize audio context
+      await this.initializeAudioContext();
+      
+      // Initialize Web Worker
       await this.initializeWorker();
       
-      // Download and cache model if needed
-      await this.ensureModelAvailable();
+      // Initialize Whisper in worker
+      await this.initializeWhisperInWorker();
       
       this.isInitialized = true;
       console.log('WhisperWASMEngine initialized successfully');
+      
+      return {
+        success: true,
+        message: 'WhisperWASMEngine initialized',
+        config: this.config
+      };
       
     } catch (error) {
       console.error('Failed to initialize WhisperWASMEngine:', error);
@@ -66,69 +87,57 @@ export class WhisperWASMEngine {
    * Check WebAssembly support
    */
   checkWebAssemblySupport() {
-    try {
-      if (!('WebAssembly' in window)) {
-        console.warn('WebAssembly not available in window');
-        return false;
-      }
-      
-      // Test basic WebAssembly functionality with a minimal valid module
-      const wasmCode = new Uint8Array([
-        0x00, 0x61, 0x73, 0x6d, // WASM magic number
-        0x01, 0x00, 0x00, 0x00  // WASM version
-      ]);
-      
-      // Try to validate the minimal WASM module
-      const isValid = WebAssembly.validate(wasmCode);
-      
-      if (!isValid) {
-        console.warn('WebAssembly validation failed');
-        return false;
-      }
-      
-      // Additional check: try to create a module
-      const module = new WebAssembly.Module(wasmCode);
-      const instance = new WebAssembly.Instance(module);
-      
-      console.log('WebAssembly support verified successfully');
-      return true;
-      
-    } catch (error) {
-      console.warn('WebAssembly support check failed:', error);
-      return false;
-    }
+    return typeof WebAssembly === 'object' && 
+           typeof WebAssembly.instantiate === 'function';
   }
 
   /**
-   * Initialize model cache manager
+   * Check SharedArrayBuffer support
    */
-  async initializeModelCache() {
+  checkSharedArrayBufferSupport() {
+    return typeof SharedArrayBuffer !== 'undefined';
+  }
+
+  /**
+   * Initialize audio context
+   */
+  async initializeAudioContext() {
     try {
-      const { ModelCacheManager } = await import('./ModelCacheManager.js');
-      this.modelCache = new ModelCacheManager({
-        modelName: this.config.modelName,
-        cacheName: 'whisper-wasm-models',
-        wasmSupport: true
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      this.audioContext = new AudioContext({
+        sampleRate: this.config.sampleRate,
+        latencyHint: 'interactive'
       });
       
-      await this.modelCache.initialize();
-      console.log('Model cache manager initialized for WASM');
+      // Resume audio context if suspended
+      if (this.audioContext.state === 'suspended') {
+        await this.audioContext.resume();
+      }
+      
+      console.log('Audio context initialized:', {
+        sampleRate: this.audioContext.sampleRate,
+        state: this.audioContext.state
+      });
+      
     } catch (error) {
-      console.warn('Model cache manager initialization failed:', error);
+      console.error('Failed to initialize audio context:', error);
+      throw error;
     }
   }
 
   /**
-   * Initialize Web Worker for WASM processing
+   * Initialize Web Worker
    */
   async initializeWorker() {
     try {
-      // Create worker with inline code to avoid CORS issues
-      const workerCode = this.generateWorkerCode();
-      const blob = new Blob([workerCode], { type: 'application/javascript' });
-      const workerUrl = URL.createObjectURL(blob);
-      
-      this.worker = new Worker(workerUrl);
+      // Create worker with proper WASM support
+      this.worker = new Worker(
+        new URL('./whisper-worker.js', import.meta.url),
+        { 
+          type: 'module',
+          name: 'whisper-wasm-worker'
+        }
+      );
       
       // Setup worker message handling
       this.worker.onmessage = (event) => {
@@ -137,154 +146,64 @@ export class WhisperWASMEngine {
       
       this.worker.onerror = (error) => {
         console.error('Worker error:', error);
+        this.handleWorkerError(error);
       };
       
-      // Initialize worker with configuration
-      await this.sendWorkerMessage('initialize', {
-        config: this.config,
-        wasmPath: this.config.wasmPath,
-        modelPath: this.config.modelPath
-      });
-      
-      console.log('Web Worker initialized for WASM processing');
+      console.log('Worker initialized');
       
     } catch (error) {
-      console.error('Failed to initialize Web Worker:', error);
+      console.error('Failed to initialize worker:', error);
       throw error;
     }
   }
 
   /**
-   * Generate Web Worker code for WASM processing
+   * Initialize Whisper in worker
    */
-  generateWorkerCode() {
-    return `
-      let whisperModule = null;
-      let context = null;
+  async initializeWhisperInWorker() {
+    try {
+      const result = await this.sendWorkerMessage('initialize', {
+        wasmPath: this.config.wasmPath,
+        modelPath: this.config.modelPath,
+        language: this.config.language,
+        n_threads: this.config.n_threads,
+        translate: this.config.translate,
+        no_context: this.config.no_context,
+        single_segment: this.config.single_segment,
+        print_timestamps: this.config.print_timestamps
+      });
       
-      self.onmessage = async function(event) {
-        const { type, data, id } = event.data;
-        
-        try {
-          switch (type) {
-            case 'initialize':
-              await initializeWhisper(data);
-              self.postMessage({ type: 'initialized', id });
-              break;
-              
-            case 'transcribe':
-              const result = await transcribeAudio(data);
-              self.postMessage({ type: 'transcribed', data: result, id });
-              break;
-              
-            case 'cleanup':
-              await cleanupWhisper();
-              self.postMessage({ type: 'cleaned', id });
-              break;
-              
-            default:
-              self.postMessage({ type: 'error', data: 'Unknown message type', id });
-          }
-        } catch (error) {
-          self.postMessage({ type: 'error', data: error.message, id });
-        }
-      };
+      console.log('Whisper initialized in worker:', result);
       
-      async function initializeWhisper(config) {
-        try {
-          // Load Whisper WASM module
-          const response = await fetch(config.wasmPath);
-          const wasmBytes = await response.arrayBuffer();
-          
-          // Initialize Whisper module
-          whisperModule = await WebAssembly.instantiate(wasmBytes);
-          
-          // Load model
-          const modelResponse = await fetch(config.modelPath + config.config.modelName + '.bin');
-          const modelData = await modelResponse.arrayBuffer();
-          
-          // Initialize context
-          context = {
-            model: new Uint8Array(modelData),
-            config: config.config,
-            initialized: true
-          };
-          
-          console.log('Whisper WASM initialized in worker');
-          
-        } catch (error) {
-          console.error('Failed to initialize Whisper WASM:', error);
-          throw error;
-        }
-      }
-      
-      async function transcribeAudio(audioData) {
-        if (!context || !context.initialized) {
-          throw new Error('Whisper not initialized');
-        }
-        
-        try {
-          // Process audio with Whisper WASM
-          // This is a simplified implementation
-          // In practice, you would use the actual Whisper WASM bindings
-          
-          const result = {
-            text: simulateTranscription(audioData),
-            confidence: 0.85,
-            timestamp: Date.now()
-          };
-          
-          return result;
-          
-        } catch (error) {
-          console.error('Transcription failed:', error);
-          throw error;
-        }
-      }
-      
-      function simulateTranscription(audioData) {
-        // Simplified simulation for demonstration
-        // In real implementation, this would call the actual Whisper WASM functions
-        return 'Transcripción simulada de audio médico';
-      }
-      
-      async function cleanupWhisper() {
-        if (whisperModule) {
-          whisperModule = null;
-        }
-        if (context) {
-          context = null;
-        }
-        console.log('Whisper WASM cleanup completed');
-      }
-    `;
+    } catch (error) {
+      console.error('Failed to initialize Whisper in worker:', error);
+      throw error;
+    }
   }
 
   /**
-   * Send message to worker
+   * Send message to worker and wait for response
    */
-  async sendWorkerMessage(type, data) {
+  async sendWorkerMessage(type, data, timeout = 30000) {
+    if (!this.worker) {
+      throw new Error('Worker not initialized');
+    }
+    
     return new Promise((resolve, reject) => {
-      const id = Date.now() + Math.random();
+      const id = ++this.messageId;
       
-      const timeout = setTimeout(() => {
-        reject(new Error('Worker message timeout'));
-      }, 30000);
+      const timeoutId = setTimeout(() => {
+        this.pendingMessages.delete(id);
+        reject(new Error(`Worker message timeout: ${type}`));
+      }, timeout);
       
-      const messageHandler = (event) => {
-        if (event.data.id === id) {
-          clearTimeout(timeout);
-          this.worker.removeEventListener('message', messageHandler);
-          
-          if (event.data.type === 'error') {
-            reject(new Error(event.data.data));
-          } else {
-            resolve(event.data.data);
-          }
-        }
-      };
+      this.pendingMessages.set(id, {
+        resolve,
+        reject,
+        timeoutId,
+        type
+      });
       
-      this.worker.addEventListener('message', messageHandler);
       this.worker.postMessage({ type, data, id });
     });
   }
@@ -293,221 +212,305 @@ export class WhisperWASMEngine {
    * Handle worker messages
    */
   handleWorkerMessage(message) {
-    const { type, data } = message;
+    const { type, data, id } = message;
     
-    switch (type) {
-      case 'transcribed':
-        this.handleTranscriptionResult(data);
-        break;
-        
-      case 'error':
-        console.error('Worker error:', data);
-        break;
-        
-      default:
-        console.log('Worker message:', type, data);
+    if (id && this.pendingMessages.has(id)) {
+      const pending = this.pendingMessages.get(id);
+      clearTimeout(pending.timeoutId);
+      this.pendingMessages.delete(id);
+      
+      if (type === 'success') {
+        pending.resolve(data);
+      } else if (type === 'error') {
+        pending.reject(new Error(data.message || 'Worker error'));
+      }
+    } else {
+      // Handle broadcast messages
+      this.handleBroadcastMessage(type, data);
     }
   }
 
   /**
-   * Handle transcription result from worker
+   * Handle broadcast messages from worker
    */
-  handleTranscriptionResult(result) {
-    if (!this.currentSession) return;
+  handleBroadcastMessage(type, data) {
+    switch (type) {
+      case 'transcription-progress':
+        this.handleTranscriptionProgress(data);
+        break;
+      case 'transcription-complete':
+        this.handleTranscriptionComplete(data);
+        break;
+      case 'error':
+        this.handleWorkerError(data);
+        break;
+      default:
+        console.log('Unhandled broadcast message:', type, data);
+    }
+  }
+
+  /**
+   * Handle worker errors
+   */
+  handleWorkerError(error) {
+    console.error('Worker error:', error);
+    this.errorCount++;
     
-    const segment = {
-      id: `wasm-segment-${Date.now()}`,
-      text: result.text,
-      startTime: result.timestamp,
-      endTime: Date.now(),
-      confidence: result.confidence || 0.85,
-      speaker: 'doctor',
-      language: this.config.language
-    };
-    
-    this.currentSession.segments.push(segment);
-    this.currentSession.fullText += ` ${result.text}`;
-    
-    // Real-time callback
-    if (this.currentSession.callbacks.onTranscriptionUpdate) {
-      this.currentSession.callbacks.onTranscriptionUpdate({
-        segment,
-        fullText: this.currentSession.fullText.trim(),
-        confidence: this.calculateOverallConfidence()
+    if (this.currentSession?.callbacks?.onError) {
+      this.currentSession.callbacks.onError({
+        error: error.message || error,
+        recoverable: this.errorCount < this.maxErrors,
+        errorCount: this.errorCount
       });
     }
+    
+    // Attempt recovery if under error limit
+    if (this.errorCount < this.maxErrors) {
+      this.attemptRecovery();
+    } else {
+      this.handleFatalError(error);
+    }
   }
 
   /**
-   * Ensure model is available
+   * Attempt error recovery
    */
-  async ensureModelAvailable() {
+  async attemptRecovery() {
     try {
-      if (this.modelCache) {
-        const isCached = await this.modelCache.isModelCached(this.config.modelName);
-        
-        if (!isCached) {
-          console.log('Downloading Whisper WASM model...');
-          await this.modelCache.downloadModel(this.config.modelName);
-        }
-      }
+      console.log('Attempting to recover from worker error...');
+      
+      // Reinitialize worker
+      await this.initializeWorker();
+      await this.initializeWhisperInWorker();
+      
+      console.log('Recovery successful');
+      this.errorCount = 0;
+      
     } catch (error) {
-      console.warn('Model cache check failed:', error);
+      console.error('Recovery failed:', error);
+      this.handleFatalError(error);
     }
+  }
+
+  /**
+   * Handle fatal errors
+   */
+  handleFatalError(error) {
+    console.error('Fatal error in WhisperWASMEngine:', error);
+    
+    if (this.currentSession?.callbacks?.onError) {
+      this.currentSession.callbacks.onError({
+        error: error.message || error,
+        recoverable: false,
+        fatal: true
+      });
+    }
+    
+    this.cleanup();
   }
 
   /**
    * Check if engine is ready
    */
   async isReady() {
-    return this.isInitialized && this.worker !== null;
+    if (!this.isInitialized || !this.worker) {
+      return false;
+    }
+    
+    try {
+      const status = await this.sendWorkerMessage('getStatus');
+      return status.isInitialized && status.hasModel && status.hasContext;
+    } catch (error) {
+      console.error('Error checking readiness:', error);
+      return false;
+    }
   }
 
   /**
-   * Start transcription
+   * Start transcription session
    */
-  async startTranscription(audioConfig, callbacks = {}) {
+  async startTranscription(audioConfig = {}, callbacks = {}) {
     if (!this.isInitialized) {
       throw new Error('WhisperWASMEngine not initialized');
     }
-
+    
     if (this.isTranscribing) {
       throw new Error('Transcription already in progress');
     }
-
-    this.isTranscribing = true;
-    this.currentSession = {
-      id: `whisper-wasm-session-${Date.now()}`,
-      startTime: Date.now(),
-      audioConfig,
-      callbacks,
-      segments: [],
-      fullText: '',
-      medicalTerms: []
-    };
-
-    // Reset audio buffer
-    this.audioBuffer = new Float32Array(0);
-
-    console.log('Starting Whisper WASM transcription');
     
-    return {
-      success: true,
-      data: {
-        sessionId: this.currentSession.id,
-        engine: 'whisper-wasm',
-        status: TranscriptionStatus.RECORDING
-      }
-    };
-  }
-
-  /**
-   * Stop transcription
-   */
-  async stopTranscription() {
-    if (!this.isTranscribing || !this.currentSession) {
-      throw new Error('No active transcription');
-    }
-
-    this.isTranscribing = false;
-    
-    // Process any remaining audio
-    if (this.audioBuffer.length > 0) {
-      await this.processAudioBuffer();
-    }
-    
-    // Finalize transcription
-    const finalResult = await this.finalizeTranscription();
-    
-    this.currentSession = null;
-    this.audioBuffer = new Float32Array(0);
-    
-    return {
-      success: true,
-      data: finalResult
-    };
-  }
-
-  /**
-   * Process audio chunk
-   */
-  async processAudioChunk(audioData, config) {
-    if (!this.isTranscribing || !this.currentSession) {
-      throw new Error('No active transcription session');
-    }
-
     try {
-      // Convert audio data to Float32Array
-      const audioFloat32 = await this.convertAudioToFloat32(audioData);
+      this.isTranscribing = true;
+      this.audioBuffer = [];
       
-      // Append to buffer
-      this.audioBuffer = this.appendToBuffer(this.audioBuffer, audioFloat32);
+      this.currentSession = {
+        id: `whisper-session-${Date.now()}`,
+        startTime: Date.now(),
+        endTime: null,
+        audioConfig: { ...this.config, ...audioConfig },
+        callbacks,
+        segments: [],
+        fullText: '',
+        status: TranscriptionStatus.RECORDING,
+        language: this.config.language,
+        medicalMode: this.config.medicalMode
+      };
       
-      // Process when buffer reaches minimum size
-      const minBufferSize = this.config.sampleRate * 5; // 5 seconds
+      // Start audio capture
+      await this.startAudioCapture();
       
-      if (this.audioBuffer.length >= minBufferSize) {
-        await this.processAudioBuffer();
+      console.log('Transcription started:', this.currentSession.id);
+      
+      if (callbacks.onStart) {
+        callbacks.onStart({
+          sessionId: this.currentSession.id,
+          status: TranscriptionStatus.RECORDING
+        });
       }
       
       return {
         success: true,
         data: {
-          bufferLength: this.audioBuffer.length,
-          processed: this.audioBuffer.length >= minBufferSize
+          sessionId: this.currentSession.id,
+          engine: 'whisper-wasm',
+          status: TranscriptionStatus.RECORDING
         }
       };
       
     } catch (error) {
-      console.error('Error processing audio chunk:', error);
-      return {
-        success: false,
-        error: error.message
-      };
-    }
-  }
-
-  /**
-   * Convert audio data to Float32Array
-   */
-  async convertAudioToFloat32(audioData) {
-    try {
-      // Handle different audio data formats
-      if (audioData instanceof Float32Array) {
-        return audioData;
-      }
-      
-      if (audioData instanceof ArrayBuffer) {
-        const audioContext = new AudioContext({ sampleRate: this.config.sampleRate });
-        const audioBuffer = await audioContext.decodeAudioData(audioData);
-        return audioBuffer.getChannelData(0);
-      }
-      
-      if (audioData instanceof Uint8Array) {
-        // Convert Uint8Array to Float32Array
-        const float32 = new Float32Array(audioData.length);
-        for (let i = 0; i < audioData.length; i++) {
-          float32[i] = (audioData[i] - 128) / 128.0;
-        }
-        return float32;
-      }
-      
-      throw new Error('Unsupported audio data format');
-      
-    } catch (error) {
-      console.error('Audio conversion failed:', error);
+      this.isTranscribing = false;
+      this.currentSession = null;
+      console.error('Failed to start transcription:', error);
       throw error;
     }
   }
 
   /**
-   * Append audio data to buffer
+   * Stop transcription session
    */
-  appendToBuffer(buffer, newData) {
-    const combined = new Float32Array(buffer.length + newData.length);
-    combined.set(buffer);
-    combined.set(newData, buffer.length);
-    return combined;
+  async stopTranscription() {
+    if (!this.isTranscribing || !this.currentSession) {
+      throw new Error('No active transcription session');
+    }
+    
+    try {
+      // Stop audio capture
+      await this.stopAudioCapture();
+      
+      // Process accumulated audio
+      if (this.audioBuffer.length > 0) {
+        await this.processAudioBuffer();
+      }
+      
+      // Finalize session
+      this.currentSession.endTime = Date.now();
+      this.currentSession.status = TranscriptionStatus.COMPLETED;
+      
+      const result = {
+        sessionId: this.currentSession.id,
+        fullText: this.currentSession.fullText,
+        segments: this.currentSession.segments,
+        duration: this.currentSession.endTime - this.currentSession.startTime,
+        language: this.currentSession.language,
+        engine: 'whisper-wasm'
+      };
+      
+      if (this.currentSession.callbacks.onComplete) {
+        this.currentSession.callbacks.onComplete(result);
+      }
+      
+      this.isTranscribing = false;
+      this.currentSession = null;
+      
+      console.log('Transcription completed:', result);
+      
+      return {
+        success: true,
+        data: result
+      };
+      
+    } catch (error) {
+      console.error('Failed to stop transcription:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Start audio capture
+   */
+  async startAudioCapture() {
+    try {
+      // Get user media
+      this.audioStream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          sampleRate: this.config.sampleRate,
+          channelCount: 1,
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        }
+      });
+      
+      // Create audio processing pipeline
+      const source = this.audioContext.createMediaStreamSource(this.audioStream);
+      const processor = this.audioContext.createScriptProcessor(this.config.chunkSize, 1, 1);
+      
+      processor.onaudioprocess = (event) => {
+        this.processAudioChunk(event.inputBuffer);
+      };
+      
+      source.connect(processor);
+      processor.connect(this.audioContext.destination);
+      
+      this.audioProcessor = processor;
+      
+      console.log('Audio capture started');
+      
+    } catch (error) {
+      console.error('Failed to start audio capture:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Stop audio capture
+   */
+  async stopAudioCapture() {
+    try {
+      if (this.audioProcessor) {
+        this.audioProcessor.disconnect();
+        this.audioProcessor = null;
+      }
+      
+      if (this.audioStream) {
+        this.audioStream.getTracks().forEach(track => track.stop());
+        this.audioStream = null;
+      }
+      
+      console.log('Audio capture stopped');
+      
+    } catch (error) {
+      console.error('Error stopping audio capture:', error);
+    }
+  }
+
+  /**
+   * Process audio chunk
+   */
+  processAudioChunk(audioBuffer) {
+    if (!this.isTranscribing) return;
+    
+    // Convert to Float32Array
+    const channelData = audioBuffer.getChannelData(0);
+    const audioData = new Float32Array(channelData);
+    
+    // Add to buffer
+    this.audioBuffer.push(audioData);
+    
+    // Process buffer when we have enough data (e.g., 1 second)
+    const bufferDuration = this.audioBuffer.length * this.config.chunkSize / this.config.sampleRate;
+    if (bufferDuration >= 1.0) {
+      this.processAudioBuffer();
+    }
   }
 
   /**
@@ -517,67 +520,102 @@ export class WhisperWASMEngine {
     if (this.audioBuffer.length === 0) return;
     
     try {
-      // Send audio to worker for transcription
-      const result = await this.sendWorkerMessage('transcribe', {
-        audioData: this.audioBuffer,
-        config: this.config
-      });
+      // Combine audio chunks
+      const totalLength = this.audioBuffer.reduce((sum, chunk) => sum + chunk.length, 0);
+      const combinedAudio = new Float32Array(totalLength);
       
-      // Clear processed audio from buffer
-      this.audioBuffer = new Float32Array(0);
+      let offset = 0;
+      for (const chunk of this.audioBuffer) {
+        combinedAudio.set(chunk, offset);
+        offset += chunk.length;
+      }
+      
+      // Clear buffer
+      this.audioBuffer = [];
+      
+      // Send to worker for transcription
+      const result = await this.sendWorkerMessage('transcribe', combinedAudio);
+      
+      if (result.success) {
+        this.handleTranscriptionResult(result);
+      }
       
     } catch (error) {
-      console.error('Audio buffer processing failed:', error);
-      throw error;
+      console.error('Error processing audio buffer:', error);
+      this.handleWorkerError(error);
     }
   }
 
   /**
-   * Calculate overall confidence score
+   * Handle transcription result
    */
-  calculateOverallConfidence() {
-    if (!this.currentSession || this.currentSession.segments.length === 0) return 0;
+  handleTranscriptionResult(result) {
+    if (!this.currentSession) return;
+    
+    const { transcription } = result;
+    
+    if (transcription.text && transcription.text.trim()) {
+      // Add segments
+      for (const segment of transcription.segments) {
+        const enhancedSegment = {
+          ...segment,
+          sessionId: this.currentSession.id,
+          engine: 'whisper-wasm',
+          timestamp: Date.now()
+        };
+        
+        this.currentSession.segments.push(enhancedSegment);
+      }
+      
+      // Update full text
+      this.currentSession.fullText += ' ' + transcription.text;
+      
+      // Real-time callback
+      if (this.currentSession.callbacks.onTranscriptionUpdate) {
+        this.currentSession.callbacks.onTranscriptionUpdate({
+          text: transcription.text,
+          fullText: this.currentSession.fullText.trim(),
+          segments: transcription.segments,
+          confidence: this.calculateAverageConfidence(),
+          engine: 'whisper-wasm'
+        });
+      }
+    }
+  }
+
+  /**
+   * Calculate average confidence
+   */
+  calculateAverageConfidence() {
+    if (!this.currentSession?.segments?.length) return 0.9;
     
     const totalConfidence = this.currentSession.segments.reduce(
-      (sum, segment) => sum + segment.confidence,
-      0
+      (sum, segment) => sum + (segment.confidence || 0.9), 0
     );
     
     return totalConfidence / this.currentSession.segments.length;
   }
 
   /**
-   * Finalize transcription session
+   * Process audio chunk directly (for external audio streams)
    */
-  async finalizeTranscription() {
-    const session = this.currentSession;
-    
-    // Apply medical terminology enhancement
-    let enhancedText = session.fullText.trim();
-    
-    if (this.config.medicalMode) {
-      try {
-        const { MedicalTerminologyEnhancer } = await import('./MedicalTerminologyEnhancer.js');
-        const enhancer = new MedicalTerminologyEnhancer();
-        enhancedText = await enhancer.enhanceText(enhancedText, 'es-MX');
-        session.medicalTerms = await enhancer.extractTerms(enhancedText, 'es-MX');
-      } catch (error) {
-        console.warn('Medical terminology enhancement failed:', error);
-      }
+  async processAudioChunk(audioData, config = {}) {
+    if (!this.isInitialized) {
+      throw new Error('WhisperWASMEngine not initialized');
     }
     
-    return {
-      id: session.id,
-      text: enhancedText,
-      segments: session.segments,
-      medicalTerms: session.medicalTerms,
-      confidence: this.calculateOverallConfidence(),
-      language: this.config.language,
-      engine: 'whisper-wasm',
-      processingTime: Date.now() - session.startTime,
-      status: TranscriptionStatus.COMPLETED,
-      timestamp: new Date()
-    };
+    try {
+      const result = await this.sendWorkerMessage('transcribe', audioData);
+      
+      return {
+        success: true,
+        data: result
+      };
+      
+    } catch (error) {
+      console.error('Error processing audio chunk:', error);
+      throw error;
+    }
   }
 
   /**
@@ -593,15 +631,45 @@ export class WhisperWASMEngine {
    */
   getEngineStats() {
     return {
+      backend: 'whisper-wasm',
       modelName: this.config.modelName,
-      backend: 'wasm',
-      threads: this.config.threads,
+      language: this.config.language,
+      sampleRate: this.config.sampleRate,
       isInitialized: this.isInitialized,
       isTranscribing: this.isTranscribing,
-      bufferLength: this.audioBuffer.length,
-      medicalMode: this.config.medicalMode,
-      wasmSupported: this.checkWebAssemblySupport()
+      errorCount: this.errorCount,
+      audioBufferLength: this.audioBuffer.length,
+      currentSession: this.currentSession ? {
+        id: this.currentSession.id,
+        status: this.currentSession.status,
+        segments: this.currentSession.segments.length
+      } : null
     };
+  }
+
+  /**
+   * Get supported languages
+   */
+  getSupportedLanguages() {
+    return [
+      { code: 'es', name: 'Español' },
+      { code: 'en', name: 'English' },
+      { code: 'fr', name: 'Français' },
+      { code: 'de', name: 'Deutsch' },
+      { code: 'it', name: 'Italiano' },
+      { code: 'pt', name: 'Português' },
+      { code: 'ru', name: 'Русский' },
+      { code: 'ja', name: '日本語' },
+      { code: 'ko', name: '한국어' },
+      { code: 'zh', name: '中文' }
+    ];
+  }
+
+  /**
+   * Get current session
+   */
+  getCurrentSession() {
+    return this.currentSession;
   }
 
   /**
@@ -609,31 +677,45 @@ export class WhisperWASMEngine {
    */
   async cleanup() {
     try {
+      console.log('Cleaning up WhisperWASMEngine...');
+      
       // Stop any active transcription
       if (this.isTranscribing) {
         await this.stopTranscription();
       }
       
-      // Cleanup worker
+      // Stop audio capture
+      await this.stopAudioCapture();
+      
+      // Clean up worker
       if (this.worker) {
-        await this.sendWorkerMessage('cleanup', {});
+        await this.sendWorkerMessage('cleanup');
         this.worker.terminate();
         this.worker = null;
       }
       
-      // Clear buffers
-      this.audioBuffer = new Float32Array(0);
-      this.processingQueue = [];
+      // Clean up audio context
+      if (this.audioContext) {
+        await this.audioContext.close();
+        this.audioContext = null;
+      }
+      
+      // Clear pending messages
+      for (const [id, pending] of this.pendingMessages) {
+        clearTimeout(pending.timeoutId);
+        pending.reject(new Error('Engine cleanup'));
+      }
+      this.pendingMessages.clear();
       
       // Reset state
       this.isInitialized = false;
-      this.context = null;
       this.currentSession = null;
+      this.audioBuffer = [];
       
       console.log('WhisperWASMEngine cleanup completed');
       
     } catch (error) {
-      console.error('Error during WhisperWASMEngine cleanup:', error);
+      console.error('Error during cleanup:', error);
     }
   }
 }

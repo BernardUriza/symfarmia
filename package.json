@@ -83,7 +83,11 @@
     "i18n:validate": "node scripts/bulletproof-build-pipeline.js",
     "i18n:optimize": "node scripts/performance-revolution.js",
     "i18n:revolutionary": "node scripts/revolutionary-build.js",
-    "i18n:monitor": "node scripts/revolutionary-build.js && npm run build:monitor"
+    "i18n:monitor": "node scripts/revolutionary-build.js && npm run build:monitor",
+    "whisper:setup": "node scripts/setup-whisper-wasm.js",
+    "whisper:download-models": "node scripts/setup-whisper-wasm.js --models-only",
+    "whisper:test": "node scripts/test-whisper-wasm.js",
+    "whisper:benchmark": "node scripts/benchmark-whisper.js"
   },
   "dependencies": {
     "@auth0/nextjs-auth0": "^4.8.0",

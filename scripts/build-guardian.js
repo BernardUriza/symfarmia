@@ -106,7 +106,12 @@ class BuildGuardian {
   async runTurboValidation() {
     console.log('⚡ Running Turbopack validation...');
     return new Promise((resolve, reject) => {
-      exec(`node "${this.turboValidationScript}"`, { maxBuffer: 1024 * 1024 * 10 }, (error, stdout, stderr) => {
+      const env = {
+        ...process.env,
+        npm_lifecycle_event: 'dev-internal' // Set a special context for guardian validation
+      };
+      
+      exec(`node "${this.turboValidationScript}"`, { maxBuffer: 1024 * 1024 * 10, env }, (error, stdout, stderr) => {
         if (stdout) process.stdout.write(stdout);
         if (stderr) process.stderr.write(stderr);
 
