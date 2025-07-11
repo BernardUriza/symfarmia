@@ -1,8 +1,13 @@
 {
   "demo": {
-    "demo_title": "Demo de IA Médica",
-    "patient_selector": "Selector de Paciente",
-    "patient_selector_subtitle": "Elige un paciente para demostración",
-    "request_custom_demo": "Solicitar Demo Personalizado"
+  "demo_title": "Demo de IA Médica",
+  "patient_selector": "Selector de Paciente",
+  "patient_selector_subtitle": "Elige un paciente para demostración",
+  "request_custom_demo": "Solicitar Demo Personalizado",
+  "medical_transcription_title": "Transcripción Médica en Vivo",
+  "see_it_working": "Verla en acción",
+  "start_medical_demo": "Iniciar Demo Médica",
+  "continue_to_dashboard": "Continuar al Dashboard",
+  "experience_ai_doctor": "Experimenta al Doctor IA"
   }
 }
