@@ -57,6 +57,8 @@ import {
   TranscriptionError
 } from '../types';
 
+import { transcriptionEngineManager } from './TranscriptionEngineManager';
+
 export class TranscriptionService {
   private mediaRecorder: MediaRecorder | null = null;
   private audioContext: AudioContext | null = null;
@@ -72,6 +74,7 @@ export class TranscriptionService {
   private networkStatusDetector: any = null;
   private medicalErrorHandler: any = null;
   private isRecovering = false;
+  private networkHealthCheckInterval: number | null = null;
 
   constructor() {
     // Only setup audio context on client side
@@ -79,6 +82,44 @@ export class TranscriptionService {
       this.setupAudioContext();
       this.setupSpeechRecognition();
       this.initializeNetworkResilienceComponents();
+      this.initializeNetworkMonitoring();
+      this.initializeHybridTranscription();
+    }
+  }
+
+  /**
+   * Initialize hybrid transcription system
+   */
+  private async initializeHybridTranscription(): Promise<void> {
+    try {
+      await transcriptionEngineManager.initialize({
+        whisperClient: {
+          modelName: 'openai/whisper-base',
+          language: 'es',
+          medicalMode: true
+        },
+        whisperWASM: {
+          modelName: 'whisper-base',
+          language: 'es',
+          medicalMode: true
+        },
+        webSpeech: {
+          language: 'es-MX',
+          continuous: true,
+          interimResults: true
+        },
+        openAI: {
+          apiKey: process.env.OPENAI_API_KEY,
+          model: 'whisper-1',
+          language: 'es',
+          medicalMode: true
+        }
+      });
+      
+      console.log('Hybrid transcription system initialized');
+    } catch (error) {
+      console.error('Failed to initialize hybrid transcription:', error);
+      // Fallback to original implementation
     }
   }
 
@@ -96,13 +137,19 @@ export class TranscriptionService {
 
       this.transcriptionCallback = onTranscriptionUpdate || null;
       
-      // Get media stream
+      // Try hybrid transcription first
+      try {
+        const hybridResult = await this.startHybridTranscription(config, onTranscriptionUpdate);
+        if (hybridResult.success) {
+          return hybridResult;
+        }
+      } catch (error) {
+        console.warn('Hybrid transcription failed, falling back to original:', error);
+      }
+      
+      // Fallback to original implementation
       const stream = await this.getMediaStream(config);
-      
-      // Initialize transcription
       this.currentTranscription = this.initializeTranscription(config);
-      
-      // Start recording
       await this.startRecording(stream, config);
       
       return {
@@ -121,6 +168,94 @@ export class TranscriptionService {
   }
 
   /**
+   * Start hybrid transcription
+   */
+  private async startHybridTranscription(
+    config: AudioConfig,
+    onTranscriptionUpdate?: (result: TranscriptionResult) => void
+  ): Promise<ServiceResponse<TranscriptionResult>> {
+    try {
+      // Set medical context
+      const medicalContext = {
+        specialty: 'general',
+        patientId: 'current',
+        sessionType: 'consultation',
+        urgency: 'routine'
+      };
+      
+      transcriptionEngineManager.setMedicalContext(medicalContext);
+      
+      // Start transcription with hybrid engine
+      const result = await transcriptionEngineManager.startTranscription(config, {
+        onTranscriptionUpdate: (hybridResult) => {
+          // Convert hybrid result to legacy format
+          const legacyResult = this.convertHybridToLegacyResult(hybridResult);
+          this.currentTranscription = legacyResult;
+          
+          if (onTranscriptionUpdate) {
+            onTranscriptionUpdate(legacyResult);
+          }
+        },
+        onError: (error) => {
+          console.error('Hybrid transcription error:', error);
+          this.handleHybridTranscriptionError(error);
+        }
+      });
+      
+      if (result.success) {
+        this.isRecording = true;
+        this.currentTranscription = this.convertHybridToLegacyResult(result.data);
+        
+        return {
+          success: true,
+          data: this.currentTranscription,
+          timestamp: new Date()
+        };
+      }
+      
+      throw new Error('Hybrid transcription failed to start');
+      
+    } catch (error) {
+      console.error('Hybrid transcription startup failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Convert hybrid result to legacy format
+   */
+  private convertHybridToLegacyResult(hybridResult: any): TranscriptionResult {
+    return {
+      id: hybridResult.sessionId || hybridResult.id || `hybrid-${Date.now()}`,
+      text: hybridResult.text || hybridResult.fullText || '',
+      confidence: hybridResult.confidence || 0.8,
+      timestamp: new Date(),
+      language: 'es-MX',
+      medicalTerms: hybridResult.medicalTerms || [],
+      segments: hybridResult.segments || [],
+      status: hybridResult.status || TranscriptionStatus.RECORDING
+    };
+  }
+
+  /**
+   * Handle hybrid transcription errors
+   */
+  private handleHybridTranscriptionError(error: any): void {
+    console.error('Hybrid transcription error:', error);
+    
+    // Update current transcription with error
+    if (this.currentTranscription) {
+      this.currentTranscription.status = TranscriptionStatus.ERROR;
+      this.currentTranscription.error = error.message || 'Hybrid transcription error';
+    }
+    
+    // Notify callback
+    if (this.transcriptionCallback && this.currentTranscription) {
+      this.transcriptionCallback(this.currentTranscription);
+    }
+  }
+
+  /**
    * Stop transcription and return final result
    */
   async stopTranscription(): Promise<ServiceResponse<TranscriptionResult>> {
@@ -129,10 +264,24 @@ export class TranscriptionService {
         throw new TranscriptionError('No active transcription to stop');
       }
 
-      // Stop recording
+      // Try hybrid transcription stop first
+      try {
+        const hybridResult = await transcriptionEngineManager.stopTranscription();
+        if (hybridResult.success) {
+          this.isRecording = false;
+          const finalResult = this.convertHybridToLegacyResult(hybridResult.data);
+          return {
+            success: true,
+            data: finalResult,
+            timestamp: new Date()
+          };
+        }
+      } catch (error) {
+        console.warn('Hybrid transcription stop failed, using fallback:', error);
+      }
+
+      // Fallback to original implementation
       this.stopRecording();
-      
-      // Finalize transcription
       const finalResult = await this.finalizeTranscription(this.currentTranscription);
       
       return {
@@ -158,7 +307,31 @@ export class TranscriptionService {
     config: AudioConfig
   ): Promise<ServiceResponse<TranscriptionSegment>> {
     try {
-      // Convert audio data to text
+      // Try hybrid transcription processing first
+      try {
+        const hybridResult = await transcriptionEngineManager.processAudioChunk(audioData, config);
+        if (hybridResult.success) {
+          // Convert to legacy segment format
+          const segment: TranscriptionSegment = {
+            id: hybridResult.data.chunkId || `chunk-${Date.now()}`,
+            text: hybridResult.data.text || '',
+            startTime: Date.now(),
+            endTime: Date.now(),
+            confidence: hybridResult.data.confidence || 0.8,
+            speaker: 'doctor'
+          };
+          
+          return {
+            success: true,
+            data: segment,
+            timestamp: new Date()
+          };
+        }
+      } catch (error) {
+        console.warn('Hybrid audio processing failed, using fallback:', error);
+      }
+
+      // Fallback to original implementation
       const segment = await this.transcribeAudioChunk(audioData, config);
       
       // Update current transcription
@@ -239,6 +412,46 @@ export class TranscriptionService {
    */
   getCurrentTranscription(): TranscriptionResult | null {
     return this.currentTranscription;
+  }
+
+  /**
+   * Get transcription engine status
+   */
+  getEngineStatus(): any {
+    try {
+      return transcriptionEngineManager.getEngineStatus();
+    } catch (error) {
+      console.error('Failed to get engine status:', error);
+      return {
+        error: 'Engine status unavailable',
+        fallbackMode: true
+      };
+    }
+  }
+
+  /**
+   * Switch to specific transcription engine
+   */
+  async switchToEngine(engineName: string): Promise<boolean> {
+    try {
+      return await transcriptionEngineManager.switchToEngine(engineName);
+    } catch (error) {
+      console.error('Failed to switch engine:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Get available transcription engines
+   */
+  getAvailableEngines(): string[] {
+    try {
+      const status = transcriptionEngineManager.getEngineStatus();
+      return status.availableEngines || [];
+    } catch (error) {
+      console.error('Failed to get available engines:', error);
+      return ['web-speech']; // Fallback
+    }
   }
 
   /**
@@ -477,9 +690,72 @@ export class TranscriptionService {
   }
 
   /**
+   * Initialize network monitoring
+   */
+  private initializeNetworkMonitoring(): void {
+    try {
+      if (typeof navigator !== 'undefined' && 'onLine' in navigator) {
+        window.addEventListener('online', () => this.handleNetworkStatusChange({ isOnline: true }));
+        window.addEventListener('offline', () => this.handleNetworkStatusChange({ isOnline: false }));
+      }
+      
+      this.startNetworkHealthCheck();
+      console.log('Network monitoring initialized');
+    } catch (error) {
+      console.error('Failed to initialize network monitoring:', error);
+    }
+  }
+
+  /**
+   * Start periodic network health check
+   */
+  private startNetworkHealthCheck(): void {
+    if (this.networkHealthCheckInterval) {
+      clearInterval(this.networkHealthCheckInterval);
+    }
+    
+    this.networkHealthCheckInterval = window.setInterval(() => {
+      this.checkNetworkHealth();
+    }, 10000); // Check every 10 seconds
+  }
+
+  /**
+   * Check network health
+   */
+  private async checkNetworkHealth(): Promise<void> {
+    try {
+      const isOnline = navigator.onLine;
+      const timestamp = Date.now();
+      
+      // Simple connectivity test
+      if (isOnline) {
+        try {
+          await fetch('/api/health', { 
+            method: 'HEAD',
+            cache: 'no-cache',
+            signal: AbortSignal.timeout(5000)
+          });
+        } catch {
+          // If API check fails but navigator says online, we might have limited connectivity
+          console.warn('Limited network connectivity detected');
+        }
+      }
+      
+      // Log network status for debugging
+      if (this.isRecording) {
+        console.log('Network health check:', { isOnline, timestamp });
+      }
+    } catch (error) {
+      console.error('Network health check failed:', error);
+    }
+  }
+
+  /**
    * Handle network status changes
    */
   private handleNetworkStatusChange(status: any): void {
+    console.log('Network status changed:', status);
+    
     if (status.isOnline && this.isRecovering) {
       console.log('Network connection restored, attempting to recover');
       this.restartSpeechRecognition();

@@ -13,6 +13,7 @@ export interface TranscriptionResult {
   medicalTerms: MedicalTerm[];
   segments: TranscriptionSegment[];
   status: TranscriptionStatus;
+  error?: string;
 }
 
 export interface TranscriptionSegment {
