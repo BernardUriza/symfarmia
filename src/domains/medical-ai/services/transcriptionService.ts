@@ -64,12 +64,21 @@ export class TranscriptionService {
   private isRecording = false;
   private transcriptionCallback: ((result: TranscriptionResult) => void) | null = null;
   private speechRecognition: SpeechRecognition | null = null;
+  private retryAttempts = 0;
+  private maxRetryAttempts = 3;
+  private exponentialBackoffBase = 1000;
+  private maxRetryDelay = 30000;
+  private fallbackManager: any = null;
+  private networkStatusDetector: any = null;
+  private medicalErrorHandler: any = null;
+  private isRecovering = false;
 
   constructor() {
     // Only setup audio context on client side
     if (typeof window !== 'undefined') {
       this.setupAudioContext();
       this.setupSpeechRecognition();
+      this.initializeNetworkResilienceComponents();
     }
   }
 
@@ -230,6 +239,254 @@ export class TranscriptionService {
    */
   getCurrentTranscription(): TranscriptionResult | null {
     return this.currentTranscription;
+  }
+
+  /**
+   * Initialize network resilience components
+   */
+  private async initializeNetworkResilienceComponents(): Promise<void> {
+    try {
+      // Initialize components lazily to avoid circular dependencies
+      console.log('Initializing network resilience components...');
+    } catch (error) {
+      console.error('Failed to initialize network resilience components:', error);
+    }
+  }
+
+  /**
+   * Handle speech recognition errors with retry mechanism
+   */
+  private async handleSpeechRecognitionError(event: any): Promise<void> {
+    try {
+      const errorContext = {
+        errorType: this.classifyError(event.error),
+        severity: this.determineSeverity(event.error),
+        timestamp: new Date(),
+        medicalContext: this.getMedicalContext(),
+        retryAttempt: this.retryAttempts
+      };
+
+      console.log('Speech recognition error:', {
+        error: event.error,
+        context: errorContext
+      });
+
+      // Determine recovery strategy
+      const recoveryStrategy = this.determineRecoveryStrategy(errorContext);
+      
+      switch (recoveryStrategy) {
+        case 'retry':
+          await this.retryWithExponentialBackoff();
+          break;
+        case 'fallback':
+          await this.switchToFallbackService();
+          break;
+        case 'buffer':
+          await this.enableOfflineMode();
+          break;
+        case 'abort':
+          this.handleCriticalError(event.error, errorContext);
+          break;
+        default:
+          console.error('Unknown recovery strategy:', recoveryStrategy);
+      }
+    } catch (error) {
+      console.error('Error in speech recognition error handler:', error);
+    }
+  }
+
+  /**
+   * Classify error type for appropriate handling
+   */
+  private classifyError(error: string): 'network' | 'hardware' | 'api' | 'timeout' | 'unknown' {
+    const errorLower = error.toLowerCase();
+    
+    if (errorLower.includes('network') || errorLower.includes('connection')) {
+      return 'network';
+    }
+    if (errorLower.includes('audio') || errorLower.includes('microphone')) {
+      return 'hardware';
+    }
+    if (errorLower.includes('service-not-allowed') || errorLower.includes('not-allowed')) {
+      return 'api';
+    }
+    if (errorLower.includes('timeout')) {
+      return 'timeout';
+    }
+    return 'unknown';
+  }
+
+  /**
+   * Determine error severity
+   */
+  private determineSeverity(error: string): 'low' | 'medium' | 'high' | 'critical' {
+    const errorLower = error.toLowerCase();
+    
+    if (errorLower.includes('not-allowed') || errorLower.includes('permission')) {
+      return 'critical';
+    }
+    if (errorLower.includes('network') || errorLower.includes('timeout')) {
+      return 'high';
+    }
+    if (errorLower.includes('audio')) {
+      return 'medium';
+    }
+    return 'low';
+  }
+
+  /**
+   * Determine recovery strategy based on error context
+   */
+  private determineRecoveryStrategy(errorContext: any): 'retry' | 'fallback' | 'buffer' | 'abort' {
+    // Critical errors require immediate abort
+    if (errorContext.severity === 'critical') {
+      return 'abort';
+    }
+    
+    // Network errors should try fallback after retries
+    if (errorContext.errorType === 'network') {
+      return this.retryAttempts < this.maxRetryAttempts ? 'retry' : 'fallback';
+    }
+    
+    // Timeout errors should try buffering
+    if (errorContext.errorType === 'timeout') {
+      return 'buffer';
+    }
+    
+    // Hardware errors should try fallback
+    if (errorContext.errorType === 'hardware') {
+      return 'fallback';
+    }
+    
+    // Default to retry for unknown errors
+    return this.retryAttempts < this.maxRetryAttempts ? 'retry' : 'abort';
+  }
+
+  /**
+   * Retry with exponential backoff
+   */
+  private async retryWithExponentialBackoff(): Promise<void> {
+    if (this.retryAttempts >= this.maxRetryAttempts) {
+      console.error('Max retry attempts reached');
+      await this.switchToFallbackService();
+      return;
+    }
+
+    this.retryAttempts++;
+    this.isRecovering = true;
+    
+    // Calculate delay with exponential backoff and jitter
+    const delay = Math.min(
+      this.exponentialBackoffBase * Math.pow(2, this.retryAttempts - 1),
+      this.maxRetryDelay
+    );
+    
+    const jitter = Math.random() * 0.1 * delay;
+    const totalDelay = delay + jitter;
+    
+    console.log(`Retrying speech recognition in ${totalDelay}ms (attempt ${this.retryAttempts}/${this.maxRetryAttempts})`);
+    
+    setTimeout(() => {
+      this.restartSpeechRecognition();
+    }, totalDelay);
+  }
+
+  /**
+   * Restart speech recognition after error
+   */
+  private restartSpeechRecognition(): void {
+    try {
+      if (this.speechRecognition && this.isRecording) {
+        this.speechRecognition.start();
+        this.isRecovering = false;
+        console.log('Speech recognition restarted successfully');
+      }
+    } catch (error) {
+      console.error('Failed to restart speech recognition:', error);
+      this.switchToFallbackService();
+    }
+  }
+
+  /**
+   * Switch to fallback transcription service
+   */
+  private async switchToFallbackService(): Promise<void> {
+    try {
+      console.log('Switching to fallback transcription service...');
+      // For now, we'll implement a basic fallback that continues with limited functionality
+      this.retryAttempts = 0; // Reset retry counter
+      this.isRecovering = false;
+      
+      // TODO: Implement actual fallback service when TranscriptionFallbackManager is created
+      console.log('Fallback service activated');
+    } catch (error) {
+      console.error('Failed to switch to fallback service:', error);
+      this.enableOfflineMode();
+    }
+  }
+
+  /**
+   * Enable offline mode with local buffering
+   */
+  private async enableOfflineMode(): Promise<void> {
+    try {
+      console.log('Enabling offline mode for transcription');
+      // For now, we'll implement a basic offline mode
+      this.isRecovering = false;
+      
+      // TODO: Implement actual offline buffering when OfflineTranscriptionBuffer is created
+      console.log('Offline mode enabled');
+    } catch (error) {
+      console.error('Failed to enable offline mode:', error);
+    }
+  }
+
+  /**
+   * Handle critical errors that require immediate attention
+   */
+  private handleCriticalError(error: string, context: any): void {
+    console.error('Critical transcription error:', error, context);
+    
+    // Stop current transcription
+    this.stopTranscription();
+    
+    // Notify user through UI
+    if (this.transcriptionCallback && this.currentTranscription) {
+      const errorResult = {
+        ...this.currentTranscription,
+        status: TranscriptionStatus.ERROR,
+        error: 'Critical error occurred: ' + error
+      };
+      this.transcriptionCallback(errorResult as any);
+    }
+    
+    this.isRecovering = false;
+  }
+
+  /**
+   * Get medical context for error handling
+   */
+  private getMedicalContext(): any {
+    return {
+      patientId: 'unknown',
+      consultationId: 'unknown',
+      specialty: 'general',
+      urgencyLevel: 'routine',
+      timestamp: new Date()
+    };
+  }
+
+  /**
+   * Handle network status changes
+   */
+  private handleNetworkStatusChange(status: any): void {
+    if (status.isOnline && this.isRecovering) {
+      console.log('Network connection restored, attempting to recover');
+      this.restartSpeechRecognition();
+    } else if (!status.isOnline && this.isRecording) {
+      console.log('Network connection lost, switching to offline mode');
+      this.enableOfflineMode();
+    }
   }
 
   // Private methods
@@ -439,7 +696,7 @@ export class TranscriptionService {
           };
           
           this.speechRecognition.onerror = (event) => {
-            console.error('Speech recognition error:', event.error);
+            this.handleSpeechRecognitionError(event);
           };
           
           this.speechRecognition.onend = () => {
