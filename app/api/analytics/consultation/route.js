@@ -1,6 +1,12 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
+// Configuración requerida para Netlify
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+
 const prisma = new PrismaClient();
 
 export async function POST(request) {
