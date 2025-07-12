@@ -52,8 +52,6 @@ export class TranscriptionEngineSelector {
       preferredEngine: config.preferredEngine || 'auto',
       fallbackOrder: config.fallbackOrder || [
         'web-speech',     // Fastest, most reliable
-        'whisper-client', // Client-side AI
-        'whisper-wasm',   // WebAssembly fallback
         'openai-whisper'  // API-based last resort
       ],
       testTimeout: config.testTimeout || 5000,
@@ -121,14 +119,6 @@ export class TranscriptionEngineSelector {
       'web-speech': async () => {
         const { WebSpeechEngine } = await import('./WebSpeechEngine.js') as any;
         return new WebSpeechEngine(this.config);
-      },
-      'whisper-client': async () => {
-        const { WhisperClientEngine } = await import('./WhisperClientEngine');
-        return new WhisperClientEngine(this.config);
-      },
-      'whisper-wasm': async () => {
-        const { WhisperWASMEngine } = await import('./WhisperWASMEngine');
-        return new WhisperWASMEngine(this.config);
       },
       'openai-whisper': async () => {
         const { OpenAIWhisperBackend } = await import('./OpenAIWhisperBackend');

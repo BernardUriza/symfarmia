@@ -105,6 +105,7 @@
   "save": "Guardar",
   "cancel": "Cancelar",
   "recording_started": "Grabación Iniciada",
+  "clear": "Limpiar",
   "missing": {
     "key": "clave faltante"
   },

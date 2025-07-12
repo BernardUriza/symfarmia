@@ -83,6 +83,8 @@ const nextConfig = {
   experimental: {
     // Emergency: Disable optimizations that cause hanging
     optimizeCss: false,
+    // External packages for server components
+    serverComponentsExternalPackages: ['@xenova/transformers'],
   },
 
   // Webpack configuration for production builds only
