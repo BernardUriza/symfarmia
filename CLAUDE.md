@@ -14,22 +14,56 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Permanent Development Server
 
-For continuous testing and reviews, use the permanent dev server:
+A simplified, reliable dev server that runs on port 3002:
 
 ```bash
-npm run permanent:start   # Start permanent server on port 3002
-npm run permanent:status  # Check if server is running
-npm run permanent:stop    # Stop permanent server
-npm run permanent:restart # Restart permanent server
-npm run permanent:logs    # View server logs
+npm run permanent:start   # Start server on port 3002
+npm run permanent:status  # Check server status (with health check)
+npm run permanent:stop    # Stop server
+npm run permanent:restart # Restart server
+npm run permanent:logs    # View server logs (real-time)
 ```
 
 **Key features:**
-- **Stable URL**: Always available at http://localhost:3002
-- **TypeScript bypass**: Runs even with TypeScript errors
-- **Process management**: Background process with PID tracking
-- **Log monitoring**: Dedicated log file at `/tmp/symfarmia-permanent-dev.log`
-- **CI/CD integration**: Works alongside the main CI/CD pipeline
+- **Simple & Reliable**: Direct Next.js execution without complex wrappers
+- **Persistent**: Runs in background with proper process detachment
+- **Smart Status**: Checks both process and HTTP response
+- **Log File**: All output saved to `/tmp/symfarmia-permanent.log`
+- **No Build Guards**: Bypasses translation locks and type checks
+- **Quick Start**: Usually ready in 10-20 seconds
+
+## Microservicios
+
+SYMFARMIA utiliza una arquitectura de microservicios para separar responsabilidades y mejorar la escalabilidad. Ver documentación completa en `docs/development/dev-notes/microservices.md`.
+
+### Susurro-Test (Transcripción de Audio) - Puerto 3001
+```bash
+cd microservices/susurro-test
+npm install
+npm start
+```
+- **Función**: Servicio de transcripción usando nodejs-whisper
+- **Endpoints principales**:
+  - `GET /api/health` - Health check
+  - `POST /api/transcribe-upload` - Transcribir archivo subido
+  - `GET /api/files` - Listar archivos disponibles
+- **Uso**: Transcripción de consultas médicas, notas de voz y dictado médico
+
+### Gestión de Puertos
+```bash
+# Limpiar puertos ocupados (3000 y 3001)
+node scripts/kill-ports.js
+# o
+npm run kill-ports
+```
+
+### Distribución de Puertos
+- **3000**: Aplicación principal Next.js
+- **3001**: Microservicio de transcripción (Susurro-Test)
+- **3002**: Servidor de desarrollo permanente
+- **3003**: [Reservado] Medical AI Service (futuro)
+
+**Importante**: Los microservicios usan puertos específicos que no deben entrar en conflicto. Ejecutar `kill-ports.js` si hay problemas de puertos ocupados.
 
 ## Architecture Overview
 
@@ -139,3 +173,65 @@ Complete project documentation is now organized in the [`docs/`](./docs/) direct
 - **[🏛️ Legacy](./docs/legacy/)** - Original system documentation
 - **[🔄 Workflows](./docs/workflows/)** - Process and workflow docs
 - **[📝 Changelog](./docs/changelog/)** - Version history and updates
+
+## 🛠️ Available Scripts
+
+These are the actively maintained scripts in the `scripts/` directory:
+
+### Core Development Scripts
+
+- **`kill-ports.js`** - Cleans ports 3000 and 3001 before starting servers
+  ```bash
+  npm run kill-ports
+  ```
+
+- **`permanent-dev-simple.js`** - Simplified permanent dev server on port 3002
+  ```bash
+  npm run permanent:start  # Start server
+  npm run permanent:stop   # Stop server
+  npm run permanent:status # Check status
+  ```
+
+- **`generate-version.js`** - Generates version info for builds
+  ```bash
+  npm run version:generate
+  ```
+
+### Build & Validation Scripts
+
+- **`build-guardian.js`** - Validates translations and Turbo before builds
+  ```bash
+  npm run build:guardian
+  ```
+
+- **`validate-translations.js`** - Validates all translation keys exist
+  ```bash
+  npm run validate:translations
+  ```
+
+- **`revolutionary-translation-validator.js`** - Enhanced translation validation
+  ```bash
+  npm run translations:validate
+  ```
+
+- **`validate-turbo.js`** - Ensures dev server uses Turbopack
+  - Used internally by build-guardian.js
+
+### Microservice Scripts
+
+- **`setup-microservices.sh`** - Configures SusurroTest microservice
+  ```bash
+  npm run setup:microservices
+  ```
+
+- **`microservice-e2e-guardian.js`** - Validates transcription microservice
+  ```bash
+  npm run test:microservice
+  ```
+
+### Utility Scripts
+
+- **`kill-brave-cache.js`** - Clears Brave Browser cache
+  ```bash
+  npm run kill:brave-cache
+  ```

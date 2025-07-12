@@ -655,7 +655,6 @@ export class TranscriptionQualityMonitor {
   evaluateAutoSwitch(overallQuality) {
     try {
       const currentScore = overallQuality.score;
-      const networkScore = overallQuality.components.network.score;
       
       // Switch to offline mode if quality is poor
       if (currentScore < this.qualityThresholds.poor && this.currentMode !== 'offline') {

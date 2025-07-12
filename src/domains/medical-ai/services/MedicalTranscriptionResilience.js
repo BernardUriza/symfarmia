@@ -457,7 +457,7 @@ export class MedicalTranscriptionResilience {
       if (preservedState.pendingSegments.size > 0) {
         console.log(`Reprocessing ${preservedState.pendingSegments.size} pending segments after engine switch`);
         
-        for (const [segmentId, segment] of preservedState.pendingSegments) {
+        for (const [, segment] of preservedState.pendingSegments) {
           await this.reprocessSegment(segment, engineSwitchData.toEngine);
         }
       }
@@ -677,7 +677,7 @@ export class MedicalTranscriptionResilience {
   /**
    * Prepare for mode transition
    */
-  async prepareTransition(newMode, context) {
+  async prepareTransition(newMode, _context) {
     try {
       console.log(`Preparing transition to ${newMode}`);
       
@@ -709,7 +709,7 @@ export class MedicalTranscriptionResilience {
   /**
    * Execute mode transition
    */
-  async executeTransition(newMode, context) {
+  async executeTransition(newMode, _context) {
     try {
       console.log(`Executing transition to ${newMode}`);
       
@@ -741,7 +741,7 @@ export class MedicalTranscriptionResilience {
   /**
    * Validate transition
    */
-  async validateTransition(newMode, context) {
+  async validateTransition(newMode, _context) {
     try {
       console.log(`Validating transition to ${newMode}`);
       
@@ -1335,7 +1335,7 @@ export class MedicalTranscriptionResilience {
    */
   async performHealthCheck() {
     try {
-      const healthResults = await this.initializeComponents();
+      await this.initializeComponents();
       
       const allHealthy = Object.values(this.serviceHealth).every(status => status === 'healthy');
       

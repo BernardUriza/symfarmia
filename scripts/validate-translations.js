@@ -33,7 +33,10 @@ function extractTranslationKeys(srcDir) {
     const content = fs.readFileSync(file, 'utf8');
     let match;
     while ((match = regex.exec(content))) {
-      keys.add(match[1]);
+      // Skip template literals that contain ${} placeholders
+      if (!match[1].includes('${')) {
+        keys.add(match[1]);
+      }
     }
   }
   return Array.from(keys);

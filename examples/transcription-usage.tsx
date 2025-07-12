@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { EnhancedTranscriptionPanel } from '../src/components/consultation/EnhancedTranscriptionPanel';
+import { ConversationCapture } from '../app/components/medical/ConversationCapture.tsx';
 
 // Basic Usage Example
 export const BasicTranscriptionExample = () => {
@@ -19,11 +19,11 @@ export const BasicTranscriptionExample = () => {
     <div className="p-6 max-w-4xl mx-auto">
       <h1 className="text-2xl font-bold mb-6">Enhanced Transcription Demo</h1>
       
-      <EnhancedTranscriptionPanel 
+      <ConversationCapture 
         onTranscriptionComplete={handleTranscriptionComplete}
         showModelInfo={true}
         showSpectrum={true}
-        microphoneSize="lg"
+        showAdvancedFeatures={true}
       />
     </div>
   );
@@ -46,11 +46,11 @@ export const AdvancedTranscriptionExample = () => {
         <div>
           <h2 className="text-xl font-semibold mb-4">Live Transcription</h2>
           {isVisible && (
-            <EnhancedTranscriptionPanel 
+            <ConversationCapture 
               onTranscriptionComplete={handleTranscriptionComplete}
               showModelInfo={process.env.NODE_ENV === 'development'}
               showSpectrum={true}
-              microphoneSize="md"
+              showAdvancedFeatures={true}
               className="shadow-xl"
             />
           )}
@@ -140,11 +140,11 @@ export const MedicalConsultationExample = () => {
         
         {/* Transcription Panel */}
         <div className="xl:col-span-2">
-          <EnhancedTranscriptionPanel 
+          <ConversationCapture 
             onTranscriptionComplete={handleTranscriptionComplete}
             showModelInfo={true}
             showSpectrum={true}
-            microphoneSize="lg"
+            showAdvancedFeatures={true}
           />
         </div>
         

@@ -1,7 +1,6 @@
 'use client'
 
 import React from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 class RouteErrorBoundary extends React.Component {
@@ -10,7 +9,7 @@ class RouteErrorBoundary extends React.Component {
     this.state = { hasError: false, error: null, errorInfo: null };
   }
 
-  static getDerivedStateFromError(error) {
+  static getDerivedStateFromError(_error) {
     // Update state so the next render will show the fallback UI
     return { hasError: true };
   }

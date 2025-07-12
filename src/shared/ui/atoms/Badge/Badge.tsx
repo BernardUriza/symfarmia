@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import { getUrgencyColor } from '../../themes/medical.theme';
 
 export interface BadgeProps {
   children: any;
@@ -39,7 +38,6 @@ export const Badge = ({
       
       case 'urgency':
         if (!urgency) return 'bg-gray-100 text-gray-800 border border-gray-200';
-        const _urgencyColor = getUrgencyColor(urgency);
         
         switch (urgency) {
           case 'critical':

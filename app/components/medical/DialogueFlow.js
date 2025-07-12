@@ -15,17 +15,6 @@ const extractChiefComplaint = (dialogue) => {
   return patientLine ? patientLine.text : '';
 };
 
-const generateMedicalSummary = (dialogue, duration = '0:00') => {
-  return {
-    chiefComplaint: extractChiefComplaint(dialogue),
-    historyPresentIllness: '',
-    physicalExam: '',
-    assessment: '',
-    plan: '',
-    duration,
-    confidence: 0.9
-  };
-};
 
 const getDialogueStructure = (t) => [
   {

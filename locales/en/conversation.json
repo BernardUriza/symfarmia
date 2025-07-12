@@ -2,7 +2,7 @@
   "conversation": {
     "capture": {
       "title": "Conversation Capture",
-      "subtitle": "AI is listening and transcribing your medical consultation in realrr-time",
+      "subtitle": "AI is listening and transcribing your medical consultation in real-time",
       "recording_active": "Recording Active",
       "ready_to_record": "Ready to Record",
       "audio_level": "Audio Level",
@@ -10,7 +10,8 @@
       "powered_by_ai": "Powered by AI",
       "review_dialog_flow": "Review Dialog Flow",
       "start": "Start Recording",
-      "stop": "Stop Recording"
+      "stop": "Stop Recording",
+      "medical_conversation_transcript": "Medical conversation transcript"
     },
     "permissions": {
       "microphone_denied": "Microphone access denied",

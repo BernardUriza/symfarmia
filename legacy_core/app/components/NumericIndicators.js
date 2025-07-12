@@ -2,7 +2,7 @@
 import React from 'react';
 import { Text, Metric, Card, Button } from "@tremor/react";
 import { UserGroupIcon, ClipboardDocumentListIcon, DocumentPlusIcon } from '@heroicons/react/24/solid';
-import { useDemoHighlight } from '../../../hooks/useDemoHighlight';
+import { useDemoHighlight } from '@/domains/demo/hooks/useDemoHighlight';
 
 const NumericIndicators = ({setOpenForm, patientsCount, reportsSentCount}) => {
   const { isDemoMode, highlight } = useDemoHighlight();

@@ -5,10 +5,9 @@ export { LiveTranscriptionDisplay } from './LiveTranscriptionDisplay';
 export { TranscriptionModelInfo } from './TranscriptionModelInfo';
 
 // Enhanced Transcription Hook
-export { useEnhancedTranscription } from '../../hooks/useEnhancedTranscription';
+// Note: useEnhancedTranscription is now exported from @/domains/medical-ai
+// Import it directly from there instead of re-exporting here
 
-// Enhanced Transcription Panel
-export { EnhancedTranscriptionPanel } from '../consultation/EnhancedTranscriptionPanel';
 
 // Types
 export type {

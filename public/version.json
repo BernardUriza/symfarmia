@@ -1,8 +1,8 @@
 {
   "version": "0.1.0",
-  "gitHash": "e5921d7",
-  "gitBranch": "dev",
-  "gitDate": "2025-07-12 09:06:55 +0000",
-  "buildDate": "2025-07-12T09:12:33.817Z",
-  "buildTimestamp": 1752311553817
+  "gitHash": "f248cce",
+  "gitBranch": "prod",
+  "gitDate": "2025-07-12 23:19:43 +0000",
+  "buildDate": "2025-07-12T23:35:49.203Z",
+  "buildTimestamp": 1752363349204
 }

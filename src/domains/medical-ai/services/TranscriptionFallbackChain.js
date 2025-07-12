@@ -5,7 +5,6 @@
  * when engines fail, maintaining continuity of medical transcription
  */
 
-import { TranscriptionStatus } from '../types';
 import { transcriptionEngineStateManager } from './TranscriptionEngineStateManager';
 
 export class TranscriptionFallbackChain {

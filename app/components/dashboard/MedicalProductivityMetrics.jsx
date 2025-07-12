@@ -6,7 +6,6 @@ import {
   FileText, 
   Users, 
   TrendingUp, 
-  TrendingDown, 
   DollarSign, 
   Activity,
   ArrowUp,
@@ -16,8 +15,8 @@ import {
   Target,
   Award
 } from 'lucide-react';
-import { useI18n } from '../../../hooks/useI18n';
-import { calculateMexicanPrivatePracticeKPIs, generateKPISummary } from '../../utils/metrics/MedicalKPICalculator';
+import { useI18n } from '@/domains/core';
+import { calculateMexicanPrivatePracticeKPIs } from '../../utils/metrics/MedicalKPICalculator';
 import { generateCompleteMockData } from '../../data/mockMedicalData';
 
 /**
@@ -118,20 +117,6 @@ const MetricCard = ({
   );
 };
 
-/**
- * Trend Indicator Component
- */
-const TrendIndicator = ({ value, isPositive, label }) => {
-  const { t } = useI18n();
-  
-  return (
-    <div className={`flex items-center space-x-1 text-sm ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-      {isPositive ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
-      <span>{Math.abs(value)}</span>
-      <span className="opacity-75">{label}</span>
-    </div>
-  );
-};
 
 /**
  * Economic Impact Section
@@ -291,7 +276,6 @@ const MedicalProductivityMetrics = ({ timeRange = 'today', showEconomicMetrics =
     return null;
   }
   
-  const summary = generateKPISummary(metrics);
   
   return (
     <div className="space-y-6">

@@ -31,7 +31,7 @@ const MODEL_SIZES = {
  */
 function convertTypedArray(src, type) {
   var buffer = new ArrayBuffer(src.byteLength);
-  var baseView = new src.constructor(buffer).set(src);
+  new src.constructor(buffer).set(src);
   return new type(buffer);
 }
 
@@ -209,7 +209,7 @@ function loadRemote(url, dst, size_mb, cbProgress, cbReady, cbCancel, cbPrint) {
     var os = tx.objectStore(STORE_NAME);
     var rq = os.get(url);
 
-    rq.onsuccess = function (event) {
+    rq.onsuccess = function (_event) {
       if (rq.result) {
         cbPrint('loadRemote: "' + url + '" found in IndexedDB cache');
         cbPrint('loadRemote: cached on ' + new Date(rq.result.timestamp).toLocaleString());
@@ -265,13 +265,13 @@ function loadRemote(url, dst, size_mb, cbProgress, cbReady, cbCancel, cbPrint) {
                 return;
               }
 
-              rq.onsuccess = function (event) {
+              rq.onsuccess = function (_event) {
                 cbPrint('loadRemote: "' + url + '" cached successfully');
                 cbPrint('loadRemote: cache size: ' + Math.round(data.byteLength / 1024 / 1024) + ' MB');
                 cbReady(dst, data);
               };
 
-              rq.onerror = function (event) {
+              rq.onerror = function (_event) {
                 cbPrint('loadRemote: failed to cache "' + url + '": ' + event.target.error);
                 // Still proceed with the data even if caching fails
                 cbReady(dst, data);
@@ -302,12 +302,12 @@ function loadRemote(url, dst, size_mb, cbProgress, cbReady, cbCancel, cbPrint) {
     cbCancel();
   };
 
-  rq.onblocked = function (event) {
+  rq.onblocked = function (_event) {
     cbPrint('loadRemote: IndexedDB access blocked');
     cbCancel();
   };
 
-  rq.onabort = function (event) {
+  rq.onabort = function (_event) {
     cbPrint('loadRemote: IndexedDB access aborted');
     cbCancel();
   };
@@ -361,7 +361,7 @@ async function removeFromCache(url) {
       const os = tx.objectStore(STORE_NAME);
       const rq = os.delete(url);
       
-      rq.onsuccess = function (event) {
+      rq.onsuccess = function (_event) {
         console.log('Model removed from cache:', url);
         resolve(true);
       };

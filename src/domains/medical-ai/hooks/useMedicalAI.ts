@@ -11,8 +11,7 @@ import {
   TranscriptionResult,
   MedicalSpecialty,
   MedicalContext,
-  UrgencyLevel,
-  ServiceResponse
+  UrgencyLevel
 } from '../types';
 
 interface UseMedicalAIProps {
@@ -43,9 +42,7 @@ interface UseMedicalAIReturn {
 
 export const useMedicalAI = (props: UseMedicalAIProps = {}): UseMedicalAIReturn => {
   const {
-    specialty = 'general',
-    autoAnalysis = false,
-    realTimeValidation = false
+    specialty = 'general'
   } = props;
 
   // State

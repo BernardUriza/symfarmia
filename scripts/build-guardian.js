@@ -16,6 +16,7 @@ const { exec } = require('child_process');
 const { promisify } = require('util');
 const fs = require('fs');
 const path = require('path');
+const { MicroserviceE2EGuardian } = require('./microservice-e2e-guardian');
 
 const execAsync = promisify(exec);
 
@@ -23,10 +24,12 @@ class BuildGuardian {
   constructor() {
     this.lockFile = path.join(__dirname, '../.translation-lock');
     this.turboLockFile = path.join(__dirname, '../.turbo-lock');
+    this.microserviceLockFile = path.join(__dirname, '../.microservice-lock');
     this.validationScript = path.join(__dirname, 'revolutionary-translation-validator.js');
     this.turboValidationScript = path.join(__dirname, 'validate-turbo.js');
     this.isDevMode = process.argv.includes('--dev');
     this.isBuildMode = process.argv.includes('--build');
+    this.microserviceGuardian = new MicroserviceE2EGuardian();
   }
 
   async guard() {
@@ -36,6 +39,7 @@ class BuildGuardian {
       // Check locks first
       await this.checkTranslationLock();
       await this.checkTurboLock();
+      await this.checkMicroserviceLock();
       
       // Run validations
       if (this.isDevMode) {
@@ -44,9 +48,13 @@ class BuildGuardian {
       }
       await this.runRevolutionaryValidation();
       
+      // Run microservice E2E tests
+      await this.runMicroserviceE2E();
+      
       // Clear locks
       await this.clearTranslationLock();
       await this.clearTurboLock();
+      await this.clearMicroserviceLock();
       
       console.log('✅ BUILD GUARDIAN: All checks passed');
       console.log('🚀 Allowing build/dev server to proceed...');
@@ -66,6 +74,8 @@ class BuildGuardian {
       // Create appropriate lock based on error type
       if (error.type === 'turbo') {
         await this.createTurboLock(error.message);
+      } else if (error.type === 'microservice') {
+        await this.createMicroserviceLock(error.message);
       } else {
         await this.createTranslationLock(error.message);
       }
@@ -185,8 +195,72 @@ class BuildGuardian {
     }
   }
 
+  async checkMicroserviceLock() {
+    if (fs.existsSync(this.microserviceLockFile)) {
+      const lockData = JSON.parse(fs.readFileSync(this.microserviceLockFile, 'utf8'));
+      const timeDiff = Date.now() - lockData.timestamp;
+      const hoursDiff = timeDiff / (1000 * 60 * 60);
+      if (hoursDiff < 1) {
+        const error = new Error(`Microservice lock active. Last failure: ${lockData.reason}`);
+        error.type = 'microservice';
+        throw error;
+      } else {
+        fs.unlinkSync(this.microserviceLockFile);
+      }
+    }
+  }
+
+  async runMicroserviceE2E() {
+    console.log('🔬 Running microservice E2E tests...');
+    try {
+      const result = await this.microserviceGuardian.guard();
+      if (!result) {
+        const error = new Error('Microservice E2E tests failed');
+        error.type = 'microservice';
+        throw error;
+      }
+      console.log('✅ Microservice E2E tests passed');
+      return true;
+    } catch (error) {
+      error.type = 'microservice';
+      throw error;
+    }
+  }
+
+  async createMicroserviceLock(reason) {
+    const lockData = {
+      timestamp: Date.now(),
+      reason: reason,
+      mode: this.isDevMode ? 'dev' : 'build',
+      message: 'Microservice E2E validation failed. Whisper transcription service must be working correctly.'
+    };
+    fs.writeFileSync(this.microserviceLockFile, JSON.stringify(lockData, null, 2));
+    console.log('🔒 Microservice lock created');
+  }
+
+  async clearMicroserviceLock() {
+    if (fs.existsSync(this.microserviceLockFile)) {
+      fs.unlinkSync(this.microserviceLockFile);
+      console.log('🔓 Microservice lock cleared');
+    }
+  }
+
   showFixInstructions(errorType = 'translation') {
-    if (errorType === 'turbo') {
+    if (errorType === 'microservice') {
+      console.log('\n🔧 HOW TO FIX MICROSERVICE ISSUES:');
+      console.log('━'.repeat(50));
+      console.log('1. Install microservice dependencies:');
+      console.log('   cd microservices/susurro-test && npm install\n');
+      console.log('2. Download Whisper model:');
+      console.log('   cd microservices/susurro-test && npm run download-model\n');
+      console.log('3. Test microservice manually:');
+      console.log('   cd microservices/susurro-test && npm test\n');
+      console.log('4. Check if port 3001 is available:');
+      console.log('   npm run kill-ports\n');
+      console.log('⚠️  IMPORTANT: The microservice must successfully transcribe');
+      console.log('   audio and return the word "Americans" in the transcript.');
+      console.log('━'.repeat(50));
+    } else if (errorType === 'turbo') {
       console.log('\n🔧 HOW TO FIX TURBO ISSUES:');
       console.log('━'.repeat(50));
       console.log('1. Use the correct dev command:');

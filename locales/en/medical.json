@@ -1,0 +1,112 @@
+{
+  "${key}": "Medical term",
+  "symptoms": {
+    "headache": "Headache",
+    "fever": "Fever",
+    "cough": "Cough",
+    "fatigue": "Fatigue",
+    "nausea": "Nausea",
+    "dizziness": "Dizziness",
+    "chest_pain": "Chest pain",
+    "shortness_of_breath": "Shortness of breath",
+    "abdominal_pain": "Abdominal pain",
+    "back_pain": "Back pain"
+  },
+  "conditions": {
+    "hypertension": "Hypertension",
+    "diabetes": "Diabetes",
+    "asthma": "Asthma",
+    "migraine": "Migraine",
+    "anxiety": "Anxiety",
+    "depression": "Depression",
+    "arthritis": "Arthritis",
+    "pneumonia": "Pneumonia",
+    "bronchitis": "Bronchitis",
+    "allergy": "Allergy"
+  },
+  "specialties": {
+    "cardiology": "Cardiology",
+    "neurology": "Neurology",
+    "pediatrics": "Pediatrics",
+    "gynecology": "Gynecology",
+    "orthopedics": "Orthopedics",
+    "dermatology": "Dermatology",
+    "psychiatry": "Psychiatry",
+    "internal_medicine": "Internal Medicine",
+    "surgery": "Surgery",
+    "family_medicine": "Family Medicine"
+  },
+  "medications": {
+    "analgesic": "Analgesic",
+    "antibiotic": "Antibiotic",
+    "antihypertensive": "Antihypertensive",
+    "antidiabetic": "Antidiabetic",
+    "antihistamine": "Antihistamine",
+    "anti_inflammatory": "Anti-inflammatory",
+    "antidepressant": "Antidepressant",
+    "anxiolytic": "Anxiolytic",
+    "bronchodilator": "Bronchodilator",
+    "diuretic": "Diuretic"
+  },
+  "examinations": {
+    "blood_pressure": "Blood pressure",
+    "heart_rate": "Heart rate",
+    "temperature": "Temperature",
+    "weight": "Weight",
+    "height": "Height",
+    "blood_test": "Blood test",
+    "urine_test": "Urine test",
+    "x_ray": "X-ray",
+    "ct_scan": "CT scan",
+    "mri": "MRI"
+  },
+  "body_parts": {
+    "head": "Head",
+    "neck": "Neck",
+    "chest": "Chest",
+    "abdomen": "Abdomen",
+    "back": "Back",
+    "arm": "Arm",
+    "leg": "Leg",
+    "heart": "Heart",
+    "lungs": "Lungs",
+    "stomach": "Stomach"
+  },
+  "urgency_levels": {
+    "emergency": "Emergency",
+    "urgent": "Urgent",
+    "routine": "Routine",
+    "non_urgent": "Non-urgent"
+  },
+  "actions": {
+    "diagnose": "Diagnose",
+    "prescribe": "Prescribe",
+    "examine": "Examine",
+    "treat": "Treat",
+    "refer": "Refer",
+    "monitor": "Monitor",
+    "follow_up": "Follow up",
+    "discharge": "Discharge",
+    "admit": "Admit",
+    "schedule": "Schedule"
+  },
+  "status": {
+    "stable": "Stable",
+    "critical": "Critical",
+    "improving": "Improving",
+    "worsening": "Worsening",
+    "recovered": "Recovered"
+  },
+  "general": {
+    "patient": "Patient",
+    "doctor": "Doctor",
+    "nurse": "Nurse",
+    "appointment": "Appointment",
+    "consultation": "Consultation",
+    "diagnosis": "Diagnosis",
+    "treatment": "Treatment",
+    "prescription": "Prescription",
+    "medical_history": "Medical history",
+    "medical_record": "Medical record"
+  }
+}

@@ -317,7 +317,7 @@ const flattenTranslations = (obj, prefix = '') => {
 const RevolutionaryI18nContext = createContext({
   locale: 'es',
   translations: {},
-  t: (key, params = {}) => key,
+  t: (key, _params = {}) => key,
   setLocale: () => {},
   isLoading: false,
   monitor: null

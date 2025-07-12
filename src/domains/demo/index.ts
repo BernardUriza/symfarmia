@@ -19,6 +19,7 @@ export { useDemoMode } from './hooks/useDemoMode';
 export { useDemoTranscription } from './hooks/useDemoTranscription';
 export { useDemoPatients } from './hooks/useDemoPatients';
 export { useDemoSettings } from './hooks/useDemoSettings';
+export { useDemoHighlight } from './hooks/useDemoHighlight';
 
 // Services
 export { demoDataService } from './services/demoDataService';

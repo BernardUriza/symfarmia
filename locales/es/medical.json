@@ -1,0 +1,112 @@
+{
+  "${key}": "Término médico",
+  "symptoms": {
+    "headache": "Dolor de cabeza",
+    "fever": "Fiebre",
+    "cough": "Tos",
+    "fatigue": "Fatiga",
+    "nausea": "Náuseas",
+    "dizziness": "Mareos",
+    "chest_pain": "Dolor de pecho",
+    "shortness_of_breath": "Dificultad para respirar",
+    "abdominal_pain": "Dolor abdominal",
+    "back_pain": "Dolor de espalda"
+  },
+  "conditions": {
+    "hypertension": "Hipertensión",
+    "diabetes": "Diabetes",
+    "asthma": "Asma",
+    "migraine": "Migraña",
+    "anxiety": "Ansiedad",
+    "depression": "Depresión",
+    "arthritis": "Artritis",
+    "pneumonia": "Neumonía",
+    "bronchitis": "Bronquitis",
+    "allergy": "Alergia"
+  },
+  "specialties": {
+    "cardiology": "Cardiología",
+    "neurology": "Neurología",
+    "pediatrics": "Pediatría",
+    "gynecology": "Ginecología",
+    "orthopedics": "Ortopedia",
+    "dermatology": "Dermatología",
+    "psychiatry": "Psiquiatría",
+    "internal_medicine": "Medicina Interna",
+    "surgery": "Cirugía",
+    "family_medicine": "Medicina Familiar"
+  },
+  "medications": {
+    "analgesic": "Analgésico",
+    "antibiotic": "Antibiótico",
+    "antihypertensive": "Antihipertensivo",
+    "antidiabetic": "Antidiabético",
+    "antihistamine": "Antihistamínico",
+    "anti_inflammatory": "Antiinflamatorio",
+    "antidepressant": "Antidepresivo",
+    "anxiolytic": "Ansiolítico",
+    "bronchodilator": "Broncodilatador",
+    "diuretic": "Diurético"
+  },
+  "examinations": {
+    "blood_pressure": "Presión arterial",
+    "heart_rate": "Frecuencia cardíaca",
+    "temperature": "Temperatura",
+    "weight": "Peso",
+    "height": "Altura",
+    "blood_test": "Análisis de sangre",
+    "urine_test": "Análisis de orina",
+    "x_ray": "Radiografía",
+    "ct_scan": "Tomografía computarizada",
+    "mri": "Resonancia magnética"
+  },
+  "body_parts": {
+    "head": "Cabeza",
+    "neck": "Cuello",
+    "chest": "Pecho",
+    "abdomen": "Abdomen",
+    "back": "Espalda",
+    "arm": "Brazo",
+    "leg": "Pierna",
+    "heart": "Corazón",
+    "lungs": "Pulmones",
+    "stomach": "Estómago"
+  },
+  "urgency_levels": {
+    "emergency": "Emergencia",
+    "urgent": "Urgente",
+    "routine": "Rutina",
+    "non_urgent": "No urgente"
+  },
+  "actions": {
+    "diagnose": "Diagnosticar",
+    "prescribe": "Recetar",
+    "examine": "Examinar",
+    "treat": "Tratar",
+    "refer": "Referir",
+    "monitor": "Monitorear",
+    "follow_up": "Seguimiento",
+    "discharge": "Alta",
+    "admit": "Admitir",
+    "schedule": "Programar"
+  },
+  "status": {
+    "stable": "Estable",
+    "critical": "Crítico",
+    "improving": "Mejorando",
+    "worsening": "Empeorando",
+    "recovered": "Recuperado"
+  },
+  "general": {
+    "patient": "Paciente",
+    "doctor": "Doctor",
+    "nurse": "Enfermera",
+    "appointment": "Cita",
+    "consultation": "Consulta",
+    "diagnosis": "Diagnóstico",
+    "treatment": "Tratamiento",
+    "prescription": "Receta",
+    "medical_history": "Historia clínica",
+    "medical_record": "Expediente médico"
+  }
+}

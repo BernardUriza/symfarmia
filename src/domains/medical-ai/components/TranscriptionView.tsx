@@ -8,8 +8,8 @@ interface TranscriptionViewProps {
 
 export const TranscriptionView = ({ 
   transcription, 
-  onEdit 
-}) => {
+  onEdit: _onEdit 
+}: TranscriptionViewProps) => {
   return (
     <div className="bg-white rounded-lg shadow p-6">
       <div className="mb-4">

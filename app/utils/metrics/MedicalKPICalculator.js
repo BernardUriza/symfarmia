@@ -5,7 +5,7 @@
  * Focuses on productivity, efficiency, and economic ROI metrics
  */
 
-import { format, subDays, startOfWeek, endOfWeek, differenceInMinutes } from 'date-fns';
+import { format, subDays, startOfWeek, endOfWeek } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 // 🏥 MEXICAN PRIVATE PRACTICE CONSTANTS
@@ -62,7 +62,7 @@ export function calculateDailyPatientCount(consultations, targetDate = new Date(
 /**
  * Calculate documentation time saved
  */
-export function calculateDocumentationTimeSaved(notes, consultations) {
+export function calculateDocumentationTimeSaved(notes, _consultations) {
   if (!notes || notes.length === 0) return { hours: 0, minutes: 0 };
   
   const automaticNotes = notes.filter(note => note.isAutomatic).length;
@@ -98,7 +98,7 @@ export function calculatePotentialIncomeIncrease(additionalConsultations, consul
 /**
  * Calculate weekly trend data
  */
-export function calculateWeeklyTrend(consultations, startDate = subDays(new Date(), 28)) {
+export function calculateWeeklyTrend(consultations, _startDate = subDays(new Date(), 28)) {
   if (!consultations || consultations.length === 0) return [];
   
   const weeklyData = [];
@@ -291,7 +291,7 @@ export function generateMockMedicalData() {
   return { consultations, notes };
 }
 
-export default {
+const MedicalKPICalculator = {
   calculateAverageConsultationTime,
   calculateAutomaticNotesRatio,
   calculateDailyPatientCount,
@@ -304,3 +304,5 @@ export default {
   generateMockMedicalData,
   MEXICAN_PRACTICE_CONSTANTS
 };
+
+export default MedicalKPICalculator;

@@ -364,11 +364,6 @@ export default function RootLayout({ children }) {
             `
           }}
         />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: require("../utils/pwa/ServiceWorkerManager").getRegisterScript()
-          }}
-        />
       </body>
     </html>
   );

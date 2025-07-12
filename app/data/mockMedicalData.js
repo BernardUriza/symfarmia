@@ -5,7 +5,7 @@
  * Used for development, testing, and demonstrations
  */
 
-import { subDays, format, addMinutes } from 'date-fns';
+import { subDays, format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 // 🏥 MEXICAN MEDICAL PRACTICE PATTERNS
@@ -300,7 +300,7 @@ export function getCurrentDayMetrics() {
   };
 }
 
-export default {
+const mockMedicalData = {
   generateCompleteMockData,
   getCurrentDayMetrics,
   generateConsultationData,
@@ -310,3 +310,5 @@ export default {
   generateComparisonData,
   MEXICAN_PRACTICE_PATTERNS
 };
+
+export default mockMedicalData;

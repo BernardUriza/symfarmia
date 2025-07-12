@@ -106,6 +106,8 @@
   "cancel": "Cancel",
   "recording_started": "Recording Started",
   "clear": "Clear",
+  "dismiss": "Dismiss",
+  "previous": "Previous",
   "missing": {
     "key": "missing key"
   },

@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import { getUrgencyColor } from '../../themes/medical.theme';
 
 export interface ButtonProps {
   children?: any;
@@ -81,8 +80,6 @@ export const Button = ({
 
   const getUrgencyStyles = () => {
     if (!urgency) return '';
-    
-    const _urgencyColor = getUrgencyColor(urgency);
     
     switch (urgency) {
       case 'critical':

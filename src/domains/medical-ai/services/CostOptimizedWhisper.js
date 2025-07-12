@@ -98,8 +98,6 @@ export class CostOptimizedWhisper {
    */
   estimateLocalProcessingCost() {
     // Estimate based on CPU/GPU usage, power consumption
-    const cpuCores = navigator.hardwareConcurrency || 4;
-    const estimatedPowerConsumption = cpuCores * 0.1; // Rough estimate
     const costPerHour = 0.02; // $0.02 per hour of processing
     
     return costPerHour / 60; // Cost per minute
@@ -246,7 +244,7 @@ export class CostOptimizedWhisper {
   /**
    * Calculate strategy score
    */
-  calculateStrategyScore(strategy, duration) {
+  calculateStrategyScore(strategy, _duration) {
     // Normalize factors
     const costScore = Math.max(0, 1 - (strategy.cost / this.config.costThreshold));
     const qualityScore = strategy.quality;

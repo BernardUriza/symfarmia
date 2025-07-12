@@ -66,7 +66,6 @@ export class TranscriptionFallbackManager {
    */
   async switchToFallback() {
     try {
-      const currentServiceIndex = this.fallbackServices.indexOf(this.currentService);
       const networkStatus = networkStatusDetector.getCurrentStatus();
       
       // Mark current service as unhealthy
