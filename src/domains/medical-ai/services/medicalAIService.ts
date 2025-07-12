@@ -328,7 +328,7 @@ export class MedicalAIService {
     return symptoms;
   }
 
-  private suggestDiagnoses(symptoms: string[], context: MedicalContext): string[] {
+  private suggestDiagnoses(symptoms: string[], _context: MedicalContext): string[] {
     // Generate potential diagnoses
     const diagnoses: string[] = [];
     
@@ -345,8 +345,8 @@ export class MedicalAIService {
 
   private recommendActions(
     symptoms: string[],
-    diagnoses: string[],
-    context: MedicalContext
+    _diagnoses: string[],
+    _context: MedicalContext
   ): string[] {
     // Generate recommended actions
     const actions: string[] = [];
@@ -367,7 +367,7 @@ export class MedicalAIService {
     return (transcription.confidence + 0.8) / 2; // Simplified calculation
   }
 
-  private calculateAnalysisConfidence(analysis: any): number {
+  private calculateAnalysisConfidence(_analysis: any): number {
     return 0.85; // Simplified confidence calculation
   }
 
@@ -375,16 +375,16 @@ export class MedicalAIService {
     return transcription.medicalTerms.length > 0 ? 0.9 : 0.6;
   }
 
-  private calculateContextAccuracy(analysis: any): number {
+  private calculateContextAccuracy(_analysis: any): number {
     return 0.8; // Simplified accuracy calculation
   }
 
-  private isValidMedicalTerm(term: string, specialty: MedicalSpecialty): boolean {
+  private isValidMedicalTerm(term: string, _specialty: MedicalSpecialty): boolean {
     // Medical term validation logic
     return term.length > 3; // Simplified validation
   }
 
-  private generateTermSuggestions(terms: string[], specialty: MedicalSpecialty): string[] {
+  private generateTermSuggestions(terms: string[], _specialty: MedicalSpecialty): string[] {
     // Generate term suggestions
     return terms.map(term => `${term} (suggested correction)`);
   }

@@ -13,7 +13,6 @@ export const MedicalAIAssistant = ({
 }: MedicalAIAssistantProps) => {
   const { analyzeMedicalContent, loading } = useMedicalAI();
   const [input, setInput] = useState('');
-  const [_analysis, _setAnalysis] = useState<MedicalAnalysis | null>(null);
 
   const handleAnalyze = async () => {
     if (!input.trim()) return;

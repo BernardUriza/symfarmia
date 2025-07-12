@@ -194,7 +194,7 @@ export class MedicalTerminologyEnhancer {
   /**
    * Extract medical terms from text
    */
-  async extractTerms(text, language = 'es-MX') {
+  async extractTerms(text, _language = 'es-MX') {
     if (!this.isInitialized) {
       await this.initialize();
     }
@@ -234,7 +234,7 @@ export class MedicalTerminologyEnhancer {
   /**
    * Enhance text with medical terminology corrections
    */
-  async enhanceText(text, language = 'es-MX') {
+  async enhanceText(text, _language = 'es-MX') {
     if (!this.isInitialized) {
       await this.initialize();
     }

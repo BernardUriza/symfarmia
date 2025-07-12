@@ -556,7 +556,7 @@ export class MedicalGradeErrorHandling {
   /**
    * Determine if error is recoverable
    */
-  isErrorRecoverable(error, context) {
+  isErrorRecoverable(error, _context) {
     const nonRecoverableErrors = [
       'SecurityError',
       'PermissionError',

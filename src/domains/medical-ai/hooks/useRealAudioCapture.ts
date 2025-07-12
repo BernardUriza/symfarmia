@@ -13,7 +13,7 @@ export const useRealAudioCapture = () => {
     }
   };
 
-  const startRealTimeTranscription = (stream: MediaStream) => {
+  const startRealTimeTranscription = (_stream: MediaStream) => {
     const SpeechRecognition =
       (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
     if (!SpeechRecognition) {
