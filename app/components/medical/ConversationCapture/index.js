@@ -15,7 +15,6 @@ export function ConversationCapture({ onNext, isRecording, setIsRecording }) {
   
   // Hook de transcripción principal
   const {
-    transcription,
     status,
     error: transcriptionError,
     startTranscription,

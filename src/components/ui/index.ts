@@ -8,8 +8,6 @@ export { TranscriptionModelInfo } from './TranscriptionModelInfo';
 // Note: useEnhancedTranscription is now exported from @/domains/medical-ai
 // Import it directly from there instead of re-exporting here
 
-// Enhanced Transcription Panel
-export { EnhancedTranscriptionPanel } from '../consultation/EnhancedTranscriptionPanel';
 
 // Types
 export type {
