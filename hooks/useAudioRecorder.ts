@@ -5,8 +5,6 @@ interface UseAudioRecorderReturn {
   isTranscribing: boolean;
   transcript: string;
   error: string | null;
-  audioLevel: number;
-  duration: number;
   startRecording: () => Promise<void>;
   stopRecording: () => Promise<void>;
   clearTranscript: () => void;
@@ -17,135 +15,217 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [audioLevel, setAudioLevel] = useState(0);
-  const [duration, setDuration] = useState(0);
 
+  // Refs tipados correctamente
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<BlobPart[]>([]);
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const analyserRef = useRef<AnalyserNode | null>(null);
-  const animationFrameRef = useRef<number>(0);
-  const startTimeRef = useRef<number | null>(null);
-  const durationIntervalRef = useRef<NodeJS.Timeout | null>(null);
-
-  const updateAudioLevel = useCallback(() => {
-    if (!analyserRef.current || !isRecording) return;
-
-    const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
-    analyserRef.current.getByteFrequencyData(dataArray);
-    
-    const average = dataArray.reduce((sum, value) => sum + value, 0) / dataArray.length;
-    setAudioLevel(average / 255);
-
-    animationFrameRef.current = requestAnimationFrame(updateAudioLevel);
-  }, [isRecording]);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const streamRef = useRef<MediaStream | null>(null);
 
   const startRecording = useCallback(async () => {
     try {
       setError(null);
+      console.log('🎤 Iniciando grabación de audio...');
       
+      // Solicitar permisos de audio con configuración específica
       const stream = await navigator.mediaDevices.getUserMedia({ 
         audio: {
-          sampleRate: 16000,
-          channelCount: 1,
+          sampleRate: 16000,  // Whisper prefiere 16kHz
+          channelCount: 1,    // Mono
           echoCancellation: true,
-          noiseSuppression: true
+          noiseSuppression: true,
+          autoGainControl: true
         }
       });
 
-      // Setup audio analysis
-      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-      analyserRef.current = audioContextRef.current.createAnalyser();
-      const source = audioContextRef.current.createMediaStreamSource(stream);
+      console.log('✅ Stream de audio obtenido');
+      console.log('📊 Audio tracks:', stream.getAudioTracks().length);
       
-      analyserRef.current.fftSize = 256;
-      source.connect(analyserRef.current);
+      if (stream.getAudioTracks().length > 0) {
+        const track = stream.getAudioTracks()[0];
+        console.log('🔊 Configuración del track:', {
+          enabled: track.enabled,
+          kind: track.kind,
+          label: track.label,
+          settings: track.getSettings()
+        });
+      }
 
-      // Setup recording
+      streamRef.current = stream;
       audioChunksRef.current = [];
+
+      // Configurar MediaRecorder con formato específico
+      const mimeTypes = [
+        'audio/webm;codecs=opus',
+        'audio/webm',
+        'audio/wav',
+        'audio/mp4',
+        'audio/ogg'
+      ];
+
+      let selectedMimeType = '';
+      for (const mimeType of mimeTypes) {
+        if (MediaRecorder.isTypeSupported(mimeType)) {
+          selectedMimeType = mimeType;
+          console.log('✅ Usando MIME type:', mimeType);
+          break;
+        }
+      }
+
+      if (!selectedMimeType) {
+        throw new Error('No hay formatos de audio soportados');
+      }
+
       mediaRecorderRef.current = new MediaRecorder(stream, {
-        mimeType: 'audio/webm;codecs=opus'
+        mimeType: selectedMimeType,
+        audioBitsPerSecond: 16000 // Bitrate bajo para reducir tamaño
       });
 
       mediaRecorderRef.current.ondataavailable = (event) => {
-        audioChunksRef.current!.push(event.data);
+        console.log('📦 Chunk de audio recibido:', {
+          size: event.data.size,
+          type: event.data.type
+        });
+        
+        if (event.data.size > 0 && audioChunksRef.current) {
+          audioChunksRef.current.push(event.data);
+        }
       };
 
       mediaRecorderRef.current.onstop = async () => {
+        console.log('🛑 Grabación detenida, procesando audio...');
         setIsTranscribing(true);
         
-        // Stop audio level monitoring
-        if (animationFrameRef.current) {
-          cancelAnimationFrame(animationFrameRef.current);
-        }
-        if (durationIntervalRef.current) {
-          clearInterval(durationIntervalRef.current);
-        }
-        if (audioContextRef.current) {
-          audioContextRef.current.close();
-          audioContextRef.current = null;
-        }
-        
         try {
-          const audioBlob = new Blob(audioChunksRef.current as BlobPart[], {
-            type: 'audio/webm'
+          const chunks = audioChunksRef.current || [];
+          console.log('📊 Total chunks recolectados:', chunks.length);
+          console.log('📏 Tamaños de chunks:', chunks.map(c => c.size));
+          
+          if (chunks.length === 0) {
+            throw new Error('No se grabó audio');
+          }
+
+          // Crear blob de audio
+          const audioBlob = new Blob(chunks, { 
+            type: selectedMimeType 
           });
           
-          // Create FormData for upload
+          console.log('🔊 Audio blob creado:', {
+            size: audioBlob.size,
+            type: audioBlob.type
+          });
+
+          if (audioBlob.size === 0) {
+            throw new Error('Audio grabado está vacío');
+          }
+
+          if (audioBlob.size < 1000) {
+            console.warn('⚠️ Audio muy pequeño, puede no transcribirse bien');
+          }
+
+          // Crear FormData para enviar
           const formData = new FormData();
-          formData.append('audio', audioBlob, 'recording.webm');
+          const audioFile = new File([audioBlob], 'recording.webm', { 
+            type: audioBlob.type 
+          });
           
-          // Send to backend
+          formData.append('audio', audioFile);
+          formData.append('language', 'es');
+          
+          console.log('📤 Enviando a /api/transcribe...', {
+            fileName: audioFile.name,
+            fileSize: audioFile.size,
+            fileType: audioFile.type
+          });
+
+          // Enviar al endpoint
           const response = await fetch('/api/transcribe', {
             method: 'POST',
-            body: formData
+            body: formData,
           });
-          
+
+          console.log('📥 Respuesta del servidor:', {
+            status: response.status,
+            statusText: response.statusText,
+            headers: Object.fromEntries(response.headers.entries())
+          });
+
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.error('❌ Error del servidor:', errorText);
+            throw new Error(`Server error: ${response.status} - ${errorText}`);
+          }
+
           const result = await response.json();
+          console.log('📋 Resultado de transcripción:', result);
 
           if (result.success) {
-            setTranscript(result.data.text);
+            const transcribedText = result.data?.text || '';
+            console.log('✅ Texto transcrito:', transcribedText);
+            setTranscript(transcribedText);
+            
+            if (!transcribedText) {
+              console.warn('⚠️ Transcripción exitosa pero texto vacío');
+              setError('Transcripción exitosa pero no se detectó texto. Intente hablar más alto o más claro.');
+            }
           } else {
             throw new Error(result.error || 'Transcripción falló');
           }
+          
         } catch (err) {
-          setError(err instanceof Error ? err.message : 'Error desconocido');
+          console.error('❌ Error en transcripción:', err);
+          setError(err instanceof Error ? err.message : 'Error desconocido en transcripción');
         } finally {
           setIsTranscribing(false);
-          setAudioLevel(0);
-          // Close stream
-          stream.getTracks().forEach(track => track.stop());
+          // Limpiar stream
+          if (streamRef.current) {
+            streamRef.current.getTracks().forEach(track => {
+              track.stop();
+              console.log('🔇 Track de audio detenido');
+            });
+            streamRef.current = null;
+          }
         }
       };
 
-      mediaRecorderRef.current.start(1000); // 1 second chunks
+      mediaRecorderRef.current.onerror = (event) => {
+        console.error('❌ Error en MediaRecorder:', event);
+        setError('Error en la grabación de audio');
+        setIsRecording(false);
+        setIsTranscribing(false);
+      };
+
+      // Comenzar grabación con chunks de 1 segundo
+      mediaRecorderRef.current.start(1000);
       setIsRecording(true);
       
-      // Start duration tracking
-      startTimeRef.current = Date.now();
-      setDuration(0);
-      durationIntervalRef.current = setInterval(() => {
-        if (startTimeRef.current !== null) {
-          setDuration(Math.floor((Date.now() - startTimeRef.current) / 1000));
-        }
-      }, 100);
-      
-      // Start audio level monitoring
-      updateAudioLevel();
+      console.log('✅ Grabación iniciada exitosamente');
       
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error accediendo micrófono');
+      console.error('❌ Error iniciando grabación:', err);
+      setError(err instanceof Error ? err.message : 'Error accediendo al micrófono');
+      setIsRecording(false);
     }
-  }, [updateAudioLevel]);
+  }, []);
 
   const stopRecording = useCallback(async () => {
+    console.log('🛑 Solicitando detener grabación...');
+    
     if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop();
-      setIsRecording(false);
+      try {
+        mediaRecorderRef.current.stop();
+        setIsRecording(false);
+        console.log('✅ Grabación detenida');
+      } catch (err) {
+        console.error('❌ Error deteniendo grabación:', err);
+        setError('Error deteniendo la grabación');
+      }
+    } else {
+      console.warn('⚠️ No hay grabación activa para detener');
     }
   }, [isRecording]);
 
   const clearTranscript = useCallback(() => {
+    console.log('🧹 Limpiando transcript');
     setTranscript('');
     setError(null);
   }, []);
@@ -155,8 +235,6 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
     isTranscribing,
     transcript,
     error,
-    audioLevel,
-    duration,
     startRecording,
     stopRecording,
     clearTranscript,
