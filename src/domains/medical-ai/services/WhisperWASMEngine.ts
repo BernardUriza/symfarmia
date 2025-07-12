@@ -133,7 +133,7 @@ export class WhisperWASMEngine implements TranscriptionEngine {
     try {
       // Don't create AudioContext here - it will be created after user interaction
       // Just check if AudioContext is available
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
       if (!AudioContext) {
         throw new Error('AudioContext not supported in this browser');
       }
@@ -230,7 +230,7 @@ export class WhisperWASMEngine implements TranscriptionEngine {
         'medium.en': 'ggml-medium.en.bin'
       };
       
-      this.modelFilename = modelFiles[this.config.modelName] || 'ggml-base.en.bin';
+      this.modelFilename = modelFiles[this.config.modelName!] || 'ggml-base.en.bin';
       
       // Check if model is already cached
       if ((window as any).Module && (window as any).Module.FS) {
@@ -301,7 +301,7 @@ export class WhisperWASMEngine implements TranscriptionEngine {
     return new Promise((resolve, reject) => {
       const script = document.createElement('script');
       script.src = src;
-      script.onload = resolve;
+      script.onload = () => resolve();
       script.onerror = reject;
       document.head.appendChild(script);
     });
@@ -451,20 +451,24 @@ export class WhisperWASMEngine implements TranscriptionEngine {
       
       // Process accumulated audio
       if (this.audioBuffer.length > 0) {
-        await this.processAudioBuffer();
+        await this.processAudioBufferAsync();
       }
       
       // Finalize session
       this.currentSession.endTime = Date.now();
       this.currentSession.status = TranscriptionStatus.COMPLETED;
       
-      const result = {
-        sessionId: this.currentSession.id,
-        fullText: this.currentSession.fullText,
+      const result: TranscriptionCompleteEvent = {
+        id: this.currentSession.id,
+        text: this.currentSession.fullText,
         segments: this.currentSession.segments,
-        duration: this.currentSession.endTime - this.currentSession.startTime,
-        language: this.currentSession.language,
-        engine: 'whisper-wasm'
+        medicalTerms: this.currentSession.medicalTerms || [],
+        confidence: 0.9,
+        language: this.currentSession.language || 'es',
+        engine: 'whisper-wasm',
+        processingTime: this.currentSession.endTime - this.currentSession.startTime,
+        status: TranscriptionStatus.COMPLETED,
+        timestamp: new Date()
       };
       
       if (this.currentSession.callbacks.onComplete) {
@@ -504,15 +508,15 @@ export class WhisperWASMEngine implements TranscriptionEngine {
       });
       
       // Create audio processing pipeline
-      const source = this.audioContext.createMediaStreamSource(this.audioStream);
-      const processor = this.audioContext.createScriptProcessor(this.config.chunkSize, 1, 1);
+      const source = this.audioContext!.createMediaStreamSource(this.audioStream!);
+      const processor = this.audioContext!.createScriptProcessor(this.config.chunkSize || 4096, 1, 1);
       
       processor.onaudioprocess = (event) => {
-        this.processAudioChunk(event.inputBuffer);
+        this.processAudioBuffer(event.inputBuffer);
       };
       
       source.connect(processor);
-      processor.connect(this.audioContext.destination);
+      processor.connect(this.audioContext!.destination);
       
       this.audioProcessor = processor;
       
@@ -549,7 +553,7 @@ export class WhisperWASMEngine implements TranscriptionEngine {
   /**
    * Process audio chunk
    */
-  private processAudioChunk(audioBuffer: AudioBuffer): void {
+  private processAudioBuffer(audioBuffer: AudioBuffer): void {
     if (!this.isTranscribing) return;
     
     // Convert to Float32Array
@@ -560,16 +564,16 @@ export class WhisperWASMEngine implements TranscriptionEngine {
     this.audioBuffer.push(audioData);
     
     // Process buffer when we have enough data (e.g., 1 second)
-    const bufferDuration = this.audioBuffer.length * this.config.chunkSize / this.config.sampleRate;
+    const bufferDuration = this.audioBuffer.length * (this.config.chunkSize || 4096) / (this.config.sampleRate || 16000);
     if (bufferDuration >= 1.0) {
-      this.processAudioBuffer();
+      this.processAudioBufferAsync();
     }
   }
 
   /**
    * Process accumulated audio buffer
    */
-  private async processAudioBuffer(): Promise<void> {
+  private async processAudioBufferAsync(): Promise<void> {
     if (this.audioBuffer.length === 0) return;
     
     try {
@@ -587,7 +591,7 @@ export class WhisperWASMEngine implements TranscriptionEngine {
       this.audioBuffer = [];
       
       // Truncate to max length if needed
-      const maxSamples = this.config.maxAudioLength * this.config.sampleRate;
+      const maxSamples = (this.config.maxAudioLength || 30) * (this.config.sampleRate || 16000);
       const audioData = combinedAudio.length > maxSamples ? 
         combinedAudio.slice(0, maxSamples) : combinedAudio;
       
@@ -619,9 +623,9 @@ export class WhisperWASMEngine implements TranscriptionEngine {
       const result = this.Module.full_default(
         this.whisperInstance,
         audioData,
-        this.config.language,
-        this.config.n_threads,
-        this.config.translate
+        this.config.language || 'es',
+        this.config.n_threads || 4,
+        this.config.translate || false
       );
       
       if (result) {
@@ -657,7 +661,7 @@ export class WhisperWASMEngine implements TranscriptionEngine {
       // Create segments from the text
       const segments = [{
         start: 0,
-        end: this.audioBuffer.length / this.config.sampleRate,
+        end: this.audioBuffer.length / (this.config.sampleRate || 16000),
         text: text.trim(),
         confidence: 0.9, // Default confidence
         speaker: null,
@@ -739,7 +743,22 @@ export class WhisperWASMEngine implements TranscriptionEngine {
     }
     
     try {
-      const result = await this.transcribeAudio(audioData);
+      // Convert AudioData to Float32Array if needed
+      let floatData: Float32Array;
+      if (audioData instanceof Float32Array) {
+        floatData = audioData;
+      } else if (audioData instanceof ArrayBuffer) {
+        floatData = new Float32Array(audioData);
+      } else if (audioData instanceof Blob) {
+        const arrayBuffer = await audioData.arrayBuffer();
+        floatData = new Float32Array(arrayBuffer);
+      } else if (audioData instanceof AudioBuffer) {
+        floatData = audioData.getChannelData(0);
+      } else {
+        throw new Error('Unsupported audio data type');
+      }
+      
+      const result = await this.transcribeAudio(floatData);
       
       return {
         success: true,

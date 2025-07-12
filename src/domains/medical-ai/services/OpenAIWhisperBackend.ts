@@ -110,7 +110,7 @@ export class OpenAIWhisperBackend implements TranscriptionEngine {
         medicalOptimized: this.config.medicalMode
       });
       
-      await this.compressionManager.initialize();
+      await this.compressionManager!.initialize();
       // Audio compression manager initialized
     } catch (error) {
       console.warn('Audio compression manager initialization failed:', error);
@@ -130,7 +130,7 @@ export class OpenAIWhisperBackend implements TranscriptionEngine {
         budgetLimit: this.config.budgetLimit || 50 // $50 per session
       });
       
-      await this.costOptimizer.initialize();
+      await this.costOptimizer!.initialize();
       // Cost optimizer initialized
     } catch (error) {
       console.warn('Cost optimizer initialization failed:', error);
@@ -150,7 +150,7 @@ export class OpenAIWhisperBackend implements TranscriptionEngine {
       // Create a minimal test audio file
       const testAudio = this.createTestAudioFile();
       
-      const response = await fetch(this.config.apiEndpoint, {
+      const response = await fetch(this.config.apiEndpoint!, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${this.config.apiKey}`,
@@ -198,7 +198,7 @@ export class OpenAIWhisperBackend implements TranscriptionEngine {
    * Check if engine is ready
    */
   async isReady(): Promise<boolean> {
-    return this.isInitialized && this.config.apiKey;
+    return this.isInitialized && !!this.config.apiKey;
   }
 
   /**
@@ -278,7 +278,7 @@ export class OpenAIWhisperBackend implements TranscriptionEngine {
   async processAudioChunk(audioData: AudioData, config?: any): Promise<TranscriptionResult> {
     console.log('[OpenAI Whisper] processAudioChunk called:', {
       hasData: !!audioData,
-      dataSize: audioData?.byteLength || audioData?.length || 0,
+      dataSize: (audioData as any)?.byteLength || (audioData as any)?.length || 0,
       dataType: audioData?.constructor?.name || typeof audioData,
       isTranscribing: this.isTranscribing,
       hasSession: !!this.currentSession,
@@ -297,8 +297,8 @@ export class OpenAIWhisperBackend implements TranscriptionEngine {
       // Audio compressed
       if (false) { // Debug logging disabled
       console.log('[OpenAI Whisper] Audio compressed:', {
-        originalSize: audioData?.byteLength || audioData?.length || 0,
-        compressedSize: compressedAudio?.byteLength || compressedAudio?.length || 0
+        originalSize: (audioData as any)?.byteLength || (audioData as any)?.length || 0,
+        compressedSize: (compressedAudio as any)?.byteLength || (compressedAudio as any)?.length || 0
       });
       }
       
@@ -421,7 +421,7 @@ export class OpenAIWhisperBackend implements TranscriptionEngine {
     try {
       // Calculate total length
       const totalLength = chunks.reduce((sum, chunk) => {
-        return sum + (chunk.data.length || chunk.data.byteLength || 0);
+        return sum + ((chunk.data as any).length || (chunk.data as any).byteLength || 0);
       }, 0);
       
       // Combine chunks
@@ -429,8 +429,15 @@ export class OpenAIWhisperBackend implements TranscriptionEngine {
       let offset = 0;
       
       for (const chunk of chunks) {
-        const data = chunk.data instanceof Float32Array ? 
-          chunk.data : new Float32Array(chunk.data);
+        let data: Float32Array;
+        if (chunk.data instanceof Float32Array) {
+          data = chunk.data;
+        } else if (chunk.data instanceof ArrayBuffer) {
+          data = new Float32Array(chunk.data);
+        } else {
+          // Skip non-compatible data
+          continue;
+        }
         
         combined.set(data, offset);
         offset += data.length;
@@ -451,13 +458,13 @@ export class OpenAIWhisperBackend implements TranscriptionEngine {
     const formData = new FormData();
     
     // Convert audio to blob
-    const audioBlob = new Blob([audioData], { type: 'audio/wav' });
+    const audioBlob = new Blob([audioData as BlobPart], { type: 'audio/wav' });
     
     // Add form fields
     formData.append('file', audioBlob, 'audio.wav');
-    formData.append('model', this.config.model);
-    formData.append('language', this.config.language);
-    formData.append('temperature', this.config.temperature.toString());
+    formData.append('model', this.config.model || 'whisper-1');
+    formData.append('language', this.config.language || 'es');
+    formData.append('temperature', (this.config.temperature || 0).toString());
     formData.append('response_format', 'json');
     
     // Add medical prompt if enabled
@@ -485,15 +492,15 @@ export class OpenAIWhisperBackend implements TranscriptionEngine {
    * Make API request with retry logic
    */
   private async makeAPIRequest(formData: FormData): Promise<any> {
-    for (let attempt = 0; attempt <= this.config.maxRetries; attempt++) {
+    for (let attempt = 0; attempt <= (this.config.maxRetries || 3); attempt++) {
       try {
-        const response = await fetch(this.config.apiEndpoint, {
+        const response = await fetch(this.config.apiEndpoint!, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${this.config.apiKey}`
           },
           body: formData,
-          signal: AbortSignal.timeout(this.config.timeout)
+          signal: AbortSignal.timeout(this.config.timeout || 30000)
         });
 
         if (!response.ok) {
@@ -503,18 +510,22 @@ export class OpenAIWhisperBackend implements TranscriptionEngine {
         const result = await response.json();
         
         // Track API call
-        this.currentSession.apiCalls++;
+        if (this.currentSession) {
+          this.currentSession.apiCalls = (this.currentSession.apiCalls || 0) + 1;
+        }
         
         // Estimate cost
         const estimatedCost = this.estimateAPICallCost(formData);
-        this.currentSession.totalCost += estimatedCost;
+        if (this.currentSession) {
+          this.currentSession.totalCost = (this.currentSession.totalCost || 0) + estimatedCost;
+        }
         
         return result;
         
       } catch (error) {
         console.error(`API request attempt ${attempt + 1} failed:`, error);
         
-        if (attempt === this.config.maxRetries) {
+        if (attempt === (this.config.maxRetries || 3)) {
           throw error;
         }
         
@@ -531,7 +542,7 @@ export class OpenAIWhisperBackend implements TranscriptionEngine {
     try {
       // Get audio file size
       const audioFile = formData.get('file');
-      const fileSizeBytes = audioFile.size;
+      const fileSizeBytes = (audioFile as File).size;
       
       // Estimate duration (rough approximation)
       const estimatedDurationMinutes = fileSizeBytes / (16000 * 2 * 60); // 16kHz, 16-bit
@@ -577,16 +588,20 @@ export class OpenAIWhisperBackend implements TranscriptionEngine {
       engine: 'openai-whisper'
     };
     
-    this.currentSession.segments.push(segment);
-    this.currentSession.fullText += ` ${result.text}`;
+    if (this.currentSession) {
+      this.currentSession.segments.push(segment);
+    }
+    if (this.currentSession) {
+      this.currentSession.fullText += ` ${result.text}`;
+    }
     
     // fullText updated
     if (false) { // Debug logging disabled
     console.log('[OpenAI Whisper] fullText updated:', {
       newTextAdded: result.text.substring(0, 50) + '...',
-      fullTextLength: this.currentSession.fullText.length,
-      segmentCount: this.currentSession.segments.length,
-      hasContent: this.currentSession.fullText.trim().length > 0
+      fullTextLength: this.currentSession?.fullText.length || 0,
+      segmentCount: this.currentSession?.segments.length || 0,
+      hasContent: (this.currentSession?.fullText.trim().length || 0) > 0
     });
     }
     
@@ -594,20 +609,26 @@ export class OpenAIWhisperBackend implements TranscriptionEngine {
     if (this.config.medicalMode) {
       try {
         const medicalTerms = await this.extractMedicalTerms(result.text);
-        this.currentSession.medicalTerms.push(...medicalTerms);
+        if (this.currentSession) {
+          if (this.currentSession.medicalTerms) {
+            this.currentSession.medicalTerms.push(...medicalTerms);
+          } else {
+            this.currentSession.medicalTerms = medicalTerms;
+          }
+        }
       } catch (error) {
         console.warn('Medical term extraction failed:', error);
       }
     }
     
     // Real-time callback
-    if (this.currentSession.callbacks.onTranscriptionUpdate) {
+    if (this.currentSession?.callbacks?.onTranscriptionUpdate) {
       this.currentSession.callbacks.onTranscriptionUpdate({
         segment,
-        fullText: this.currentSession.fullText.trim(),
-        medicalTerms: this.currentSession.medicalTerms,
+        fullText: this.currentSession?.fullText.trim() || '',
+        medicalTerms: this.currentSession?.medicalTerms || [],
         confidence: this.calculateOverallConfidence(),
-        cost: this.currentSession.totalCost
+        cost: this.currentSession?.totalCost
       });
     }
   }
@@ -618,7 +639,7 @@ export class OpenAIWhisperBackend implements TranscriptionEngine {
   private async handleAPIError(error: Error | any): Promise<void> {
     console.error('API error:', error);
     
-    if (this.currentSession.callbacks.onError) {
+    if (this.currentSession?.callbacks?.onError) {
       this.currentSession.callbacks.onError(error);
     }
     
@@ -680,7 +701,7 @@ export class OpenAIWhisperBackend implements TranscriptionEngine {
     if (!this.currentSession || this.currentSession.segments.length === 0) return 0;
     
     const totalConfidence = this.currentSession.segments.reduce(
-      (sum, segment) => sum + segment.confidence,
+      (sum, segment) => sum + (segment.confidence || 0),
       0
     );
     
@@ -706,12 +727,7 @@ export class OpenAIWhisperBackend implements TranscriptionEngine {
       await this.processAudioBuffer();
     }
     
-    const session = this.currentSession;
-    
-    if (!session) {
-      console.error('[OpenAI Whisper] No session available for finalization');
-      throw new Error('No active session to finalize');
-    }
+    const session = this.currentSession!;
     
     // Check session state
     if (false) { // Debug logging disabled
@@ -765,15 +781,15 @@ export class OpenAIWhisperBackend implements TranscriptionEngine {
       }
     }
     
-    console.log(`✓ OpenAI Whisper completed - Cost: $${session.totalCost.toFixed(4)}`);
+    console.log(`✓ OpenAI Whisper completed - Cost: $${(session.totalCost || 0).toFixed(4)}`);
     
     return {
       id: session.id,
       text: enhancedText,
       segments: session.segments,
-      medicalTerms: session.medicalTerms,
+      medicalTerms: session.medicalTerms || [],
       confidence: this.calculateOverallConfidence(),
-      language: this.config.language,
+      language: this.config.language || 'es',
       engine: 'openai-whisper',
       processingTime: Date.now() - session.startTime,
       totalCost: session.totalCost,

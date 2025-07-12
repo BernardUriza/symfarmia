@@ -217,7 +217,7 @@ function renderLiveTranscription(transcription, status, isRecording, t) {
           aria-live="polite"
           aria-label="Medical conversation transcript"
         >
-          {renderTranscriptionSegments(transcription, t)}
+          {renderTranscriptionSegments(transcription)}
           {renderTranscriptionStatus(status, t)}
           {renderNoTranscription(transcription, isRecording, t)}
           {renderInitializingStatus(status, t)}
@@ -227,7 +227,7 @@ function renderLiveTranscription(transcription, status, isRecording, t) {
   );
 }
 
-function renderTranscriptionSegments(transcription, t) {
+function renderTranscriptionSegments(transcription) {
   if (!transcription?.segments?.length) return null;
   return transcription.segments.map((segment, index) => (
     <div

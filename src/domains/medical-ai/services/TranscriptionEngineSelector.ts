@@ -104,8 +104,7 @@ export class TranscriptionEngineSelector {
       
       return {
         success: true,
-        selectedEngine: this.currentEngine,
-        availableEngines: this.getAvailableEngines()
+        message: `Engine selected: ${this.currentEngine?.constructor.name || 'none'}`
       };
       
     } catch (error) {
@@ -138,10 +137,10 @@ export class TranscriptionEngineSelector {
     };
 
     // Load engines in parallel
-    const loadPromises = this.config.fallbackOrder.map(async (engineName) => {
+    const loadPromises = (this.config.fallbackOrder || []).map(async (engineName) => {
       try {
-        if (engineLoaders[engineName]) {
-          const engine = await engineLoaders[engineName]();
+        if ((engineLoaders as any)[engineName]) {
+          const engine = await (engineLoaders as any)[engineName]();
           this.engines.set(engineName, engine);
           this.engineStatus.set(engineName, { loaded: true, tested: false });
         }
@@ -150,7 +149,7 @@ export class TranscriptionEngineSelector {
         this.engineStatus.set(engineName, { 
           loaded: false, 
           tested: false, 
-          error: error.message 
+          error: (error as Error).message 
         });
       }
     });
@@ -174,13 +173,14 @@ export class TranscriptionEngineSelector {
         ]);
         
         // Check if initialization was successful
-        const isReady = initResult?.success || (await engine.isReady());
+        const isReady = (initResult as InitializationResult)?.success || (await engine.isReady());
         
+        const currentStatus = this.engineStatus.get(name) || { loaded: true, tested: false };
         this.engineStatus.set(name, {
-          ...this.engineStatus.get(name),
+          ...currentStatus,
           tested: true,
           available: isReady,
-          initResult
+          initResult: initResult as InitializationResult
         });
         
         if (isReady) {
@@ -192,11 +192,11 @@ export class TranscriptionEngineSelector {
       } catch (error) {
         // Engine test failed
         this.engineStatus.set(name, {
-          ...this.engineStatus.get(name),
+          ...this.engineStatus.get(name) || {},
           tested: true,
           available: false,
-          error: error.message
-        });
+          error: (error as Error).message
+        } as EngineStatus);
       }
     });
 
@@ -208,7 +208,7 @@ export class TranscriptionEngineSelector {
    */
   private async selectBestEngine(): Promise<string | null> {
     // If preferred engine is specified and available, use it
-    if (this.config.preferredEngine !== 'auto') {
+    if (this.config.preferredEngine && this.config.preferredEngine !== 'auto') {
       const status = this.engineStatus.get(this.config.preferredEngine);
       if (status?.available) {
         return this.config.preferredEngine;
@@ -216,7 +216,7 @@ export class TranscriptionEngineSelector {
     }
 
     // Otherwise, select first available engine from fallback order
-    for (const engineName of this.config.fallbackOrder) {
+    for (const engineName of (this.config.fallbackOrder || [])) {
       const status = this.engineStatus.get(engineName);
       if (status?.available) {
         return engineName;
@@ -233,19 +233,19 @@ export class TranscriptionEngineSelector {
     if (!this.currentEngine || !this.engines.has(this.currentEngine)) {
       return null;
     }
-    return this.engines.get(this.currentEngine);
+    return this.engines.get(this.currentEngine) || null;
   }
 
   /**
    * Get list of available engines
    */
   getAvailableEngines(): AvailableEngine[] {
-    const available = [];
+    const available: AvailableEngine[] = [];
     for (const [name, status] of this.engineStatus.entries()) {
       if (status.available) {
         available.push({
           name,
-          priority: this.config.fallbackOrder.indexOf(name),
+          priority: (this.config.fallbackOrder || []).indexOf(name),
           status
         });
       }
@@ -278,10 +278,10 @@ export class TranscriptionEngineSelector {
    * Try next available engine in fallback order
    */
   private async tryNextEngine(): Promise<boolean> {
-    const currentIndex = this.config.fallbackOrder.indexOf(this.currentEngine);
+    const currentIndex = (this.config.fallbackOrder || []).indexOf(this.currentEngine || '');
     
-    for (let i = currentIndex + 1; i < this.config.fallbackOrder.length; i++) {
-      const engineName = this.config.fallbackOrder[i];
+    for (let i = currentIndex + 1; i < (this.config.fallbackOrder || []).length; i++) {
+      const engineName = (this.config.fallbackOrder || [])[i];
       const status = this.engineStatus.get(engineName);
       
       if (status?.available) {
@@ -313,7 +313,7 @@ export class TranscriptionEngineSelector {
       
       return {
         ...result,
-        engine: this.currentEngine
+        engine: this.currentEngine || undefined
       };
       
     } catch (error) {
@@ -341,7 +341,7 @@ export class TranscriptionEngineSelector {
       const result = await engine.stopTranscription();
       return {
         ...result,
-        engine: this.currentEngine
+        engine: this.currentEngine || undefined
       };
     } catch (error) {
       console.error(`Failed to stop transcription on ${this.currentEngine}:`, error);
@@ -393,10 +393,10 @@ export class TranscriptionEngineSelector {
           // Notify about engine switch
           if (callbacks.onEngineSwitch) {
             callbacks.onEngineSwitch({
-              previousEngine: this.config.fallbackOrder[
-                this.config.fallbackOrder.indexOf(this.currentEngine) - 1
+              previousEngine: (this.config.fallbackOrder || [])[
+                (this.config.fallbackOrder || []).indexOf(this.currentEngine || '') - 1
               ],
-              newEngine: this.currentEngine,
+              newEngine: this.currentEngine || '',
               reason: error
             });
           }
@@ -409,7 +409,7 @@ export class TranscriptionEngineSelector {
    * Get engine statistics
    */
   getStats(): any {
-    const stats = {
+    const stats: any = {
       currentEngine: this.currentEngine,
       engineStatus: Object.fromEntries(this.engineStatus),
       availableEngines: this.getAvailableEngines().map(e => e.name),

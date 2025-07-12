@@ -123,21 +123,21 @@ export class TranscriptionEngineManager {
         name: 'whisper-wasm',
         priority: 1,
         requirements: ['webAssembly', 'webWorkers'],
-        module: () => import('./WhisperWASMEngine.js'),
+        module: () => import('./WhisperWASMEngine'),
         config: { ...config.whisperWASM }
       },
       {
         name: 'whisper-webgpu',
         priority: 2,
         requirements: ['webGPU', 'webWorkers'],
-        module: () => import('./WhisperClientEngine.js'),
+        module: () => import('./WhisperClientEngine'),
         config: { ...config.whisperClient, backend: 'webgpu' }
       },
       {
         name: 'openai-whisper',
         priority: 3,
         requirements: [],
-        module: () => import('./OpenAIWhisperBackend.js'),
+        module: () => import('./OpenAIWhisperBackend'),
         config: { ...config.openAI }
       },
       {
