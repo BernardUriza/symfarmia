@@ -125,7 +125,7 @@ class ConsoleErrorInterceptor {
     }
   ];
   
-  private callbacks: Map<string, Set<Function>> = new Map();
+  private callbacks: Map<string, Set<(data: any) => void>> = new Map();
   private medicalErrorHandler: any = null;
   
   constructor() {
@@ -624,7 +624,7 @@ class ConsoleErrorInterceptor {
   /**
    * Register callback
    */
-  onEvent(event: string, callback: Function): () => void {
+  onEvent(event: string, callback: (data: any) => void): () => void {
     if (!this.callbacks.has(event)) {
       this.callbacks.set(event, new Set());
     }
