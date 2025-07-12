@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { MicrophoneIcon, CheckCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { MicrophoneIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { useTranslation } from 'react-i18next';
 
 export const UserInteractionRequired = ({ 

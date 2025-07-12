@@ -12,8 +12,7 @@ import {
   UrgencyLevel,
   ConfidenceLevel,
   ServiceResponse,
-  MedicalAIServiceConfig,
-  MedicalAIError
+  MedicalAIServiceConfig
 } from '../types';
 
 export class MedicalAIService {
@@ -268,7 +267,7 @@ export class MedicalAIService {
 
   private async generateContextualSuggestions(
     context: MedicalContext,
-    currentText: string
+    _currentText: string
   ): Promise<string[]> {
     // Generate suggestions based on medical context
     const suggestions: string[] = [];
@@ -284,7 +283,7 @@ export class MedicalAIService {
 
   private calculateTriageUrgency(
     symptoms: string[],
-    patientData: MedicalContext
+    _patientData: MedicalContext
   ): UrgencyLevel {
     // Triage calculation logic
     let urgencyScore = 0;

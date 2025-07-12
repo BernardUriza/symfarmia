@@ -185,7 +185,6 @@ export class MedicalGradeErrorHandling {
    */
   classifyMedicalError(error, context) {
     const errorMessage = error.message?.toLowerCase() || '';
-    const errorType = error.name?.toLowerCase() || '';
     
     // Determine category
     let category = 'UNKNOWN';
@@ -436,7 +435,7 @@ export class MedicalGradeErrorHandling {
   /**
    * Execute escalation strategy
    */
-  async executeEscalationStrategy(errorRecord, strategy) {
+  async executeEscalationStrategy(errorRecord, _strategy) {
     // Log critical error
     console.error('CRITICAL MEDICAL ERROR:', errorRecord);
     
@@ -457,7 +456,7 @@ export class MedicalGradeErrorHandling {
   /**
    * Execute ignore strategy
    */
-  async executeIgnoreStrategy(errorRecord, strategy) {
+  async executeIgnoreStrategy(errorRecord, _strategy) {
     // Silent handling - just log internally
     this.errorMetrics.silentErrors++;
     errorRecord.resolution = 'ignored';

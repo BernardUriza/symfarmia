@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import { getUrgencyColor } from '../../themes/medical.theme';
 
 export interface ButtonProps {
   children?: any;
