@@ -30,7 +30,10 @@
     "permanent:stop": "./scripts/permanent-dev-server.sh stop",
     "permanent:restart": "./scripts/permanent-dev-server.sh restart",
     "permanent:status": "./scripts/permanent-dev-server.sh status",
-    "permanent:logs": "./scripts/permanent-dev-server.sh logs"
+    "permanent:logs": "./scripts/permanent-dev-server.sh logs",
+    "dev:susurro": "cd microservices/susurro-test && npm run dev",
+    "dev:all": "concurrently \"npm run dev\" \"npm run dev:susurro\"",
+    "setup:microservices": "./scripts/setup-microservices.sh"
   },
   "dependencies": {
     "@auth0/nextjs-auth0": "^4.8.0",
@@ -97,6 +100,7 @@
     "@types/react-slick": "0.23.13",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
+    "concurrently": "^7.6.0",
     "critters": "^0.0.23",
     "eslint": "8.57.1",
     "eslint-config-next": "14.2.30",
