@@ -374,7 +374,7 @@ export class TranscriptionEngineStateManager {
   getSystemHealth() {
     const engineHealths = [];
     
-    for (const [id, _] of this.engineStates) {
+    for (const [id] of this.engineStates) {
       engineHealths.push(this.getEngineHealth(id));
     }
 

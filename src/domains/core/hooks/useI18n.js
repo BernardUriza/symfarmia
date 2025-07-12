@@ -25,6 +25,23 @@ export const useI18n = () => {
   const context = useContext(I18nContext);
   const [demoTranslations, setDemoTranslations] = useState({});
   
+  // Always call useEffect before any conditional returns
+  useEffect(() => {
+    if (context?.locale) {
+      import(`@/locales/${context.locale}/demo.json`)
+        .then(mod => {
+          const data = mod.default?.demo || mod.default || {};
+          setDemoTranslations(Object.keys(data).reduce((acc, key) => {
+            acc[`demo.${key}`] = data[key];
+            return acc;
+          }, {}));
+        })
+        .catch(() => {
+          setDemoTranslations({});
+        });
+    }
+  }, [context?.locale]);
+  
   // Early return setup for when there's no context
   const fallbackSetLocale = (locale) => {
     if (typeof window !== 'undefined') {
@@ -50,19 +67,8 @@ export const useI18n = () => {
   
   const { locale, setLocale, translations: ctxTranslations, isLoading } = context;
 
-  useEffect(() => {
-    import(`@/locales/${locale}/demo.json`)
-      .then(mod => {
-        const data = mod.default?.demo || mod.default || {};
-        setDemoTranslations(Object.keys(data).reduce((acc, key) => {
-          acc[`demo.${key}`] = data[key];
-          return acc;
-        }, {}));
-      })
-      .catch(() => {
-        setDemoTranslations({});
-      });
-  }, [locale]);
+  // Remove the duplicate useEffect that was here
+  // This useEffect has been moved to before the conditional return
 
   const translations = { ...demoTranslations, ...ctxTranslations };
   

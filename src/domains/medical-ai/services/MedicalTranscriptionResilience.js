@@ -457,7 +457,7 @@ export class MedicalTranscriptionResilience {
       if (preservedState.pendingSegments.size > 0) {
         console.log(`Reprocessing ${preservedState.pendingSegments.size} pending segments after engine switch`);
         
-        for (const [_segmentId, segment] of preservedState.pendingSegments) {
+        for (const [, segment] of preservedState.pendingSegments) {
           await this.reprocessSegment(segment, engineSwitchData.toEngine);
         }
       }

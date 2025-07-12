@@ -570,7 +570,7 @@ class TranscriptionServiceWorker {
       const tasks = [];
       
       // Add background tasks
-      for (const [_taskId, task] of this.backgroundTasks) {
+      for (const [, task] of this.backgroundTasks) {
         tasks.push({
           id: task.id,
           type: task.type,
@@ -582,7 +582,7 @@ class TranscriptionServiceWorker {
       }
       
       // Add sync tasks
-      for (const [_taskId, task] of this.syncTasks) {
+      for (const [, task] of this.syncTasks) {
         tasks.push({
           id: task.id,
           type: task.type,
