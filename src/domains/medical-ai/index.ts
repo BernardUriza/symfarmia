@@ -20,7 +20,6 @@ export { useTranscription } from './hooks/useTranscription';
 export { useMedicalAI } from './hooks/useMedicalAI';
 export { useAudioCapture } from './hooks/useAudioCapture';
 export { useMedicalValidation } from './hooks/useMedicalValidation';
-export { useAudioRecorder } from './hooks/useAudioRecorder';
 export { useMicrophoneLevel } from './hooks/useMicrophoneLevel';
 export { useMicrophoneDiagnostics } from './hooks/useMicrophoneDiagnostics';
 export { useRealAudioCapture } from './hooks/useRealAudioCapture';
