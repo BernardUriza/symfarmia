@@ -24,9 +24,7 @@ export { useAudioRecorder } from './hooks/useAudioRecorder';
 export { useMicrophoneLevel } from './hooks/useMicrophoneLevel';
 export { useMicrophoneDiagnostics } from './hooks/useMicrophoneDiagnostics';
 export { useRealAudioCapture } from './hooks/useRealAudioCapture';
-export { useEnhancedTranscription } from './hooks/useEnhancedTranscription';
 export { useMedicalTranslation } from './hooks/useMedicalTranslation';
-export { useTranscription as useNativeSpeechTranscription } from './hooks/useNativeSpeechTranscription';
 
 // Services
 export { transcriptionService } from './services/transcriptionService';

@@ -44,6 +44,8 @@
     "@auth0/nextjs-auth0": "^4.8.0",
     "@edgestore/react": "0.2.2",
     "@edgestore/server": "0.2.2",
+    "@ffmpeg/ffmpeg": "^0.12.15",
+    "@ffmpeg/util": "^0.12.2",
     "@headlessui/react": "1.7.19",
     "@heroicons/react": "2.0.18",
     "@material-tailwind/react": "2.1.10",
