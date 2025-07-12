@@ -618,7 +618,7 @@ export class OpenAIWhisperBackend {
       }
     }
     
-    console.log(`OpenAI Whisper session completed. Cost: $${session.totalCost.toFixed(4)}, API calls: ${session.apiCalls}`);
+    console.log(`OpenAI Whisper session completed. Cost: $${session.totalCost.toFixed(4)}, API calls: ${session.apiCalls}, Result: ${enhancedText}`);
     
     return {
       id: session.id,

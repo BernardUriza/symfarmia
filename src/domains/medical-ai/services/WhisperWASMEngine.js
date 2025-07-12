@@ -6,7 +6,6 @@
  */
 
 import { TranscriptionStatus } from '../types';
-import { checkStorageQuota, getModelSize, loadRemotePromise } from '../utils/whisperUtils';
 export class WhisperWASMEngine {
   constructor(config = {}) {
     this.config = {
@@ -181,85 +180,6 @@ export class WhisperWASMEngine {
       
     } catch (error) {
       console.error('Failed to load Whisper modules:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Load model into WASM filesystem directly from public folder
-   */
-  async loadModel() {
-    try {
-      // Use the actual model file path directly
-      const modelPath = this.config.modelPath || `/models/ggml-${this.config.modelName}.bin`;
-      console.log('Loading model directly:', modelPath);
-      
-      // Check storage quota before loading
-      const storageInfo = await checkStorageQuota();
-      const modelSize = getModelSize(this.config.modelName);
-      const requiredSpace = modelSize * 1024 * 1024; // Convert MB to bytes
-      
-      if (storageInfo.available < requiredSpace) {
-        console.warn(`Storage warning: Required ${modelSize}MB, Available ${Math.round(storageInfo.available / 1024 / 1024)}MB`);
-      }
-      
-      // Load model with caching and progress feedback
-      const result = await loadRemotePromise(
-        modelPath,
-        this.config.modelName,
-        {
-          size: modelSize,
-          onProgress: (progress) => {
-            console.log(`Model loading progress: ${progress.percentage}%`);
-            
-            // Emit progress event if callbacks are available
-            if (this.currentSession?.callbacks?.onProgress) {
-              this.currentSession.callbacks.onProgress({
-                stage: 'model_loading',
-                progress: progress.progress,
-                percentage: progress.percentage,
-                message: `Loading ${this.config.modelName} model... ${progress.percentage}%`
-              });
-            }
-          },
-          onMessage: (message) => {
-            console.log(`Model loading: ${message}`);
-            
-            // Emit message event if callbacks are available
-            if (this.currentSession?.callbacks?.onMessage) {
-              this.currentSession.callbacks.onMessage({
-                stage: 'model_loading',
-                message: message
-              });
-            }
-          }
-        }
-      );
-      
-      const modelBuffer = result.data;
-      const modelFilename = 'whisper.bin';
-      
-      // Remove existing model file if it exists
-      try {
-        this.Module.FS_unlink(modelFilename);
-      } catch (e) {
-        // Ignore if file doesn't exist
-      }
-      
-      // Create new model file in WASM filesystem
-      this.Module.FS_createDataFile('/', modelFilename, modelBuffer, true, true);
-      
-      console.log('Model loaded successfully:', {
-        filename: modelFilename,
-        size: modelBuffer.length,
-        cached: true,
-        modelName: this.config.modelName
-      });
-      
-      this.modelFilename = modelFilename;
-      
-    } catch (error) {
-      console.error('Failed to load model:', error);
       throw error;
     }
   }
