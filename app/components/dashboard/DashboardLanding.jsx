@@ -22,10 +22,10 @@ const DashboardLanding = () => {
           <div className="flex justify-between items-center py-6">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                {t('dashboard.medical_panel') || 'Panel Médico'}
+                {t('medical_panel') || 'Panel Médico'}
               </h1>
               <p className="text-gray-600 dark:text-gray-400 mt-1">
-                {t('dashboard.efficient_clinical_management') || 'Sistema de gestión clínica eficiente'}
+                {t('efficient_clinical_management') || 'Sistema de gestión clínica eficiente'}
               </p>
             </div>
             
@@ -33,7 +33,7 @@ const DashboardLanding = () => {
               <div className="flex items-center space-x-2">
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                 <span className="text-sm text-gray-600 dark:text-gray-400">
-                  {t('dashboard.system_active') || 'Sistema Activo'}
+                  {t('system_active') || 'Sistema Activo'}
                 </span>
               </div>
               <HydrationSafeDateDisplay 
@@ -75,17 +75,17 @@ const DashboardLanding = () => {
                       </div>
                       <div>
                         <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                          {t('dashboard.operational_metrics') || 'Métricas Operacionales en Tiempo Real'}
+                          {t('operational_metrics') || 'Métricas Operacionales en Tiempo Real'}
                         </h2>
                         <p className="text-sm text-gray-600 dark:text-gray-400">
-                          {t('dashboard.operational_metrics_description') || 'Estado operacional y alertas críticas del sistema médico'}
+                          {t('operational_metrics_description') || 'Estado operacional y alertas críticas del sistema médico'}
                         </p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
                       <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                       <span className="text-sm text-green-600 dark:text-green-400">
-                        {t('dashboard.live_metrics') || 'En Vivo'}
+                        {t('live_metrics') || 'En Vivo'}
                       </span>
                     </div>
                   </div>
