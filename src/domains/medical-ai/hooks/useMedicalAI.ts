@@ -79,7 +79,7 @@ export const useMedicalAI = (props: UseMedicalAIProps = {}): UseMedicalAIReturn 
       if (response.success && response.data) {
         setAnalysis(response.data);
       } else {
-        setError(response.error || 'Medical analysis failed');
+        setError(typeof response.error === 'string' ? response.error : response.error?.message || 'Medical analysis failed');
       }
 
     } catch (err) {
@@ -145,10 +145,10 @@ export const useMedicalAI = (props: UseMedicalAIProps = {}): UseMedicalAIReturn 
         return response.data.urgency;
       }
       
-      return 'urgent';
+      return UrgencyLevel.URGENT;
     } catch (err) {
       console.error('Triage assessment error:', err);
-      return 'urgent';
+      return UrgencyLevel.URGENT;
     }
   }, [currentSpecialty]);
 

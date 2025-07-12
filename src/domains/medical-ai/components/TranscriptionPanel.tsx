@@ -264,26 +264,26 @@ export const TranscriptionPanel = ({
         <div className="bg-blue-50 rounded-lg p-4 mb-4">
           <h4 className="text-sm font-medium text-blue-900 mb-2">Análisis Médico IA:</h4>
           
-          {analysis.analysis.symptoms.length > 0 && (
+          {analysis.analysis?.symptoms && analysis.analysis.symptoms.length > 0 && (
             <div className="mb-2">
               <span className="text-xs font-medium text-blue-800">Síntomas:</span>
               <div className="text-xs text-blue-700">
-                {analysis.analysis.symptoms.join(', ')}
+                {analysis.analysis?.symptoms.join(', ')}
               </div>
             </div>
           )}
           
-          {analysis.analysis.potentialDiagnoses.length > 0 && (
+          {analysis.analysis?.potentialDiagnoses && analysis.analysis.potentialDiagnoses.length > 0 && (
             <div className="mb-2">
               <span className="text-xs font-medium text-blue-800">Posibles diagnósticos:</span>
               <div className="text-xs text-blue-700">
-                {analysis.analysis.potentialDiagnoses.join(', ')}
+                {analysis.analysis?.potentialDiagnoses.join(', ')}
               </div>
             </div>
           )}
           
           <div className="text-xs text-blue-600">
-            Nivel de urgencia: {analysis.analysis.urgencyLevel}
+            Nivel de urgencia: {analysis.analysis?.urgencyLevel}
           </div>
         </div>
       )}

@@ -20,9 +20,14 @@ export const MedicalAIAssistant = ({
 
     const transcription: TranscriptionResult = {
       id: `trans-${Date.now()}`,
+      sessionId: `session-${Date.now()}`,
       text: input,
+      fullText: input,
+      duration: 0,
+      engine: 'manual',
       confidence: 1.0,
       timestamp: new Date(),
+      createdAt: new Date(),
       language: 'es',
       medicalTerms: [],
       segments: [],
@@ -31,8 +36,11 @@ export const MedicalAIAssistant = ({
 
     await analyzeMedicalContent(transcription, {
       patientId,
+      practitionerId: 'default-practitioner',
       consultationId: `consult-${Date.now()}`,
       specialty: 'general',
+      appointmentType: 'consultation',
+      language: 'es',
       urgencyLevel: 'routine'
     });
   };
@@ -73,7 +81,7 @@ export const MedicalAIAssistant = ({
               <div>
                 <span className="font-medium text-gray-700">Síntomas detectados:</span>
                 <ul className="mt-1 list-disc list-inside text-gray-600">
-                  {analysis.analysis.symptoms.map((symptom, idx) => (
+                  {analysis.analysis?.symptoms.map((symptom, idx) => (
                     <li key={idx}>{symptom}</li>
                   ))}
                 </ul>
@@ -82,7 +90,7 @@ export const MedicalAIAssistant = ({
               <div>
                 <span className="font-medium text-gray-700">Posibles diagnósticos:</span>
                 <ul className="mt-1 list-disc list-inside text-gray-600">
-                  {analysis.analysis.potentialDiagnoses.map((diagnosis, idx) => (
+                  {analysis.analysis?.potentialDiagnoses.map((diagnosis, idx) => (
                     <li key={idx}>{diagnosis}</li>
                   ))}
                 </ul>
@@ -91,7 +99,7 @@ export const MedicalAIAssistant = ({
               <div>
                 <span className="font-medium text-gray-700">Acciones recomendadas:</span>
                 <ul className="mt-1 list-disc list-inside text-gray-600">
-                  {analysis.analysis.recommendedActions.map((action, idx) => (
+                  {analysis.analysis?.recommendedActions.map((action, idx) => (
                     <li key={idx}>{action}</li>
                   ))}
                 </ul>
@@ -99,10 +107,10 @@ export const MedicalAIAssistant = ({
 
               <div className="flex items-center gap-4 mt-4">
                 <span className="text-xs text-gray-500">
-                  Urgencia: <span className="font-medium">{analysis.analysis.urgencyLevel}</span>
+                  Urgencia: <span className="font-medium">{analysis.analysis?.urgencyLevel}</span>
                 </span>
                 <span className="text-xs text-gray-500">
-                  Especialidad: <span className="font-medium">{analysis.analysis.specialty}</span>
+                  Especialidad: <span className="font-medium">{analysis.analysis?.specialty}</span>
                 </span>
               </div>
             </div>

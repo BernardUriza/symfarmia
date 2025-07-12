@@ -1,760 +1,534 @@
 /**
- * Medical AI Domain Types
+ * Medical AI Types and Interfaces
  * 
- * Core type definitions for medical AI functionality and transcription resilience
+ * Core type definitions for the Medical AI domain supporting Spanish medical
+ * terminology and HIPAA compliance requirements.
  */
 
-export interface TranscriptionResult {
-  id: string;
-  text: string;
-  confidence: number;
-  timestamp: Date;
-  language: string;
-  medicalTerms: MedicalTerm[];
-  segments: TranscriptionSegment[];
-  status: TranscriptionStatus;
-  error?: string;
+/**
+ * Transcription status enum for tracking the state of medical transcriptions
+ */
+export enum TranscriptionStatus {
+  IDLE = 'idle',
+  INITIALIZING = 'initializing',
+  RECORDING = 'recording',
+  PROCESSING = 'processing',
+  COMPLETED = 'completed',
+  ERROR = 'error',
+  CANCELLED = 'cancelled'
 }
 
+/**
+ * Model loading status for AI models
+ */
+export enum ModelStatus {
+  NOT_LOADED = 'not_loaded',
+  DOWNLOADING = 'downloading',
+  LOADING = 'loading',
+  LOADED = 'loaded',
+  ERROR = 'error'
+}
+
+/**
+ * Medical urgency levels for prioritizing patient care
+ */
+export enum UrgencyLevel {
+  CRITICAL = 'critical',
+  EMERGENCY = 'emergency',
+  URGENT = 'urgent',
+  ROUTINE = 'routine',
+  LOW = 'low'
+}
+
+export type UrgencyLevelString = 'critical' | 'emergency' | 'urgent' | 'routine' | 'low';
+
+/**
+ * Confidence levels for medical AI predictions
+ */
+export enum ConfidenceLevel {
+  HIGH = 'high',
+  MEDIUM = 'medium',
+  LOW = 'low',
+  UNCERTAIN = 'uncertain'
+}
+
+/**
+ * Audio formats supported by the system
+ */
+export enum AudioFormat {
+  WAV = 'audio/wav',
+  MP3 = 'audio/mp3',
+  WEBM = 'audio/webm',
+  OGG = 'audio/ogg'
+}
+
+/**
+ * Medical specialties supported by the system
+ */
+export type MedicalSpecialty = 'general' | 'cardiology' | 'pediatrics' | 'emergency' | 'obstetrics' | string;
+
+/**
+ * Medical specialty details
+ */
+export interface MedicalSpecialtyDetails {
+  code: string;
+  name: string;
+  nameEs: string; // Spanish name
+  description?: string;
+  descriptionEs?: string; // Spanish description
+  terminology?: MedicalTerm[];
+}
+
+/**
+ * Medical term definition with multilingual support
+ */
+export interface MedicalTerm {
+  id: string;
+  term: string;
+  termEs: string; // Spanish term
+  definition: string;
+  definitionEs: string; // Spanish definition
+  category: MedicalCategory;
+  confidence?: number;
+  synonyms?: string[];
+  abbreviations?: string[];
+  icd10Code?: string;
+  snomedCode?: string;
+}
+
+/**
+ * Medical category enum
+ */
+export enum MedicalCategory {
+  SYMPTOM = 'symptom',
+  DIAGNOSIS = 'diagnosis',
+  MEDICATION = 'medication',
+  TREATMENT = 'treatment',
+  PROCEDURE = 'procedure'
+}
+
+/**
+ * Medical category details for organizing terms and conditions
+ */
+export interface MedicalCategoryDetails {
+  id: string;
+  name: string;
+  nameEs: string; // Spanish name
+  parentId?: string;
+  level: number;
+  color?: string;
+  icon?: string;
+}
+
+/**
+ * Transcription segment with medical metadata
+ */
 export interface TranscriptionSegment {
   id: string;
+  start: number;
+  end: number;
+  startTime?: number;
+  endTime?: number;
   text: string;
-  startTime: number;
-  endTime: number;
   confidence: number;
   speaker?: string;
+  language: string;
+  medicalTerms?: MedicalTerm[];
+  urgencyLevel?: UrgencyLevel;
+  timestamp: number;
+  alternatives?: Array<{
+    text: string;
+    confidence: number;
+  }>;
 }
 
-export interface MedicalTerm {
-  term: string;
-  definition: string;
-  category: MedicalCategory;
+/**
+ * Complete transcription result with medical analysis
+ */
+export interface TranscriptionResult {
+  id?: string;
+  sessionId: string;
+  text: string;
+  fullText: string;
+  segments: TranscriptionSegment[];
+  duration: number;
+  language: string;
+  engine: string;
   confidence: number;
-  synonyms: string[];
+  medicalTerms: MedicalTerm[];
+  status?: TranscriptionStatus;
+  error?: string;
+  medicalAnalysis?: MedicalAnalysis;
+  createdAt: Date;
+  updatedAt?: Date;
+  timestamp?: Date;
+  metadata?: Record<string, any>;
 }
 
+/**
+ * Medical analysis result from AI processing
+ */
 export interface MedicalAnalysis {
+  id: string;
   patientId?: string;
+  transcriptionId: string;
   consultationId?: string;
-  analysis: {
+  chiefComplaint: string;
+  symptoms: Array<{
+    name: string;
+    severity: 'mild' | 'moderate' | 'severe';
+    duration?: string;
+    onset?: string;
+  }>;
+  vitalSigns?: {
+    bloodPressure?: string;
+    heartRate?: number;
+    temperature?: number;
+    respiratoryRate?: number;
+    oxygenSaturation?: number;
+  };
+  diagnoses: Array<{
+    code: string;
+    description: string;
+    confidence: ConfidenceLevel;
+    icd10Code?: string;
+  }>;
+  medications?: Array<{
+    name: string;
+    dosage: string;
+    frequency: string;
+    route: string;
+    duration?: string;
+  }>;
+  allergies?: string[];
+  medicalHistory?: string[];
+  recommendations: string[];
+  urgencyLevel: UrgencyLevel;
+  confidenceLevel: ConfidenceLevel;
+  confidence?: number;
+  strategy?: MedicalStrategy;
+  analysis?: {
     symptoms: string[];
     potentialDiagnoses: string[];
     recommendedActions: string[];
-    urgencyLevel: UrgencyLevel;
-    specialty: MedicalSpecialty;
+    urgencyLevel: string;
+    specialty: string;
   };
-  confidence: ConfidenceLevel;
-  timestamp: Date;
-  aiModel: string;
-  medicalContext: MedicalContext;
+  createdAt: Date;
+  createdBy: string;
+  isVerified: boolean;
+  verifiedBy?: string;
+  verifiedAt?: Date;
+  timestamp?: Date;
+  aiModel?: string;
+  medicalContext?: MedicalContext;
 }
 
-export interface AudioConfig {
-  sampleRate: number;
-  channels: number;
-  bitDepth: number;
-  format: AudioFormat;
-  noiseReduction: boolean;
-  medicalOptimization: boolean;
-  realTimeProcessing: boolean;
-  maxDuration: number;
-}
-
-export interface MedicalContext {
-  patientId?: string;
-  consultationId?: string;
-  patientAge?: number;
-  patientGender?: 'male' | 'female' | 'other';
-  medicalHistory?: string[];
-  currentMedications?: string[];
-  allergies?: string[];
-  emergencyContact?: string;
-  specialty: MedicalSpecialty;
-  urgencyLevel: UrgencyLevel;
-}
-
-export interface ConfidenceMetrics {
-  overall: number;
-  transcription: number;
-  medicalAnalysis: number;
-  termRecognition: number;
-  contextAccuracy: number;
-}
-
-export enum ConfidenceLevel {
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  VERY_HIGH = 'very_high'
-}
-
+/**
+ * Medical strategy for patient care
+ */
 export interface MedicalStrategy {
   id: string;
   name: string;
   description: string;
+  steps: Array<{
+    order: number;
+    action: string;
+    responsible: string;
+    timeline: string;
+    required: boolean;
+  }>;
+  followUpRequired: boolean;
+  followUpInterval?: string;
+  specialtyReferrals?: string[];
+}
+
+/**
+ * Medical context for AI processing
+ */
+export interface MedicalContext {
+  patientId?: string;
+  practitionerId: string;
+  facilityId?: string;
   specialty: MedicalSpecialty;
-  optimizations: StrategyOptimization[];
-  threshold: number;
-  enabled: boolean;
+  consultationId?: string;
+  appointmentType: 'consultation' | 'followup' | 'emergency' | 'routine';
+  previousVisits?: Array<{
+    date: Date;
+    diagnosis: string;
+    treatment: string;
+  }>;
+  currentMedications?: string[];
+  allergies?: string[];
+  chronicConditions?: string[];
+  language: 'es' | 'en';
+  culturalConsiderations?: string;
+  insuranceType?: string;
+  urgencyLevel?: string;
 }
 
-export interface StrategyOptimization {
-  type: 'vocabulary' | 'context' | 'confidence' | 'speed';
-  value: string | number;
-  description: string;
+/**
+ * Audio configuration for recording
+ */
+export interface AudioConfig {
+  sampleRate: number;
+  channelCount?: number;
+  channels?: number;
+  echoCancellation?: boolean;
+  noiseSuppression?: boolean;
+  noiseReduction?: boolean;
+  autoGainControl?: boolean;
+  deviceId?: string;
+  mimeType?: AudioFormat;
+  format?: string;
+  audioBitsPerSecond?: number;
+  medicalOptimization?: boolean;
+  bitDepth?: number;
+  realTimeProcessing?: boolean;
+  maxDuration?: number;
 }
 
-// Enums
-export enum TranscriptionStatus {
-  IDLE = 'idle',
-  RECORDING = 'recording',
-  PROCESSING = 'processing',
-  COMPLETED = 'completed',
-  ERROR = 'error'
+/**
+ * Medical AI service configuration
+ */
+export interface MedicalAIServiceConfig {
+  apiKey?: string;
+  endpoint?: string;
+  baseUrl?: string;
+  model: string;
+  language: string;
+  medicalMode: boolean;
+  medicalModel?: string;
+  maxRetries: number;
+  retries?: number;
+  timeout: number;
+  enableCache: boolean;
+  cacheExpiration?: number;
+  hipaaCompliant: boolean;
+  encryptionEnabled: boolean;
+  auditLogging: boolean;
+  specialty?: string;
 }
 
-export enum MedicalCategory {
-  SYMPTOM = 'symptom',
-  DIAGNOSIS = 'diagnosis',
-  TREATMENT = 'treatment',
-  MEDICATION = 'medication',
-  ANATOMY = 'anatomy',
-  PROCEDURE = 'procedure',
-  LABORATORY = 'laboratory'
+/**
+ * Base error class for Medical AI errors
+ */
+export interface MedicalAIError {
+  code: string;
+  message: string;
+  details?: any;
+  timestamp: Date;
+  recoverable: boolean;
+  userMessage?: string;
+  userMessageEs?: string; // Spanish user message
 }
 
-export type UrgencyLevel = 'routine' | 'urgent' | 'emergency' | 'critical';
+/**
+ * Transcription error class
+ */
+export class TranscriptionError extends Error implements MedicalAIError {
+  code: string;
+  details?: any;
+  timestamp: Date;
+  recoverable: boolean;
+  userMessage?: string;
+  userMessageEs?: string;
+  sessionId?: string;
+  stage?: 'initialization' | 'recording' | 'processing' | 'analysis';
+  audioData?: {
+    duration?: number;
+    format?: string;
+    size?: number;
+  };
 
-export type MedicalSpecialty = 
-  | 'general'
-  | 'cardiology'
-  | 'pediatrics'
-  | 'emergency'
-  | 'obstetrics'
-  | 'neurology'
-  | 'psychiatry'
-  | 'dermatology'
-  | 'orthopedics'
-  | 'oncology';
-
-export enum AudioFormat {
-  WAV = 'wav',
-  MP3 = 'mp3',
-  OGG = 'ogg',
-  WEBM = 'webm'
-}
-
-// Error Types
-export class MedicalAIError extends Error {
-  constructor(
-    message: string,
-    public code: string,
-    public context?: Record<string, any>
-  ) {
+  constructor(message: string, options?: Partial<TranscriptionError>) {
     super(message);
-    this.name = 'MedicalAIError';
-  }
-}
-
-export class TranscriptionError extends MedicalAIError {
-  constructor(message: string, context?: Record<string, any>) {
-    super(message, 'TRANSCRIPTION_ERROR', context);
     this.name = 'TranscriptionError';
+    this.code = options?.code || 'TRANSCRIPTION_ERROR';
+    this.timestamp = new Date();
+    this.recoverable = options?.recoverable ?? true;
+    Object.assign(this, options);
   }
 }
 
-export class MedicalValidationError extends MedicalAIError {
-  constructor(message: string, context?: Record<string, any>) {
-    super(message, 'MEDICAL_VALIDATION_ERROR', context);
-    this.name = 'MedicalValidationError';
-  }
-}
-
-// Service Response Types
+/**
+ * Generic service response type
+ */
 export interface ServiceResponse<T> {
   success: boolean;
   data?: T;
-  error?: string;
-  timestamp: Date;
+  error?: MedicalAIError | string;
+  timestamp?: Date;
+  metadata?: {
+    requestId: string;
+    timestamp: Date;
+    duration: number;
+    version: string;
+  };
 }
 
-export interface MedicalAIServiceConfig {
-  apiKey: string;
-  baseUrl: string;
-  timeout: number;
-  retries: number;
-  medicalModel: string;
-  specialty: MedicalSpecialty;
-}
-
-// =============================================================================
-// MEDICAL TRANSCRIPTION RESILIENCE TYPES
-// =============================================================================
-
-// Network Status and Quality Types
-export interface NetworkStatus {
-  isOnline: boolean;
-  connectionType: 'wifi' | 'cellular' | 'ethernet' | 'unknown';
-  effectiveType: '2g' | '3g' | '4g' | '5g' | 'unknown';
-  downlink: number;
-  rtt: number;
-  quality: NetworkQuality;
-  medicalGrade: boolean;
-  timestamp: Date;
-}
-
-export type NetworkQuality = 'excellent' | 'good' | 'fair' | 'poor' | 'offline' | 'unknown';
-
-export interface NetworkPerformanceMetrics {
-  latency: number[];
-  bandwidth: number[];
-  stability: number[];
-  packetLoss: number[];
-  timestamp: Date;
-}
-
-// Transcription Quality Types
-export interface TranscriptionQualityMetrics {
-  transcriptionAccuracy: number;
-  networkLatency: number;
-  audioQuality: number;
-  overallQuality: number;
-  confidenceScore: number;
-  errorRate: number;
-  throughput: number;
-  availability: number;
-  timestamp: Date;
-}
-
-export interface QualityThresholds {
-  excellent: number;
-  good: number;
-  fair: number;
-  poor: number;
-}
-
-export interface QualityAlert {
-  type: 'quality_degradation' | 'quality_improvement' | 'quality_trend_down' | 'mode_switch_recommended';
-  timestamp: Date;
-  data: Record<string, any>;
-}
-
-// Audio Chunk Management Types
-export interface AudioChunk {
-  id: string;
-  sequence: number;
-  startTime: number;
-  endTime: number;
-  duration: number;
-  audioData: ArrayBuffer;
-  metadata: AudioChunkMetadata;
-  status: AudioChunkStatus;
-  processingAttempts: number;
-  maxAttempts: number;
-}
-
-export interface AudioChunkMetadata {
-  volume: number;
-  networkQuality: NetworkQuality;
-  chunkingReason: string;
-  silenceDetected: boolean;
-  hasOverlap: boolean;
-  originalSize?: number;
-  compressedSize?: number;
-  compressed?: boolean;
-  overlapDuration?: number;
-}
-
-export type AudioChunkStatus = 'recording' | 'processing' | 'completed' | 'failed';
-
-export interface AudioChunkStats {
-  totalChunks: number;
-  recordingChunks: number;
-  processingChunks: number;
-  completedChunks: number;
-  failedChunks: number;
-  queueLength: number;
-  averageChunkDuration: number;
-  currentVolume: number;
-  isProcessing: boolean;
-}
-
-// Offline Buffer Types
-export interface OfflineQueueItem {
-  id: string;
-  timestamp: Date;
-  audioData: ArrayBuffer;
-  metadata: OfflineQueueMetadata;
-  status: OfflineQueueStatus;
-  retryCount: number;
-  lastAttempt: Date | null;
-  processingStarted: Date | null;
-  processingCompleted: Date | null;
-}
-
-export interface OfflineQueueMetadata {
-  originalSize: number;
-  consultationId: string;
-  patientId: string;
-  priority: 'high' | 'medium' | 'low';
-  attempts: number;
-  maxAttempts: number;
-}
-
-export type OfflineQueueStatus = 'pending' | 'processing' | 'completed' | 'failed';
-
-export interface OfflineQueueStats {
-  totalItems: number;
-  pendingItems: number;
-  processingItems: number;
-  completedItems: number;
-  failedItems: number;
-  currentBufferSize: number;
-  maxBufferSize: number;
-  bufferUsagePercent: number;
-  isProcessing: boolean;
-}
-
-// Connection Recovery Types
-export interface ConnectionRecoveryStatus {
-  state: 'idle' | 'attempting' | 'backing_off' | 'failed';
-  attempts: number;
-  maxAttempts: number;
-  strategy: RecoveryStrategy;
-  circuitBreakerState: CircuitBreakerState;
-  emergencyMode: boolean;
-  lastConnectionTime: number | null;
-  connectionQuality: NetworkQuality;
-  isRecovering: boolean;
-}
-
-export type RecoveryStrategy = 'exponential_backoff' | 'linear_backoff' | 'fibonacci_backoff' | 'medical_priority';
-
-export interface CircuitBreaker {
-  state: CircuitBreakerState;
-  failures: number;
-  threshold: number;
-  timeout: number;
-  lastFailure: number | null;
-}
-
-export type CircuitBreakerState = 'closed' | 'open' | 'half-open';
-
-export interface ConnectionTest {
-  success: boolean;
-  duration: number;
-  testResults: ConnectionTestResult[];
-  successCount: number;
-  totalTests: number;
-  networkStatus: NetworkStatus;
-  error?: string;
-}
-
-export interface ConnectionTestResult {
-  success: boolean;
-  type: 'basic_connectivity' | 'service_endpoint' | 'bandwidth_quality';
-  status?: number;
-  data?: any;
-  error?: string;
-  speed?: number;
-}
-
-// Backup Strategy Types
-export interface BackupRecord {
-  id: string;
-  sessionId: string;
-  timestamp: Date;
-  version: number;
-  transcriptionData: any;
-  metadata: BackupMetadata;
-  checksum: string;
-  compressed: boolean;
-  encrypted: boolean;
-  size: number;
-}
-
-export interface BackupMetadata {
-  consultationId: string;
-  patientId: string;
-  startTime: Date;
-  duration: number;
-  networkStatus: NetworkStatus;
-  backupReason: string;
-  originalSize?: number;
-  compressedSize?: number;
-}
-
-export interface BackupStats {
-  totalBackups: number;
-  successfulBackups: number;
-  failedBackups: number;
-  recoveredSessions: number;
-  dataLossPrevented: number;
-  isActive: boolean;
-  currentSession: string | null;
-  recoveryMode: boolean;
-  backupInterval: number;
-  queueLength: number;
-}
-
-// Audio Persistence Types
-export interface AudioStorageRecord {
-  id: string;
-  timestamp: Date;
-  expirationDate: Date;
-  metadata: AudioStorageMetadata;
-  classification: string;
-  encrypted: boolean;
-  compressed: boolean;
-  accessCount: number;
-  lastAccessed: Date;
-  checksum: string;
-  hipaaCompliant: boolean;
-  auditTrail: AuditEntry[];
-}
-
-export interface AudioStorageMetadata {
-  consultationId: string;
-  patientId: string;
-  duration: number;
-  format: string;
-  sampleRate: number;
-  channels: number;
-  originalSize: number;
-  compressedSize?: number;
-}
-
-export interface AudioStorageStats {
-  currentSize: number;
-  maxSize: number;
-  usagePercent: number;
-  encryptionEnabled: boolean;
-  compressionEnabled: boolean;
-  hipaaCompliant: boolean;
-  isInitialized: boolean;
-  accessLogSize: number;
-  auditLogSize: number;
-}
-
-export interface AuditEntry {
-  timestamp: Date;
-  action: string;
-  recordId: string;
-  metadata: Record<string, any>;
-  userAgent: string;
-  url: string;
-}
-
-// Service Worker Types
-export interface BackgroundTask {
-  id: string;
-  type: 'TRANSCRIPTION' | 'AUDIO_CHUNK' | 'OFFLINE_SYNC';
-  status: 'processing' | 'syncing';
-  retryCount: number;
-  createdAt: Date;
-  lastError?: string;
-}
-
-export interface BackgroundProcessingStats {
-  isRegistered: boolean;
-  isAvailable: boolean;
-  activeBackgroundTasks: number;
-  activeSyncTasks: number;
-  totalActiveTasks: number;
-  queuedMessages: number;
-  processingState: string;
-}
-
-// Medical Resilience Types
-export interface MedicalResilienceStatus {
-  mode: ResilienceMode;
-  isActive: boolean;
-  sessionId: string | null;
-  continuity: ContinuityStatus;
-  serviceHealth: ServiceHealthMap;
-  emergencyMode: boolean;
-  coordinationState: string;
-}
-
-export type ResilienceMode = 'online' | 'offline' | 'hybrid' | 'emergency';
-
-export type ContinuityStatus = 'maintained' | 'interrupted' | 'restored';
-
-export interface ServiceHealthMap {
-  networkDetector: 'healthy' | 'unhealthy';
-  qualityMonitor: 'healthy' | 'unhealthy';
-  recoveryService: 'healthy' | 'unhealthy';
-  offlineBuffer: 'healthy' | 'unhealthy';
-  chunkManager: 'healthy' | 'unhealthy';
-  persistence: 'healthy' | 'unhealthy';
-  backupStrategy: 'healthy' | 'unhealthy';
-}
-
-export interface TranscriptionSession {
-  id: string;
-  startTime: Date;
-  lastTranscriptionTime: Date;
-  activeSegments: Map<string, any>;
-  pendingSegments: Map<string, any>;
-  completedSegments: Map<string, any>;
-  totalSegments: number;
-  processedSegments: number;
-  errorSegments: number;
-  continuity: ContinuityStatus;
-}
-
-export interface ModeTransition {
-  from: ResilienceMode;
-  to: ResilienceMode;
-  timestamp: Date;
-  context: Record<string, any>;
-  duration: number;
-  success: boolean;
-}
-
-export interface EmergencyProtocols {
-  enabled: boolean;
-  triggeredAt: Date | null;
-  reason: string | null;
-  escalationLevel: 'none' | 'low' | 'medium' | 'high' | 'critical';
-}
-
-export interface ResilienceConfiguration {
-  autoModeSwitch: boolean;
-  seamlessTransitions: boolean;
-  medicalGradeReliability: boolean;
-  emergencyModeEnabled: boolean;
-  maxDataLossToleranceSec: number;
-  qualityThreshold: number;
-  networkQualityThreshold: number;
-  backupFrequency: number;
-  bufferSize: number;
-}
-
-export interface ResilienceMetrics {
-  totalSessions: number;
-  successfulSessions: number;
-  interruptedSessions: number;
-  dataLossIncidents: number;
-  modeTransitions: number;
-  averageRecoveryTime: number;
-  uptime: number;
-  lastIncident: Date | null;
-  currentMode: ResilienceMode;
-  isActive: boolean;
-  serviceHealth: ServiceHealthMap;
-  emergencyProtocols: EmergencyProtocols;
-  transitionHistory: ModeTransition[];
-}
-
-// Error Handling Types
-export interface TranscriptionErrorContext {
-  errorType: 'network' | 'hardware' | 'api' | 'timeout' | 'unknown';
-  severity: 'low' | 'medium' | 'high' | 'critical';
-  recoveryStrategy: 'retry' | 'fallback' | 'buffer' | 'abort';
-  medicalContext: MedicalContext;
-  timestamp: Date;
-  retryAttempt: number;
-}
-
-export interface MedicalErrorContext {
-  patientId?: string;
-  consultationId?: string;
-  sessionId?: string;
-  component?: string;
-  operation?: string;
-  urgencyLevel?: UrgencyLevel;
-  specialty?: string;
-  errorType?: 'transcription' | 'network' | 'audio' | 'storage' | 'security';
-  hipaaRelevant?: boolean;
-  medicalDataInvolved?: boolean;
-}
-
-export interface ErrorLogEntry {
-  timestamp: Date;
-  level: 'error' | 'warn' | 'info' | 'debug';
+/**
+ * Progress callback data
+ */
+export interface ProgressData {
+  stage: 'model_loading' | 'initialization' | 'recording' | 'processing' | 'analysis';
+  progress: number;
+  percentage: number;
   message: string;
-  stack?: string;
-  context?: Record<string, any>;
-  medicalContext?: MedicalErrorContext;
-  hash: string;
-  count: number;
-  firstOccurrence: Date;
-  lastOccurrence: Date;
-  suppressed: boolean;
+  estimatedTimeRemaining?: number;
 }
 
-export interface ErrorStatistics {
-  totalErrors: number;
-  suppressedErrors: number;
-  medicalErrors: number;
-  escalatedErrors: number;
-  errorsByType: Record<string, number>;
+/**
+ * Message callback data
+ */
+export interface MessageData {
+  stage: string;
+  message: string;
+  level: 'info' | 'warning' | 'error';
+  timestamp: Date;
 }
 
-// Fallback Configuration Types
-export interface FallbackConfiguration {
-  primaryService: TranscriptionService;
-  fallbackServices: TranscriptionService[];
-  retryAttempts: number;
-  exponentialBackoffBase: number;
-  maxRetryDelay: number;
-  circuitBreakerThreshold: number;
+/**
+ * Error callback data
+ */
+export interface ErrorData {
+  error: string | Error;
+  recoverable: boolean;
+  errorCount?: number;
+  fatal?: boolean;
+  suggestion?: string;
 }
 
-export type TranscriptionService = 'browser' | 'whisper' | 'deepgram';
-
-export interface ServiceHealthStatus {
-  isHealthy: boolean;
-  lastCheck: Date;
-  errorCount: number;
-  successCount: number;
-  averageLatency: number;
-  reliability: number;
+/**
+ * Session callbacks for real-time updates
+ */
+export interface SessionCallbacks {
+  onStart?: (data: { sessionId: string; status: TranscriptionStatus }) => void;
+  onProgress?: (data: ProgressData) => void;
+  onMessage?: (data: MessageData) => void;
+  onError?: (data: ErrorData) => void;
+  onTranscriptionUpdate?: (data: {
+    text: string;
+    fullText: string;
+    segments: TranscriptionSegment[];
+    confidence: number;
+    engine: string;
+  }) => void;
+  onComplete?: (result: TranscriptionResult) => void | Promise<void>;
 }
 
-export interface ServiceAnalytics {
-  totalSwitches: number;
-  switchHistory: any[];
-  serviceReliability: Record<string, ServiceHealthStatus>;
-  currentService: TranscriptionService;
-  uptime: number;
+/**
+ * Medical report data structure
+ */
+export interface MedicalReport {
+  id: string;
+  patientId: string;
+  practitionerId: string;
+  transcriptionId?: string;
+  type: 'consultation' | 'procedure' | 'laboratory' | 'imaging' | 'other';
+  title: string;
+  content: string;
+  findings?: string;
+  diagnosis?: string;
+  treatment?: string;
+  recommendations?: string;
+  attachments?: Array<{
+    id: string;
+    name: string;
+    type: string;
+    url: string;
+    size: number;
+  }>;
+  createdAt: Date;
+  updatedAt?: Date;
+  signedBy?: string;
+  signedAt?: Date;
+  isConfidential: boolean;
 }
 
-// Visual Indicator Types
-export interface VisualIndicatorProps {
-  networkStatusDetector?: any;
-  transcriptionQualityMonitor?: any;
-  medicalTranscriptionResilience?: any;
-  className?: string;
-  showDetails?: boolean;
-  compact?: boolean;
+/**
+ * Patient demographic data (HIPAA compliant)
+ */
+export interface PatientDemographics {
+  id: string;
+  mrn?: string; // Medical Record Number
+  firstName: string;
+  lastName: string;
+  dateOfBirth: Date;
+  gender: 'male' | 'female' | 'other';
+  preferredLanguage: string;
+  contactInfo?: {
+    phone?: string;
+    email?: string;
+    address?: {
+      street?: string;
+      city?: string;
+      state?: string;
+      zipCode?: string;
+      country?: string;
+    };
+  };
+  emergencyContact?: {
+    name: string;
+    relationship: string;
+    phone: string;
+  };
+  insuranceInfo?: {
+    provider: string;
+    policyNumber: string;
+    groupNumber?: string;
+  };
 }
 
-// Extended Error Types
-export class NetworkError extends MedicalAIError {
-  constructor(message: string, context?: Record<string, any>) {
-    super(message, 'NETWORK_ERROR', context);
-    this.name = 'NetworkError';
-  }
+/**
+ * Practitioner information
+ */
+export interface Practitioner {
+  id: string;
+  licenseNumber: string;
+  firstName: string;
+  lastName: string;
+  title: string;
+  specialty: MedicalSpecialtyDetails;
+  languages: string[];
+  facilities: string[];
+  contactInfo: {
+    phone: string;
+    email: string;
+  };
+  isActive: boolean;
 }
 
-export class AudioError extends MedicalAIError {
-  constructor(message: string, context?: Record<string, any>) {
-    super(message, 'AUDIO_ERROR', context);
-    this.name = 'AudioError';
-  }
+/**
+ * Appointment data
+ */
+export interface Appointment {
+  id: string;
+  patientId: string;
+  practitionerId: string;
+  facilityId?: string;
+  scheduledAt: Date;
+  duration: number; // minutes
+  type: 'consultation' | 'followup' | 'procedure' | 'emergency';
+  status: 'scheduled' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled' | 'no_show';
+  reason: string;
+  notes?: string;
+  transcriptionId?: string;
+  reportId?: string;
+  createdAt: Date;
+  updatedAt?: Date;
 }
 
-export class StorageError extends MedicalAIError {
-  constructor(message: string, context?: Record<string, any>) {
-    super(message, 'STORAGE_ERROR', context);
-    this.name = 'StorageError';
-  }
-}
-
-export class SecurityError extends MedicalAIError {
-  constructor(message: string, context?: Record<string, any>) {
-    super(message, 'SECURITY_ERROR', context);
-    this.name = 'SecurityError';
-  }
-}
-
-export class ResilienceError extends MedicalAIError {
-  constructor(message: string, context?: Record<string, any>) {
-    super(message, 'RESILIENCE_ERROR', context);
-    this.name = 'ResilienceError';
-  }
-}
-
-export class MedicalComplianceError extends MedicalAIError {
-  constructor(message: string, context?: Record<string, any>) {
-    super(message, 'MEDICAL_COMPLIANCE_ERROR', context);
-    this.name = 'MedicalComplianceError';
-  }
-}
-
-// Callback Types
-export type NetworkStatusCallback = (status: NetworkStatus) => void;
-export type QualityUpdateCallback = (metrics: TranscriptionQualityMetrics) => void;
-export type ModeTransitionCallback = (transition: ModeTransition) => void;
-export type ErrorCallback = (error: ErrorLogEntry) => void;
-export type RecoveryCallback = (status: ConnectionRecoveryStatus) => void;
-export type BackupCallback = (backup: BackupRecord) => void;
-export type ChunkCallback = (chunk: AudioChunk) => void;
-export type TaskCallback = (task: BackgroundTask) => void;
-
-// Utility Types
-export type DeepPartial<T> = {
-  [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
+// Export type guards
+export const isTranscriptionError = (error: any): error is TranscriptionError => {
+  return error && 'code' in error && 'sessionId' in error;
 };
 
-export type RequiredKeys<T, K extends keyof T> = T & Required<Pick<T, K>>;
+export const isMedicalAIError = (error: any): error is MedicalAIError => {
+  return error && 'code' in error && 'message' in error && 'recoverable' in error;
+};
 
-export type OptionalKeys<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
-
-// Event Types
-export type ResilienceEvent = 
-  | 'sessionStarted'
-  | 'sessionStopped'
-  | 'modeTransitionCompleted'
-  | 'modeTransitionFailed'
-  | 'emergencyModeTriggered'
-  | 'continuityBreak'
-  | 'continuityRestored'
-  | 'recoveryAvailable';
-
-export type QualityEvent = 
-  | 'qualityUpdated'
-  | 'qualityDegraded'
-  | 'qualityImproved'
-  | 'qualityTrendDown'
-  | 'modeSwitchRecommended'
-  | 'networkChanged';
-
-export type RecoveryEvent = 
-  | 'connectionLost'
-  | 'connectionRestored'
-  | 'recoveryStarted'
-  | 'recoverySuccessful'
-  | 'recoveryFailed'
-  | 'recoveryCancelled';
-
-export type BackupEvent = 
-  | 'backupStarted'
-  | 'backupStopped'
-  | 'backupCompleted'
-  | 'backupFailed'
-  | 'recoveryCompleted'
-  | 'recoveryFailed';
-
-export type ChunkEvent = 
-  | 'chunkReady'
-  | 'chunkProcessed'
-  | 'chunkFailed'
-  | 'networkChanged';
-
-export type TaskEvent = 
-  | 'taskCompleted'
-  | 'taskFailed'
-  | 'syncCompleted'
-  | 'progressUpdate'
-  | 'error';
-
-// Configuration Validation Types
-export interface ConfigurationValidation {
-  isValid: boolean;
-  errors: string[];
-  warnings: string[];
-  recommendations: string[];
-}
-
-export interface MedicalComplianceCheck {
-  hipaaCompliant: boolean;
-  encryptionEnabled: boolean;
-  auditTrailEnabled: boolean;
-  accessControlEnabled: boolean;
-  dataRetentionConfigured: boolean;
-  issues: string[];
-  recommendations: string[];
-}
+// Export utility types
+export type MedicalAIResponse<T> = Promise<ServiceResponse<T>>;
+export type TranscriptionResponse = MedicalAIResponse<TranscriptionResult>;
+export type AnalysisResponse = MedicalAIResponse<MedicalAnalysis>;
