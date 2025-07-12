@@ -20,6 +20,7 @@
     "using_fallback": "Usando motor alternativo",
     "no_content_yet": "Sin contenido aún",
     "initializing": "Inicializando...",
-    "engine_status": "Estado del motor"
+    "engine_status": "Estado del motor",
+    "processing": "Procesando..."
     }
 }

@@ -25,7 +25,7 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const animationFrameRef = useRef<number>(0);
-  const startTimeRef = useRef<number>(0);
+  const startTimeRef = useRef<number | null>(null);
   const durationIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const updateAudioLevel = useCallback(() => {
@@ -125,7 +125,9 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
       startTimeRef.current = Date.now();
       setDuration(0);
       durationIntervalRef.current = setInterval(() => {
-        setDuration(Math.floor((Date.now() - startTimeRef.current) / 1000));
+        if (startTimeRef.current !== null) {
+          setDuration(Math.floor((Date.now() - startTimeRef.current) / 1000));
+        }
       }, 100);
       
       // Start audio level monitoring

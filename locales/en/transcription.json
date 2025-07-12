@@ -20,6 +20,7 @@
     "engine_status": "Engine Status",
     "using_fallback": "Using Fallback",
     "no_content_yet": "No content yet",
-    "initializing": "Initializing..."
+    "initializing": "Initializing...",
+    "processing": "Processing..."
   }
 }
