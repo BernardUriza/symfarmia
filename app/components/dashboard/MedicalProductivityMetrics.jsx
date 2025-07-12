@@ -16,7 +16,7 @@ import {
   Target,
   Award
 } from 'lucide-react';
-import { useI18n } from '../../../hooks/useI18n';
+import { useI18n } from '@/domains/core/hooks/useI18n';
 import { calculateMexicanPrivatePracticeKPIs, generateKPISummary } from '../../utils/metrics/MedicalKPICalculator';
 import { generateCompleteMockData } from '../../data/mockMedicalData';
 
