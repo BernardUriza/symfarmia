@@ -5,7 +5,6 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { WhisperWASMEngine } from '../services/WhisperWASMEngine';
 import { useModelDownload } from '../hooks/useModelDownload';
 
 // Storage quota check helper
@@ -45,14 +44,8 @@ const WhisperModelManager = ({ onModelReady = null }) => {
   useEffect(() => {
     const initEngine = async () => {
       try {
-        const whisperEngine = new WhisperWASMEngine({
-          modelName: selectedModel,
-          modelPath: `/models/ggml-${selectedModel}.bin`,
-          language: 'es',
-          medicalMode: true
-        });
-        
-        setEngine(whisperEngine);
+        // WASM engine removed
+        setEngine(null);
         
         // Get storage info
         const info = await checkStorageQuota();

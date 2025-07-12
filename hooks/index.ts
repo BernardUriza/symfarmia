@@ -15,7 +15,7 @@ export { useCategories } from './useCategories';
 export { useStudyTypes } from './useStudyTypes';
 export { useStudies } from './useStudies';
 export { useMedicalReports } from './useMedicalReports';
-export { useWhisperTranscription } from './useWhisperTranscription';
+export { useAudioRecorder } from './useAudioRecorder';
 
 // API hooks
 export {

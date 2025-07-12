@@ -120,20 +120,6 @@ export class TranscriptionEngineManager {
   async initializeEngines(config) {
     const engineConfigs = [
       {
-        name: 'whisper-wasm',
-        priority: 1,
-        requirements: ['webAssembly', 'webWorkers'],
-        module: () => import('./WhisperWASMEngine'),
-        config: { ...config.whisperWASM }
-      },
-      {
-        name: 'whisper-webgpu',
-        priority: 2,
-        requirements: ['webGPU', 'webWorkers'],
-        module: () => import('./WhisperClientEngine'),
-        config: { ...config.whisperClient, backend: 'webgpu' }
-      },
-      {
         name: 'openai-whisper',
         priority: 3,
         requirements: [],
