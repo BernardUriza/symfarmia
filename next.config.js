@@ -5,8 +5,6 @@ const nextConfig = {
   
   images: {
     unoptimized: true,
-    loader: 'custom',
-    loaderFile: './image-loader.js'
   },
 
   experimental: {
@@ -14,12 +12,6 @@ const nextConfig = {
   },
 
   webpack: (config, { dev, isServer }) => {
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      'sharp$': false,
-      'sharp/lib/index.js': false,
-    };
-    
     config.resolve.fallback = {
       ...config.resolve.fallback,
       fs: false,

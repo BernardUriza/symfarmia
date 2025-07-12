@@ -1,11 +1,10 @@
 [build]
-  command = "npm install tailwindcss postcss autoprefixer && npm run build"
+  command = "npm install && npm run build"
 
 [build.environment]
   NODE_ENV = "production"
   NETLIFY = "true"
   NEXT_TELEMETRY_DISABLED = "1"
-  NODE_VERSION = "18"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
