@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, Text, BarList } from "@tremor/react";
-import { useDemoHighlight } from '../../../hooks/useDemoHighlight';
+import { useDemoHighlight } from '@/domains/demo/hooks/useDemoHighlight';
 
 const TopStudiesList = ({ medicalReports }) => {
   const { isDemoMode, highlight } = useDemoHighlight();

@@ -8,7 +8,7 @@ type ReactNode = any;
 import { DemoAPIProvider } from './DemoAPIProvider';
 import { LiveAPIProvider } from './LiveAPIProvider';
 import { createDatabase } from '../infrastructure/database';
-import { useLocalStorage } from '@/domains/core/hooks/useLocalStorage';
+import { useLocalStorage } from '@/domains/core';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 interface AppModeContextValue {

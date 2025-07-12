@@ -8,7 +8,7 @@
 'use client';
 
 import { useContext, useEffect, useState } from 'react';
-import { I18nContext } from '../app/providers/I18nProvider';
+import { I18nContext } from '@/app/providers/I18nProvider';
 
 
 // 🔄 PARAMETER SUBSTITUTION
@@ -51,7 +51,7 @@ export const useI18n = () => {
   const [demoTranslations, setDemoTranslations] = useState({});
 
   useEffect(() => {
-    import(`../locales/${locale}/demo.json`)
+    import(`@/locales/${locale}/demo.json`)
       .then(mod => {
         const data = mod.default?.demo || mod.default || {};
         setDemoTranslations(Object.keys(data).reduce((acc, key) => {

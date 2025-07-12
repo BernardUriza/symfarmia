@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import Logger from '../src/utils/logger.js';
+import Logger from '@/src/utils/logger.js';
 
 export function useLocalStorage<T>(
   key: string,
