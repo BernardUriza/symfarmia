@@ -17,10 +17,6 @@ async function initializeWhisper() {
         }
       );
       console.log('✅ Whisper model cargado exitosamente');
-      console.log('📊 Model info:', {
-        model: whisperPipeline.model?.config?.model_type || 'unknown',
-        tokenizer: whisperPipeline.tokenizer?.constructor?.name || 'unknown'
-      });
     } catch (error) {
       console.error('❌ Error cargando modelo Whisper:', error);
       throw error;
@@ -29,74 +25,80 @@ async function initializeWhisper() {
   return whisperPipeline;
 }
 
-// Función para convertir audio a formato compatible
-async function processAudioBuffer(arrayBuffer) {
-  console.log('🔊 Procesando audio buffer...');
+// Función simple para procesar audio (sin conversión compleja)
+async function processAudioForWhisper(arrayBuffer, mimeType) {
+  console.log('🔊 Procesando audio para Whisper...');
   console.log('📏 Buffer size:', arrayBuffer.byteLength, 'bytes');
+  console.log('🎵 MIME type:', mimeType);
   
-  // Verificar si el buffer tiene contenido
   if (arrayBuffer.byteLength === 0) {
     throw new Error('Audio buffer está vacío');
   }
   
-  if (arrayBuffer.byteLength < 1000) {
-    console.warn('⚠️ Audio muy corto, puede no transcribirse correctamente');
-  }
-  
-  // Para debugging, log primeros bytes del audio
+  // Log de información del audio
   const firstBytes = new Uint8Array(arrayBuffer.slice(0, 16));
-  console.log('🔍 Primeros 16 bytes del audio:', Array.from(firstBytes).map(b => b.toString(16).padStart(2, '0')).join(' '));
+  console.log('🔍 Primeros bytes:', Array.from(firstBytes).map(b => b.toString(16).padStart(2, '0')).join(' '));
   
-  return arrayBuffer;
+  // Intentar diferentes formatos para Whisper
+  const audioFormats = [
+    () => {
+      console.log('🔄 Intentando formato: ArrayBuffer directo');
+      return arrayBuffer;
+    },
+    () => {
+      console.log('🔄 Intentando formato: Uint8Array');
+      return new Uint8Array(arrayBuffer);
+    },
+    () => {
+      console.log('🔄 Intentando formato: Buffer de Node.js');
+      return Buffer.from(arrayBuffer);
+    }
+  ];
+  
+  // Retornar el primer formato (Whisper debería manejar ArrayBuffer)
+  return audioFormats[0]();
 }
 
 export async function POST(request) {
   const startTime = Date.now();
-  console.log('🚀 Iniciando petición POST /api/transcribe');
+  console.log('🚀 POST /api/transcribe iniciado');
   
   try {
     // 1. Obtener FormData
-    console.log('📥 Extrayendo FormData...');
     const formData = await request.formData();
     const audioFile = formData.get('audio');
     
-    console.log('📋 FormData keys:', Array.from(formData.keys()));
-    
     if (!audioFile) {
-      console.error('❌ No se encontró archivo de audio en FormData');
       return NextResponse.json(
         { success: false, error: 'No se recibió archivo de audio' },
         { status: 400 }
       );
     }
 
-    // 2. Información del archivo
-    console.log('📁 Información del archivo:', {
+    console.log('📁 Archivo recibido:', {
       name: audioFile.name,
       type: audioFile.type,
       size: audioFile.size
     });
 
     if (audioFile.size === 0) {
-      console.error('❌ Archivo de audio vacío');
       return NextResponse.json(
         { success: false, error: 'Archivo de audio vacío' },
         { status: 400 }
       );
     }
 
-    // 3. Convertir a ArrayBuffer
-    console.log('🔄 Convirtiendo a ArrayBuffer...');
+    // 2. Convertir a ArrayBuffer
     const arrayBuffer = await audioFile.arrayBuffer();
     
-    // 4. Procesar audio
-    const processedAudio = await processAudioBuffer(arrayBuffer);
+    // 3. Procesar audio
+    const processedAudio = await processAudioForWhisper(arrayBuffer, audioFile.type);
     
-    // 5. Inicializar Whisper
+    // 4. Inicializar Whisper
     console.log('🤖 Inicializando Whisper...');
     const whisper = await initializeWhisper();
     
-    // 6. Configuración de transcripción
+    // 5. Configuración de transcripción
     const transcriptionConfig = {
       language: 'spanish',
       task: 'transcribe',
@@ -105,36 +107,67 @@ export async function POST(request) {
       stride_length_s: 5
     };
     
-    console.log('⚙️ Configuración transcripción:', transcriptionConfig);
+    console.log('⚙️ Configuración:', transcriptionConfig);
     
-    // 7. Transcribir con logs detallados
-    console.log('🎙️ Iniciando transcripción con Whisper...');
-    console.log('📊 Input data type:', processedAudio.constructor.name);
-    console.log('📊 Input data size:', processedAudio.byteLength);
+    // 6. Transcribir con múltiples intentos
+    console.log('🎙️ Iniciando transcripción...');
     
-    const result = await whisper(processedAudio, transcriptionConfig);
+    let result = null;
+    const attempts = [
+      // Intento 1: Configuración estándar
+      async () => {
+        console.log('🔄 Intento 1: Configuración estándar');
+        return await whisper(processedAudio, transcriptionConfig);
+      },
+      // Intento 2: Sin configuración de idioma
+      async () => {
+        console.log('🔄 Intento 2: Sin idioma específico');
+        return await whisper(processedAudio, {
+          task: 'transcribe',
+          return_timestamps: false
+        });
+      },
+      // Intento 3: Solo el audio
+      async () => {
+        console.log('🔄 Intento 3: Solo audio, configuración mínima');
+        return await whisper(processedAudio);
+      }
+    ];
     
-    // 8. Analizar resultado
-    console.log('📤 Resultado crudo de Whisper:', result);
-    console.log('🔍 Tipo de resultado:', typeof result);
-    console.log('🔍 Propiedades del resultado:', Object.keys(result || {}));
-    
-    if (result && typeof result === 'object') {
-      console.log('📝 Texto transcrito:', result.text);
-      console.log('📊 Chunks disponibles:', result.chunks?.length || 0);
-      if (result.chunks && result.chunks.length > 0) {
-        console.log('🔍 Primer chunk:', result.chunks[0]);
+    for (const attempt of attempts) {
+      try {
+        result = await attempt();
+        console.log('📤 Resultado obtenido:', result);
+        
+        if (result && (result.text || typeof result === 'string')) {
+          console.log('✅ Transcripción exitosa');
+          break;
+        } else {
+          console.warn('⚠️ Resultado sin texto, intentando siguiente método...');
+        }
+      } catch (error) {
+        console.warn('⚠️ Intento falló:', error.message);
       }
     }
-
-    const processingTime = Date.now() - startTime;
-    console.log(`⏱️ Tiempo total de procesamiento: ${processingTime}ms`);
     
-    // 9. Preparar respuesta
+    if (!result) {
+      throw new Error('Todos los intentos de transcripción fallaron');
+    }
+    
+    // 7. Procesar resultado
+    const transcribedText = result?.text || result || '';
+    const processingTime = Date.now() - startTime;
+    
+    console.log('📊 Resultado final:', {
+      text: transcribedText,
+      length: transcribedText.length,
+      processingTime
+    });
+    
     const responseData = {
       success: true,
       data: {
-        text: result?.text || result || '',
+        text: transcribedText,
         confidence: 0.9,
         language: 'es',
         processingTime,
@@ -142,21 +175,18 @@ export async function POST(request) {
           audioSize: audioFile.size,
           audioType: audioFile.type,
           modelUsed: 'Xenova/whisper-small',
-          chunks: result?.chunks?.length || 0
+          attempts: attempts.length
         }
       }
     };
-    
-    console.log('✅ Respuesta preparada:', responseData);
     
     return NextResponse.json(responseData);
 
   } catch (error) {
     const processingTime = Date.now() - startTime;
-    console.error('❌ Error completo en transcripción:', {
+    console.error('❌ Error en transcripción:', {
       message: error.message,
       stack: error.stack,
-      name: error.name,
       processingTime
     });
     
@@ -164,7 +194,6 @@ export async function POST(request) {
       { 
         success: false, 
         error: error.message,
-        errorType: error.name,
         processingTime,
         debug: process.env.NODE_ENV === 'development' ? error.stack : undefined
       },
