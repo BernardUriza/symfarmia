@@ -16,7 +16,6 @@ export class WhisperWASMEngine {
       sampleRate: config.sampleRate || 16000,
       chunkSize: config.chunkSize || 1024,
       medicalMode: config.medicalMode || true,
-      modelPath: config.modelPath || '/models/ggml-base.en.bin',
       n_threads: config.n_threads || Math.min(navigator.hardwareConcurrency || 4, 8),
       translate: config.translate || false,
       maxAudioLength: config.maxAudioLength || 30, // seconds
@@ -191,11 +190,13 @@ export class WhisperWASMEngine {
   }
 
   /**
-   * Load model into WASM filesystem with caching
+   * Load model into WASM filesystem directly from public folder
    */
   async loadModel() {
     try {
-      console.log('Loading model with cache:', this.config.modelPath);
+      // Use the actual model file path directly
+      const modelPath = this.config.modelPath || `/models/ggml-${this.config.modelName}.bin`;
+      console.log('Loading model directly:', modelPath);
       
       // Check storage quota before loading
       const storageInfo = await checkStorageQuota();
@@ -208,7 +209,7 @@ export class WhisperWASMEngine {
       
       // Load model with caching and progress feedback
       const result = await loadRemotePromise(
-        this.config.modelPath,
+        modelPath,
         this.config.modelName,
         {
           size: modelSize,

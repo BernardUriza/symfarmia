@@ -11,6 +11,22 @@
       "review_dialog_flow": "Review Dialog Flow",
       "start": "Start Recording",
       "stop": "Stop Recording"
+    },
+    "permissions": {
+      "microphone_denied": "Microphone access denied",
+      "audio_init_failed": "Audio initialization failed",
+      "access_denied": "Access denied",
+      "access_required": "Access required",
+      "microphone_description": "Microphone access is required for transcription",
+      "audio_description": "Audio access is required for recording",
+      "fix_instructions": "To fix this issue, please follow these steps:",
+      "fix_step1": "1. Click on the browser settings icon",
+      "fix_step2": "2. Allow microphone access for this site",
+      "fix_step3": "3. Reload the page and try again",
+      "requesting": "Requesting permissions...",
+      "try_again": "Try Again",
+      "grant_access": "Grant Access",
+      "privacy_notice": "Your privacy is important. Audio is processed locally and securely."
     }
   },
   "speakers": {

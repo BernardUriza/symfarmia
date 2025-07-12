@@ -486,6 +486,7 @@ export class OpenAIWhisperBackend {
    * Process API result
    */
   async processAPIResult(result) {
+    console.warn('Medical transcription result processing:', result);
     if (!result.text) return;
     
     const segment = {

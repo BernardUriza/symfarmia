@@ -18,13 +18,10 @@ const WhisperModelManager = ({ onModelReady = null }) => {
 
   const { downloadState, startDownload, createEngineCallbacks, resetDownload } = useModelDownload();
 
-  // Available models
+  // Available models (matching what's in public/models folder)
   const models = [
-    { name: 'tiny.en', size: 39, description: 'Fastest, English only' },
-    { name: 'base.en', size: 74, description: 'Good balance, English only' },
-    { name: 'small.en', size: 244, description: 'Better accuracy, English only' },
-    { name: 'medium.en', size: 769, description: 'High accuracy, English only' },
-    { name: 'large-v3', size: 1550, description: 'Best accuracy, multilingual' }
+    { name: 'base', size: 148, description: 'Base multilingual model' },
+    { name: 'base.en', size: 148, description: 'Base English-only model' }
   ];
 
   // Initialize engine when component mounts

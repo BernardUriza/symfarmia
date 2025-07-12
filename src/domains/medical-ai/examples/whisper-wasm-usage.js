@@ -6,7 +6,6 @@
 
 import { WhisperWASMEngine } from '../services/WhisperWASMEngine.js';
 import { AudioProcessor } from '../services/AudioProcessor.js';
-import { ModelManager } from '../services/ModelManager.js';
 import { TranscriptionStatus } from '../types';
 
 /**
@@ -18,10 +17,8 @@ export async function basicUsageExample() {
   try {
     // Initialize the engine
     const engine = new WhisperWASMEngine({
-      modelName: 'whisper-base',
+      modelName: 'base',
       language: 'es',
-      wasmPath: '/whisper.wasm',
-      modelPath: '/models/whisper-base.bin',
       medicalMode: true
     });
     
@@ -179,55 +176,43 @@ export async function advancedUsageExample() {
 }
 
 /**
- * Model management example
+ * Direct model loading example
  */
-export async function modelManagementExample() {
-  console.log('🚀 Starting Model Management Example...');
+export async function directModelLoadingExample() {
+  console.log('🚀 Starting Direct Model Loading Example...');
   
   try {
-    // Initialize model manager
-    const modelManager = new ModelManager({
-      baseUrl: '/models',
-      cacheEnabled: true,
-      maxCacheSize: 1024 * 1024 * 1024 // 1GB
+    // Initialize engine with direct model path
+    const engine = new WhisperWASMEngine({
+      modelName: 'base',
+      language: 'es',
+      medicalMode: true
     });
     
-    await modelManager.initialize();
-    console.log('✅ Model manager initialized');
+    // The engine will automatically load the model from /models/ggml-base.bin
+    await engine.initialize();
+    console.log('✅ Engine initialized with model loaded from public folder');
     
-    // List available models
-    const models = modelManager.listModels();
-    console.log('📋 Available models:', models);
+    // Available models in public folder:
+    const availableModels = [
+      { name: 'base', path: '/models/ggml-base.bin', size: '148MB' },
+      { name: 'base.en', path: '/models/ggml-base.en.bin', size: '148MB' }
+    ];
+    console.log('📋 Available models:', availableModels);
     
-    // Check if model is cached
-    const isBaseCached = modelManager.isModelCached('whisper-base');
-    console.log('💾 whisper-base cached:', isBaseCached);
+    // The models are cached automatically by the browser and whisperUtils
+    console.log('💾 Models are automatically cached in browser storage');
     
-    // Download model with progress tracking
-    if (!isBaseCached) {
-      console.log('📥 Downloading whisper-base model...');
-      
-      await modelManager.downloadModel('whisper-base', (progress, loaded, total) => {
-        console.log(`📊 Download progress: ${progress}% (${Math.round(loaded/1024/1024)}MB / ${Math.round(total/1024/1024)}MB)`);
-      });
-      
-      console.log('✅ Model downloaded successfully');
-    }
-    
-    // Get cache statistics
-    const cacheStats = modelManager.getCacheStats();
-    console.log('📊 Cache statistics:', cacheStats);
-    
-    // Use the model
-    const modelData = await modelManager.getModel('whisper-base');
-    console.log('🎯 Model loaded:', modelData.length, 'bytes');
+    // Check if ready
+    const isReady = await engine.isReady();
+    console.log('🔍 Engine ready:', isReady);
     
     // Cleanup
-    await modelManager.cleanup();
-    console.log('🧹 Model manager cleanup completed');
+    await engine.cleanup();
+    console.log('🧹 Engine cleanup completed');
     
   } catch (error) {
-    console.error('❌ Model management example failed:', error);
+    console.error('❌ Direct model loading example failed:', error);
   }
 }
 
@@ -308,17 +293,15 @@ export async function medicalTranscriptionWorkflow() {
   
   try {
     // Initialize all components
-    const modelManager = new ModelManager();
     const audioProcessor = new AudioProcessor();
     const engine = new WhisperWASMEngine({
-      modelName: 'whisper-base',
+      modelName: 'base',
       language: 'es',
       medicalMode: true
     });
     
     // Initialize everything
     await Promise.all([
-      modelManager.initialize(),
       audioProcessor.initialize(),
       engine.initialize()
     ]);
@@ -374,8 +357,7 @@ export async function medicalTranscriptionWorkflow() {
         await engine.stopTranscription();
         await Promise.all([
           engine.cleanup(),
-          audioProcessor.cleanup(),
-          modelManager.cleanup()
+          audioProcessor.cleanup()
         ]);
         console.log('🧹 Complete workflow cleanup completed');
       } catch (error) {

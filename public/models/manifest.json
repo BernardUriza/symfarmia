@@ -3,9 +3,9 @@
   "description": "Whisper.cpp model manifest for medical transcription",
   "lastUpdated": "2024-01-15T00:00:00Z",
   "models": {
-    "whisper-base": {
-      "name": "whisper-base",
-      "fileName": "whisper-base.bin",
+    "base": {
+      "name": "base",
+      "fileName": "ggml-base.bin",
       "size": 148000000,
       "sizeHuman": "148 MB",
       "description": "Base multilingual model for general medical transcription",
@@ -16,7 +16,7 @@
       "recommended": true,
       "medicalOptimized": true,
       "checksum": "sha256:placeholder_checksum_here",
-      "downloadUrl": "/models/whisper-base.bin",
+      "downloadUrl": "/models/ggml-base.bin",
       "version": "1.5.4",
       "compatibility": {
         "minBrowsers": {
@@ -28,9 +28,9 @@
         "requiredFeatures": ["WebAssembly", "AudioContext", "MediaDevices", "Worker"]
       }
     },
-    "whisper-base-en": {
-      "name": "whisper-base-en",
-      "fileName": "whisper-base-en.bin",
+    "base.en": {
+      "name": "base.en",
+      "fileName": "ggml-base.en.bin",
       "size": 148000000,
       "sizeHuman": "148 MB",
       "description": "Base English-only model optimized for English medical transcription",
@@ -41,57 +41,7 @@
       "recommended": false,
       "medicalOptimized": true,
       "checksum": "sha256:placeholder_checksum_here",
-      "downloadUrl": "/models/whisper-base-en.bin",
-      "version": "1.5.4",
-      "compatibility": {
-        "minBrowsers": {
-          "chrome": 91,
-          "firefox": 90,
-          "safari": 14,
-          "edge": 91
-        },
-        "requiredFeatures": ["WebAssembly", "AudioContext", "MediaDevices", "Worker"]
-      }
-    },
-    "whisper-small": {
-      "name": "whisper-small",
-      "fileName": "whisper-small.bin",
-      "size": 488000000,
-      "sizeHuman": "488 MB",
-      "description": "Small multilingual model with improved accuracy for medical terminology",
-      "languages": ["en", "es", "fr", "de", "it", "pt", "ru", "ja", "ko", "zh", "auto"],
-      "accuracy": "better",
-      "speed": "medium",
-      "memoryUsage": "medium",
-      "recommended": false,
-      "medicalOptimized": true,
-      "checksum": "sha256:placeholder_checksum_here",
-      "downloadUrl": "/models/whisper-small.bin",
-      "version": "1.5.4",
-      "compatibility": {
-        "minBrowsers": {
-          "chrome": 91,
-          "firefox": 90,
-          "safari": 14,
-          "edge": 91
-        },
-        "requiredFeatures": ["WebAssembly", "AudioContext", "MediaDevices", "Worker"]
-      }
-    },
-    "whisper-small-en": {
-      "name": "whisper-small-en",
-      "fileName": "whisper-small-en.bin",
-      "size": 488000000,
-      "sizeHuman": "488 MB",
-      "description": "Small English-only model for high-accuracy English medical transcription",
-      "languages": ["en"],
-      "accuracy": "better",
-      "speed": "medium",
-      "memoryUsage": "medium",
-      "recommended": false,
-      "medicalOptimized": true,
-      "checksum": "sha256:placeholder_checksum_here",
-      "downloadUrl": "/models/whisper-small-en.bin",
+      "downloadUrl": "/models/ggml-base.en.bin",
       "version": "1.5.4",
       "compatibility": {
         "minBrowsers": {
@@ -105,10 +55,10 @@
     }
   },
   "recommendations": {
-    "medicalGeneral": "whisper-base",
-    "medicalEnglish": "whisper-base-en",
-    "medicalHighAccuracy": "whisper-small",
-    "medicalSpecialty": "whisper-small"
+    "medicalGeneral": "base",
+    "medicalEnglish": "base.en",
+    "medicalHighAccuracy": "base",
+    "medicalSpecialty": "base"
   },
   "notes": {
     "testing": "Run 'npm run whisper:test' to verify the setup",
