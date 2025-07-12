@@ -4,7 +4,16 @@ try {
   withPWA = pwa({
     dest: 'public',
     disable: process.env.NODE_ENV === 'development',
-    buildExcludes: [/app-build-manifest\.json$/],
+    buildExcludes: [
+      /app-build-manifest\.json$/,
+      /dynamic-css-manifest\.json$/
+    ],
+    runtimeCaching: [
+      {
+        urlPattern: /^\/_next\/dynamic-css-manifest\.json$/,
+        handler: 'NetworkOnly'
+      }
+    ],
     // Increase the maximum file size to cache to 5MB (default is 2MB)
     maximumFileSizeToCacheInBytes: 5 * 1024 * 1024
   });

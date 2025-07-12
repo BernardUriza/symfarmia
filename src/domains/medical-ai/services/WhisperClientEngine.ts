@@ -6,9 +6,43 @@
  */
 
 import { TranscriptionStatus } from '../types';
+import {
+  TranscriptionEngine,
+  WhisperClientConfig,
+  InitializationResult,
+  TranscriptionResult,
+  TranscriptionSession,
+  TranscriptionCallbacks,
+  AudioData,
+  AudioChunk,
+  EngineStats,
+  MedicalContext,
+  TranscriptionSegment,
+  TranscriptionCompleteEvent,
+  ModelCacheManager,
+  AudioProcessor
+} from '../types/transcription-engines';
 
-export class WhisperClientEngine {
-  constructor(config = {}) {
+interface ProcessingQueueItem {
+  id: string;
+  data: AudioData;
+  timestamp: number;
+  config?: any;
+}
+
+export class WhisperClientEngine implements TranscriptionEngine {
+  private config: WhisperClientConfig;
+  private pipeline: any = null;
+  private isInitialized: boolean = false;
+  private isTranscribing: boolean = false;
+  private modelCache: ModelCacheManager | null = null;
+  private medicalContext: MedicalContext | null = null;
+  private processingQueue: ProcessingQueueItem[] = [];
+  private webGPUDevice: any | null = null;
+  private audioProcessor: AudioProcessor | null = null;
+  private currentSession: TranscriptionSession | null = null;
+
+  constructor(config: WhisperClientConfig = {}) {
     this.config = {
       modelName: config.modelName || 'openai/whisper-base',
       language: config.language || 'es',
@@ -19,16 +53,6 @@ export class WhisperClientEngine {
       medicalMode: config.medicalMode || true,
       ...config
     };
-
-    this.pipeline = null;
-    this.isInitialized = false;
-    this.isTranscribing = false;
-    this.modelCache = null;
-    this.medicalContext = null;
-    this.processingQueue = [];
-    this.webGPUDevice = null;
-    this.audioProcessor = null;
-    this.currentSession = null;
   }
 
   /**
@@ -36,7 +60,7 @@ export class WhisperClientEngine {
    */
   async initialize() {
     try {
-      console.log('Initializing WhisperClientEngine with WebGPU...');
+      // Initializing WhisperClientEngine...
       
       // Initialize WebGPU device
       await this.initializeWebGPU();
@@ -51,30 +75,30 @@ export class WhisperClientEngine {
         
         // Ensure backends object exists
         if (!env.backends) {
-          env.backends = {};
+          (env as any).backends = {};
         }
         
         // Ensure onnx backend exists
-        if (!env.backends.onnx) {
-          env.backends.onnx = {};
+        if (!(env.backends as any).onnx) {
+          (env.backends as any).onnx = {};
         }
         
         // Ensure wasm backend exists
-        if (!env.backends.onnx.wasm) {
-          env.backends.onnx.wasm = {};
+        if (!(env.backends as any).onnx.wasm) {
+          (env.backends as any).onnx.wasm = {};
         }
         
-        env.backends.onnx.wasm.numThreads = navigator.hardwareConcurrency || 4;
+        (env.backends as any).onnx.wasm.numThreads = navigator.hardwareConcurrency || 4;
       }
       
       // Set backend preference
-      if (env && env.backends && env.backends.onnx) {
+      if (env && env.backends && (env.backends as any).onnx) {
         if (this.webGPUDevice) {
-          env.backends.onnx.webgpu = true;
-          console.log('WebGPU backend enabled for Whisper');
+          (env.backends as any).onnx.webgpu = true;
+          // WebGPU backend enabled
         } else {
-          env.backends.onnx.webgl = true;
-          console.log('WebGL backend enabled for Whisper');
+          (env.backends as any).onnx.webgl = true;
+          // WebGL backend enabled
         }
       }
       
@@ -86,40 +110,49 @@ export class WhisperClientEngine {
         'automatic-speech-recognition',
         this.config.modelName,
         {
-          device: this.webGPUDevice ? 'webgpu' : 'webgl',
           dtype: 'fp16',
           cache_dir: this.modelCache?.getCacheDir()
-        }
+        } as any
       );
       
       // Initialize audio processor
       this.audioProcessor = await this.initializeAudioProcessor();
       
       this.isInitialized = true;
-      console.log('WhisperClientEngine initialized successfully');
+      console.log('✓ WhisperClientEngine ready');
+      
+      return {
+        success: true,
+        message: 'WhisperClientEngine initialized',
+        config: this.config
+      };
       
     } catch (error) {
       console.error('Failed to initialize WhisperClientEngine:', error);
-      throw error;
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Initialization failed',
+        recoverable: true
+      };
     }
   }
 
   /**
    * Initialize WebGPU device
    */
-  async initializeWebGPU() {
+  private async initializeWebGPU(): Promise<void> {
     try {
       if (!('gpu' in navigator)) {
-        console.warn('WebGPU not supported');
+        // WebGPU not supported
         return;
       }
 
-      const adapter = await navigator.gpu.requestAdapter({
+      const adapter = await (navigator as any).gpu.requestAdapter({
         powerPreference: 'high-performance'
       });
 
       if (!adapter) {
-        console.warn('WebGPU adapter not available');
+        // WebGPU adapter not available
         return;
       }
 
@@ -131,7 +164,7 @@ export class WhisperClientEngine {
         }
       });
 
-      console.log('WebGPU device initialized:', this.webGPUDevice);
+      // WebGPU device initialized
       
     } catch (error) {
       console.warn('WebGPU initialization failed:', error);
@@ -142,16 +175,16 @@ export class WhisperClientEngine {
   /**
    * Initialize model cache manager
    */
-  async initializeModelCache() {
+  private async initializeModelCache(): Promise<void> {
     try {
-      const { ModelCacheManager } = await import('./ModelCacheManager.js');
+      const { ModelCacheManager } = await import('./ModelCacheManager.js') as any;
       this.modelCache = new ModelCacheManager({
         modelName: this.config.modelName,
         cacheName: 'whisper-models'
       });
       
-      await this.modelCache.initialize();
-      console.log('Model cache manager initialized');
+      await this.modelCache!.initialize();
+      // Model cache manager initialized
     } catch (error) {
       console.warn('Model cache manager initialization failed:', error);
     }
@@ -160,13 +193,13 @@ export class WhisperClientEngine {
   /**
    * Initialize audio processor
    */
-  async initializeAudioProcessor() {
+  private async initializeAudioProcessor(): Promise<AudioProcessor | null> {
     try {
-      const { AudioChunkOptimizer } = await import('./AudioChunkOptimizer.js');
+      const { AudioChunkOptimizer } = await import('./AudioChunkOptimizer.js') as any;
       return new AudioChunkOptimizer({
         sampleRate: 16000,
-        chunkSize: this.config.chunkLengthS * 16000,
-        overlapSize: this.config.strideLengthS * 16000,
+        chunkSize: (this.config.chunkLengthS || 30) * 16000,
+        overlapSize: (this.config.strideLengthS || 5) * 16000,
         medicalMode: this.config.medicalMode
       });
     } catch (error) {
@@ -178,14 +211,14 @@ export class WhisperClientEngine {
   /**
    * Check if engine is ready
    */
-  async isReady() {
+  async isReady(): Promise<boolean> {
     return this.isInitialized && this.pipeline !== null;
   }
 
   /**
    * Start transcription
    */
-  async startTranscription(audioConfig, callbacks = {}) {
+  async startTranscription(audioConfig?: any, callbacks: TranscriptionCallbacks = {}): Promise<TranscriptionResult> {
     if (!this.isInitialized) {
       throw new Error('WhisperClientEngine not initialized');
     }
@@ -198,14 +231,17 @@ export class WhisperClientEngine {
     this.currentSession = {
       id: `whisper-session-${Date.now()}`,
       startTime: Date.now(),
+      status: TranscriptionStatus.RECORDING,
       audioConfig,
       callbacks,
       segments: [],
       fullText: '',
-      medicalTerms: []
+      medicalTerms: [],
+      language: this.config.language || 'es',
+      medicalMode: this.config.medicalMode
     };
 
-    console.log('Starting Whisper client transcription');
+    // Starting Whisper client transcription
     
     return {
       success: true,
@@ -220,7 +256,7 @@ export class WhisperClientEngine {
   /**
    * Stop transcription
    */
-  async stopTranscription() {
+  async stopTranscription(): Promise<TranscriptionResult> {
     if (!this.isTranscribing || !this.currentSession) {
       throw new Error('No active transcription');
     }
@@ -244,7 +280,18 @@ export class WhisperClientEngine {
   /**
    * Process audio chunk
    */
-  async processAudioChunk(audioData, config) {
+  async processAudioChunk(audioData: AudioData, config?: any): Promise<TranscriptionResult> {
+    console.log('[WhisperClient] processAudioChunk called:', {
+      hasData: !!audioData,
+      dataSize: (audioData as any)?.byteLength || (audioData as any)?.length || 0,
+      dataType: audioData?.constructor?.name || typeof audioData,
+      isTranscribing: this.isTranscribing,
+      hasSession: !!this.currentSession,
+      sessionId: this.currentSession?.id,
+      bufferLength: this.processingQueue.length,
+      currentFullTextLength: this.currentSession?.fullText?.length || 0
+    });
+    
     if (!this.isTranscribing || !this.currentSession) {
       throw new Error('No active transcription session');
     }
@@ -286,39 +333,59 @@ export class WhisperClientEngine {
   /**
    * Process audio queue
    */
-  async processQueue() {
+  private async processQueue(): Promise<void> {
     while (this.processingQueue.length > 0 && this.isTranscribing) {
       const chunk = this.processingQueue.shift();
+      if (!chunk) continue;
       
       try {
         const result = await this.transcribeChunk(chunk.data, chunk.config);
         
         if (result.text && result.text.trim().length > 0) {
-          const segment = {
+          const segment: TranscriptionSegment = {
             id: chunk.id,
             text: result.text,
             startTime: chunk.timestamp,
             endTime: Date.now(),
             confidence: result.confidence || 0.9,
             speaker: 'doctor',
-            language: this.config.language
+            language: this.config.language || 'es',
+            sessionId: this.currentSession!.id,
+            engine: 'whisper-client'
           };
           
-          this.currentSession.segments.push(segment);
-          this.currentSession.fullText += ` ${result.text}`;
+          if (this.currentSession) {
+            this.currentSession.segments.push(segment);
+          }
+          if (this.currentSession) {
+            this.currentSession.fullText += ` ${result.text}`;
+          }
+          
+          console.log('[WhisperClient] Text accumulated:', {
+            newText: result.text,
+            newTextLength: result.text.length,
+            totalTextLength: this.currentSession?.fullText.length || 0,
+            segmentCount: this.currentSession?.segments.length || 0
+          });
           
           // Extract medical terms
           if (this.config.medicalMode) {
             const medicalTerms = await this.extractMedicalTerms(result.text);
-            this.currentSession.medicalTerms.push(...medicalTerms);
+            if (this.currentSession) {
+              if (this.currentSession.medicalTerms) {
+                this.currentSession.medicalTerms.push(...medicalTerms);
+              } else {
+                this.currentSession.medicalTerms = medicalTerms;
+              }
+            }
           }
           
           // Real-time callback
-          if (this.currentSession.callbacks.onTranscriptionUpdate) {
+          if (this.currentSession?.callbacks?.onTranscriptionUpdate) {
             this.currentSession.callbacks.onTranscriptionUpdate({
               segment,
-              fullText: this.currentSession.fullText.trim(),
-              medicalTerms: this.currentSession.medicalTerms,
+              fullText: this.currentSession?.fullText.trim() || '',
+              medicalTerms: this.currentSession?.medicalTerms || [],
               confidence: this.calculateOverallConfidence()
             });
           }
@@ -328,7 +395,7 @@ export class WhisperClientEngine {
         console.error('Error transcribing chunk:', error);
         
         // Continue processing other chunks
-        if (this.currentSession.callbacks.onError) {
+        if (this.currentSession?.callbacks?.onError) {
           this.currentSession.callbacks.onError(error);
         }
       }
@@ -338,9 +405,9 @@ export class WhisperClientEngine {
   /**
    * Process queued audio before stopping
    */
-  async processQueuedAudio() {
+  private async processQueuedAudio(): Promise<void> {
     if (this.processingQueue.length > 0) {
-      console.log(`Processing ${this.processingQueue.length} remaining audio chunks...`);
+      // Processing remaining audio chunks
       await this.processQueue();
     }
   }
@@ -348,10 +415,10 @@ export class WhisperClientEngine {
   /**
    * Optimize audio chunk for Whisper processing
    */
-  async optimizeAudioChunk(audioData, config) {
+  private async optimizeAudioChunk(audioData: AudioData, config?: any): Promise<AudioData> {
     try {
       if (this.audioProcessor) {
-        return await this.audioProcessor.optimizeForWhisper(audioData, config);
+        return await this.audioProcessor.processChunk(audioData);
       }
       
       // Basic optimization without AudioChunkOptimizer
@@ -400,7 +467,7 @@ export class WhisperClientEngine {
   /**
    * Transcribe audio chunk using Whisper
    */
-  async transcribeChunk(audioData, config) {
+  private async transcribeChunk(audioData: AudioData, config?: any): Promise<any> {
     try {
       const result = await this.pipeline(audioData, {
         language: this.config.language,
@@ -425,9 +492,9 @@ export class WhisperClientEngine {
   /**
    * Extract medical terms from transcribed text
    */
-  async extractMedicalTerms(text) {
+  private async extractMedicalTerms(text: string): Promise<string[]> {
     try {
-      const { MedicalTerminologyEnhancer } = await import('./MedicalTerminologyEnhancer.js');
+      const { MedicalTerminologyEnhancer } = await import('./MedicalTerminologyEnhancer.js') as any;
       const enhancer = new MedicalTerminologyEnhancer();
       return await enhancer.extractTerms(text, 'es-MX');
     } catch (error) {
@@ -439,33 +506,100 @@ export class WhisperClientEngine {
   /**
    * Calculate overall confidence score
    */
-  calculateOverallConfidence() {
-    if (this.currentSession.segments.length === 0) return 0;
+  private calculateOverallConfidence(): number {
+    if (!this.currentSession || this.currentSession.segments.length === 0) return 0;
     
-    const totalConfidence = this.currentSession.segments.reduce(
-      (sum, segment) => sum + segment.confidence,
+    const totalConfidence = this.currentSession!.segments.reduce(
+      (sum, segment) => sum + (segment.confidence || 0),
       0
     );
     
-    return totalConfidence / this.currentSession.segments.length;
+    return totalConfidence / this.currentSession!.segments.length;
   }
 
   /**
    * Finalize transcription session
    */
-  async finalizeTranscription() {
-    const session = this.currentSession;
+  private async finalizeTranscription(): Promise<TranscriptionCompleteEvent> {
+    // Finalizing transcription
+    if (true) { // Debug logging disabled
+    console.log('[WhisperClient] Finalizing transcription - Session state:', {
+      hasSession: !!this.currentSession,
+      sessionId: this.currentSession?.id,
+      fullTextLength: this.currentSession?.fullText?.length || 0,
+      fullTextContent: this.currentSession?.fullText || 'EMPTY',
+      segmentCount: this.currentSession?.segments?.length || 0,
+      queueLength: this.processingQueue.length
+    });
+    }
     
-    // Apply medical terminology enhancement
-    let enhancedText = session.fullText.trim();
+    // Process any remaining queued audio
+    if (this.processingQueue.length > 0) {
+      // Processing remaining queued audio
+      await this.processQueue();
+    }
+    
+    const session = this.currentSession!;
+    
+    if (!session) {
+      console.error('[WhisperClient] No active session found during finalization');
+      throw new Error('No active transcription session');
+    }
+    
+    // Get text with validation and fallback
+    const rawText = session.fullText || '';
+    // Check raw text
+    if (false) { // Debug logging disabled
+    console.log('[WhisperClient] Raw text before trim:', {
+      length: rawText.length,
+      isEmpty: rawText.trim() === '',
+      preview: rawText.substring(0, 100)
+    });
+    }
+    
+    let enhancedText = rawText.trim();
+    
+    // Fallback to segments if fullText is empty
+    if (!enhancedText && session.segments && session.segments.length > 0) {
+      console.warn('[WhisperClient] Empty fullText detected, reconstructing from segments');
+      enhancedText = session.segments.map(s => s.text || '').join(' ').trim();
+      // Reconstructed text from segments
+      if (false) { // Debug logging disabled
+      console.log('[WhisperClient] Reconstructed text from segments:', {
+        segmentCount: session.segments.length,
+        reconstructedLength: enhancedText.length,
+        preview: enhancedText.substring(0, 100)
+      });
+      }
+    }
+    
+    // Final fallback
+    if (!enhancedText) {
+      console.error('[WhisperClient] No text available for enhancement');
+      enhancedText = '[No transcription text available]';
+    }
     
     if (this.config.medicalMode) {
+      // Applying medical terminology enhancement
+      if (false) { // Debug logging disabled
+      console.log('[WhisperClient] Applying medical terminology enhancement:', {
+        textLength: enhancedText.length,
+        language: 'es-MX'
+      });
+      }
+      
       try {
         const { MedicalTerminologyEnhancer } = await import('./MedicalTerminologyEnhancer.js');
         const enhancer = new MedicalTerminologyEnhancer();
         enhancedText = await enhancer.enhanceText(enhancedText, 'es-MX');
+        // Enhancement completed
+        if (false) { // Debug logging disabled
+        console.log('[WhisperClient] Enhancement completed:', {
+          enhancedLength: enhancedText.length
+        });
+        }
       } catch (error) {
-        console.warn('Medical terminology enhancement failed:', error);
+        console.warn('[WhisperClient] Medical terminology enhancement failed:', error);
       }
     }
     
@@ -475,7 +609,7 @@ export class WhisperClientEngine {
       segments: session.segments,
       medicalTerms: session.medicalTerms,
       confidence: this.calculateOverallConfidence(),
-      language: this.config.language,
+      language: this.config.language || 'es',
       engine: 'whisper-client',
       processingTime: Date.now() - session.startTime,
       status: TranscriptionStatus.COMPLETED,
@@ -486,22 +620,21 @@ export class WhisperClientEngine {
   /**
    * Set medical context for optimization
    */
-  setMedicalContext(context) {
+  setMedicalContext(context: MedicalContext): void {
     this.medicalContext = context;
-    console.log('Medical context set for WhisperClientEngine:', context);
+    // Medical context set
   }
 
   /**
    * Get engine statistics
    */
-  getEngineStats() {
+  getEngineStats(): EngineStats {
     return {
       modelName: this.config.modelName,
       backend: this.webGPUDevice ? 'webgpu' : 'webgl',
       isInitialized: this.isInitialized,
       isTranscribing: this.isTranscribing,
-      queueLength: this.processingQueue.length,
-      webGPUSupported: !!this.webGPUDevice,
+      bufferLength: this.processingQueue.length,
       medicalMode: this.config.medicalMode
     };
   }
@@ -509,7 +642,7 @@ export class WhisperClientEngine {
   /**
    * Cleanup resources
    */
-  async cleanup() {
+  async cleanup(): Promise<void> {
     try {
       // Stop any active transcription
       if (this.isTranscribing) {

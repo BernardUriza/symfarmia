@@ -404,30 +404,6 @@ function createPrintCallback(onMessage) {
   };
 }
 
-/**
- * Promise-based wrapper for loadRemote
- */
-function loadRemotePromise(url, modelName, options = {}) {
-  return new Promise((resolve, reject) => {
-    const size_mb = options.size || getModelSize(modelName);
-    const onProgress = options.onProgress || (() => {});
-    const onMessage = options.onMessage || (() => {});
-    
-    const cbProgress = createProgressCallback(onProgress);
-    const cbPrint = createPrintCallback(onMessage);
-    
-    const cbReady = (dst, data) => {
-      resolve({ modelName: dst, data, size: data.byteLength });
-    };
-    
-    const cbCancel = () => {
-      reject(new Error('Model loading cancelled'));
-    };
-    
-    loadRemote(url, modelName, size_mb, cbProgress, cbReady, cbCancel, cbPrint);
-  });
-}
-
 // Export all utility functions
 export {
   convertTypedArray,
@@ -435,7 +411,6 @@ export {
   clearCache,
   fetchRemote,
   loadRemote,
-  loadRemotePromise,
   getCachedModels,
   removeFromCache,
   checkStorageQuota,
@@ -451,7 +426,6 @@ export {
 // Default export with commonly used functions
 export default {
   loadRemote,
-  loadRemotePromise,
   clearCache,
   getCachedModels,
   checkStorageQuota,

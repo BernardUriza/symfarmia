@@ -180,6 +180,8 @@ export class TranscriptionService {
     onTranscriptionUpdate?: (result: TranscriptionResult) => void
   ): Promise<ServiceResponse<TranscriptionResult>> {
     try {
+      console.log('[HybridTranscription] Starting hybrid transcription system');
+      
       // Set medical context
       const medicalContext = {
         specialty: 'general',
@@ -189,6 +191,36 @@ export class TranscriptionService {
       };
       
       transcriptionEngineManager.setMedicalContext(medicalContext);
+      
+      // Initialize transcription result
+      this.currentTranscription = this.initializeTranscription(config);
+      
+      // Setup audio capture for hybrid system
+      const stream = await this.getMediaStream(config);
+      console.log('[HybridTranscription] Media stream obtained');
+      
+      // Setup MediaRecorder to capture audio
+      if (typeof window !== 'undefined' && window.MediaRecorder) {
+        this.mediaRecorder = new MediaRecorder(stream, {
+          mimeType: this.getMimeType(config.format || 'webm')
+        });
+        
+        // Connect audio data to hybrid engine
+        this.mediaRecorder.ondataavailable = (event) => {
+          if (event.data.size > 0) {
+            console.log('[HybridTranscription] Audio data available:', {
+              size: event.data.size,
+              type: event.data.type
+            });
+            this.processAudioData(event.data);
+          }
+        };
+        
+        this.mediaRecorder.start(1000); // Capture every second
+        console.log('[HybridTranscription] MediaRecorder started');
+      } else {
+        console.error('[HybridTranscription] MediaRecorder not available');
+      }
       
       // Start transcription with hybrid engine
       const result = await transcriptionEngineManager.startTranscription(config, {
@@ -209,7 +241,19 @@ export class TranscriptionService {
       
       if (result.success) {
         this.isRecording = true;
-        this.currentTranscription = this.convertHybridToLegacyResult(result.data);
+        
+        // Merge initial result with current transcription
+        const hybridData = this.convertHybridToLegacyResult(result.data);
+        this.currentTranscription = {
+          ...this.currentTranscription,
+          ...hybridData,
+          fullText: this.currentTranscription.fullText || ''
+        };
+        
+        console.log('[HybridTranscription] Successfully started:', {
+          engine: this.currentTranscription.engine,
+          sessionId: this.currentTranscription.sessionId
+        });
         
         return {
           success: true,
@@ -221,7 +265,14 @@ export class TranscriptionService {
       throw new Error('Hybrid transcription failed to start');
       
     } catch (error) {
-      console.error('Hybrid transcription startup failed:', error);
+      console.error('[HybridTranscription] Startup failed:', error);
+      
+      // Cleanup on error
+      if (this.mediaRecorder) {
+        this.mediaRecorder.stop();
+        this.mediaRecorder = null;
+      }
+      
       throw error;
     }
   }
@@ -962,14 +1013,74 @@ export class TranscriptionService {
 
   private async processAudioData(audioBlob: Blob): Promise<void> {
     try {
-      // Web Speech API handles transcription directly
-      // This method is now primarily for audio level monitoring
+      console.log('[TranscriptionService] Processing audio data:', {
+        blobSize: audioBlob.size,
+        blobType: audioBlob.type,
+        isRecording: this.isRecording,
+        hasCurrentTranscription: !!this.currentTranscription,
+        isUsingHybrid: !!transcriptionEngineManager
+      });
+
+      // Convert Blob to ArrayBuffer for processing
+      const arrayBuffer = await audioBlob.arrayBuffer();
+      
+      // Send audio to transcription engine manager if using hybrid system
+      if (this.isRecording && transcriptionEngineManager && this.currentTranscription) {
+        try {
+          console.log('[TranscriptionService] Sending audio to hybrid engine:', {
+            arrayBufferSize: arrayBuffer.byteLength,
+            currentEngine: transcriptionEngineManager.currentEngine?.name
+          });
+
+          // Process audio chunk through engine manager
+          const result = await transcriptionEngineManager.processAudioChunk(
+            arrayBuffer,
+            { 
+              format: audioBlob.type.includes('webm') ? 'webm' : 'wav',
+              sampleRate: 16000,
+              channels: 1 
+            }
+          );
+          
+          console.log('[TranscriptionService] Audio chunk processed:', {
+            success: result.success,
+            hasText: !!result.data?.text,
+            textLength: result.data?.text?.length || 0
+          });
+          
+          // Update current transcription if we have results
+          if (result.success && result.data && result.data.text) {
+            // Accumulate text
+            this.currentTranscription.fullText = (this.currentTranscription.fullText || '') + ' ' + result.data.text;
+            this.currentTranscription.text = this.currentTranscription.fullText.trim();
+            
+            console.log('[TranscriptionService] Transcription updated:', {
+              fullTextLength: this.currentTranscription.fullText.length,
+              latestText: result.data.text.substring(0, 50) + '...'
+            });
+            
+            // Update medical terms if provided
+            if (result.data.medicalTerms) {
+              this.currentTranscription.medicalTerms.push(...result.data.medicalTerms);
+            }
+            
+            // Notify callback with updated transcription
+            if (this.transcriptionCallback) {
+              this.transcriptionCallback(this.currentTranscription);
+            }
+          }
+        } catch (error) {
+          console.error('[TranscriptionService] Failed to process audio chunk:', error);
+          // Continue with speech recognition as fallback
+        }
+      }
+      
+      // Web Speech API continues to work in parallel if available
       if (this.speechRecognition) {
-        // Speech recognition handles text processing
-        // We just need to maintain the recording state
+        console.log('[TranscriptionService] Web Speech API active in parallel');
       }
     } catch (error) {
-      console.error('Error processing audio data:', error);
+      console.error('[TranscriptionService] Error processing audio data:', error);
     }
   }
 
