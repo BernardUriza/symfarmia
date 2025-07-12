@@ -10,7 +10,8 @@
       "powered_by_ai": "Impulsado por IA",
       "review_dialog_flow": "Revisar Flujo de Diálogo",
       "start": "Iniciar Grabación",
-      "stop": "Detener Grabación"
+      "stop": "Detener Grabación",
+      "medical_conversation_transcript": "Transcripción de conversación médica"
     },
     "permissions": {
       "access_required": "Acceso Requerido",

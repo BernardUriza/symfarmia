@@ -21,6 +21,7 @@
     "using_fallback": "Using Fallback",
     "no_content_yet": "No content yet",
     "initializing": "Initializing...",
-    "processing": "Processing..."
+    "processing": "Processing...",
+    "press_record_to_start": "Press the record button to start"
   }
 }

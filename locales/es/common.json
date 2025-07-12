@@ -106,6 +106,8 @@
   "cancel": "Cancelar",
   "recording_started": "Grabación Iniciada",
   "clear": "Limpiar",
+  "dismiss": "Descartar",
+  "previous": "Anterior",
   "missing": {
     "key": "clave faltante"
   },

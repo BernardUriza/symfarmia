@@ -21,6 +21,7 @@
     "no_content_yet": "Sin contenido aún",
     "initializing": "Inicializando...",
     "engine_status": "Estado del motor",
-    "processing": "Procesando..."
-    }
+    "processing": "Procesando...",
+    "press_record_to_start": "Presiona el botón de grabación para iniciar"
+  }
 }
