@@ -173,3 +173,65 @@ Complete project documentation is now organized in the [`docs/`](./docs/) direct
 - **[🏛️ Legacy](./docs/legacy/)** - Original system documentation
 - **[🔄 Workflows](./docs/workflows/)** - Process and workflow docs
 - **[📝 Changelog](./docs/changelog/)** - Version history and updates
+
+## 🛠️ Available Scripts
+
+These are the actively maintained scripts in the `scripts/` directory:
+
+### Core Development Scripts
+
+- **`kill-ports.js`** - Cleans ports 3000 and 3001 before starting servers
+  ```bash
+  npm run kill-ports
+  ```
+
+- **`permanent-dev-simple.js`** - Simplified permanent dev server on port 3002
+  ```bash
+  npm run permanent:start  # Start server
+  npm run permanent:stop   # Stop server
+  npm run permanent:status # Check status
+  ```
+
+- **`generate-version.js`** - Generates version info for builds
+  ```bash
+  npm run version:generate
+  ```
+
+### Build & Validation Scripts
+
+- **`build-guardian.js`** - Validates translations and Turbo before builds
+  ```bash
+  npm run build:guardian
+  ```
+
+- **`validate-translations.js`** - Validates all translation keys exist
+  ```bash
+  npm run validate:translations
+  ```
+
+- **`revolutionary-translation-validator.js`** - Enhanced translation validation
+  ```bash
+  npm run translations:validate
+  ```
+
+- **`validate-turbo.js`** - Ensures dev server uses Turbopack
+  - Used internally by build-guardian.js
+
+### Microservice Scripts
+
+- **`setup-microservices.sh`** - Configures SusurroTest microservice
+  ```bash
+  npm run setup:microservices
+  ```
+
+- **`microservice-e2e-guardian.js`** - Validates transcription microservice
+  ```bash
+  npm run test:microservice
+  ```
+
+### Utility Scripts
+
+- **`kill-brave-cache.js`** - Clears Brave Browser cache
+  ```bash
+  npm run kill:brave-cache
+  ```
