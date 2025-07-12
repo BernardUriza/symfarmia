@@ -78,3 +78,17 @@
 - **Documentación**: Guía completa con ejemplos de uso, endpoints y troubleshooting
 - **Gestión de puertos**: Script `kill-ports.js` para resolver conflictos
 - **Referencia**: Ver `docs/development/dev-notes/microservices.md` para detalles completos
+
+### 2025-07-12 - Implementación de Pruebas E2E para Microservicios
+- ✅ **COMPLETED** - Sistema de pruebas end-to-end integrado en build guardian
+- ✅ Creado `scripts/microservice-e2e-guardian.js` para pruebas automatizadas
+- ✅ Integrado con `build-guardian.js` para validación pre-build
+- ✅ Prueba verifica transcripción contenga "Americans"
+- ✅ Manejo automático del ciclo de vida del microservicio
+
+**Características del Sistema E2E:**
+- **Automatización completa**: Inicia/detiene microservicio según necesidad
+- **Validación estricta**: Busca palabra "Americans" en transcripción
+- **Integración con CI/CD**: Se ejecuta antes de cada build
+- **Debugging mejorado**: Logs detallados para resolución de problemas
+- **Scripts npm**: `npm run test:microservice` para ejecución manual

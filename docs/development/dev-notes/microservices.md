@@ -272,6 +272,46 @@ kill -9 [PID]
 netstat -tulpn | grep LISTEN
 ```
 
+## 🧪 Pruebas End-to-End (E2E)
+
+### Guardian de Microservicios E2E
+El sistema incluye un guardian automatizado que valida el funcionamiento del microservicio antes de permitir builds.
+
+#### Ejecución Manual
+```bash
+# Ejecutar prueba E2E del microservicio
+npm run test:microservice
+
+# Ejecutar prueba específica de Susurro-Test
+npm run test:microservice:susurro
+```
+
+#### Integración con Build Guardian
+El `build-guardian.js` ejecuta automáticamente las pruebas E2E del microservicio:
+1. Verifica si el microservicio está activo
+2. Lo inicia si es necesario
+3. Ejecuta prueba de transcripción
+4. Verifica que la palabra "Americans" esté en la transcripción
+5. Detiene el servicio si lo inició
+
+#### Criterios de Éxito
+- ✅ Servidor responde al health check
+- ✅ Transcripción completa en menos de 30 segundos
+- ✅ La transcripción contiene la palabra "Americans"
+- ✅ El modelo de Whisper funciona correctamente
+
+#### Script Guardian E2E
+```bash
+# Ubicación
+/scripts/microservice-e2e-guardian.js
+
+# Características
+- Manejo automático del ciclo de vida del servicio
+- Timeout configurable (15s para inicio, 30s para test)
+- Logs detallados para debugging
+- Limpieza automática al finalizar
+```
+
 ## 🔍 Troubleshooting
 
 ### Problema: Puerto en uso
