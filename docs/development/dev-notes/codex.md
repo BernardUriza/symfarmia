@@ -39,3 +39,16 @@
 - **Architecture**: Modular domain-driven design active
 - **ModelManager**: Extension needed for medical AI workflows
 - **Testing**: End-to-end medical functionality validation required
+
+### Microservicios Documentados (2025-07-12)
+- **Susurro-Test**: Servicio de transcripción activo en puerto 3001
+- **Servidor Permanente**: Puerto 3002 para desarrollo estable
+- **Medical AI Service**: Planificado para puerto 3003 (configuración preparada)
+- **Documentación completa**: `docs/development/dev-notes/microservices.md`
+- **Gestión de puertos**: Usar `npm run kill-ports` si hay conflictos
+
+**Importante para desarrollo:**
+- Al trabajar con microservicios, siempre verificar puertos disponibles
+- Susurro-Test requiere `nodejs-whisper` instalado
+- Los microservicios se comunican vía REST API con CORS habilitado
+- Cada servicio tiene su propio health check endpoint

@@ -64,3 +64,17 @@
 - **State Management**: Zustand stores active (Redux being phased out)
 - **CI/CD**: Intelligent pipeline monitoring builds
 - **Performance**: Medical workflow optimization in progress
+
+### 2025-07-12 - Documentación de Microservicios
+- ✅ **COMPLETED** - Documentación completa de arquitectura de microservicios
+- ✅ Creado `docs/development/dev-notes/microservices.md` con guía detallada
+- ✅ Documentado microservicio Susurro-Test (transcripción de audio)
+- ✅ Documentado servidor de desarrollo permanente
+- ✅ Documentado Medical AI Service planificado
+- ✅ Actualizado CLAUDE.md con sección de microservicios
+
+**Detalles Técnicos:**
+- **Microservicio activo**: Susurro-Test en puerto 3001 para transcripción de audio
+- **Documentación**: Guía completa con ejemplos de uso, endpoints y troubleshooting
+- **Gestión de puertos**: Script `kill-ports.js` para resolver conflictos
+- **Referencia**: Ver `docs/development/dev-notes/microservices.md` para detalles completos
