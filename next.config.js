@@ -11,16 +11,19 @@ const nextConfig = {
     serverComponentsExternalPackages: ['@xenova/transformers']
   },
 
-  webpack: (config, { dev, isServer }) => {
-    config.resolve.fallback = {
-      ...config.resolve.fallback,
-      fs: false,
-      path: false,
-      crypto: false,
-    };
-    
-    return config;
-  },
+  // Webpack configuration only for production builds
+  ...(process.env.NODE_ENV === 'production' && {
+    webpack: (config, { dev, isServer }) => {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        path: false,
+        crypto: false,
+      };
+      
+      return config;
+    },
+  }),
 
   async headers() {
     return [

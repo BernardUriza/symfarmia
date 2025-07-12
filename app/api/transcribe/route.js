@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { WaveFile } from 'wavefile';
 
 // Configuración requerida para Netlify
 export const runtime = 'nodejs';
@@ -106,13 +107,19 @@ export async function POST(request) {
     let modelUsed = '';
     
     // Estrategia de transcripción basada en entorno
-    if (isTurbopack || isDevelopment) {
+    if (false) {
       console.log('🔄 Modo desarrollo detectado, intentando Whisper con fallback...');
       
       try {
         // Intentar Whisper real primero
         const whisper = await initializeWhisper();
-        const result = await whisper(arrayBuffer, {
+        
+        // Convertir ArrayBuffer a Float32Array
+        const audioContext = new (globalThis.AudioContext || globalThis.webkitAudioContext)({ sampleRate: 16000 });
+        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+        const channelData = audioBuffer.getChannelData(0); // Get first channel as Float32Array
+        
+        const result = await whisper(channelData, {
           language: 'spanish',
           task: 'transcribe'
         });
@@ -141,18 +148,88 @@ export async function POST(request) {
       
       // Producción: Whisper real
       const whisper = await initializeWhisper();
-      const result = await whisper(arrayBuffer, {
-        language: 'spanish',
-        task: 'transcribe',
-        return_timestamps: false
-      });
       
-      transcriptionResult = result?.text || '';
-      processingMethod = 'whisper-production';
-      modelUsed = 'Xenova/whisper-small';
-      
-      if (!transcriptionResult) {
-        throw new Error('Whisper no pudo procesar el audio');
+      try {
+        // Usar wavefile para procesar el audio en Node.js
+        const wav = new WaveFile();
+        
+        // Determinar el formato del archivo de audio
+        if (audioFile.type === 'audio/wav' || audioFile.name.endsWith('.wav')) {
+          // Cargar directamente archivos WAV
+          wav.fromBuffer(Buffer.from(arrayBuffer));
+        } else {
+          // Para otros formatos, intentar procesarlos como WAV PCM de 16 bits
+          // Esto asume que el audio ya está en formato PCM
+          console.log('⚠️ Archivo no es WAV, intentando procesar como PCM raw');
+          
+          // Crear un WAV básico con los datos de audio
+          wav.fromScratch(1, 16000, '16', audioData);
+        }
+        
+        // Convertir a 32-bit float
+        wav.toBitDepth('32f');
+        
+        // Asegurar que esté a 16kHz
+        wav.toSampleRate(16000);
+        
+        // Obtener las muestras de audio como Float32Array
+        let audioSamples = wav.getSamples();
+        
+        // Si es estéreo o multicanal, tomar solo el primer canal
+        if (Array.isArray(audioSamples)) {
+          audioSamples = audioSamples[0];
+        }
+        
+        console.log('🎵 Audio procesado:', {
+          channels: wav.fmt.numChannels,
+          sampleRate: wav.fmt.sampleRate,
+          bitDepth: wav.bitDepth,
+          samplesLength: audioSamples.length
+        });
+        
+        const result = await whisper(audioSamples, {
+          language: 'spanish',
+          task: 'transcribe',
+          return_timestamps: false
+        });
+        
+        transcriptionResult = result?.text || '';
+        processingMethod = 'whisper-production';
+        modelUsed = 'Xenova/whisper-small';
+        
+        if (!transcriptionResult) {
+          throw new Error('Whisper no pudo procesar el audio');
+        }
+      } catch (audioError) {
+        console.error('❌ Error procesando audio:', audioError);
+        
+        // Si falla el procesamiento de audio, intentar pasar los datos directamente
+        // como último recurso
+        console.log('🔄 Intentando procesamiento directo del audio...');
+        
+        // Convertir ArrayBuffer a Float32Array asumiendo PCM 16-bit
+        const dataView = new DataView(arrayBuffer);
+        const audioSamples = new Float32Array(arrayBuffer.byteLength / 2);
+        
+        for (let i = 0; i < audioSamples.length; i++) {
+          // Leer PCM 16-bit y normalizar a Float32 [-1, 1]
+          const sample = dataView.getInt16(i * 2, true);
+          audioSamples[i] = sample / 32768.0;
+        }
+        
+        const result = await whisper(audioSamples, {
+          language: 'spanish',
+          task: 'transcribe',
+          return_timestamps: false
+        });
+        
+        transcriptionResult = result?.text || '';
+        processingMethod = 'whisper-production-direct';
+        modelUsed = 'Xenova/whisper-small';
+        
+        if (!transcriptionResult) {
+          throw new Error('Whisper no pudo procesar el audio');
+        }
       }
     }
     
