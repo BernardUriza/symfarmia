@@ -6,7 +6,7 @@ import DashboardMetrics from './DashboardMetrics';
 import EfficiencyChart from './EfficiencyChart';
 import QuickActions from './QuickActions';
 import PatientWorkflow from '../patient/PatientWorkflow';
-import { useI18n } from '@/domains/core/hooks/useI18n';
+import { useI18n } from '@/domains/core';
 import { Activity } from 'lucide-react';
 import HydrationSafeDateDisplay from '../../../src/components/HydrationSafeDateDisplay';
 

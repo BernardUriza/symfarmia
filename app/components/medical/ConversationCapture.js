@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useTranslation } from "../../providers/I18nProvider";
-import { useAudioRecorder } from "@/domains/medical-ai/hooks/useAudioRecorder";
+import { useAudioRecorder } from "@/domains/medical-ai";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";

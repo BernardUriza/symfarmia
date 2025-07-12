@@ -45,7 +45,7 @@ console.log('\n🎯 USAGE EXAMPLES:');
 console.log(`
 // In any component:
 import { CompactLanguageSwitcher } from '../ui/LanguageSwitcher';
-import { useI18n } from '@/domains/core/hooks/useI18n';
+import { useI18n } from '@/domains/core';
 
 function MyComponent() {
   const { t, locale, setLocale } = useI18n();

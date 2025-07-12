@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react'
-import { useMicrophoneDiagnostics } from '@/domains/medical-ai/hooks/useMicrophoneDiagnostics'
+import { useMicrophoneDiagnostics } from '@/domains/medical-ai'
 
 describe('useMicrophoneDiagnostics', () => {
   it('initial permission state is prompt', () => {
