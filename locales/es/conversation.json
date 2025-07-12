@@ -30,5 +30,21 @@
     "doctor_inquiry": "¿Puede describir el dolor? ¿Es pulsátil, punzante o sordo?",
     "patient_description": "Es más bien un dolor sordo y constante, especialmente en el lado derecho de mi cabeza.",
     "doctor_followup": "¿Ha probado algún medicamento o tratamiento..."
+  },
+  "permissions": {
+    "access_required": "Acceso Requerido",
+    "access_denied": "Acceso Denegado",
+    "microphone_denied": "Se denegó el acceso al micrófono. Por favor, permita el acceso al micrófono en la configuración de su navegador.",
+    "audio_init_failed": "Error al inicializar el audio. Por favor, recargue la página e intente de nuevo.",
+    "microphone_description": "Necesitamos acceso a su micrófono para transcribir la conversación médica en tiempo real.",
+    "audio_description": "Necesitamos inicializar el audio para la transcripción en tiempo real.",
+    "fix_instructions": "Para solucionar esto:",
+    "fix_step1": "Haga clic en el icono del candado en la barra de direcciones",
+    "fix_step2": "Encuentre \"Micrófono\" y cambie a \"Permitir\"",
+    "fix_step3": "Recargue la página e intente de nuevo",
+    "requesting": "Solicitando...",
+    "try_again": "Intentar de Nuevo",
+    "grant_access": "Otorgar Acceso",
+    "privacy_notice": "Su audio es procesado localmente y no se almacena sin su consentimiento."
   }
 }

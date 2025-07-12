@@ -52,11 +52,11 @@ const LandingPage = ({
   };
 
   const handleLoginClick = () => {
-    onLoginClick?.() || (window.location.href = '/api/auth/login?returnTo=/legacy');
+    onLoginClick?.() || (window.location.href = '/auth/login?returnTo=/legacy');
   };
 
   const handleRegisterClick = () => {
-    onRegisterClick?.() || (window.location.href = '/api/auth/login?returnTo=/legacy');
+    onRegisterClick?.() || (window.location.href = '/auth/login?returnTo=/legacy');
   };
 
   return (

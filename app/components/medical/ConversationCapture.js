@@ -13,22 +13,44 @@ import { Mic, MicOff, Volume2, ChevronRight, Activity } from 'lucide-react';
 
 export function ConversationCapture({ onNext, isRecording, setIsRecording }) {
   const { t } = useTranslation();
+  const [engineError, setEngineError] = React.useState(null);
+  const [showPermissionDialog, setShowPermissionDialog] = React.useState(false);
+  
   const {
     transcription,
     status,
     startTranscription,
     stopTranscription,
+    error: transcriptionError,
+    engineStatus
   } = useTranscription({ realTimeUpdates: true });
 
   const audioLevel = useMicrophoneLevel(isRecording);
 
   const toggleRecording = async () => {
-    if (isRecording) {
-      await stopTranscription();
+    try {
+      setEngineError(null);
+      
+      if (isRecording) {
+        await stopTranscription();
+        setIsRecording(false);
+      } else {
+        const started = await startTranscription();
+        if (started) {
+          setIsRecording(true);
+        } else {
+          // Handle permission or initialization error
+          if (transcriptionError?.includes('permission') || transcriptionError?.includes('microphone')) {
+            setShowPermissionDialog(true);
+          } else {
+            setEngineError(transcriptionError || 'Failed to start transcription');
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error toggling recording:', error);
+      setEngineError(error.message || 'An error occurred');
       setIsRecording(false);
-    } else {
-      const started = await startTranscription();
-      if (started) setIsRecording(true);
     }
   };
 
@@ -36,6 +58,29 @@ export function ConversationCapture({ onNext, isRecording, setIsRecording }) {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
+      {/* Error Alert */}
+      {engineError && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
+          <strong className="font-bold">{t('common.error')}: </strong>
+          <span className="block sm:inline">{engineError}</span>
+          <button
+            className="absolute top-0 bottom-0 right-0 px-4 py-3"
+            onClick={() => setEngineError(null)}
+          >
+            <span className="text-2xl">&times;</span>
+          </button>
+        </div>
+      )}
+      
+      {/* Engine Status Info */}
+      {engineStatus && engineStatus !== 'ready' && (
+        <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded">
+          <span className="text-sm">
+            {t('transcription.engine_status')}: {engineStatus}
+            {engineStatus === 'fallback' && ` - ${t('transcription.using_fallback')}`}
+          </span>
+        </div>
+      )}
       <div className="text-center mb-6">
         <h1 className="text-2xl font-medium text-gray-900 dark:text-white mb-2">{t('conversation.capture.title')}</h1>
         <p className="text-gray-700 dark:text-gray-300">{t('conversation.capture.subtitle')}</p>
@@ -149,6 +194,20 @@ export function ConversationCapture({ onNext, isRecording, setIsRecording }) {
                   {t('conversation.processing.ai_processing')}
                   <span className="animate-pulse">|</span>
                 </p>
+              </div>
+            )}
+            {/* Show message when no transcription yet */}
+            {(!transcription || transcription.segments.length === 0) && !isRecording && (
+              <div className="text-center py-8 text-gray-500">
+                <Mic className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                <p>{t('transcription.no_content_yet')}</p>
+              </div>
+            )}
+            {/* Show initializing message */}
+            {status === TranscriptionStatus.INITIALIZING && (
+              <div className="text-center py-4 text-blue-600">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                <p className="text-sm">{t('transcription.initializing')}</p>
               </div>
             )}
           </div>

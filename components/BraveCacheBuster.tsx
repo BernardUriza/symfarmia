@@ -2,6 +2,24 @@
 import { useEffect, useState, useCallback, useMemo } from 'react'
 import { logWarn, logError } from '../utils/logger/ProductionLogger'
 
+// Throttled logging to prevent excessive console output
+const throttledLoggers = new Map()
+const getThrottledLogger = (key: string, delay: number = 60000) => {
+  if (!throttledLoggers.has(key)) {
+    let lastLog = 0
+    throttledLoggers.set(key, (message: string, data?: any) => {
+      const now = Date.now()
+      if (now - lastLog > delay) {
+        logWarn(message, data)
+        lastLog = now
+      }
+    })
+  }
+  return throttledLoggers.get(key)
+}
+
+const throttledLogWarn = getThrottledLogger('brave-cache-buster')
+
 /**
  * 🦁 BRAVE CACHE BUSTER - Nuclear Cache Destruction for Development
  * 
@@ -48,7 +66,7 @@ export default function BraveCacheBuster() {
     
     detectBrave().then(isBraveDetected => {
       if (isBraveDetected && process.env.NODE_ENV === 'development') {
-        logWarn('BRAVE BROWSER DETECTED - cache bust tools enabled')
+        throttledLogWarn('BRAVE BROWSER DETECTED - cache bust tools enabled')
         // Show instructions after a delay
         timeoutId = setTimeout(() => setShowInstructions(true), 2000)
       }
@@ -64,7 +82,7 @@ export default function BraveCacheBuster() {
 
   const destroyAllCaches = useCallback(async () => {
     try {
-      logWarn('DESTROYING ALL BRAVE CACHES')
+      logWarn('DESTROYING ALL BRAVE CACHES') // Keep this one as it's user-initiated
       
       // 1. Clear all storage types
       const storageTypes = ['localStorage', 'sessionStorage']
@@ -93,11 +111,12 @@ export default function BraveCacheBuster() {
         try {
           const registrations = await navigator.serviceWorker.getRegistrations()
           const promises = registrations.map(registration => {
-            logWarn('Unregistering service worker', { scope: registration.scope })
             return registration.unregister()
           })
           await Promise.all(promises)
-          logWarn('All service workers unregistered')
+          if (registrations.length > 0) {
+            logWarn(`Unregistered ${registrations.length} service workers`)
+          }
         } catch (e) {
           logWarn('Failed to unregister service workers', { error: e.message })
         }
@@ -108,11 +127,12 @@ export default function BraveCacheBuster() {
         try {
           const cacheNames = await caches.keys()
           const promises = cacheNames.map(cacheName => {
-            logWarn('Destroying cache', { cacheName })
             return caches.delete(cacheName)
           })
           await Promise.all(promises)
-          logWarn('All caches destroyed via Cache API')
+          if (cacheNames.length > 0) {
+            logWarn(`Destroyed ${cacheNames.length} caches via Cache API`)
+          }
         } catch (e) {
           logWarn('Failed to clear caches', { error: e.message })
         }
@@ -122,7 +142,7 @@ export default function BraveCacheBuster() {
       // @ts-ignore - gc is available in some dev environments
       if (window.gc) {
         window.gc()
-        logWarn('Garbage collection forced')
+        // Silent GC, no need to log
       }
       
       logWarn('BRAVE CACHE NUCLEAR DESTRUCTION COMPLETE')
@@ -133,7 +153,7 @@ export default function BraveCacheBuster() {
   }, [])
 
   const forceReloadInBrave = useCallback(() => {
-    logWarn('FORCE RELOADING IN BRAVE')
+    logWarn('FORCE RELOADING IN BRAVE') // Keep this as it's user-initiated
     
     // Multiple reload strategies for Brave
     const strategies = [

@@ -432,6 +432,85 @@ export class MedicalTranscriptionResilience {
   }
 
   /**
+   * Handle transcription engine switch
+   */
+  async handleEngineSwitch(engineSwitchData) {
+    try {
+      console.log('Transcription engine switch detected:', engineSwitchData);
+      
+      // Preserve current transcription state
+      const preservedState = {
+        activeSegments: new Map(this.transcriptionState.activeSegments),
+        pendingSegments: new Map(this.transcriptionState.pendingSegments),
+        lastTranscriptionTime: this.transcriptionState.lastTranscriptionTime
+      };
+      
+      // Notify about engine switch
+      this.triggerCallback('engineSwitched', {
+        fromEngine: engineSwitchData.fromEngine,
+        toEngine: engineSwitchData.toEngine,
+        reason: engineSwitchData.reason,
+        preservedSegments: preservedState.activeSegments.size + preservedState.pendingSegments.size
+      });
+      
+      // Ensure continuity by reprocessing pending segments
+      if (preservedState.pendingSegments.size > 0) {
+        console.log(`Reprocessing ${preservedState.pendingSegments.size} pending segments after engine switch`);
+        
+        for (const [segmentId, segment] of preservedState.pendingSegments) {
+          await this.reprocessSegment(segment, engineSwitchData.toEngine);
+        }
+      }
+      
+      // Update metrics
+      this.metrics.engineSwitches = (this.metrics.engineSwitches || 0) + 1;
+      
+      // Check if emergency mode needed
+      if (engineSwitchData.reason === 'critical_failure' || 
+          engineSwitchData.toEngine === 'mock-fallback') {
+        await this.triggerEmergencyMode('engine_failure', engineSwitchData);
+      }
+      
+    } catch (error) {
+      console.error('Error handling engine switch:', error);
+      await medicalGradeErrorHandler.handleError(error, {
+        component: 'MedicalTranscriptionResilience',
+        operation: 'handleEngineSwitch',
+        engineData: engineSwitchData
+      });
+    }
+  }
+
+  /**
+   * Reprocess segment with new engine
+   */
+  async reprocessSegment(segment, newEngine) {
+    try {
+      // Mark segment for reprocessing
+      segment.reprocessing = true;
+      segment.reprocessEngine = newEngine;
+      
+      // Move to active segments
+      this.transcriptionState.activeSegments.set(segment.id, segment);
+      
+      // Trigger reprocessing through audio chunk manager
+      if (segment.audioData) {
+        await audioChunkManager.reprocessChunk(segment.audioData, {
+          segmentId: segment.id,
+          priority: 'high',
+          engine: newEngine
+        });
+      }
+      
+    } catch (error) {
+      console.error('Error reprocessing segment:', error);
+      segment.reprocessing = false;
+      segment.error = error.message;
+      this.transcriptionState.errorSegments++;
+    }
+  }
+
+  /**
    * Handle quality degradation
    */
   async handleQualityDegradation(qualityData) {

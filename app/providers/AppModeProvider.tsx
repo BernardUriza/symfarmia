@@ -1,5 +1,5 @@
 "use client"
-import { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, Suspense } from 'react';
 import { DemoAPIProvider } from './DemoAPIProvider';
 import { LiveAPIProvider } from './LiveAPIProvider';
 import { createDatabase } from '../infrastructure/database';
@@ -31,7 +31,8 @@ export function useAppMode() {
   return context;
 }
 
-export function AppModeProvider({ children }: { children: React.ReactNode }) {
+// Inner component that uses useSearchParams
+function AppModeProviderInner({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [appMode, setAppMode] = useLocalStorage<'live' | 'demo'>('appMode', 'live');
@@ -161,5 +162,32 @@ export function AppModeProvider({ children }: { children: React.ReactNode }) {
     <AppModeContext.Provider value={value}>
       {children}
     </AppModeContext.Provider>
+  );
+}
+
+// Loading fallback component
+function AppModeProviderFallback({ children }: { children: React.ReactNode }) {
+  // Provide default values during loading
+  const value = {
+    appMode: 'live' as const,
+    apiProvider: null,
+    isDemoMode: false,
+    isLiveMode: true,
+    toggleMode: () => {}
+  };
+
+  return (
+    <AppModeContext.Provider value={value}>
+      {children}
+    </AppModeContext.Provider>
+  );
+}
+
+// Public wrapper component that handles Suspense
+export function AppModeProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <Suspense fallback={<AppModeProviderFallback>{children}</AppModeProviderFallback>}>
+      <AppModeProviderInner>{children}</AppModeProviderInner>
+    </Suspense>
   );
 }

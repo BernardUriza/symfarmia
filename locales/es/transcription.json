@@ -1,21 +1,25 @@
 {
   "transcription": {
     "title": "Transcripción Médica",
-    "ready_to_record": "Listo para Grabar",
-    "start_recording": "Iniciar Grabación",
-    "stop_recording": "Detener Grabación",
+    "ready_to_record": "Listo para grabar",
+    "start_recording": "Iniciar grabación",
+    "stop_recording": "Detener grabación",
     "no_transcript_available": "No hay transcripción disponible",
-    "reset_demo": "Llamar al administrador para llenar este valor",
-    "final_transcript": "Llamar al administrador para llenar este valor",
-    "service_label": "Llamar al administrador para llenar este valor",
-    "medical_ai_active": "Llamar al administrador para llenar este valor",
-    "words_count": "Llamar al administrador para llenar este valor",
-    "recording": "Llamar al administrador para llenar este valor",
-    "transcribing": "Llamar al administrador para llenar este valor",
-    "demo_empty_state": "Llamar al administrador para llenar este valor",
-    "no_transcript_description": "Llamar al administrador para llenar este valor",
-    "service_browser": "Llamar al administrador para llenar este valor",
-    "service_whisper": "Llamar al administrador para llenar este valor",
-    "ai_active": "Llamar al administrador para llenar este valor"
-  }
+    "reset_demo": "Reiniciar demostración",
+    "final_transcript": "Transcripción final",
+    "service_label": "Motor de transcripción",
+    "medical_ai_active": "IA médica activa",
+    "words_count": "Palabras transcritas",
+    "recording": "Grabando audio...",
+    "transcribing": "Transcribiendo...",
+    "demo_empty_state": "Sin datos de demostración",
+    "no_transcript_description": "Aún no hay texto transcrito",
+    "service_browser": "Reconocimiento del navegador",
+    "service_whisper": "Whisper AI (OpenAI)",
+    "ai_active": "IA activada",
+    "using_fallback": "Usando motor alternativo",
+    "no_content_yet": "Sin contenido aún",
+    "initializing": "Inicializando...",
+    "engine_status": "Estado del motor"
+    }
 }

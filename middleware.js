@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { withMiddlewareAuthRequired } from '@auth0/nextjs-auth0/edge';
+import { auth0 } from './lib/auth0';
 
 // Protected routes that require authentication
 const protectedRoutes = [
@@ -22,15 +22,15 @@ const publicRoutes = [
   '/legacy'
 ];
 
-// Auth routes
+// Auth routes (handled by Auth0 v4 middleware)
 const authRoutes = [
-  '/api/auth/login',
-  '/api/auth/logout',
-  '/api/auth/callback',
-  '/api/auth/me'
+  '/auth/login',
+  '/auth/logout',
+  '/auth/callback',
+  '/auth/me'
 ];
 
-export default function middleware(request) {
+export default async function middleware(request) {
   const { pathname, search } = request.nextUrl;
   const url = request.nextUrl.clone();
 
@@ -44,9 +44,9 @@ export default function middleware(request) {
     return NextResponse.next();
   }
 
-  // Allow auth routes to pass through
-  if (authRoutes.some(route => pathname.startsWith(route))) {
-    return NextResponse.next();
+  // Handle Auth0 routes (v4 automatically handles /auth/* routes)
+  if (pathname.startsWith('/auth/')) {
+    return auth0.middleware(request);
   }
 
   // Check if the route is protected
@@ -62,13 +62,16 @@ export default function middleware(request) {
       return NextResponse.next();
     }
 
-    // Redirect to login with returnTo parameter
-    if (!request.cookies.get('appSession')) {
-      const returnUrl = `${pathname}${search}`;
-      url.pathname = '/api/auth/login';
-      url.search = `returnTo=${encodeURIComponent(returnUrl)}`;
-      return NextResponse.redirect(url);
+    // Use Auth0 v4 middleware for authentication check
+    const response = await auth0.middleware(request);
+    
+    // If Auth0 middleware returns a redirect (user not authenticated), use it
+    if (response.status === 302 || response.status === 307) {
+      return response;
     }
+    
+    // Otherwise continue with the request
+    return response;
   }
 
   // Handle trailing slashes for static export

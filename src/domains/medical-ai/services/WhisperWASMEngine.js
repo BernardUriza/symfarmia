@@ -59,10 +59,7 @@ export class WhisperWASMEngine {
       
       // Load Whisper.cpp WASM modules
       await this.loadWhisperModules();
-      
-      // Load model
-      await this.loadModel();
-      
+            
       // Initialize Whisper instance
       await this.initializeWhisperInstance();
       
@@ -101,26 +98,46 @@ export class WhisperWASMEngine {
    */
   async initializeAudioContext() {
     try {
+      // Don't create AudioContext here - it will be created after user interaction
+      // Just check if AudioContext is available
       const AudioContext = window.AudioContext || window.webkitAudioContext;
-      this.audioContext = new AudioContext({
-        sampleRate: this.config.sampleRate,
-        latencyHint: 'interactive'
-      });
-      
-      // Resume audio context if suspended
-      if (this.audioContext.state === 'suspended') {
-        await this.audioContext.resume();
+      if (!AudioContext) {
+        throw new Error('AudioContext not supported in this browser');
       }
       
-      console.log('Audio context initialized:', {
-        sampleRate: this.audioContext.sampleRate,
-        state: this.audioContext.state
-      });
+      console.log('AudioContext support verified, will initialize on user interaction');
       
     } catch (error) {
-      console.error('Failed to initialize audio context:', error);
+      console.error('Failed to verify audio context support:', error);
       throw error;
     }
+  }
+  
+  /**
+   * Set audio context from user interaction
+   */
+  setAudioContext(audioContext, audioStream = null) {
+    this.audioContext = audioContext;
+    this.audioStream = audioStream;
+    console.log('Audio context set from user interaction:', {
+      sampleRate: this.audioContext.sampleRate,
+      state: this.audioContext.state,
+      hasStream: !!audioStream
+    });
+  }
+  
+  /**
+   * Check if user interaction is required
+   */
+  requiresUserInteraction() {
+    return !this.audioContext || this.audioContext.state === 'suspended';
+  }
+  
+  /**
+   * Check if engine is ready
+   */
+  async isReady() {
+    return this.isInitialized && this.audioContext && this.audioContext.state === 'running';
   }
 
   /**

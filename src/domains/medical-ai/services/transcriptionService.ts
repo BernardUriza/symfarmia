@@ -75,6 +75,11 @@ export class TranscriptionService {
   private medicalErrorHandler: any = null;
   private isRecovering = false;
   private networkHealthCheckInterval: number | null = null;
+  private recognitionState: 'idle' | 'starting' | 'running' | 'stopping' = 'idle';
+  private lastNetworkLog = 0;
+  private networkLogThrottle = 60000; // Log network status at most once per minute
+  private consecutiveNetworkErrors = 0;
+  private maxConsecutiveNetworkErrors = 5;
 
   constructor() {
     // Only setup audio context on client side
@@ -484,6 +489,13 @@ export class TranscriptionService {
         context: errorContext
       });
 
+      // Track consecutive network errors
+      if (errorContext.errorType === 'network') {
+        this.consecutiveNetworkErrors++;
+      } else {
+        this.consecutiveNetworkErrors = 0; // Reset on non-network errors
+      }
+
       // Determine recovery strategy
       const recoveryStrategy = this.determineRecoveryStrategy(errorContext);
       
@@ -492,12 +504,16 @@ export class TranscriptionService {
           await this.retryWithExponentialBackoff();
           break;
         case 'fallback':
+          this.retryAttempts = 0; // Reset counters
+          this.consecutiveNetworkErrors = 0;
           await this.switchToFallbackService();
           break;
         case 'buffer':
           await this.enableOfflineMode();
           break;
         case 'abort':
+          this.retryAttempts = 0;
+          this.consecutiveNetworkErrors = 0;
           this.handleCriticalError(event.error, errorContext);
           break;
         default:
@@ -581,6 +597,16 @@ export class TranscriptionService {
   private async retryWithExponentialBackoff(): Promise<void> {
     if (this.retryAttempts >= this.maxRetryAttempts) {
       console.error('Max retry attempts reached');
+      this.retryAttempts = 0; // Reset counter to prevent accumulation
+      await this.switchToFallbackService();
+      return;
+    }
+
+    // Check for too many consecutive network errors
+    if (this.consecutiveNetworkErrors >= this.maxConsecutiveNetworkErrors) {
+      console.error('Too many consecutive network errors, switching to fallback');
+      this.consecutiveNetworkErrors = 0;
+      this.retryAttempts = 0;
       await this.switchToFallbackService();
       return;
     }
@@ -599,9 +625,21 @@ export class TranscriptionService {
     
     console.log(`Retrying speech recognition in ${totalDelay}ms (attempt ${this.retryAttempts}/${this.maxRetryAttempts})`);
     
-    setTimeout(() => {
-      this.restartSpeechRecognition();
+    // Use a timeout handle that can be cancelled if needed
+    const retryTimeout = setTimeout(() => {
+      if (this.isRecording) {
+        this.restartSpeechRecognition();
+      } else {
+        console.log('Recording stopped, cancelling retry');
+        this.retryAttempts = 0;
+        this.isRecovering = false;
+      }
     }, totalDelay);
+    
+    // Store timeout handle for potential cancellation
+    if (this.networkHealthCheckInterval) {
+      clearTimeout(this.networkHealthCheckInterval);
+    }
   }
 
   /**
@@ -610,9 +648,39 @@ export class TranscriptionService {
   private restartSpeechRecognition(): void {
     try {
       if (this.speechRecognition && this.isRecording) {
-        this.speechRecognition.start();
-        this.isRecovering = false;
-        console.log('Speech recognition restarted successfully');
+        // First check if recognition is already running
+        try {
+          this.speechRecognition.stop();
+        } catch (stopError) {
+          // Ignore stop errors - recognition might already be stopped
+        }
+        
+        // Use a small delay to ensure clean state
+        setTimeout(() => {
+          try {
+            if (this.speechRecognition && this.isRecording && this.recognitionState !== 'running') {
+              this.recognitionState = 'starting';
+              this.speechRecognition.start();
+              this.recognitionState = 'running';
+              this.isRecovering = false;
+              console.log('Speech recognition restarted successfully');
+            } else if (this.recognitionState === 'running') {
+              // Already running, just clear recovery flag
+              this.isRecovering = false;
+              console.log('Speech recognition already running');
+            }
+          } catch (startError) {
+            console.error('Failed to start speech recognition:', startError);
+            this.recognitionState = 'idle';
+            if (startError.message && startError.message.includes('already started')) {
+              // Recognition is already running, update state
+              this.recognitionState = 'running';
+              this.isRecovering = false;
+            } else {
+              this.switchToFallbackService();
+            }
+          }
+        }, 100);
       }
     } catch (error) {
       console.error('Failed to restart speech recognition:', error);
@@ -741,9 +809,13 @@ export class TranscriptionService {
         }
       }
       
-      // Log network status for debugging
+      // Log network status for debugging (throttled)
       if (this.isRecording) {
-        console.log('Network health check:', { isOnline, timestamp });
+        const now = Date.now();
+        if (now - this.lastNetworkLog > this.networkLogThrottle) {
+          console.log('Network health check:', { isOnline, timestamp });
+          this.lastNetworkLog = now;
+        }
       }
     } catch (error) {
       console.error('Network health check failed:', error);
@@ -826,8 +898,16 @@ export class TranscriptionService {
       this.mediaRecorder.start(1000); // Capture every 1 second
       
       // Start speech recognition
-      if (this.speechRecognition) {
-        this.speechRecognition.start();
+      if (this.speechRecognition && this.recognitionState !== 'running') {
+        try {
+          this.recognitionState = 'starting';
+          this.speechRecognition.start();
+          this.recognitionState = 'running';
+        } catch (error) {
+          console.error('Failed to start speech recognition:', error);
+          this.recognitionState = 'idle';
+          // Continue without speech recognition - don't fail the entire recording
+        }
       }
       
       this.isRecording = true;
@@ -842,8 +922,15 @@ export class TranscriptionService {
       this.mediaRecorder.stop();
       
       // Stop speech recognition
-      if (this.speechRecognition) {
-        this.speechRecognition.stop();
+      if (this.speechRecognition && this.recognitionState === 'running') {
+        try {
+          this.recognitionState = 'stopping';
+          this.speechRecognition.stop();
+          this.recognitionState = 'idle';
+        } catch (error) {
+          console.error('Failed to stop speech recognition:', error);
+          this.recognitionState = 'idle';
+        }
       }
       
       this.isRecording = false;
