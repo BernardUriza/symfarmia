@@ -10,21 +10,19 @@ import {
   Tooltip, 
   Legend, 
   ResponsiveContainer,
-  BarChart,
   Bar,
   ComposedChart,
   Area,
   AreaChart
 } from 'recharts';
 import { 
-  TrendingUp, 
+ 
   BarChart3, 
   Activity, 
   DollarSign,
   Clock,
   Users,
   FileText,
-  Zap
 } from 'lucide-react';
 import { useI18n } from '@/domains/core';
 import { generateCompleteMockData } from '../../data/mockMedicalData';
@@ -33,7 +31,7 @@ import { calculateWeeklyTrend } from '../../utils/metrics/MedicalKPICalculator';
 /**
  * Custom Tooltip Component
  */
-const CustomTooltip = ({ active, payload, label, locale }) => {
+const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-white dark:bg-gray-800 p-4 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
@@ -344,7 +342,6 @@ const ChartStatistics = ({ data, chartType }) => {
 const EfficiencyChart = ({ 
   dataType = 'consultations', 
   timeRange = 'month', 
-  showProjections = false,
   showStatistics = true 
 }) => {
   const { t } = useI18n();

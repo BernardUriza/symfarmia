@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import { useTranslation } from '../../providers/I18nProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
-import { Badge } from '../ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { ChevronLeft, Download, FileText, Mail, Printer, Share2, Clock, User } from 'lucide-react';
 
@@ -35,7 +34,7 @@ const medicalSummary = {
 };
 
 export function SummaryExport({ onPrevious }) {
-  const { t } = useTranslation();
+  const { t: _t } = useTranslation();
   const [exportFormat, setExportFormat] = useState('pdf');
   const [isExporting, setIsExporting] = useState(false);
 
