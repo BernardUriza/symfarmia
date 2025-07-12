@@ -182,19 +182,70 @@ export async function POST(request) {
           
           console.log('🎵 Audio WAV procesado, muestras:', audioSamples.length);
           
-          // Procesar con Whisper
-          const result = await whisper(audioSamples, {
+          // Calcular duración del audio
+          const audioDuration = audioSamples.length / 16000; // segundos
+          console.log(`⏱️ Duración del audio: ${audioDuration.toFixed(1)} segundos`);
+          
+          // Configurar parámetros para audio largo
+          const whisperOptions = {
             language: 'spanish',
             task: 'transcribe',
             return_timestamps: false
-          });
+          };
           
-          transcriptionResult = result?.text || '';
-          processingMethod = 'whisper-production';
-          modelUsed = 'Xenova/whisper-small';
+          // Si el audio es mayor a 30 segundos, usar chunking
+          if (audioDuration > 30) {
+            console.log('📦 Audio largo detectado, usando chunking...');
+            Object.assign(whisperOptions, {
+              chunk_length_s: 30,     // Procesar en chunks de 30 segundos
+              stride_length_s: 5,     // Overlap de 5 segundos entre chunks
+              batch_size: 1           // Procesar un chunk a la vez
+            });
+          }
           
-          if (!transcriptionResult) {
-            throw new Error('Whisper no pudo procesar el audio');
+          // Procesar con Whisper con manejo de errores robusto
+          try {
+            const result = await whisper(audioSamples, whisperOptions);
+            
+            transcriptionResult = result?.text || '';
+            processingMethod = 'whisper-production';
+            modelUsed = 'Xenova/whisper-small';
+            
+            if (!transcriptionResult) {
+              throw new Error('Whisper no pudo procesar el audio');
+            }
+          } catch (whisperError) {
+            console.error('❌ Error en Whisper:', whisperError);
+            
+            // Si Whisper falla, intentar con audio más corto
+            if (audioDuration > 30) {
+              console.log('🔄 Intentando con audio truncado a 30 segundos...');
+              
+              // Truncar audio a 30 segundos
+              const maxSamples = 30 * 16000; // 30 segundos
+              const truncatedSamples = audioSamples.slice(0, maxSamples);
+              
+              try {
+                const result = await whisper(truncatedSamples, {
+                  language: 'spanish',
+                  task: 'transcribe',
+                  return_timestamps: false
+                });
+                
+                transcriptionResult = result?.text || '';
+                processingMethod = 'whisper-truncated';
+                modelUsed = 'Xenova/whisper-small';
+                
+                if (transcriptionResult) {
+                  transcriptionResult += ' [Audio truncado a 30 segundos]';
+                }
+              } catch (truncateError) {
+                console.error('❌ Error con audio truncado:', truncateError);
+                throw truncateError;
+              }
+            } else {
+              throw whisperError;
+            }
           }
           
         } else {

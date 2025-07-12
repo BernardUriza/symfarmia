@@ -21,6 +21,10 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
+  const recordingTimerRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Límite máximo de grabación (45 segundos)
+  const MAX_RECORDING_TIME = 45000; // milisegundos
 
   const startRecording = useCallback(async () => {
     try {
@@ -215,6 +219,16 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
       
       console.log('✅ Grabación iniciada exitosamente');
       
+      // Configurar timer para detener automáticamente después del límite
+      recordingTimerRef.current = setTimeout(() => {
+        console.log('⏰ Límite de tiempo alcanzado, deteniendo grabación...');
+        setError('Grabación detenida: límite de 45 segundos alcanzado');
+        if (mediaRecorderRef.current) {
+          mediaRecorderRef.current.stop();
+          setIsRecording(false);
+        }
+      }, MAX_RECORDING_TIME);
+      
     } catch (err) {
       console.error('❌ Error iniciando grabación:', err);
       setError(err instanceof Error ? err.message : 'Error accediendo al micrófono');
@@ -224,6 +238,13 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
 
   const stopRecording = useCallback(async () => {
     console.log('🛑 Solicitando detener grabación...');
+    
+    // Limpiar el timer si existe
+    if (recordingTimerRef.current) {
+      clearTimeout(recordingTimerRef.current);
+      recordingTimerRef.current = null;
+      console.log('⏱️ Timer de grabación cancelado');
+    }
     
     if (mediaRecorderRef.current && isRecording) {
       try {
