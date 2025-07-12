@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
+import { convertToWav } from '@/utils/audioConverter';
 
 interface UseAudioRecorderReturn {
   isRecording: boolean;
@@ -122,10 +123,24 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
             console.warn('⚠️ Audio muy pequeño, puede no transcribirse bien');
           }
 
+          // Convertir a WAV para mejor compatibilidad con Whisper
+          let finalAudioBlob = audioBlob;
+          let fileName = 'recording.webm';
+          
+          try {
+            console.log('🔄 Convirtiendo audio a WAV...');
+            finalAudioBlob = await convertToWav(audioBlob);
+            fileName = 'recording.wav';
+            console.log('✅ Audio convertido a WAV exitosamente');
+          } catch (conversionError) {
+            console.warn('⚠️ No se pudo convertir a WAV, enviando formato original:', conversionError);
+            // Continuar con el formato original si la conversión falla
+          }
+
           // Crear FormData para enviar
           const formData = new FormData();
-          const audioFile = new File([audioBlob], 'recording.webm', { 
-            type: audioBlob.type 
+          const audioFile = new File([finalAudioBlob], fileName, { 
+            type: finalAudioBlob.type 
           });
           
           formData.append('audio', audioFile);
