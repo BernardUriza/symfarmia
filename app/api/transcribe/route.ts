@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { nodewhisper } from 'nodejs-whisper';
 import { writeFile, unlink } from 'fs/promises';
+import { existsSync } from 'fs';
 import path from 'path';
 
 export async function POST(request: NextRequest) {
@@ -18,10 +19,17 @@ export async function POST(request: NextRequest) {
     const tempPath = path.join('/tmp', `${Date.now()}-${audioFile.name}`);
     
     await writeFile(tempPath, buffer);
-    // Usar modelo local desde public/models/
-    const modelFullPath = path.join(process.cwd(), 'public', 'models', 'ggml-base.en.bin');
 
-    // Transcribir con nodejs-whisper
+    // Verificar modelo local
+    const modelFullPath = path.join(process.cwd(), 'public', 'models', 'ggml-base.en.bin');
+    console.log('Model path:', modelFullPath);
+    console.log('Audio path:', tempPath);
+    
+    if (!existsSync(modelFullPath)) {
+      console.error('Model file not found at:', modelFullPath);
+      return NextResponse.json({ error: 'Model file not found' }, { status: 500 });
+    }
+    
     const result = await nodewhisper(tempPath, {
       modelName: modelFullPath,
       removeWavFileAfterTranscription: false,
