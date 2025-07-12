@@ -14,22 +14,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Permanent Development Server
 
-For continuous testing and reviews, use the permanent dev server:
+A simplified, reliable dev server that runs on port 3002:
 
 ```bash
-npm run permanent:start   # Start permanent server on port 3002
-npm run permanent:status  # Check if server is running
-npm run permanent:stop    # Stop permanent server
-npm run permanent:restart # Restart permanent server
-npm run permanent:logs    # View server logs
+npm run permanent:start   # Start server on port 3002
+npm run permanent:status  # Check server status (with health check)
+npm run permanent:stop    # Stop server
+npm run permanent:restart # Restart server
+npm run permanent:logs    # View server logs (real-time)
 ```
 
 **Key features:**
-- **Stable URL**: Always available at http://localhost:3002
-- **TypeScript bypass**: Runs even with TypeScript errors
-- **Process management**: Background process with PID tracking
-- **Log monitoring**: Dedicated log file at `/tmp/symfarmia-permanent-dev.log`
-- **CI/CD integration**: Works alongside the main CI/CD pipeline
+- **Simple & Reliable**: Direct Next.js execution without complex wrappers
+- **Persistent**: Runs in background with proper process detachment
+- **Smart Status**: Checks both process and HTTP response
+- **Log File**: All output saved to `/tmp/symfarmia-permanent.log`
+- **No Build Guards**: Bypasses translation locks and type checks
+- **Quick Start**: Usually ready in 10-20 seconds
 
 ## Microservicios
 
