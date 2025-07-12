@@ -15,4 +15,15 @@ npm install sharp@0.32.6 --platform=linux --arch=x64 --silent
 echo "🏗️ Building Next.js..."
 npm run build
 
+# Verificar que .next existe
+if [ -d ".next" ]; then
+    echo "✅ Directorio .next creado exitosamente"
+    ls -la .next/
+else
+    echo "❌ Error: Directorio .next no encontrado"
+    echo "📂 Contenido del directorio actual:"
+    ls -la
+    exit 1
+fi
+
 echo "✅ Build completado exitosamente"

@@ -86,6 +86,12 @@
     "legacy_core",
     "legacy-design/figma-exports/**/*",
     "docs/legacy/**/*",
-    "src/stores/**/*"
+    "src/stores/**/*",
+    "__tests__/**/*",
+    "tests/**/*",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx"
   ]
 }
