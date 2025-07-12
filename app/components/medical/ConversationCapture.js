@@ -2,7 +2,6 @@
 
 import React from "react";
 import { useTranslation } from "../../providers/I18nProvider";
-import { useMicrophoneLevel } from "../../../hooks/useMicrophoneLevel";
 import { useAudioRecorder } from "../../../hooks/useAudioRecorder";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
@@ -18,12 +17,12 @@ export function ConversationCapture({ onNext, isRecording, setIsRecording }) {
     isTranscribing,
     transcript,
     error: transcriptionError,
+    audioLevel,
+    duration,
     startRecording: startAudioRecording,
     stopRecording: stopAudioRecording,
     clearTranscript,
   } = useAudioRecorder();
-
-  const audioLevel = useMicrophoneLevel(isRecording);
 
   const toggleRecording = async () => {
     try {
@@ -62,9 +61,9 @@ export function ConversationCapture({ onNext, isRecording, setIsRecording }) {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      {renderEngineError(engineError, setEngineError, t)}
+      {renderEngineError(engineError || transcriptionError, setEngineError, t)}
       {renderHeader(t)}
-      {renderRecordingCard(isRecording, isTranscribing, t, audioLevel, toggleRecording)}
+      {renderRecordingCard(isRecording, isTranscribing, t, audioLevel, duration, toggleRecording)}
       {renderLiveTranscription(transcriptionSegments, transcript, isRecording, isTranscribing, t, clearAllTranscriptions)}
       {renderNavigation(onNext, t)}
     </div>
@@ -103,13 +102,13 @@ function renderHeader(t) {
   );
 }
 
-function renderRecordingCard(isRecording, isTranscribing, t, audioLevel, toggleRecording) {
+function renderRecordingCard(isRecording, isTranscribing, t, audioLevel, duration, toggleRecording) {
   return (
     <Card className="border-2 border-dashed border-blue-200 dark:border-blue-700 bg-white dark:bg-gray-800 shadow-sm">
       <CardContent className="p-8 text-center">
         <div className="flex flex-col items-center space-y-4">
           {renderMicIcon(isRecording)}
-          {renderRecordingStatus(isRecording, isTranscribing, t, audioLevel)}
+          {renderRecordingStatus(isRecording, isTranscribing, t, audioLevel, duration)}
           {renderToggleButton(isRecording, isTranscribing, t, toggleRecording)}
         </div>
       </CardContent>
@@ -138,7 +137,13 @@ function renderMicIcon(isRecording) {
   );
 }
 
-function renderRecordingStatus(isRecording, isTranscribing, t, audioLevel) {
+function renderRecordingStatus(isRecording, isTranscribing, t, audioLevel, duration) {
+  const formatDuration = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
   return (
     <div className="space-y-2">
       <Badge
@@ -151,6 +156,11 @@ function renderRecordingStatus(isRecording, isTranscribing, t, audioLevel) {
           ? t("transcription.processing")
           : t("conversation.capture.ready_to_record")}
       </Badge>
+      {isRecording && duration > 0 && (
+        <div className="text-lg font-mono text-gray-700 dark:text-gray-300">
+          {formatDuration(duration)}
+        </div>
+      )}
       {isRecording && (
         <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-gray-300">
           <Activity className="h-4 w-4" />
@@ -158,7 +168,7 @@ function renderRecordingStatus(isRecording, isTranscribing, t, audioLevel) {
           <div className="w-32 h-2 bg-slate-200 dark:bg-gray-700 rounded-full overflow-hidden">
             <div
               className="h-full bg-green-500 transition-all duration-200"
-              style={{ width: `${Math.min(100, (audioLevel / 255) * 100)}%` }}
+              style={{ width: `${Math.min(100, audioLevel * 100)}%` }}
             />
           </div>
         </div>
