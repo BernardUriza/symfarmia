@@ -75,14 +75,34 @@ const ConsultationPage = () => {
 
   // Auto-save functionality
   useEffect(() => {
+    const autoSave = async () => {
+      if (!selectedPatient || !consultationState.transcriptionText) return;
+      
+      try {
+        // In real app, save to API
+        console.log('Auto-saving consultation:', {
+          patientId: selectedPatient.id,
+          transcription: consultationState.transcriptionText,
+          timestamp: new Date()
+        });
+        
+        setConsultationState(prev => ({
+          ...prev,
+          lastSaved: new Date()
+        }));
+      } catch (error) {
+        console.error('Auto-save failed:', error);
+      }
+    };
+
     let autoSaveInterval: NodeJS.Timeout;
     if (consultationState.autoSaveEnabled && consultationState.transcriptionText.length > 0) {
       autoSaveInterval = setInterval(() => {
-        handleAutoSave();
+        autoSave();
       }, 30000); // Auto-save every 30 seconds
     }
     return () => clearInterval(autoSaveInterval);
-  }, [consultationState.autoSaveEnabled, consultationState.transcriptionText]);
+  }, [consultationState.autoSaveEnabled, consultationState.transcriptionText, selectedPatient]);
 
   const handlePatientSelect = (patient: Patient) => {
     setSelectedPatient(patient);
@@ -102,25 +122,6 @@ const ConsultationPage = () => {
     }));
   };
 
-  const handleAutoSave = async () => {
-    if (!selectedPatient || !consultationState.transcriptionText) return;
-    
-    try {
-      // In real app, save to API
-      console.log('Auto-saving consultation:', {
-        patientId: selectedPatient.id,
-        transcription: consultationState.transcriptionText,
-        timestamp: new Date()
-      });
-      
-      setConsultationState(prev => ({
-        ...prev,
-        lastSaved: new Date()
-      }));
-    } catch (error) {
-      console.error('Auto-save failed:', error);
-    }
-  };
 
   const handleSaveConsultation = async () => {
     if (!selectedPatient || !consultationState.transcriptionText) return;

@@ -1,9 +1,9 @@
 "use client"
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 
-// @ts-ignore - TypeScript React type issues
+// @ts-expect-error - TypeScript React type issues
 const Suspense = React.Suspense;
-// @ts-ignore - TypeScript React type issues  
+// @ts-expect-error - TypeScript React type issues  
 type ReactNode = any;
 import { DemoAPIProvider } from './DemoAPIProvider';
 import { LiveAPIProvider } from './LiveAPIProvider';

@@ -12,21 +12,8 @@ import {
   X
 } from 'lucide-react';
 
-const PatientQuickSearch = ({ onPatientSelect }) => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
-  const [isSearching, setIsSearching] = useState(false);
-  const [selectedFilters, setSelectedFilters] = useState({
-    urgency: 'all',
-    status: 'all',
-    lastVisit: 'all'
-  });
-  const [showFilters, setShowFilters] = useState(false);
-  const [showResults, setShowResults] = useState(false);
-  const searchInputRef = useRef(null);
-
-  // Mock patient data - replace with actual API call
-  const mockPatients = [
+// Mock patient data - replace with actual API call
+const mockPatients = [
     {
       id: 'P001',
       name: 'María González',
@@ -87,28 +74,41 @@ const PatientQuickSearch = ({ onPatientSelect }) => {
       condition: 'Embarazo',
       nextAppointment: '2024-01-16'
     }
-  ];
+];
 
-  const urgencyLabels = {
-    all: 'Todas las Urgencias',
-    high: 'Alta Prioridad',
-    medium: 'Prioridad Media',
-    low: 'Baja Prioridad'
-  };
+const urgencyLabels = {
+  all: 'Todas las Urgencias',
+  high: 'Alta Prioridad',
+  medium: 'Prioridad Media',
+  low: 'Baja Prioridad'
+};
 
-  const statusLabels = {
-    all: 'Todos los Estados',
-    active: 'Activo',
-    pending: 'Pendiente',
-    critical: 'Crítico'
-  };
+const statusLabels = {
+  all: 'Todos los Estados',
+  active: 'Activo',
+  pending: 'Pendiente',
+  critical: 'Crítico'
+};
 
-  const lastVisitLabels = {
-    all: 'Cualquier Fecha',
-    today: 'Hoy',
-    week: 'Esta Semana',
-    month: 'Este Mes'
-  };
+const lastVisitLabels = {
+  all: 'Cualquier Fecha',
+  today: 'Hoy',
+  week: 'Esta Semana',
+  month: 'Este Mes'
+};
+
+const PatientQuickSearch = ({ onPatientSelect }) => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [selectedFilters, setSelectedFilters] = useState({
+    urgency: 'all',
+    status: 'all',
+    lastVisit: 'all'
+  });
+  const [showFilters, setShowFilters] = useState(false);
+  const [showResults, setShowResults] = useState(false);
+  const searchInputRef = useRef(null);
 
   useEffect(() => {
     const performSearch = (term) => {

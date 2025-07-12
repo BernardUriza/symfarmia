@@ -8,7 +8,6 @@ import { ClinicalNotes } from '../components/medical/ClinicalNotes';
 import { OrderEntry } from '../components/medical/OrderEntry';
 import { SummaryExport } from '../components/medical/SummaryExport';
 import { Button } from '../components/ui/button';
-import { Badge } from '../components/ui/badge';
 import { Progress } from '../components/ui/progress';
 import { Mic, MicOff, Clock, User, ArrowLeft, Stethoscope, FileText, Users, FolderOpen, MessageSquare, Activity, ClipboardList, Download } from 'lucide-react';
 import Link from 'next/link';
@@ -26,7 +25,7 @@ const MedicalWorkflowSteps = (t) => ([
 
 export default function MedicalAIDemo() {
   const { t } = useTranslation();
-  const { patients, selectedPatient, loading, selectPatient, getSelectedPatient } = useDemoPatients();
+  const { patients, selectPatient, getSelectedPatient } = useDemoPatients();
   const [showPatientSelector, setShowPatientSelector] = useState(true);
   const [externalPatient, setExternalPatient] = useState(null);
   const steps = MedicalWorkflowSteps(t);
