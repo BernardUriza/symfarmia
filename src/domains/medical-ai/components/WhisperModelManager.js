@@ -6,12 +6,29 @@
 
 import React, { useState, useEffect } from 'react';
 import { WhisperWASMEngine } from '../services/WhisperWASMEngine';
-import ModelDownloadProgress from './ModelDownloadProgress';
 import { useModelDownload } from '../hooks/useModelDownload';
+
+// Storage quota check helper
+const checkStorageQuota = async () => {
+  if (!navigator.storage || !navigator.storage.estimate) {
+    return { quota: 0, usage: 0, available: 0 };
+  }
+  try {
+    const estimate = await navigator.storage.estimate();
+    return {
+      quota: estimate.quota || 0,
+      usage: estimate.usage || 0,
+      available: (estimate.quota || 0) - (estimate.usage || 0)
+    };
+  } catch (error) {
+    console.error('Failed to check storage quota:', error);
+    return { quota: 0, usage: 0, available: 0 };
+  }
+};
 
 const WhisperModelManager = ({ onModelReady = null }) => {
   const [engine, setEngine] = useState(null);
-  const [cacheInfo, setCacheInfo] = useState(null);
+  const [storageInfo, setStorageInfo] = useState(null);
   const [selectedModel, setSelectedModel] = useState('base.en');
   const [isInitializing, setIsInitializing] = useState(false);
   const [error, setError] = useState(null);
@@ -37,9 +54,9 @@ const WhisperModelManager = ({ onModelReady = null }) => {
         
         setEngine(whisperEngine);
         
-        // Get cache info
-        const info = await whisperEngine.getModelCacheInfo();
-        setCacheInfo(info);
+        // Get storage info
+        const info = await checkStorageQuota();
+        setStorageInfo(info);
         
       } catch (err) {
         console.error('Failed to initialize engine:', err);
@@ -67,9 +84,9 @@ const WhisperModelManager = ({ onModelReady = null }) => {
       
       await engine.initialize();
       
-      // Update cache info after successful load
-      const info = await engine.getModelCacheInfo();
-      setCacheInfo(info);
+      // Update storage info after successful load
+      const info = await checkStorageQuota();
+      setStorageInfo(info);
       
       if (onModelReady) {
         onModelReady(engine);
@@ -85,14 +102,16 @@ const WhisperModelManager = ({ onModelReady = null }) => {
 
   // Clear cache
   const clearCache = async () => {
-    if (!engine) return;
-
     try {
-      const success = await engine.clearModelCache();
-      if (success) {
-        const info = await engine.getModelCacheInfo();
-        setCacheInfo(info);
-      }
+      const deleteReq = indexedDB.deleteDatabase('whisper-models-cache');
+      deleteReq.onsuccess = () => {
+        console.log('Cache cleared successfully');
+        checkStorageQuota().then(setStorageInfo);
+      };
+      deleteReq.onerror = () => {
+        console.error('Failed to clear cache');
+        setError('Failed to clear cache');
+      };
     } catch (err) {
       console.error('Failed to clear cache:', err);
       setError(err.message);
@@ -155,47 +174,26 @@ const WhisperModelManager = ({ onModelReady = null }) => {
         </div>
 
         {/* Storage Information */}
-        {cacheInfo && (
+        {storageInfo && (
           <div className="mb-6 p-4 bg-gray-50 rounded-lg">
             <h3 className="text-sm font-medium text-gray-700 mb-2">Storage Information</h3>
             <div className="grid grid-cols-3 gap-4 text-sm">
               <div>
                 <span className="text-gray-500">Used:</span>
-                <span className="ml-2 font-mono">{cacheInfo.storage.usage}MB</span>
+                <span className="ml-2 font-mono">{Math.round(storageInfo.usage / 1024 / 1024)}MB</span>
               </div>
               <div>
                 <span className="text-gray-500">Available:</span>
-                <span className="ml-2 font-mono">{cacheInfo.storage.available}MB</span>
+                <span className="ml-2 font-mono">{Math.round(storageInfo.available / 1024 / 1024)}MB</span>
               </div>
               <div>
                 <span className="text-gray-500">Total:</span>
-                <span className="ml-2 font-mono">{cacheInfo.storage.quota}MB</span>
+                <span className="ml-2 font-mono">{Math.round(storageInfo.quota / 1024 / 1024)}MB</span>
               </div>
             </div>
           </div>
         )}
 
-        {/* Cached Models */}
-        {cacheInfo && cacheInfo.cachedModels.length > 0 && (
-          <div className="mb-6">
-            <h3 className="text-sm font-medium text-gray-700 mb-3">Cached Models</h3>
-            <div className="space-y-2">
-              {cacheInfo.cachedModels.map((model, index) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                  <div>
-                    <span className="font-medium text-green-800">{model.modelName}</span>
-                    <span className="ml-2 text-sm text-green-600">
-                      ({formatSize(Math.round(model.size / 1024 / 1024))})
-                    </span>
-                  </div>
-                  <div className="text-xs text-green-600">
-                    Cached: {model.cached}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Action Buttons */}
         <div className="flex space-x-4">
@@ -229,18 +227,29 @@ const WhisperModelManager = ({ onModelReady = null }) => {
         </div>
       </div>
 
-      {/* Progress Modal */}
-      <ModelDownloadProgress
-        isVisible={downloadState.isDownloading}
-        progress={downloadState.progress}
-        message={downloadState.message}
-        modelName={downloadState.modelName}
-        onCancel={cancelDownload}
-        onComplete={() => {
-          resetDownload();
-          setIsInitializing(false);
-        }}
-      />
+      {/* Download Progress */}
+      {downloadState.isDownloading && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <h3 className="text-lg font-semibold mb-4">Downloading Model</h3>
+            <p className="text-sm text-gray-600 mb-2">{downloadState.modelName}</p>
+            <p className="text-sm text-gray-500 mb-4">{downloadState.message}</p>
+            <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
+              <div
+                className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                style={{ width: `${downloadState.progress * 100}%` }}
+              />
+            </div>
+            <p className="text-center text-sm font-medium">{Math.round(downloadState.progress * 100)}%</p>
+            <button
+              onClick={cancelDownload}
+              className="mt-4 w-full py-2 px-4 bg-gray-600 text-white rounded hover:bg-gray-700"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

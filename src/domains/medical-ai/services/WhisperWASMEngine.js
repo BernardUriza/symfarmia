@@ -6,8 +6,7 @@
  */
 
 import { TranscriptionStatus } from '../types';
-import { loadRemotePromise, getModelSize, checkStorageQuota } from '../utils/whisperUtils';
-
+import { checkStorageQuota, getModelSize, loadRemotePromise } from '../utils/whisperUtils';
 export class WhisperWASMEngine {
   constructor(config = {}) {
     this.config = {
@@ -58,6 +57,9 @@ export class WhisperWASMEngine {
       
       // Load Whisper.cpp WASM modules
       await this.loadWhisperModules();
+      
+      // Load the model file
+      await this.loadModel();
             
       // Initialize Whisper instance
       await this.initializeWhisperInstance();
@@ -132,12 +134,6 @@ export class WhisperWASMEngine {
     return !this.audioContext || this.audioContext.state === 'suspended';
   }
   
-  /**
-   * Check if engine is ready
-   */
-  async isReady() {
-    return this.isInitialized && this.audioContext && this.audioContext.state === 'running';
-  }
 
   /**
    * Load Whisper.cpp WASM modules
@@ -371,7 +367,9 @@ export class WhisperWASMEngine {
     return this.isInitialized && 
            this.Module && 
            this.whisperInstance && 
-           this.modelFilename;
+           this.modelFilename &&
+           this.audioContext && 
+           this.audioContext.state === 'running';
   }
 
   /**
@@ -463,7 +461,7 @@ export class WhisperWASMEngine {
       };
       
       if (this.currentSession.callbacks.onComplete) {
-        this.currentSession.callbacks.onComplete(result);
+        await this.currentSession.callbacks.onComplete(result);
       }
       
       this.isTranscribing = false;
@@ -805,59 +803,6 @@ export class WhisperWASMEngine {
     return this.currentSession;
   }
 
-  /**
-   * Get model cache information
-   */
-  async getModelCacheInfo() {
-    try {
-      const storageInfo = await checkStorageQuota();
-      const { getCachedModels } = await import('../utils/whisperUtils');
-      const cachedModels = await getCachedModels();
-      
-      return {
-        storage: {
-          quota: Math.round(storageInfo.quota / 1024 / 1024),
-          usage: Math.round(storageInfo.usage / 1024 / 1024),
-          available: Math.round(storageInfo.available / 1024 / 1024)
-        },
-        cachedModels: cachedModels,
-        currentModel: {
-          name: this.config.modelName,
-          path: this.config.modelPath,
-          estimatedSize: getModelSize(this.config.modelName)
-        }
-      };
-    } catch (error) {
-      console.error('Failed to get cache info:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Clear model cache
-   */
-  async clearModelCache() {
-    try {
-      const { clearCache } = await import('../utils/whisperUtils');
-      return await clearCache();
-    } catch (error) {
-      console.error('Failed to clear cache:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Remove specific model from cache
-   */
-  async removeModelFromCache(modelUrl) {
-    try {
-      const { removeFromCache } = await import('../utils/whisperUtils');
-      return await removeFromCache(modelUrl);
-    } catch (error) {
-      console.error('Failed to remove model from cache:', error);
-      throw error;
-    }
-  }
 
   /**
    * Cleanup resources
