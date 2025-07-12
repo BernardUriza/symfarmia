@@ -15,7 +15,6 @@ try {
 const nextConfig = {
   // Detectar entorno de Netlify y configurar output apropiado
   ...(process.env.NETLIFY && {
-    // En Netlify, NO usar export - usar configuración estándar
     trailingSlash: true,
     images: {
       unoptimized: true // Para compatibilidad con Netlify
@@ -31,20 +30,12 @@ const nextConfig = {
     }
   }),
 
-  // Configuración de orígenes permitidos
-  allowedDevOrigins: [
-    'http://127.0.0.1:3000', 
-    'http://localhost:3000',
-    'http://127.0.0.1:3002',
-    'http://localhost:3002',
-    'http://127.0.0.1:*',
-    'http://localhost:*'
-  ],
-  
   typescript: { ignoreBuildErrors: true },
   eslint: { ignoreDuringBuilds: true },
 
+  // CRÍTICO: Deshabilitar Sharp en Netlify
   images: {
+    unoptimized: true, // Deshabilita Sharp completamente
     formats: ['image/webp', 'image/avif'],
     minimumCacheTTL: 86400,
     dangerouslyAllowSVG: true,
@@ -53,84 +44,38 @@ const nextConfig = {
       { protocol: 'https', hostname: '**.edgestore.dev' },
       { protocol: 'https', hostname: 'avatars.githubusercontent.com' },
     ],
-    // Desoptimizar imágenes en Netlify para evitar problemas
-    ...(process.env.NETLIFY && { unoptimized: true })
   },
 
   compress: true,
   poweredByHeader: false,
   generateEtags: true,
 
-  onDemandEntries: {
-    maxInactiveAge: 25 * 1000,
-    pagesBufferLength: 2,
-  },
-
-  // Turbopack solo en desarrollo
-  turbopack: process.env.NODE_ENV === 'development' ? {
-    rules: {
-      '*.{svg,eot,ttf,woff,woff2}': {
-        loaders: ['@vercel/turbopack-loader-font'],
-        as: 'font'
-      }
-    },
-    resolveAlias: {
-      '@': '/workspaces/symfarmia',
-      '@/components': '/workspaces/symfarmia/src/components',
-      '@/app': '/workspaces/symfarmia/app',
-      '@/hooks': '/workspaces/symfarmia/hooks',
-      '@/lib': '/workspaces/symfarmia/lib',
-      '@/utils': '/workspaces/symfarmia/src/utils',
-      '@/services': '/workspaces/symfarmia/app/services',
-      '@/providers': '/workspaces/symfarmia/app/providers'
-    },
-    resolveExtensions: ['.tsx', '.ts', '.jsx', '.js', '.json', '.mjs', '.cjs']
-  } : undefined,
-
   experimental: {
     optimizeCss: false,
     // Configuración específica para @xenova/transformers en Netlify
-    ...(process.env.NETLIFY && {
-      serverComponentsExternalPackages: ['@xenova/transformers']
-    })
+    serverComponentsExternalPackages: ['@xenova/transformers']
   },
 
-  // Webpack solo para producción
-  ...(process.env.NODE_ENV === 'production' && {
-    webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
-      if (!dev) {
-        // Configuración específica para @xenova/transformers
-        config.resolve.alias = {
-          ...config.resolve.alias,
-          '@xenova/transformers': '@xenova/transformers/dist/transformers.min.js'
-        };
-        
-        // Optimización para Netlify
-        if (process.env.NETLIFY) {
-          config.optimization.splitChunks = {
-            chunks: 'all',
-            cacheGroups: {
-              transformers: {
-                test: /[\\/]node_modules[\\/]@xenova[\\/]/,
-                name: 'transformers',
-                chunks: 'async',
-              }
-            }
-          };
-        }
-        
-        // Font handling para producción
-        config.module.rules.push({
-          test: /\.(woff|woff2|eot|ttf|otf)$/i,
-          type: 'asset/resource',
-          generator: {
-            filename: 'static/fonts/[name].[hash][ext]'
-          }
-        });
-      }
-      return config;
+  // Webpack configuración mínima
+  webpack: (config, { dev, isServer }) => {
+    // Solo en producción
+    if (!dev && !isServer) {
+      // Ignorar sharp para evitar errores de build
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        'sharp$': false,
+      };
+      
+      // Configuración para @xenova/transformers
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        path: false,
+        crypto: false,
+      };
     }
-  }),
+    return config;
+  },
 
   async headers() {
     return [
@@ -147,7 +92,6 @@ const nextConfig = {
         source: '/api/(.*)',
         headers: [
           { key: 'Cache-Control', value: 'no-store, max-age=0' },
-          // Headers específicos para API de transcripción
           { key: 'Access-Control-Allow-Origin', value: '*' },
           { key: 'Access-Control-Allow-Methods', value: 'POST, GET, OPTIONS' },
           { key: 'Access-Control-Allow-Headers', value: 'Content-Type, Authorization' }
@@ -156,25 +100,6 @@ const nextConfig = {
       {
         source: '/_next/static/(.*)',
         headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
-      },
-      // Headers específicos para archivos de modelo
-      {
-        source: '/:path*.wasm',
-        headers: [
-          { key: 'Content-Type', value: 'application/wasm' },
-          { key: 'Cross-Origin-Embedder-Policy', value: 'require-corp' },
-          { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
-          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
-        ],
-      },
-      {
-        source: '/models/:path*.bin',
-        headers: [
-          { key: 'Content-Type', value: 'application/octet-stream' },
-          { key: 'Cross-Origin-Embedder-Policy', value: 'require-corp' },
-          { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
-          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
-        ],
       },
     ];
   },

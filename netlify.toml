@@ -1,5 +1,5 @@
 [build]
-  command = "npm run build"
+  command = "chmod +x build-netlify.sh && ./build-netlify.sh"
   # ❌ ELIMINAR: publish = "out"
   # ✅ NUEVO: Dejar que @netlify/plugin-nextjs maneje el publish automáticamente
 
