@@ -13,7 +13,7 @@
     "kill:brave-cache": "node scripts/kill-brave-cache.js",
     "kill:brave-cache:bash": "./scripts/kill-brave-cache.sh",
     "validate-turbo": "node scripts/validate-turbo.js",   
-    "build": "npm run version:generate && npx prisma generate && next build",  
+    "build": "next build",  
     "build:guardian": "node scripts/build-guardian.js --build && npm run build",
     "build:original": "npm run version:generate && npm run type-check && npx prisma generate && next build",
     "build:enhanced": "node scripts/enhanced-build.js",
