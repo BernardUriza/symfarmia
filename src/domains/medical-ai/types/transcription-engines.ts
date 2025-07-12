@@ -40,12 +40,6 @@ export interface WhisperWASMConfig extends TranscriptionEngineConfig {
   n_threads?: number;
 }
 
-export interface WebSpeechConfig extends TranscriptionEngineConfig {
-  continuous?: boolean;
-  interimResults?: boolean;
-  maxAlternatives?: number;
-}
-
 // Audio data types
 export type AudioData = Float32Array | ArrayBuffer | Blob | AudioBuffer;
 

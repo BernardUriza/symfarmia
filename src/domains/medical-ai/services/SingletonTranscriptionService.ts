@@ -4,13 +4,16 @@ import {
   AudioConfig,
   ServiceResponse,
 } from '../types';
-import { transcriptionEngineManager } from './TranscriptionEngineManager';
 
 export class SingletonTranscriptionService {
   private mediaRecorder: MediaRecorder | null = null;
+  private audioChunks: Blob[] = [];
   private currentTranscription: TranscriptionResult | null = null;
   private isRecording = false;
   private transcriptionCallback: ((result: TranscriptionResult) => void) | null = null;
+  private recordingStartTime = 0;
+  private chunkInterval: NodeJS.Timeout | null = null;
+  private microserviceUrl = 'http://localhost:3001';
 
   async startTranscription(
     config: AudioConfig,
@@ -79,7 +82,7 @@ export class SingletonTranscriptionService {
       text: '',
       fullText: '',
       duration: 0,
-      engine: 'webapi',
+      engine: 'susurro-test',
       confidence: 0,
       timestamp: new Date(),
       createdAt: new Date(),
@@ -97,91 +100,89 @@ export class SingletonTranscriptionService {
     this.mediaRecorder = new MediaRecorder(stream, {
       mimeType: this.getMimeType(config.format || 'webm')
     });
+    this.audioChunks = [];
+    this.recordingStartTime = Date.now();
+    
     this.mediaRecorder.ondataavailable = (event) => {
       if (event.data.size > 0) {
-        this.processAudioData(event.data);
+        this.audioChunks.push(event.data);
       }
     };
+    
     this.mediaRecorder.start(1000);
     this.isRecording = true;
+    
+    // Process chunks every 10 seconds
+    this.chunkInterval = setInterval(() => {
+      if (this.audioChunks.length > 0) {
+        this.processAudioChunks();
+      }
+    }, 10000);
   }
 
   private stopRecording(): void {
     if (this.mediaRecorder && this.isRecording) {
       this.mediaRecorder.stop();
       this.isRecording = false;
+      
+      if (this.chunkInterval) {
+        clearInterval(this.chunkInterval);
+        this.chunkInterval = null;
+      }
+      
+      // Process remaining chunks
+      if (this.audioChunks.length > 0) {
+        this.processAudioChunks();
+      }
+      
       if (this.currentTranscription) {
         this.currentTranscription.status = TranscriptionStatus.PROCESSING;
+        this.currentTranscription.duration = (Date.now() - this.recordingStartTime) / 1000;
       }
     }
   }
 
 
-  private async processAudioData(audioBlob: Blob): Promise<void> {
+  private async processAudioChunks(): Promise<void> {
+    if (this.audioChunks.length === 0 || !this.currentTranscription) return;
+    
     try {
-      console.log('[TranscriptionService] Processing audio data:', {
-        blobSize: audioBlob.size,
-        blobType: audioBlob.type,
-        isRecording: this.isRecording,
-        hasCurrentTranscription: !!this.currentTranscription,
-        isUsingHybrid: false
-      });
-
-      // Convert Blob to ArrayBuffer for processing
-      const arrayBuffer = await audioBlob.arrayBuffer();
+      // Combine chunks into single blob
+      const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
+      this.audioChunks = [];
       
-      // Send audio to transcription engine manager if using hybrid system
-      if (this.isRecording && this.currentTranscription) {
-        try {
-          console.log('[TranscriptionService] Sending audio to engine:', {
-            arrayBufferSize: arrayBuffer.byteLength,
-            currentEngine: this.currentTranscription.engine
-          });
-
-          // Process audio chunk through engine manager
-          const result = await transcriptionEngineManager.processAudioChunk(
-            arrayBuffer,
-            { 
-              format: audioBlob.type.includes('webm') ? 'webm' : 'wav',
-              sampleRate: 16000,
-              channels: 1 
-            }
-          );
-          
-          console.log('[TranscriptionService] Audio chunk processed:', {
-            success: result.success,
-            hasText: !!result.data?.text,
-            textLength: result.data?.text?.length || 0
-          });
-          
-          // Update current transcription if we have results
-          if (result.success && result.data && result.data.text) {
-            // Accumulate text
-            this.currentTranscription.fullText = (this.currentTranscription.fullText || '') + ' ' + result.data.text;
-            this.currentTranscription.text = this.currentTranscription.fullText.trim();
-            
-            console.log('[TranscriptionService] Transcription updated:', {
-              fullTextLength: this.currentTranscription.fullText.length,
-              latestText: result.data.text.substring(0, 50) + '...'
-            });
-            
-            // Update medical terms if provided
-            if (result.data.medicalTerms) {
-              this.currentTranscription.medicalTerms.push(...result.data.medicalTerms);
-            }
-            
-            // Notify callback with updated transcription
-            if (this.transcriptionCallback) {
-              this.transcriptionCallback(this.currentTranscription);
-            }
-          }
-        } catch (error) {
-          console.error('[TranscriptionService] Failed to process audio chunk:', error);
-          // Continue with speech recognition as fallback
+      // Create form data for microservice
+      const formData = new FormData();
+      formData.append('audio', audioBlob, 'audio.wav');
+      formData.append('language', 'es');
+      
+      // Send to SusurroTest microservice
+      const response = await fetch(`${this.microserviceUrl}/api/transcribe-upload`, {
+        method: 'POST',
+        body: formData
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Microservice error: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      
+      if (result.transcription && this.currentTranscription) {
+        // Update transcription
+        this.currentTranscription.fullText = 
+          (this.currentTranscription.fullText + ' ' + result.transcription).trim();
+        this.currentTranscription.text = this.currentTranscription.fullText;
+        this.currentTranscription.confidence = result.confidence || 0.85;
+        
+        // Notify callback
+        if (this.transcriptionCallback) {
+          this.transcriptionCallback(this.currentTranscription);
         }
       }
+      
     } catch (error) {
-      console.error('[TranscriptionService] Error processing audio data:', error);
+      console.error('[SingletonTranscriptionService] Error processing audio chunks:', error);
     }
   }
 

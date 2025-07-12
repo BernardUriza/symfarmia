@@ -9,9 +9,9 @@ import { transcriptionService } from '../services/transcriptionService';
 import {
   TranscriptionResult,
   TranscriptionStatus,
-  AudioConfig,
-  ServiceResponse
+  AudioConfig
 } from '../types';
+import { useMemo } from 'react';
 
 interface UseTranscriptionProps {
   autoStart?: boolean;
@@ -59,17 +59,17 @@ export const useTranscription = (props: UseTranscriptionProps = {}): UseTranscri
   const statusRef = useRef<TranscriptionStatus>(TranscriptionStatus.IDLE);
 
   // Default audio configuration with medical optimization
-  const defaultAudioConfig: AudioConfig = {
+  const defaultAudioConfig: AudioConfig = useMemo(() => ({
     sampleRate: 44100,
     channels: 1,
     bitDepth: 16,
-    format: 'webm' as any,
+    format: 'webm', // Assuming 'format' is of type string in AudioConfig
     noiseReduction: true,
     medicalOptimization,
     realTimeProcessing: true,
     maxDuration: 3600,
     ...customAudioConfig
-  };
+  }), [medicalOptimization, customAudioConfig]);
 
   // Update refs when state changes
   useEffect(() => {

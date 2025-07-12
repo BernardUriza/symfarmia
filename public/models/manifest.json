@@ -65,6 +65,6 @@
     "performance": "Base models are recommended for real-time transcription, small models for batch processing",
     "memory": "Ensure at least 1GB of available RAM for base models, 2GB for small models",
     "browser": "Enable SharedArrayBuffer for optimal performance (requires secure context)",
-    "fallback": "WebSpeechEngine will be used as fallback if WASM fails"
+    "fallback": "Native browser speech recognition will be used as fallback if WASM fails"
   }
 }
