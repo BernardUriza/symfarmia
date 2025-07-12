@@ -35,7 +35,10 @@
     "permanent:logs": "./scripts/permanent-dev-server.sh logs",
     "dev:susurro": "cd microservices/susurro-test && npm run dev",
     "dev:all": "concurrently \"npm run dev\" \"npm run dev:susurro\"",
-    "setup:microservices": "./scripts/setup-microservices.sh"
+    "setup:microservices": "./scripts/setup-microservices.sh",
+    "test:microservice": "node scripts/microservice-e2e-guardian.js",
+    "test:microservice:susurro": "cd microservices/susurro-test && npm test",
+    "kill-ports": "node scripts/kill-ports.js"
   },
   "dependencies": {
     "@auth0/nextjs-auth0": "^4.8.0",
