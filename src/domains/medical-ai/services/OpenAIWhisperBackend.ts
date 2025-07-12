@@ -6,9 +6,36 @@
  */
 
 import { TranscriptionStatus } from '../types';
+import {
+  TranscriptionEngine,
+  OpenAIWhisperConfig,
+  InitializationResult,
+  TranscriptionResult,
+  TranscriptionSession,
+  TranscriptionCallbacks,
+  AudioData,
+  AudioChunk,
+  EngineStats,
+  CompressionManager,
+  CostOptimizer,
+  MedicalContext,
+  TranscriptionSegment,
+  TranscriptionCompleteEvent
+} from '../types/transcription-engines';
 
-export class OpenAIWhisperBackend {
-  constructor(config = {}) {
+export class OpenAIWhisperBackend implements TranscriptionEngine {
+  private config: OpenAIWhisperConfig;
+  private isInitialized: boolean = false;
+  private isTranscribing: boolean = false;
+  private currentSession: TranscriptionSession | null = null;
+  private audioBuffer: AudioChunk[] = [];
+  private compressionManager: CompressionManager | null = null;
+  private costOptimizer: CostOptimizer | null = null;
+  private medicalContext: MedicalContext | null = null;
+  private retryCount: number = 0;
+  private connectionTested: boolean = false;
+
+  constructor(config: OpenAIWhisperConfig = {}) {
     this.config = {
       apiKey: config.apiKey || (typeof process !== 'undefined' && process.env?.OPENAI_API_KEY) || null,
       model: config.model || 'whisper-1',
@@ -21,28 +48,25 @@ export class OpenAIWhisperBackend {
       apiEndpoint: config.apiEndpoint || 'https://api.openai.com/v1/audio/transcriptions',
       ...config
     };
-
-    this.isInitialized = false;
-    this.isTranscribing = false;
-    this.currentSession = null;
-    this.audioBuffer = [];
-    this.compressionManager = null;
-    this.costOptimizer = null;
-    this.medicalContext = null;
-    this.retryCount = 0;
   }
 
   /**
    * Initialize OpenAI Whisper backend
    */
-  async initialize() {
+  async initialize(): Promise<InitializationResult> {
     try {
-      console.log('Initializing OpenAI Whisper backend...');
+      // Initializing OpenAI Whisper backend...
       
       // Validate API key
       if (!this.config.apiKey) {
         console.warn('OpenAI API key not configured. Create a .env file with OPENAI_API_KEY=your_key_here or pass apiKey in config.');
-        throw new Error('OpenAI API key not provided. Please configure OPENAI_API_KEY environment variable or pass apiKey in config.');
+        // Don't throw error immediately - allow graceful degradation
+        this.isInitialized = false;
+        return {
+          success: false,
+          message: 'OpenAI API key not configured',
+          recoverable: true
+        };
       }
       
       // Initialize audio compression manager
@@ -51,24 +75,34 @@ export class OpenAIWhisperBackend {
       // Initialize cost optimizer
       await this.initializeCostOptimizer();
       
-      // Test API connection
-      await this.testConnection();
-      
+      // Skip API connection test during initialization for graceful degradation
+      // Connection will be tested on first actual transcription attempt
       this.isInitialized = true;
-      console.log('OpenAI Whisper backend initialized successfully');
+      console.log('✓ OpenAI Whisper backend ready');
+      
+      return {
+        success: true,
+        message: 'OpenAI Whisper backend initialized',
+        apiKeyConfigured: true
+      };
       
     } catch (error) {
       console.error('Failed to initialize OpenAI Whisper backend:', error);
-      throw error;
+      // Return error info instead of throwing
+      return {
+        success: false,
+        message: error.message,
+        recoverable: true
+      };
     }
   }
 
   /**
    * Initialize audio compression manager
    */
-  async initializeCompressionManager() {
+  private async initializeCompressionManager(): Promise<void> {
     try {
-      const { AudioCompressionManager } = await import('./AudioCompressionManager.js');
+      const { AudioCompressionManager } = await import('./AudioCompressionManager.js') as any;
       this.compressionManager = new AudioCompressionManager({
         targetFormat: 'webm',
         targetBitrate: 64000, // 64 kbps for cost optimization
@@ -77,7 +111,7 @@ export class OpenAIWhisperBackend {
       });
       
       await this.compressionManager.initialize();
-      console.log('Audio compression manager initialized');
+      // Audio compression manager initialized
     } catch (error) {
       console.warn('Audio compression manager initialization failed:', error);
     }
@@ -86,9 +120,9 @@ export class OpenAIWhisperBackend {
   /**
    * Initialize cost optimizer
    */
-  async initializeCostOptimizer() {
+  private async initializeCostOptimizer(): Promise<void> {
     try {
-      const { CostOptimizedWhisper } = await import('./CostOptimizedWhisper.js');
+      const { CostOptimizedWhisper } = await import('./CostOptimizedWhisper.js') as any;
       this.costOptimizer = new CostOptimizedWhisper({
         maxDurationPerRequest: 600, // 10 minutes
         batchRequests: this.config.costOptimization,
@@ -97,17 +131,22 @@ export class OpenAIWhisperBackend {
       });
       
       await this.costOptimizer.initialize();
-      console.log('Cost optimizer initialized');
+      // Cost optimizer initialized
     } catch (error) {
       console.warn('Cost optimizer initialization failed:', error);
     }
   }
 
   /**
-   * Test API connection
+   * Test API connection (deferred - called on first transcription)
    */
-  async testConnection() {
+  private async testConnection(): Promise<boolean> {
     try {
+      // Skip if already tested
+      if (this.connectionTested) {
+        return true;
+      }
+      
       // Create a minimal test audio file
       const testAudio = this.createTestAudioFile();
       
@@ -125,29 +164,32 @@ export class OpenAIWhisperBackend {
         throw new Error(`API connection test failed: ${response.status}`);
       }
       
-      console.log('OpenAI API connection test successful');
+      this.connectionTested = true;
+      // API connection test successful
+      return true;
       
     } catch (error) {
       console.warn('API connection test failed:', error);
-      // Don't fail initialization for connection test failure
+      // Return false but don't throw - allow fallback to other engines
+      return false;
     }
   }
 
   /**
    * Create test audio file for connection testing
    */
-  createTestAudioFile() {
+  private createTestAudioFile(): FormData {
     // Create minimal FormData with test audio
     const formData = new FormData();
     
     // Create a minimal audio blob (1 second of silence)
-    const audioContext = new AudioContext({ sampleRate: 16000 });
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 16000 });
     const buffer = audioContext.createBuffer(1, 16000, 16000);
     const blob = new Blob([buffer.getChannelData(0)], { type: 'audio/wav' });
     
     formData.append('file', blob, 'test.wav');
-    formData.append('model', this.config.model);
-    formData.append('language', this.config.language);
+    formData.append('model', this.config.model || 'whisper-1');
+    formData.append('language', this.config.language || 'es');
     
     return formData;
   }
@@ -155,14 +197,14 @@ export class OpenAIWhisperBackend {
   /**
    * Check if engine is ready
    */
-  async isReady() {
+  async isReady(): Promise<boolean> {
     return this.isInitialized && this.config.apiKey;
   }
 
   /**
    * Start transcription
    */
-  async startTranscription(audioConfig, callbacks = {}) {
+  async startTranscription(audioConfig?: any, callbacks: TranscriptionCallbacks = {}): Promise<TranscriptionResult> {
     if (!this.isInitialized) {
       throw new Error('OpenAI Whisper backend not initialized');
     }
@@ -175,20 +217,23 @@ export class OpenAIWhisperBackend {
     this.currentSession = {
       id: `openai-session-${Date.now()}`,
       startTime: Date.now(),
+      status: TranscriptionStatus.RECORDING,
       audioConfig,
       callbacks,
       segments: [],
       fullText: '',
       medicalTerms: [],
       totalCost: 0,
-      apiCalls: 0
+      apiCalls: 0,
+      language: this.config.language || 'es',
+      medicalMode: this.config.medicalMode
     };
 
     // Clear audio buffer
     this.audioBuffer = [];
     this.retryCount = 0;
 
-    console.log('Starting OpenAI Whisper transcription');
+    // Starting OpenAI Whisper transcription
     
     return {
       success: true,
@@ -203,7 +248,7 @@ export class OpenAIWhisperBackend {
   /**
    * Stop transcription
    */
-  async stopTranscription() {
+  async stopTranscription(): Promise<TranscriptionResult> {
     if (!this.isTranscribing || !this.currentSession) {
       throw new Error('No active transcription');
     }
@@ -230,7 +275,7 @@ export class OpenAIWhisperBackend {
   /**
    * Process audio chunk
    */
-  async processAudioChunk(audioData, config) {
+  async processAudioChunk(audioData: AudioData, config?: any): Promise<TranscriptionResult> {
     console.log('[OpenAI Whisper] processAudioChunk called:', {
       hasData: !!audioData,
       dataSize: audioData?.byteLength || audioData?.length || 0,
@@ -249,10 +294,13 @@ export class OpenAIWhisperBackend {
     try {
       // Compress audio for cost optimization
       const compressedAudio = await this.compressAudio(audioData);
+      // Audio compressed
+      if (false) { // Debug logging disabled
       console.log('[OpenAI Whisper] Audio compressed:', {
         originalSize: audioData?.byteLength || audioData?.length || 0,
         compressedSize: compressedAudio?.byteLength || compressedAudio?.length || 0
       });
+      }
       
       // Add to buffer
       this.audioBuffer.push({
@@ -288,7 +336,7 @@ export class OpenAIWhisperBackend {
   /**
    * Compress audio for API efficiency
    */
-  async compressAudio(audioData) {
+  private async compressAudio(audioData: AudioData): Promise<AudioData> {
     try {
       if (this.compressionManager) {
         return await this.compressionManager.compressForAPI(audioData);
@@ -306,7 +354,7 @@ export class OpenAIWhisperBackend {
   /**
    * Basic audio compression fallback
    */
-  basicAudioCompression(audioData) {
+  private basicAudioCompression(audioData: AudioData): AudioData {
     // Simple downsampling for smaller file size
     if (audioData instanceof Float32Array) {
       const downsampledLength = Math.floor(audioData.length / 2);
@@ -325,7 +373,7 @@ export class OpenAIWhisperBackend {
   /**
    * Determine if buffer should be processed
    */
-  async shouldProcessBuffer() {
+  private async shouldProcessBuffer(): Promise<boolean> {
     if (this.audioBuffer.length === 0) return false;
     
     // Check cost optimizer recommendations
@@ -341,7 +389,7 @@ export class OpenAIWhisperBackend {
   /**
    * Process accumulated audio buffer
    */
-  async processAudioBuffer() {
+  private async processAudioBuffer(): Promise<void> {
     if (this.audioBuffer.length === 0) return;
     
     try {
@@ -369,7 +417,7 @@ export class OpenAIWhisperBackend {
   /**
    * Combine audio chunks into single file
    */
-  async combineAudioChunks(chunks) {
+  private async combineAudioChunks(chunks: AudioChunk[]): Promise<Float32Array> {
     try {
       // Calculate total length
       const totalLength = chunks.reduce((sum, chunk) => {
@@ -399,7 +447,7 @@ export class OpenAIWhisperBackend {
   /**
    * Create form data for API request
    */
-  async createFormData(audioData) {
+  private async createFormData(audioData: AudioData): Promise<FormData> {
     const formData = new FormData();
     
     // Convert audio to blob
@@ -423,7 +471,7 @@ export class OpenAIWhisperBackend {
   /**
    * Get medical context prompt
    */
-  getMedicalPrompt() {
+  private getMedicalPrompt(): string {
     const basePrompt = 'Este es una transcripción médica en español. ';
     
     if (this.medicalContext) {
@@ -436,7 +484,7 @@ export class OpenAIWhisperBackend {
   /**
    * Make API request with retry logic
    */
-  async makeAPIRequest(formData) {
+  private async makeAPIRequest(formData: FormData): Promise<any> {
     for (let attempt = 0; attempt <= this.config.maxRetries; attempt++) {
       try {
         const response = await fetch(this.config.apiEndpoint, {
@@ -479,7 +527,7 @@ export class OpenAIWhisperBackend {
   /**
    * Estimate API call cost
    */
-  estimateAPICallCost(formData) {
+  private estimateAPICallCost(formData: FormData): number {
     try {
       // Get audio file size
       const audioFile = formData.get('file');
@@ -500,7 +548,9 @@ export class OpenAIWhisperBackend {
   /**
    * Process API result
    */
-  async processAPIResult(result) {
+  private async processAPIResult(result: any): Promise<void> {
+    // API result received
+    if (false) { // Debug logging disabled
     console.log('[OpenAI Whisper] API result received:', {
       hasResult: !!result,
       hasText: !!result?.text,
@@ -508,31 +558,37 @@ export class OpenAIWhisperBackend {
       textPreview: result?.text?.substring(0, 100) || 'NO_TEXT',
       currentFullTextLength: this.currentSession?.fullText?.length || 0
     });
+    }
     
     if (!result.text) {
       console.warn('[OpenAI Whisper] API result has no text!', result);
       return;
     }
     
-    const segment = {
+    const segment: TranscriptionSegment = {
       id: `openai-segment-${Date.now()}`,
       text: result.text,
       startTime: Date.now(),
       endTime: Date.now(),
       confidence: 0.95, // OpenAI Whisper typically has high confidence
       speaker: 'doctor',
-      language: this.config.language
+      language: this.config.language || 'es',
+      sessionId: this.currentSession!.id,
+      engine: 'openai-whisper'
     };
     
     this.currentSession.segments.push(segment);
     this.currentSession.fullText += ` ${result.text}`;
     
+    // fullText updated
+    if (false) { // Debug logging disabled
     console.log('[OpenAI Whisper] fullText updated:', {
       newTextAdded: result.text.substring(0, 50) + '...',
       fullTextLength: this.currentSession.fullText.length,
       segmentCount: this.currentSession.segments.length,
       hasContent: this.currentSession.fullText.trim().length > 0
     });
+    }
     
     // Extract medical terms
     if (this.config.medicalMode) {
@@ -559,7 +615,7 @@ export class OpenAIWhisperBackend {
   /**
    * Handle API errors
    */
-  async handleAPIError(error) {
+  private async handleAPIError(error: Error | any): Promise<void> {
     console.error('API error:', error);
     
     if (this.currentSession.callbacks.onError) {
@@ -577,8 +633,8 @@ export class OpenAIWhisperBackend {
   /**
    * Handle rate limit errors
    */
-  async handleRateLimitError() {
-    console.log('Rate limit detected, implementing backoff...');
+  private async handleRateLimitError(): Promise<void> {
+    // Rate limit detected, implementing backoff
     
     // Exponential backoff
     const delay = Math.min(1000 * Math.pow(2, this.retryCount), 30000);
@@ -590,8 +646,8 @@ export class OpenAIWhisperBackend {
   /**
    * Handle timeout errors
    */
-  async handleTimeoutError() {
-    console.log('Timeout detected, adjusting buffer size...');
+  private async handleTimeoutError(): Promise<void> {
+    // Timeout detected, adjusting buffer size
     
     // Reduce buffer size for faster processing
     if (this.audioBuffer.length > 1) {
@@ -606,9 +662,9 @@ export class OpenAIWhisperBackend {
   /**
    * Extract medical terms from text
    */
-  async extractMedicalTerms(text) {
+  private async extractMedicalTerms(text: string): Promise<string[]> {
     try {
-      const { MedicalTerminologyEnhancer } = await import('./MedicalTerminologyEnhancer.js');
+      const { MedicalTerminologyEnhancer } = await import('./MedicalTerminologyEnhancer.js') as any;
       const enhancer = new MedicalTerminologyEnhancer();
       return await enhancer.extractTerms(text, 'es-MX');
     } catch (error) {
@@ -620,7 +676,7 @@ export class OpenAIWhisperBackend {
   /**
    * Calculate overall confidence score
    */
-  calculateOverallConfidence() {
+  private calculateOverallConfidence(): number {
     if (!this.currentSession || this.currentSession.segments.length === 0) return 0;
     
     const totalConfidence = this.currentSession.segments.reduce(
@@ -634,16 +690,19 @@ export class OpenAIWhisperBackend {
   /**
    * Finalize transcription session
    */
-  async finalizeTranscription() {
+  private async finalizeTranscription(): Promise<TranscriptionCompleteEvent> {
+    // Finalizing transcription
+    if (false) { // Debug logging disabled
     console.log('[OpenAI Whisper] Finalizing transcription - Pre-check:', {
       hasSession: !!this.currentSession,
       audioBufferLength: this.audioBuffer.length,
       isTranscribing: this.isTranscribing
     });
+    }
     
     // Process any remaining audio before finalization
     if (this.audioBuffer.length > 0) {
-      console.log('[OpenAI Whisper] Processing remaining audio buffer before finalization');
+      // Processing remaining audio buffer
       await this.processAudioBuffer();
     }
     
@@ -654,6 +713,8 @@ export class OpenAIWhisperBackend {
       throw new Error('No active session to finalize');
     }
     
+    // Check session state
+    if (false) { // Debug logging disabled
     console.log('[OpenAI Whisper] Session state:', {
       sessionId: session.id,
       fullTextLength: session.fullText?.length || 0,
@@ -662,6 +723,7 @@ export class OpenAIWhisperBackend {
       apiCalls: session.apiCalls,
       totalCost: session.totalCost
     });
+    }
     
     // Apply medical terminology enhancement
     let enhancedText = session.fullText?.trim() || '';
@@ -670,11 +732,14 @@ export class OpenAIWhisperBackend {
     if (!enhancedText && session.segments?.length > 0) {
       console.warn('[OpenAI Whisper] fullText empty, reconstructing from segments');
       enhancedText = session.segments.map(s => s.text || '').join(' ').trim();
+      // Reconstructed text
+      if (false) { // Debug logging disabled
       console.log('[OpenAI Whisper] Reconstructed text:', {
         segmentCount: session.segments.length,
         reconstructedLength: enhancedText.length,
         preview: enhancedText.substring(0, 100)
       });
+      }
     }
     
     if (!enhancedText) {
@@ -682,14 +747,17 @@ export class OpenAIWhisperBackend {
       enhancedText = '[No transcription available]';
     }
     
+    // Text ready for enhancement
+    if (false) { // Debug logging disabled
     console.log('[OpenAI Whisper] Text ready for enhancement:', {
       textLength: enhancedText.length,
       preview: enhancedText.substring(0, 100)
     });
+    }
     
     if (this.config.medicalMode) {
       try {
-        const { MedicalTerminologyEnhancer } = await import('./MedicalTerminologyEnhancer.js');
+        const { MedicalTerminologyEnhancer } = await import('./MedicalTerminologyEnhancer.js') as any;
         const enhancer = new MedicalTerminologyEnhancer();
         enhancedText = await enhancer.enhanceText(enhancedText, 'es-MX');
       } catch (error) {
@@ -697,7 +765,7 @@ export class OpenAIWhisperBackend {
       }
     }
     
-    console.log(`OpenAI Whisper session completed. Cost: $${session.totalCost.toFixed(4)}, API calls: ${session.apiCalls}, Result: ${enhancedText}`);
+    console.log(`✓ OpenAI Whisper completed - Cost: $${session.totalCost.toFixed(4)}`);
     
     return {
       id: session.id,
@@ -718,15 +786,15 @@ export class OpenAIWhisperBackend {
   /**
    * Set medical context for optimization
    */
-  setMedicalContext(context) {
+  setMedicalContext(context: MedicalContext): void {
     this.medicalContext = context;
-    console.log('Medical context set for OpenAI Whisper backend:', context);
+    // Medical context set
   }
 
   /**
    * Get engine statistics
    */
-  getEngineStats() {
+  getEngineStats(): EngineStats {
     return {
       model: this.config.model,
       backend: 'openai-api',
@@ -743,7 +811,7 @@ export class OpenAIWhisperBackend {
   /**
    * Cleanup resources
    */
-  async cleanup() {
+  async cleanup(): Promise<void> {
     try {
       // Stop any active transcription
       if (this.isTranscribing) {
@@ -766,7 +834,7 @@ export class OpenAIWhisperBackend {
       this.isInitialized = false;
       this.currentSession = null;
       
-      console.log('OpenAI Whisper backend cleanup completed');
+      // Cleanup completed
       
     } catch (error) {
       console.error('Error during OpenAI Whisper backend cleanup:', error);
