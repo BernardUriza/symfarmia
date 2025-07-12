@@ -1,6 +1,6 @@
 "use client";
 
-import { useMedicalHydrationSafe } from '../hooks/useMedicalHydrationSafe';
+import { useMedicalHydrationSafe } from '@/domains/ui';
 
 /**
  * HYDRATION-SAFE DATE DISPLAY COMPONENT

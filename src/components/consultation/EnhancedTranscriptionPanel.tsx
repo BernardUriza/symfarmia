@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { useEnhancedTranscription } from '../../hooks/useEnhancedTranscription';
+import { useEnhancedTranscription } from '@/domains/medical-ai';
 import { VoiceReactiveMicrophone } from '../ui/VoiceReactiveMicrophone';
 import { AudioSpectrum } from '../ui/AudioSpectrum';
 import { LiveTranscriptionDisplay } from '../ui/LiveTranscriptionDisplay';

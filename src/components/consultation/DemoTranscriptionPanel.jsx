@@ -17,7 +17,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { CheckIcon } from "@heroicons/react/24/solid";
 import { useTranslation } from "../../../app/providers/I18nProvider";
-import { useDemoTranscription } from "../../../hooks/useDemoTranscription";
+import { useDemoTranscription } from "@/domains/demo";
 import { useRouter } from 'next/navigation';
 
 const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
