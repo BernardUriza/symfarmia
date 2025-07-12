@@ -7,7 +7,7 @@ import {
   CheckCircleIcon,
   SparklesIcon,
 } from "@heroicons/react/24/outline";
-import { useTranscription } from "../../../hooks/useTranscription";
+import { useNativeSpeechTranscription as useTranscription } from "@/domains/medical-ai";
 import { useTranslation } from "../../../app/providers/I18nProvider";
 import { useAppMode } from "../../../app/providers/AppModeProvider";
 import DemoTranscriptionPanel from "./DemoTranscriptionPanel";
