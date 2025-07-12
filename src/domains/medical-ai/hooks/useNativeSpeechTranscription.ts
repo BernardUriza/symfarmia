@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 // ❌ WHISPER FRONTEND ELIMINADO - Solo Speech API nativa
-import { useConsultation } from '../src/contexts/ConsultationContext';
-import Logger from '../src/utils/logger';
+import { useConsultation } from '@/src/contexts/ConsultationContext';
+import Logger from '@/utils/logger';
 import { useMicrophoneDiagnostics } from './useMicrophoneDiagnostics';
 
 export function useTranscription() {

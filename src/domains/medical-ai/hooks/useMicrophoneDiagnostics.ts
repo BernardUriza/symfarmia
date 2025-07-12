@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import Logger from '../src/utils/logger';
+import Logger from '@/utils/logger';
 
 export interface MicrophoneDiagnostics {
   timestamp: string;

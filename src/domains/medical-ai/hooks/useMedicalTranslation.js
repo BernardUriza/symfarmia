@@ -1,7 +1,9 @@
-import { useTranslation } from 'next-i18next';
+import { useI18n } from '@/domains/core';
 
-export default function useMedicalTranslation(ns = 'medical') {
-  const { t, i18n } = useTranslation(ns);
-  const translateMedicalTerm = (key) => t(key, { ns: 'medical' });
-  return { t, i18n, translateMedicalTerm };
+export function useMedicalTranslation(ns = 'medical') {
+  const { t, locale } = useI18n();
+  const translateMedicalTerm = (key) => t(`medical.${key}`);
+  return { t, i18n: { language: locale }, translateMedicalTerm };
 }
+
+export default useMedicalTranslation;
