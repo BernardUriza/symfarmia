@@ -3,7 +3,7 @@
 import React from "react";
 import { useTranslation } from "../../providers/I18nProvider";
 import { useMicrophoneLevel } from "../../../hooks/useMicrophoneLevel";
-import { useTranscription } from "../../../src/domains/medical-ai/hooks/useTranscription";
+import { useSingletonTranscription } from "../../../src/domains/medical-ai/hooks/useSingletonTranscription";
 import { TranscriptionStatus } from "../../../src/domains/medical-ai/types";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
@@ -20,7 +20,7 @@ export function ConversationCapture({ onNext, isRecording, setIsRecording }) {
     stopTranscription,
     error: transcriptionError,
     engineStatus,
-  } = useTranscription({ realTimeUpdates: true });
+  } = useSingletonTranscription({ realTimeUpdates: true });
   const audioLevel = useMicrophoneLevel(isRecording);
 
   const toggleRecording = async () => {
