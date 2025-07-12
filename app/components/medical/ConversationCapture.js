@@ -3,8 +3,7 @@
 import React from "react";
 import { useTranslation } from "../../providers/I18nProvider";
 import { useMicrophoneLevel } from "../../../hooks/useMicrophoneLevel";
-import { useSingletonTranscription } from "../../../src/domains/medical-ai/hooks/useSingletonTranscription";
-import { TranscriptionStatus } from "../../../src/domains/medical-ai/types";
+import { useAudioRecorder } from "../../../hooks/useAudioRecorder";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
@@ -12,30 +11,42 @@ import { Mic, MicOff, Volume2, ChevronRight, Activity } from "lucide-react";
 
 export function ConversationCapture({ onNext, isRecording, setIsRecording }) {
   const { t } = useTranslation();
-  const [engineError, setEngineError] = React.useState(null)
+  const [engineError, setEngineError] = React.useState(null);
+  const [transcriptionSegments, setTranscriptionSegments] = React.useState([]);
+  
   const {
-    transcription,
-    status,
-    startTranscription,
-    stopTranscription,
+    isTranscribing,
+    transcript,
     error: transcriptionError,
-    engineStatus,
-  } = useSingletonTranscription({ realTimeUpdates: true });
+    startRecording: startAudioRecording,
+    stopRecording: stopAudioRecording,
+    clearTranscript,
+  } = useAudioRecorder();
+
   const audioLevel = useMicrophoneLevel(isRecording);
 
   const toggleRecording = async () => {
     try {
       setEngineError(null);
       if (isRecording) {
-        await stopTranscription();
+        await stopAudioRecording();
         setIsRecording(false);
-      } else {
-        const started = await startTranscription();
-        if (started) {
-          setIsRecording(true);
-        } else {
-          setEngineError(transcriptionError || 'Failed to start transcription');
+        
+        // Agregar segmento completado
+        if (transcript) {
+          const newSegment = {
+            id: Date.now(),
+            speaker: "patient", // Por defecto, se puede cambiar después
+            text: transcript,
+            startTime: new Date(),
+            confidence: 0.9
+          };
+          setTranscriptionSegments(prev => [...prev, newSegment]);
+          clearTranscript();
         }
+      } else {
+        await startAudioRecording();
+        setIsRecording(true);
       }
     } catch (error) {
       setEngineError(error.message || "An error occurred");
@@ -43,13 +54,18 @@ export function ConversationCapture({ onNext, isRecording, setIsRecording }) {
     }
   };
 
+  const clearAllTranscriptions = () => {
+    setTranscriptionSegments([]);
+    clearTranscript();
+    setEngineError(null);
+  };
+
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {renderEngineError(engineError, setEngineError, t)}
-      {renderEngineStatus(engineStatus, t)}
       {renderHeader(t)}
-      {renderRecordingCard(isRecording, t, audioLevel, toggleRecording)}
-      {renderLiveTranscription(transcription, status, isRecording, t)}
+      {renderRecordingCard(isRecording, isTranscribing, t, audioLevel, toggleRecording)}
+      {renderLiveTranscription(transcriptionSegments, transcript, isRecording, isTranscribing, t, clearAllTranscriptions)}
       {renderNavigation(onNext, t)}
     </div>
   );
@@ -74,19 +90,6 @@ function renderEngineError(engineError, setEngineError, t) {
   );
 }
 
-function renderEngineStatus(engineStatus, t) {
-  if (!engineStatus || engineStatus === "ready") return null;
-  return (
-    <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded">
-      <span className="text-sm">
-        {t("transcription.engine_status")}: {engineStatus}
-        {engineStatus === "fallback" &&
-          ` - ${t("transcription.using_fallback")}`}
-      </span>
-    </div>
-  );
-}
-
 function renderHeader(t) {
   return (
     <div className="text-center mb-6">
@@ -100,14 +103,14 @@ function renderHeader(t) {
   );
 }
 
-function renderRecordingCard(isRecording, t, audioLevel, toggleRecording) {
+function renderRecordingCard(isRecording, isTranscribing, t, audioLevel, toggleRecording) {
   return (
     <Card className="border-2 border-dashed border-blue-200 dark:border-blue-700 bg-white dark:bg-gray-800 shadow-sm">
       <CardContent className="p-8 text-center">
         <div className="flex flex-col items-center space-y-4">
           {renderMicIcon(isRecording)}
-          {renderRecordingStatus(isRecording, t, audioLevel)}
-          {renderToggleButton(isRecording, t, toggleRecording)}
+          {renderRecordingStatus(isRecording, isTranscribing, t, audioLevel)}
+          {renderToggleButton(isRecording, isTranscribing, t, toggleRecording)}
         </div>
       </CardContent>
     </Card>
@@ -124,7 +127,7 @@ function renderMicIcon(isRecording) {
       }`}
     >
       {isRecording ? (
-        <MicOff className="h-10 w-10 text-white" />
+        <Mic className="h-10 w-10 text-white" />
       ) : (
         <Mic className="h-10 w-10 text-slate-500 dark:text-gray-300" />
       )}
@@ -135,7 +138,7 @@ function renderMicIcon(isRecording) {
   );
 }
 
-function renderRecordingStatus(isRecording, t, audioLevel) {
+function renderRecordingStatus(isRecording, isTranscribing, t, audioLevel) {
   return (
     <div className="space-y-2">
       <Badge
@@ -144,6 +147,8 @@ function renderRecordingStatus(isRecording, t, audioLevel) {
       >
         {isRecording
           ? t("conversation.capture.recording_active")
+          : isTranscribing
+          ? t("transcription.processing")
           : t("conversation.capture.ready_to_record")}
       </Badge>
       {isRecording && (
@@ -158,16 +163,23 @@ function renderRecordingStatus(isRecording, t, audioLevel) {
           </div>
         </div>
       )}
+      {isTranscribing && (
+        <div className="flex items-center gap-2 text-sm text-blue-600">
+          <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-500 border-t-transparent" />
+          <span>{t("transcription.processing")}</span>
+        </div>
+      )}
     </div>
   );
 }
 
-function renderToggleButton(isRecording, t, toggleRecording) {
+function renderToggleButton(isRecording, isTranscribing, t, toggleRecording) {
   return (
     <Button
       size="lg"
       variant={isRecording ? "destructive" : "default"}
       onClick={toggleRecording}
+      disabled={isTranscribing}
       className="px-8"
       aria-label={
         isRecording
@@ -183,14 +195,14 @@ function renderToggleButton(isRecording, t, toggleRecording) {
       ) : (
         <>
           <Mic className="h-5 w-5 mr-2" />
-          {t("transcription.start_recording")}
+          {isTranscribing ? t("transcription.processing") : t("transcription.start_recording")}
         </>
       )}
     </Button>
   );
 }
 
-function renderLiveTranscription(transcription, status, isRecording, t) {
+function renderLiveTranscription(transcriptionSegments, currentTranscript, isRecording, isTranscribing, t, clearAllTranscriptions) {
   return (
     <Card>
       <CardHeader>
@@ -208,6 +220,16 @@ function renderLiveTranscription(transcription, status, isRecording, t) {
           <Badge variant="outline" className="ml-auto">
             {t("conversation.capture.powered_by_ai")}
           </Badge>
+          {transcriptionSegments.length > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={clearAllTranscriptions}
+              className="ml-2 text-xs"
+            >
+              {t("common.clear")}
+            </Button>
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -217,21 +239,22 @@ function renderLiveTranscription(transcription, status, isRecording, t) {
           aria-live="polite"
           aria-label="Medical conversation transcript"
         >
-          {renderTranscriptionSegments(transcription)}
-          {renderTranscriptionStatus(status, t)}
-          {renderNoTranscription(transcription, isRecording, t)}
-          {renderInitializingStatus(status, t)}
+          {renderTranscriptionSegments(transcriptionSegments)}
+          {renderCurrentTranscript(currentTranscript, isRecording)}
+          {renderProcessingStatus(isTranscribing, t)}
+          {renderNoTranscription(transcriptionSegments, currentTranscript, isRecording, t)}
         </div>
       </CardContent>
     </Card>
   );
 }
 
-function renderTranscriptionSegments(transcription) {
-  if (!transcription?.segments?.length) return null;
-  return transcription.segments.map((segment, index) => (
+function renderTranscriptionSegments(transcriptionSegments) {
+  if (!transcriptionSegments?.length) return null;
+  
+  return transcriptionSegments.map((segment, index) => (
     <div
-      key={index}
+      key={segment.id}
       className="flex gap-4 p-3 rounded-lg bg-slate-50 dark:bg-gray-700 shadow-sm border-2 border-gray-200 dark:border-gray-600 leading-relaxed"
       role="article"
       aria-labelledby={`speaker-${index}`}
@@ -261,13 +284,32 @@ function renderTranscriptionSegments(transcription) {
   ));
 }
 
-function renderTranscriptionStatus(status, t) {
-  if (status !== TranscriptionStatus.PROCESSING) return null;
+function renderCurrentTranscript(currentTranscript, isRecording) {
+  if (!currentTranscript || !isRecording) return null;
+  
+  return (
+    <div className="flex gap-4 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700">
+      <div className="flex flex-col items-center">
+        <Badge variant="outline" className="text-xs mb-1 animate-pulse">
+          LIVE
+        </Badge>
+      </div>
+      <p className="flex-1 text-slate-700 dark:text-gray-300 font-medium">
+        {currentTranscript}
+        <span className="animate-pulse">|</span>
+      </p>
+    </div>
+  );
+}
+
+function renderProcessingStatus(isTranscribing, t) {
+  if (!isTranscribing) return null;
+  
   return (
     <div className="flex gap-4 p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700">
       <div className="flex flex-col items-center">
         <Badge variant="secondary" className="text-xs mb-1">
-          {t("conversation.speakers.ai_medical")}
+          AI
         </Badge>
         <span className="text-xs text-slate-500 dark:text-gray-400">
           {t("conversation.processing.processing_status")}
@@ -281,23 +323,14 @@ function renderTranscriptionStatus(status, t) {
   );
 }
 
-function renderNoTranscription(transcription, isRecording, t) {
-  if ((transcription && transcription.segments.length > 0) || isRecording)
+function renderNoTranscription(transcriptionSegments, currentTranscript, isRecording, t) {
+  if ((transcriptionSegments && transcriptionSegments.length > 0) || currentTranscript || isRecording)
     return null;
+    
   return (
     <div className="text-center py-8 text-gray-500">
       <Mic className="h-12 w-12 mx-auto mb-3 text-gray-300" />
       <p>{t("transcription.no_content_yet")}</p>
-    </div>
-  );
-}
-
-function renderInitializingStatus(status, t) {
-  if (status !== TranscriptionStatus.INITIALIZING) return null;
-  return (
-    <div className="text-center py-4 text-blue-600">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
-      <p className="text-sm">{t("transcription.initializing")}</p>
     </div>
   );
 }
