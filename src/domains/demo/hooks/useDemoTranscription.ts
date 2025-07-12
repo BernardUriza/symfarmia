@@ -6,7 +6,7 @@ interface UseDemoTranscriptionProps {
 }
 
 export const useDemoTranscription = (props: UseDemoTranscriptionProps) => {
-  const { isRecording, language: _language = 'es' } = props;
+  const { isRecording } = props;
   const [transcription, setTranscription] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);

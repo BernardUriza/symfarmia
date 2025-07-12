@@ -29,7 +29,7 @@ export const TranscriptionPanel = ({
   className = '',
   medicalOptimization = true,
   realTimeAnalysis = false
-}) => {
+}: TranscriptionPanelProps) => {
   // Hooks
   const {
     transcription,
@@ -41,8 +41,7 @@ export const TranscriptionPanel = ({
     pauseTranscription,
     resumeTranscription,
     resetTranscription,
-    enhanceTranscription,
-    getTranscriptionText
+    enhanceTranscription
   } = useTranscription({
     realTimeUpdates: true,
     medicalOptimization,
@@ -55,8 +54,7 @@ export const TranscriptionPanel = ({
   const {
     analysis,
     loading: aiLoading,
-    analyzeMedicalContent,
-    validateMedicalTerms
+    analyzeMedicalContent
   } = useMedicalAI({
     specialty,
     autoAnalysis: realTimeAnalysis,

@@ -256,7 +256,7 @@ export class PediatricStrategy implements DemoStrategy {
     };
   }
 
-  private generatePediatricResponse(userInput: string, context: any): string {
+  private generatePediatricResponse(userInput: string, _context: any): string {
     const input = userInput.toLowerCase();
     
     // Age-specific greetings
@@ -439,7 +439,7 @@ export class PediatricStrategy implements DemoStrategy {
     return actions;
   }
 
-  private assessPediatricUrgency(symptoms: string[], input: string): 'low' | 'medium' | 'high' | 'critical' {
+  private assessPediatricUrgency(symptoms: string[], _input: string): 'low' | 'medium' | 'high' | 'critical' {
     // Critical pediatric emergencies
     if (symptoms.includes('dificultad respiratoria severa') || symptoms.includes('cianosis')) {
       return 'critical';
@@ -516,7 +516,7 @@ export class PediatricStrategy implements DemoStrategy {
     return { appropriate, suggestions };
   }
 
-  private calculatePediatricConfidence(input: string, analysis: DemoMedicalAnalysis): number {
+  private calculatePediatricConfidence(input: string, _analysis: DemoMedicalAnalysis): number {
     let confidence = 0.5; // Base confidence for pediatrics
     
     const pediatricTerms = this.extractPediatricTerms(input);
@@ -553,7 +553,7 @@ export class PediatricStrategy implements DemoStrategy {
     return Math.min(confidence, 0.9);
   }
 
-  private generatePediatricReasoning(symptoms: string[], diagnoses: string[], input: string): string {
+  private generatePediatricReasoning(symptoms: string[], diagnoses: string[], _input: string): string {
     let reasoning = `Paciente pediátrico de ${this.patientProfile.age} meses. `;
     
     if (symptoms.length > 0) {

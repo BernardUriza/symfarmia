@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { AlertCircle, RefreshCw, Mic, MicOff } from 'lucide-react';
+import { AlertCircle, RefreshCw } from 'lucide-react';
 import { transcriptionEngineStateManager } from '../services/TranscriptionEngineStateManager';
 
 export class TranscriptionErrorBoundary extends React.Component {

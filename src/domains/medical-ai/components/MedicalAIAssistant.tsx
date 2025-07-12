@@ -9,11 +9,11 @@ interface MedicalAIAssistantProps {
 
 export const MedicalAIAssistant = ({ 
   patientId, 
-  onAnalysisComplete 
-}) => {
+  onAnalysisComplete: _onAnalysisComplete 
+}: MedicalAIAssistantProps) => {
   const { analyzeMedicalContent, loading } = useMedicalAI();
   const [input, setInput] = useState('');
-  const [analysis, setAnalysis] = useState<MedicalAnalysis | null>(null);
+  const [_analysis, _setAnalysis] = useState<MedicalAnalysis | null>(null);
 
   const handleAnalyze = async () => {
     if (!input.trim()) return;

@@ -244,7 +244,7 @@ export class HIVPregnancyStrategy implements DemoStrategy {
     };
   }
 
-  private generateResponse(userInput: string, context: any): string {
+  private generateResponse(userInput: string, _context: any): string {
     const input = userInput.toLowerCase();
     
     // Initial assessment
@@ -445,7 +445,7 @@ export class HIVPregnancyStrategy implements DemoStrategy {
     return concerns;
   }
 
-  private calculateConfidence(input: string, analysis: DemoMedicalAnalysis): number {
+  private calculateConfidence(input: string, _analysis: DemoMedicalAnalysis): number {
     let confidence = 0.4; // Lower base for complex case
     
     const specializedTerms = this.extractSpecializedTerms(input);
@@ -481,7 +481,7 @@ export class HIVPregnancyStrategy implements DemoStrategy {
     return Math.min(confidence + (diagnoses.length * 0.05), 0.95);
   }
 
-  private generateExpertReasoning(symptoms: string[], diagnoses: string[], input: string): string {
+  private generateExpertReasoning(symptoms: string[], diagnoses: string[], _input: string): string {
     let reasoning = `Paciente embarazada de ${this.patientProfile.gestationalAge} semanas con VIH. `;
     
     if (symptoms.length > 0) {

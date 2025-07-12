@@ -23,19 +23,21 @@ const substituteParameters = (text, params = {}) => {
 // 🎯 MAIN I18N HOOK
 export const useI18n = () => {
   const context = useContext(I18nContext);
+  const [demoTranslations, setDemoTranslations] = useState({});
+  
+  // Early return setup for when there's no context
+  const fallbackSetLocale = (locale) => {
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('preferredLanguage', locale);
+      } catch (error) {
+        console.warn('Could not save language preference:', error);
+      }
+    }
+  };
   
   if (!context) {
     // Fallback implementation when provider is not available
-    const fallbackSetLocale = (locale) => {
-      if (typeof window !== 'undefined') {
-        try {
-          localStorage.setItem('preferredLanguage', locale);
-        } catch (error) {
-          console.warn('Could not save language preference:', error);
-        }
-      }
-    };
-    
     return {
       locale: 'es',
       setLocale: fallbackSetLocale,
@@ -47,8 +49,6 @@ export const useI18n = () => {
   }
   
   const { locale, setLocale, translations: ctxTranslations, isLoading } = context;
-
-  const [demoTranslations, setDemoTranslations] = useState({});
 
   useEffect(() => {
     import(`@/locales/${locale}/demo.json`)

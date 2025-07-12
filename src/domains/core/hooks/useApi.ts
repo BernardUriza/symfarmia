@@ -328,7 +328,7 @@ export function useInfiniteScroll<T>(
   endpoint: string,
   options: UseApiOptions & { pageSize?: number } = {}
 ) {
-  const { pageSize = 10, ...apiOptions } = options;
+  const { pageSize = 10 } = options;
   const [data, setData] = useState<T[]>([]);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);

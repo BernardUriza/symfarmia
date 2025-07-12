@@ -139,7 +139,7 @@ export default function BraveCacheBuster() {
       }
       
       // 5. Force garbage collection if available
-      // @ts-ignore - gc is available in some dev environments
+      // @ts-expect-error - gc is available in some dev environments
       if (window.gc) {
         window.gc()
         // Silent GC, no need to log

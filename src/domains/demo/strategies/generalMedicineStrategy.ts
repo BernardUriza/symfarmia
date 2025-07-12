@@ -311,7 +311,7 @@ export class GeneralMedicineStrategy implements DemoStrategy {
     return diagnoses;
   }
 
-  private generateActions(symptoms: string[], diagnoses: string[]): string[] {
+  private generateActions(symptoms: string[], _diagnoses: string[]): string[] {
     const actions: string[] = [];
     
     if (symptoms.includes('fiebre')) {

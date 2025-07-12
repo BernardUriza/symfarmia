@@ -14,7 +14,6 @@ import { TranscriptionModelInfo } from '../ui/TranscriptionModelInfo';
 import { 
   PlayIcon, 
   StopIcon, 
-  PauseIcon,
   ArrowPathIcon,
   DocumentTextIcon,
   ChartBarIcon 
@@ -36,8 +35,6 @@ export const EnhancedTranscriptionPanel = ({
   microphoneSize = 'lg'
 }: EnhancedTranscriptionPanelProps) => {
   const {
-    words,
-    currentWord,
     finalTranscript,
     liveTranscript,
     totalWords,

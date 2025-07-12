@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from 'react';
-import { useTranslation } from '../../providers/I18nProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
@@ -34,7 +33,6 @@ const medicalSummary = {
 };
 
 export function SummaryExport({ onPrevious }) {
-  const { t: _t } = useTranslation();
   const [exportFormat, setExportFormat] = useState('pdf');
   const [isExporting, setIsExporting] = useState(false);
 
