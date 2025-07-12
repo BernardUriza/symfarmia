@@ -245,6 +245,17 @@ export class WhisperClientEngine {
    * Process audio chunk
    */
   async processAudioChunk(audioData, config) {
+    console.log('[WhisperClient] processAudioChunk called:', {
+      hasData: !!audioData,
+      dataSize: audioData?.byteLength || audioData?.length || 0,
+      dataType: audioData?.constructor?.name || typeof audioData,
+      isTranscribing: this.isTranscribing,
+      hasSession: !!this.currentSession,
+      sessionId: this.currentSession?.id,
+      queueLength: this.processingQueue.length,
+      currentFullTextLength: this.currentSession?.fullText?.length || 0
+    });
+    
     if (!this.isTranscribing || !this.currentSession) {
       throw new Error('No active transcription session');
     }
@@ -306,6 +317,13 @@ export class WhisperClientEngine {
           
           this.currentSession.segments.push(segment);
           this.currentSession.fullText += ` ${result.text}`;
+          
+          console.log('[WhisperClient] Text accumulated:', {
+            newText: result.text,
+            newTextLength: result.text.length,
+            totalTextLength: this.currentSession.fullText.length,
+            segmentCount: this.currentSession.segments.length
+          });
           
           // Extract medical terms
           if (this.config.medicalMode) {
@@ -454,18 +472,70 @@ export class WhisperClientEngine {
    * Finalize transcription session
    */
   async finalizeTranscription() {
+    console.log('[WhisperClient] Finalizing transcription - Session state:', {
+      hasSession: !!this.currentSession,
+      sessionId: this.currentSession?.id,
+      fullTextLength: this.currentSession?.fullText?.length || 0,
+      fullTextContent: this.currentSession?.fullText || 'EMPTY',
+      segmentCount: this.currentSession?.segments?.length || 0,
+      queueLength: this.processingQueue.length
+    });
+    
+    // Process any remaining queued audio
+    if (this.processingQueue.length > 0) {
+      console.log('[WhisperClient] Processing remaining queued audio before finalization');
+      await this.processQueue();
+    }
+    
     const session = this.currentSession;
     
-    // Apply medical terminology enhancement
-    let enhancedText = session.fullText.trim();
+    if (!session) {
+      console.error('[WhisperClient] No active session found during finalization');
+      throw new Error('No active transcription session');
+    }
+    
+    // Get text with validation and fallback
+    const rawText = session.fullText || '';
+    console.log('[WhisperClient] Raw text before trim:', {
+      length: rawText.length,
+      isEmpty: rawText.trim() === '',
+      preview: rawText.substring(0, 100)
+    });
+    
+    let enhancedText = rawText.trim();
+    
+    // Fallback to segments if fullText is empty
+    if (!enhancedText && session.segments && session.segments.length > 0) {
+      console.warn('[WhisperClient] Empty fullText detected, reconstructing from segments');
+      enhancedText = session.segments.map(s => s.text || '').join(' ').trim();
+      console.log('[WhisperClient] Reconstructed text from segments:', {
+        segmentCount: session.segments.length,
+        reconstructedLength: enhancedText.length,
+        preview: enhancedText.substring(0, 100)
+      });
+    }
+    
+    // Final fallback
+    if (!enhancedText) {
+      console.error('[WhisperClient] No text available for enhancement');
+      enhancedText = '[No transcription text available]';
+    }
     
     if (this.config.medicalMode) {
+      console.log('[WhisperClient] Applying medical terminology enhancement:', {
+        textLength: enhancedText.length,
+        language: 'es-MX'
+      });
+      
       try {
         const { MedicalTerminologyEnhancer } = await import('./MedicalTerminologyEnhancer.js');
         const enhancer = new MedicalTerminologyEnhancer();
         enhancedText = await enhancer.enhanceText(enhancedText, 'es-MX');
+        console.log('[WhisperClient] Enhancement completed:', {
+          enhancedLength: enhancedText.length
+        });
       } catch (error) {
-        console.warn('Medical terminology enhancement failed:', error);
+        console.warn('[WhisperClient] Medical terminology enhancement failed:', error);
       }
     }
     

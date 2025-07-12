@@ -231,6 +231,17 @@ export class OpenAIWhisperBackend {
    * Process audio chunk
    */
   async processAudioChunk(audioData, config) {
+    console.log('[OpenAI Whisper] processAudioChunk called:', {
+      hasData: !!audioData,
+      dataSize: audioData?.byteLength || audioData?.length || 0,
+      dataType: audioData?.constructor?.name || typeof audioData,
+      isTranscribing: this.isTranscribing,
+      hasSession: !!this.currentSession,
+      sessionId: this.currentSession?.id,
+      bufferLength: this.audioBuffer.length,
+      currentFullTextLength: this.currentSession?.fullText?.length || 0
+    });
+    
     if (!this.isTranscribing || !this.currentSession) {
       throw new Error('No active transcription session');
     }
@@ -238,6 +249,10 @@ export class OpenAIWhisperBackend {
     try {
       // Compress audio for cost optimization
       const compressedAudio = await this.compressAudio(audioData);
+      console.log('[OpenAI Whisper] Audio compressed:', {
+        originalSize: audioData?.byteLength || audioData?.length || 0,
+        compressedSize: compressedAudio?.byteLength || compressedAudio?.length || 0
+      });
       
       // Add to buffer
       this.audioBuffer.push({
@@ -486,8 +501,18 @@ export class OpenAIWhisperBackend {
    * Process API result
    */
   async processAPIResult(result) {
-    console.warn('Medical transcription result processing:', result);
-    if (!result.text) return;
+    console.log('[OpenAI Whisper] API result received:', {
+      hasResult: !!result,
+      hasText: !!result?.text,
+      textLength: result?.text?.length || 0,
+      textPreview: result?.text?.substring(0, 100) || 'NO_TEXT',
+      currentFullTextLength: this.currentSession?.fullText?.length || 0
+    });
+    
+    if (!result.text) {
+      console.warn('[OpenAI Whisper] API result has no text!', result);
+      return;
+    }
     
     const segment = {
       id: `openai-segment-${Date.now()}`,
@@ -501,6 +526,13 @@ export class OpenAIWhisperBackend {
     
     this.currentSession.segments.push(segment);
     this.currentSession.fullText += ` ${result.text}`;
+    
+    console.log('[OpenAI Whisper] fullText updated:', {
+      newTextAdded: result.text.substring(0, 50) + '...',
+      fullTextLength: this.currentSession.fullText.length,
+      segmentCount: this.currentSession.segments.length,
+      hasContent: this.currentSession.fullText.trim().length > 0
+    });
     
     // Extract medical terms
     if (this.config.medicalMode) {
@@ -603,10 +635,57 @@ export class OpenAIWhisperBackend {
    * Finalize transcription session
    */
   async finalizeTranscription() {
+    console.log('[OpenAI Whisper] Finalizing transcription - Pre-check:', {
+      hasSession: !!this.currentSession,
+      audioBufferLength: this.audioBuffer.length,
+      isTranscribing: this.isTranscribing
+    });
+    
+    // Process any remaining audio before finalization
+    if (this.audioBuffer.length > 0) {
+      console.log('[OpenAI Whisper] Processing remaining audio buffer before finalization');
+      await this.processAudioBuffer();
+    }
+    
     const session = this.currentSession;
     
+    if (!session) {
+      console.error('[OpenAI Whisper] No session available for finalization');
+      throw new Error('No active session to finalize');
+    }
+    
+    console.log('[OpenAI Whisper] Session state:', {
+      sessionId: session.id,
+      fullTextLength: session.fullText?.length || 0,
+      fullTextContent: session.fullText || 'EMPTY',
+      segmentCount: session.segments?.length || 0,
+      apiCalls: session.apiCalls,
+      totalCost: session.totalCost
+    });
+    
     // Apply medical terminology enhancement
-    let enhancedText = session.fullText.trim();
+    let enhancedText = session.fullText?.trim() || '';
+    
+    // Fallback to segments if fullText is empty
+    if (!enhancedText && session.segments?.length > 0) {
+      console.warn('[OpenAI Whisper] fullText empty, reconstructing from segments');
+      enhancedText = session.segments.map(s => s.text || '').join(' ').trim();
+      console.log('[OpenAI Whisper] Reconstructed text:', {
+        segmentCount: session.segments.length,
+        reconstructedLength: enhancedText.length,
+        preview: enhancedText.substring(0, 100)
+      });
+    }
+    
+    if (!enhancedText) {
+      console.error('[OpenAI Whisper] No text available for enhancement');
+      enhancedText = '[No transcription available]';
+    }
+    
+    console.log('[OpenAI Whisper] Text ready for enhancement:', {
+      textLength: enhancedText.length,
+      preview: enhancedText.substring(0, 100)
+    });
     
     if (this.config.medicalMode) {
       try {

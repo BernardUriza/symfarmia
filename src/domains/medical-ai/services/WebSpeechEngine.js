@@ -203,6 +203,13 @@ export class WebSpeechEngine {
         this.currentSession.segments.push(segment);
         this.currentSession.fullText += ` ${transcript}`;
         
+        console.log('[WebSpeech] Text accumulated:', {
+          newText: transcript,
+          newTextLength: transcript.length,
+          totalTextLength: this.currentSession.fullText.length,
+          segmentCount: this.currentSession.segments.length
+        });
+        
         // Extract medical terms
         this.extractMedicalTerms(transcript);
         
@@ -341,17 +348,62 @@ export class WebSpeechEngine {
    * Finalize transcription session
    */
   async finalizeTranscription() {
+    console.log('[WebSpeech] Finalizing transcription - Session state:', {
+      hasSession: !!this.currentSession,
+      sessionId: this.currentSession?.id,
+      fullTextLength: this.currentSession?.fullText?.length || 0,
+      fullTextContent: this.currentSession?.fullText || 'EMPTY',
+      segmentCount: this.currentSession?.segments?.length || 0
+    });
+    
     const session = this.currentSession;
     
-    // Apply medical terminology enhancement
-    let enhancedText = session.fullText.trim();
+    if (!session) {
+      console.error('[WebSpeech] No active session found during finalization');
+      throw new Error('No active transcription session');
+    }
+    
+    // Get text with validation and fallback
+    const rawText = session.fullText || '';
+    console.log('[WebSpeech] Raw text before trim:', {
+      length: rawText.length,
+      isEmpty: rawText.trim() === '',
+      preview: rawText.substring(0, 100)
+    });
+    
+    let enhancedText = rawText.trim();
+    
+    // Fallback to segments if fullText is empty
+    if (!enhancedText && session.segments && session.segments.length > 0) {
+      console.warn('[WebSpeech] Empty fullText detected, reconstructing from segments');
+      enhancedText = session.segments.map(s => s.text || '').join(' ').trim();
+      console.log('[WebSpeech] Reconstructed text from segments:', {
+        segmentCount: session.segments.length,
+        reconstructedLength: enhancedText.length,
+        preview: enhancedText.substring(0, 100)
+      });
+    }
+    
+    // Final fallback
+    if (!enhancedText) {
+      console.error('[WebSpeech] No text available for enhancement');
+      enhancedText = '[No transcription text available]';
+    }
+    
+    console.log('[WebSpeech] Applying medical terminology enhancement:', {
+      textLength: enhancedText.length,
+      language: this.config.language
+    });
     
     try {
       const { MedicalTerminologyEnhancer } = await import('./MedicalTerminologyEnhancer.js');
       const enhancer = new MedicalTerminologyEnhancer();
       enhancedText = await enhancer.enhanceText(enhancedText, this.config.language);
+      console.log('[WebSpeech] Enhancement completed:', {
+        enhancedLength: enhancedText.length
+      });
     } catch (error) {
-      console.warn('Medical terminology enhancement failed:', error);
+      console.warn('[WebSpeech] Medical terminology enhancement failed:', error);
     }
     
     return {
