@@ -39,14 +39,34 @@ export class MedicalAIService {
       const analysis = await this.performMedicalAnalysis(transcription, context);
       
       // Calculate confidence levels
-      const confidence = this.calculateConfidence(analysis, transcription);
+      const confidenceLevel = this.calculateConfidence(analysis, transcription);
+      const confidence = this.calculateOverallConfidence(analysis, transcription);
       
       // Assess urgency level
       const urgencyLevel = this.assessUrgencyLevel(analysis);
 
       const medicalAnalysis: MedicalAnalysis = {
+        id: `analysis-${Date.now()}`,
         patientId: context.patientId,
+        transcriptionId: transcription.id || `trans-${Date.now()}`,
         consultationId: context.consultationId,
+        chiefComplaint: analysis.chiefComplaint || 'Not specified',
+        symptoms: analysis.symptoms?.map((s: string) => ({
+          name: s,
+          severity: 'moderate' as const,
+          duration: 'unknown',
+          onset: 'unknown'
+        })) || [],
+        diagnoses: analysis.diagnoses?.map((d: string) => ({
+          code: `D-${Date.now()}`,
+          description: d,
+          confidence: ConfidenceLevel.MEDIUM,
+          icd10Code: undefined
+        })) || [],
+        recommendations: analysis.actions || [],
+        urgencyLevel,
+        confidenceLevel,
+        confidence,
         analysis: {
           symptoms: analysis.symptoms,
           potentialDiagnoses: analysis.diagnoses,
@@ -54,7 +74,9 @@ export class MedicalAIService {
           urgencyLevel,
           specialty: this.activeSpecialty
         },
-        confidence,
+        createdAt: new Date(),
+        createdBy: 'system',
+        isVerified: false,
         timestamp: new Date(),
         aiModel: this.config.medicalModel,
         medicalContext: context
@@ -160,6 +182,7 @@ export class MedicalAIService {
     symptoms: string[];
     diagnoses: string[];
     actions: string[];
+    chiefComplaint: string;
   }> {
     // Simulate medical AI analysis
     // In real implementation, this would call the actual AI service
@@ -169,7 +192,9 @@ export class MedicalAIService {
     const diagnoses = this.suggestDiagnoses(symptoms, context);
     const actions = this.recommendActions(symptoms, diagnoses, context);
 
-    return { symptoms, diagnoses, actions };
+    const chiefComplaint = this.extractChiefComplaint(text) || 'General consultation';
+    
+    return { symptoms, diagnoses, actions, chiefComplaint };
   }
 
   private calculateConfidence(
@@ -191,14 +216,20 @@ export class MedicalAIService {
     const text = JSON.stringify(analysis).toLowerCase();
     
     if (emergencyKeywords.some(keyword => text.includes(keyword))) {
-      return 'critical';
+      return UrgencyLevel.CRITICAL;
     }
     
     if (highUrgencyKeywords.some(keyword => text.includes(keyword))) {
-      return 'urgent';
+      return UrgencyLevel.URGENT;
     }
     
-    return 'urgent';
+    return UrgencyLevel.URGENT;
+  }
+
+  private extractChiefComplaint(text: string): string {
+    // Extract the main complaint from the text
+    const firstSentence = text.split(/[.!?]/)[0];
+    return firstSentence.trim() || 'General consultation';
   }
 
   private extractMedicalTerms(text: string): string[] {
@@ -271,10 +302,10 @@ export class MedicalAIService {
       }
     }
     
-    if (urgencyScore >= 6) return 'critical';
-    if (urgencyScore >= 4) return 'emergency';
-    if (urgencyScore >= 2) return 'urgent';
-    return 'routine';
+    if (urgencyScore >= 6) return UrgencyLevel.CRITICAL;
+    if (urgencyScore >= 4) return UrgencyLevel.EMERGENCY;
+    if (urgencyScore >= 2) return UrgencyLevel.URGENT;
+    return UrgencyLevel.ROUTINE;
   }
 
   private generateTriageReasoning(symptoms: string[], urgency: UrgencyLevel): string {
@@ -364,8 +395,16 @@ export class MedicalAIService {
 export const medicalAIService = new MedicalAIService({
   apiKey: process.env.MEDICAL_AI_API_KEY || '',
   baseUrl: process.env.MEDICAL_AI_BASE_URL || '',
-  timeout: 30000,
-  retries: 3,
+  model: 'gpt-4',
+  language: 'es',
+  medicalMode: true,
   medicalModel: 'medical-gpt-4',
+  maxRetries: 3,
+  retries: 3,
+  timeout: 30000,
+  enableCache: true,
+  hipaaCompliant: true,
+  encryptionEnabled: true,
+  auditLogging: true,
   specialty: 'general'
 });

@@ -27,15 +27,54 @@ export { medicalAIService } from './services/medicalAIService';
 export { audioProcessingService } from './services/audioProcessingService';
 export { medicalValidationService } from './services/medicalValidationService';
 
-// Types
-export type {
-  TranscriptionResult,
-  MedicalAnalysis,
-  AudioConfig,
-  MedicalSpecialty,
+// Types - Export all types and enums
+export {
+  // Enums
+  TranscriptionStatus,
+  ModelStatus,
+  UrgencyLevel,
   ConfidenceLevel,
-  MedicalStrategy
+  AudioFormat,
+  // Type guards
+  isTranscriptionError,
+  isMedicalAIError
 } from './types';
+
+export type {
+  // Core interfaces
+  TranscriptionResult,
+  TranscriptionSegment,
+  TranscriptionError,
+  MedicalAnalysis,
+  MedicalStrategy,
+  MedicalContext,
+  MedicalSpecialty,
+  MedicalTerm,
+  MedicalCategory,
+  MedicalReport,
+  // Configuration types
+  AudioConfig,
+  MedicalAIServiceConfig,
+  // Error types
+  MedicalAIError,
+  // Callback types
+  SessionCallbacks,
+  ProgressData,
+  MessageData,
+  ErrorData,
+  // Response types
+  ServiceResponse,
+  MedicalAIResponse,
+  TranscriptionResponse,
+  AnalysisResponse,
+  // Entity types
+  PatientDemographics,
+  Practitioner,
+  Appointment
+} from './types';
+
+// Re-export medical constants
+export * from './types/medical-constants';
 
 // Utils
 export { medicalTerminology } from './utils/medicalTerminology';

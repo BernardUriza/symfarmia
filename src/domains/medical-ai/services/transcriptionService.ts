@@ -232,9 +232,14 @@ export class TranscriptionService {
   private convertHybridToLegacyResult(hybridResult: any): TranscriptionResult {
     return {
       id: hybridResult.sessionId || hybridResult.id || `hybrid-${Date.now()}`,
+      sessionId: hybridResult.sessionId || hybridResult.id || `session-${Date.now()}`,
       text: hybridResult.text || hybridResult.fullText || '',
+      fullText: hybridResult.fullText || hybridResult.text || '',
+      duration: hybridResult.duration || 0,
+      engine: hybridResult.engine || 'hybrid',
       confidence: hybridResult.confidence || 0.8,
       timestamp: new Date(),
+      createdAt: new Date(),
       language: 'es-MX',
       medicalTerms: hybridResult.medicalTerms || [],
       segments: hybridResult.segments || [],
@@ -319,11 +324,15 @@ export class TranscriptionService {
           // Convert to legacy segment format
           const segment: TranscriptionSegment = {
             id: hybridResult.data.chunkId || `chunk-${Date.now()}`,
-            text: hybridResult.data.text || '',
+            start: 0,
+            end: 0,
             startTime: Date.now(),
             endTime: Date.now(),
+            text: hybridResult.data.text || '',
             confidence: hybridResult.data.confidence || 0.8,
-            speaker: 'doctor'
+            speaker: 'doctor',
+            language: 'es-MX',
+            timestamp: Date.now()
           };
           
           return {
@@ -409,7 +418,7 @@ export class TranscriptionService {
    */
   getTranscriptionStatus(): TranscriptionStatus {
     if (!this.currentTranscription) return TranscriptionStatus.IDLE;
-    return this.currentTranscription.status;
+    return this.currentTranscription.status || TranscriptionStatus.IDLE;
   }
 
   /**
@@ -867,11 +876,17 @@ export class TranscriptionService {
   }
 
   private initializeTranscription(config: AudioConfig): TranscriptionResult {
+    const now = Date.now();
     return {
-      id: `transcription-${Date.now()}`,
+      id: `transcription-${now}`,
+      sessionId: `session-${now}`,
       text: '',
+      fullText: '',
+      duration: 0,
+      engine: 'webapi',
       confidence: 0,
       timestamp: new Date(),
+      createdAt: new Date(),
       language: 'es-MX', // Default to Spanish Mexico
       medicalTerms: [],
       segments: [],
@@ -886,7 +901,7 @@ export class TranscriptionService {
       }
       
       this.mediaRecorder = new MediaRecorder(stream, {
-        mimeType: this.getMimeType(config.format)
+        mimeType: this.getMimeType(config.format || 'webm')
       });
 
       this.mediaRecorder.ondataavailable = (event) => {
@@ -913,7 +928,11 @@ export class TranscriptionService {
       this.isRecording = true;
 
     } catch (error) {
-      throw new TranscriptionError('Failed to start recording', { error });
+      throw new TranscriptionError('Failed to start recording', { 
+        details: error,
+        code: 'RECORDING_START_FAILED',
+        recoverable: true
+      });
     }
   }
 
@@ -962,11 +981,15 @@ export class TranscriptionService {
     // This method creates segments from speech recognition results
     return {
       id: `segment-${Date.now()}`,
-      text: '', // Will be populated by speech recognition
+      start: 0,
+      end: 0,
       startTime: Date.now(),
       endTime: Date.now() + 1000,
+      text: '', // Will be populated by speech recognition
       confidence: 0.85,
-      speaker: 'doctor'
+      speaker: 'doctor',
+      language: 'es-MX',
+      timestamp: Date.now()
     };
   }
 
@@ -1001,8 +1024,11 @@ export class TranscriptionService {
     for (const medicalTerm of medicalTerms) {
       if (words.some(word => word.includes(medicalTerm.term))) {
         terms.push({
+          id: `term-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           term: medicalTerm.term,
+          termEs: medicalTerm.term, // Already in Spanish
           definition: `Medical term: ${medicalTerm.term}`,
+          definitionEs: `Término médico: ${medicalTerm.term}`,
           category: medicalTerm.category,
           confidence: 0.8,
           synonyms: []
@@ -1090,11 +1116,15 @@ export class TranscriptionService {
         // Create a new segment for final results
         const segment: TranscriptionSegment = {
           id: `segment-${Date.now()}`,
-          text: transcript,
+          start: 0,
+          end: 0,
           startTime: Date.now(),
           endTime: Date.now() + 1000,
+          text: transcript,
           confidence: event.results[i][0].confidence,
-          speaker: 'doctor'
+          speaker: 'doctor',
+          language: 'es-MX',
+          timestamp: Date.now()
         };
         
         this.currentTranscription.segments.push(segment);

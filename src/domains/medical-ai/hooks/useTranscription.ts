@@ -98,7 +98,7 @@ export const useTranscription = (props: UseTranscriptionProps = {}): UseTranscri
       const onTranscriptionUpdate = realTimeUpdates 
         ? (result: TranscriptionResult) => {
             setTranscription(result);
-            setStatus(result.status);
+            setStatus(result.status || TranscriptionStatus.PROCESSING);
           }
         : undefined;
 
@@ -111,7 +111,7 @@ export const useTranscription = (props: UseTranscriptionProps = {}): UseTranscri
         setTranscription(response.data);
         return true;
       } else {
-        setError(response.error || 'Failed to start transcription');
+        setError(typeof response.error === 'string' ? response.error : response.error?.message || 'Failed to start transcription');
         setStatus(TranscriptionStatus.ERROR);
         setIsRecording(false);
         return false;
@@ -141,7 +141,7 @@ export const useTranscription = (props: UseTranscriptionProps = {}): UseTranscri
         setStatus(TranscriptionStatus.COMPLETED);
         return true;
       } else {
-        setError(response.error || 'Failed to stop transcription');
+        setError(typeof response.error === 'string' ? response.error : response.error?.message || 'Failed to stop transcription');
         setStatus(TranscriptionStatus.ERROR);
         return false;
       }
@@ -205,7 +205,7 @@ export const useTranscription = (props: UseTranscriptionProps = {}): UseTranscri
         setTranscription(response.data);
         setStatus(TranscriptionStatus.COMPLETED);
       } else {
-        setError(response.error || 'Failed to enhance transcription');
+        setError(typeof response.error === 'string' ? response.error : response.error?.message || 'Failed to enhance transcription');
       }
 
     } catch (err) {

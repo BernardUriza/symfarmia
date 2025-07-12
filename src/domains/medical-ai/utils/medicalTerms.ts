@@ -1,30 +1,36 @@
-import { MedicalCategory } from '../types';
+// Medical category types for classification
+export enum MedicalCategoryType {
+  SYMPTOM = 'symptom',
+  DIAGNOSIS = 'diagnosis',
+  MEDICATION = 'medication',
+  PROCEDURE = 'procedure'
+}
 
 export const medicalTermsDatabase = {
   symptoms: [
-    { term: 'cefalea', synonyms: ['dolor de cabeza', 'jaqueca'], category: MedicalCategory.SYMPTOM },
-    { term: 'pirexia', synonyms: ['fiebre', 'temperatura elevada'], category: MedicalCategory.SYMPTOM },
-    { term: 'disnea', synonyms: ['dificultad respiratoria', 'falta de aire'], category: MedicalCategory.SYMPTOM },
-    { term: 'taquicardia', synonyms: ['pulso rápido', 'latidos acelerados'], category: MedicalCategory.SYMPTOM },
-    { term: 'hipertensión', synonyms: ['presión alta', 'tensión arterial elevada'], category: MedicalCategory.DIAGNOSIS },
-    { term: 'diabetes', synonyms: ['diabetes mellitus', 'azúcar alta'], category: MedicalCategory.DIAGNOSIS },
-    { term: 'anemia', synonyms: ['hemoglobina baja', 'déficit de hierro'], category: MedicalCategory.DIAGNOSIS }
+    { term: 'cefalea', synonyms: ['dolor de cabeza', 'jaqueca'], category: MedicalCategoryType.SYMPTOM },
+    { term: 'pirexia', synonyms: ['fiebre', 'temperatura elevada'], category: MedicalCategoryType.SYMPTOM },
+    { term: 'disnea', synonyms: ['dificultad respiratoria', 'falta de aire'], category: MedicalCategoryType.SYMPTOM },
+    { term: 'taquicardia', synonyms: ['pulso rápido', 'latidos acelerados'], category: MedicalCategoryType.SYMPTOM },
+    { term: 'hipertensión', synonyms: ['presión alta', 'tensión arterial elevada'], category: MedicalCategoryType.DIAGNOSIS },
+    { term: 'diabetes', synonyms: ['diabetes mellitus', 'azúcar alta'], category: MedicalCategoryType.DIAGNOSIS },
+    { term: 'anemia', synonyms: ['hemoglobina baja', 'déficit de hierro'], category: MedicalCategoryType.DIAGNOSIS }
   ],
   medications: [
-    { term: 'paracetamol', synonyms: ['acetaminofén'], category: MedicalCategory.MEDICATION },
-    { term: 'ibuprofeno', synonyms: ['antiinflamatorio'], category: MedicalCategory.MEDICATION },
-    { term: 'amoxicilina', synonyms: ['antibiótico'], category: MedicalCategory.MEDICATION },
-    { term: 'omeprazol', synonyms: ['protector gástrico'], category: MedicalCategory.MEDICATION }
+    { term: 'paracetamol', synonyms: ['acetaminofén'], category: MedicalCategoryType.MEDICATION },
+    { term: 'ibuprofeno', synonyms: ['antiinflamatorio'], category: MedicalCategoryType.MEDICATION },
+    { term: 'amoxicilina', synonyms: ['antibiótico'], category: MedicalCategoryType.MEDICATION },
+    { term: 'omeprazol', synonyms: ['protector gástrico'], category: MedicalCategoryType.MEDICATION }
   ],
   procedures: [
-    { term: 'hemograma', synonyms: ['análisis de sangre', 'conteo sanguíneo'], category: MedicalCategory.PROCEDURE },
-    { term: 'radiografía', synonyms: ['rayos x', 'rx'], category: MedicalCategory.PROCEDURE },
-    { term: 'electrocardiograma', synonyms: ['ecg', 'ekg'], category: MedicalCategory.PROCEDURE },
-    { term: 'ecografía', synonyms: ['ultrasonido', 'eco'], category: MedicalCategory.PROCEDURE }
+    { term: 'hemograma', synonyms: ['análisis de sangre', 'conteo sanguíneo'], category: MedicalCategoryType.PROCEDURE },
+    { term: 'radiografía', synonyms: ['rayos x', 'rx'], category: MedicalCategoryType.PROCEDURE },
+    { term: 'electrocardiograma', synonyms: ['ecg', 'ekg'], category: MedicalCategoryType.PROCEDURE },
+    { term: 'ecografía', synonyms: ['ultrasonido', 'eco'], category: MedicalCategoryType.PROCEDURE }
   ]
 };
 
-export const findMedicalTerm = (text: string): { term: string; category: MedicalCategory } | null => {
+export const findMedicalTerm = (text: string): { term: string; category: MedicalCategoryType } | null => {
   const lowerText = text.toLowerCase();
   
   for (const category of Object.values(medicalTermsDatabase)) {
@@ -39,8 +45,8 @@ export const findMedicalTerm = (text: string): { term: string; category: Medical
   return null;
 };
 
-export const extractMedicalTermsFromText = (text: string): Array<{ term: string; category: MedicalCategory }> => {
-  const terms: Array<{ term: string; category: MedicalCategory }> = [];
+export const extractMedicalTermsFromText = (text: string): Array<{ term: string; category: MedicalCategoryType }> => {
+  const terms: Array<{ term: string; category: MedicalCategoryType }> = [];
   const words = text.toLowerCase().split(/\s+/);
   
   for (const word of words) {
