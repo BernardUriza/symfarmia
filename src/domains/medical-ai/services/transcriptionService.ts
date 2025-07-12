@@ -1,5 +1,3 @@
-import { FFmpeg  } from '@ffmpeg/ffmpeg';
-import { fetchFile } from '@ffmpeg/util';
 import {
   TranscriptionResult,
   TranscriptionSegment,
@@ -10,8 +8,6 @@ import {
   ServiceResponse,
 } from '../types';
 
-const ffmpeg = new FFmpeg();
-
 export class TranscriptionService {
   private mediaRecorder: MediaRecorder | null = null;
   private audioChunks: Blob[] = [];
@@ -21,10 +17,10 @@ export class TranscriptionService {
   private recordingStartTime = 0;
   private chunkDuration = 10000;
   private chunkInterval: NodeJS.Timeout | null = null;
-  private microserviceUrl = 'http://localhost:3001';
+  // private microserviceUrl = 'http://localhost:3001'; // Ya no se usa directo, ahora usamos proxy API
 
   constructor() {
-    console.log('🎙️ [TranscriptionService] Ready for war - SusurroTest microservice');
+    console.log('🎙️ [TranscriptionService] Ready - usando proxy API endpoint');
   }
 
   async startTranscription(
@@ -150,12 +146,12 @@ export class TranscriptionService {
       console.log('📤 [Transcription] Processing audio chunk');
       const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
       this.audioChunks = [];
-      const wavBlob = await this.convertToWav(audioBlob);
+      // El backend API maneja la conversión si es necesaria
       const formData = new FormData();
-      formData.append('audio', wavBlob, 'audio.wav');
+      formData.append('audio', audioBlob, 'recording.webm');
       formData.append('language', 'es');
-      console.log('🌐 [Transcription] Sending to SusurroTest microservice');
-      const response = await fetch(`${this.microserviceUrl}/api/transcribe-upload`, {
+      console.log('🌐 [Transcription] Sending to transcription API endpoint');
+      const response = await fetch('/api/transcription', {
         method: 'POST',
         body: formData
       });
@@ -164,8 +160,8 @@ export class TranscriptionService {
       }
       const result = await response.json();
       console.log('✅ [Transcription] Received result:', result);
-      if (result.transcription) {
-        this.updateTranscriptionState(result.transcription, result.confidence);
+      if (result.transcript) {
+        this.updateTranscriptionState(result.transcript, result.confidence);
       }
     } catch (error) {
       console.error('❌ [Transcription] Error processing chunk:', error);
@@ -175,14 +171,7 @@ export class TranscriptionService {
     }
   }
 
-  private async convertToWav(audioBlob: Blob): Promise<Blob> {
-    console.log('🔀 [Audio] Converting to WAV format');
-    await ffmpeg.load();
-    ffmpeg.writeFile('input.webm', await fetchFile(audioBlob));
-    await ffmpeg.exec(['-i', 'input.webm', 'output.wav']);
-    const data = await ffmpeg.readFile('output.wav');
-    return new Blob([data], { type: 'audio/wav' });
-  }
+  // Conversión de audio removida - ahora se maneja en el backend API
 
   private updateTranscriptionState(text: string, confidence: number) {
     if (!this.currentTranscription) return;
