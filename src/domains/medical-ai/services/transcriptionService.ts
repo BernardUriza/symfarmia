@@ -1,4 +1,5 @@
-import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
+import { FFmpeg  } from '@ffmpeg/ffmpeg';
+import { fetchFile } from '@ffmpeg/util';
 import {
   TranscriptionResult,
   TranscriptionSegment,
@@ -7,10 +8,9 @@ import {
   MedicalTerm,
   MedicalCategory,
   ServiceResponse,
-  TranscriptionError
 } from '../types';
 
-const ffmpeg = createFFmpeg({ log: true });
+const ffmpeg = new FFmpeg();
 
 export class TranscriptionService {
   private mediaRecorder: MediaRecorder | null = null;
@@ -178,10 +178,10 @@ export class TranscriptionService {
   private async convertToWav(audioBlob: Blob): Promise<Blob> {
     console.log('🔀 [Audio] Converting to WAV format');
     await ffmpeg.load();
-    ffmpeg.FS('writeFile', 'input.webm', await fetchFile(audioBlob));
-    await ffmpeg.run('-i', 'input.webm', 'output.wav');
-    const data = ffmpeg.FS('readFile', 'output.wav');
-    return new Blob([data.buffer], { type: 'audio/wav' });
+    ffmpeg.writeFile('input.webm', await fetchFile(audioBlob));
+    await ffmpeg.exec(['-i', 'input.webm', 'output.wav']);
+    const data = await ffmpeg.readFile('output.wav');
+    return new Blob([data], { type: 'audio/wav' });
   }
 
   private updateTranscriptionState(text: string, confidence: number) {

@@ -82,8 +82,6 @@ export const Button = ({
   const getUrgencyStyles = () => {
     if (!urgency) return '';
     
-    const _urgencyColor = getUrgencyColor(urgency);
-    
     switch (urgency) {
       case 'critical':
         return 'animate-pulse shadow-lg border-2 border-red-500';

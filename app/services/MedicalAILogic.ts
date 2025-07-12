@@ -12,7 +12,6 @@ async function processMedicalQuery(
   try {
     // Handle both string and object inputs for backwards compatibility
     const query = typeof queryData === 'string' ? queryData : queryData.query;
-    const _type = typeof queryData === 'string' ? 'general' : (queryData.type || 'general');
     
     // Simulate medical AI processing
     const medicalResponse = `Basándome en la consulta médica "${query}", recomiendo una evaluación clínica completa con anamnesis detallada, exploración física dirigida y estudios complementarios según indicación médica.`;
@@ -52,8 +51,10 @@ export {
 };
 
 // Default export for backwards compatibility
-export default {
+const MedicalAILogic = {
   processMedicalQuery,
   getErrorMessage,
   getAvailableTypes
 };
+
+export default MedicalAILogic;
