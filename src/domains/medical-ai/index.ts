@@ -26,6 +26,7 @@ export { useMicrophoneDiagnostics } from './hooks/useMicrophoneDiagnostics';
 export { useRealAudioCapture } from './hooks/useRealAudioCapture';
 export { useEnhancedTranscription } from './hooks/useEnhancedTranscription';
 export { useMedicalTranslation } from './hooks/useMedicalTranslation';
+export { useNativeSpeechTranscription } from './hooks/useNativeSpeechTranscription';
 
 // Services
 export { transcriptionService } from './services/transcriptionService';
