@@ -169,8 +169,15 @@ class MicroserviceE2EGuardian {
 
       // Step 2: Check test file exists
       console.log('   2️⃣  Checking test audio file...');
-      const testFile = 'jfk.wav';
-      const testFilePath = path.join(this.microserviceDir, 'test-audio', testFile);
+      // Use sample.wav if jfk.wav doesn't exist
+      let testFile = 'jfk.wav';
+      let testFilePath = path.join(this.microserviceDir, 'test-audio', testFile);
+      
+      if (!fs.existsSync(testFilePath)) {
+        console.log('   ⚠️  jfk.wav not found, using sample.wav instead');
+        testFile = 'sample.wav';
+        testFilePath = path.join(this.microserviceDir, 'test-audio', testFile);
+      }
       
       if (!fs.existsSync(testFilePath)) {
         throw new Error(`Test file not found: ${testFile}`);
