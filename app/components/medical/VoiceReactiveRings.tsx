@@ -172,7 +172,10 @@ export const VoiceReactiveRings = ({
             backgroundColor: 'transparent',
             transform: `scale(${getRingScale(index)})`,
             opacity: getRingOpacity(index),
-            animation: isRecording ? `pulse-ring-${index} 2s infinite ease-in-out` : 'none',
+            animationName: isRecording ? `pulse-ring-${index}` : 'none',
+            animationDuration: '2s',
+            animationIterationCount: 'infinite',
+            animationTimingFunction: 'ease-in-out',
             animationDelay: `${index * 0.2}s`
           }}
         />
@@ -189,7 +192,6 @@ export const VoiceReactiveRings = ({
                 backgroundColor: colors.core,
                 top: `${20 + Math.sin(i * 60) * 30}%`,
                 left: `${20 + Math.cos(i * 60) * 30}%`,
-                animationDelay: `${i * 0.3}s`,
                 opacity: ringLevels[0] * 0.6
               }}
             />

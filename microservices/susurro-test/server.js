@@ -22,13 +22,18 @@ app.use(cors());
 app.use(express.json());
 
 // Configuración de multer
+const uploadsDir = path.join(__dirname, 'uploads');
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/');
+    // Ensure uploads directory exists
+    ensureDirectoryExists(uploadsDir);
+    cb(null, uploadsDir);
   },
   filename: (req, file, cb) => {
     const timestamp = Date.now();
-    cb(null, `${timestamp}-${file.originalname}`);
+    // Sanitize filename
+    const sanitizedName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_');
+    cb(null, `${timestamp}-${sanitizedName}`);
   }
 });
 
@@ -47,11 +52,13 @@ const upload = multer({
 const ensureDirectoryExists = (dir) => {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
+    console.log(`📁 Directorio creado: ${dir}`);
   }
 };
 
-ensureDirectoryExists('./uploads');
-ensureDirectoryExists('./test-audio');
+// Ensure directories exist on startup
+ensureDirectoryExists(path.join(__dirname, 'uploads'));
+ensureDirectoryExists(path.join(__dirname, 'test-audio'));
 
 // ENDPOINT 1: Transcribir archivo existente en servidor
 app.post('/api/transcribe-server-file', async (req, res) => {
@@ -124,25 +131,52 @@ app.post('/api/transcribe-server-file', async (req, res) => {
 app.post('/api/transcribe-upload', upload.single('audio'), async (req, res) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ error: 'No se subió ningún archivo de audio' });
+      return res.status(400).json({ 
+        error: 'No se subió ningún archivo de audio',
+        help: 'Envíe un archivo de audio con el campo "audio" en multipart/form-data'
+      });
     }
 
-    const audioPath = req.file.path;
-    console.log(`[${new Date().toISOString()}] Archivo subido: ${req.file.originalname}`);
+    const audioPath = path.resolve(req.file.path);
+    console.log(`[${new Date().toISOString()}] Archivo subido:`);
+    console.log(`  - Original: ${req.file.originalname}`);
+    console.log(`  - Guardado: ${req.file.filename}`);
+    console.log(`  - Ruta: ${audioPath}`);
+    console.log(`  - Tamaño: ${req.file.size} bytes`);
+    
+    // Verificar que el archivo existe
+    if (!fs.existsSync(audioPath)) {
+      throw new Error(`Archivo no encontrado después de guardar: ${audioPath}`);
+    }
     
     const startTime = Date.now();
     
+    console.log(`🎙️ Iniciando transcripción con nodejs-whisper...`);
     const result = await nodewhisper(audioPath, {
       modelName: process.env.WHISPER_MODEL || 'medium',
       removeWavFileAfterTranscription: false,
       whisperOptions: {
         wordTimestamps: true,
-        outputInJson: true
+        outputInJson: true,
+        language: req.body?.language || 'es' // Default to Spanish
       }
     });
 
     const processingTime = Date.now() - startTime;
     const transcriptText = result.text || result || '';
+
+    console.log(`✅ Transcripción completada en ${processingTime}ms`);
+    console.log(`📝 Texto: "${transcriptText.substring(0, 100)}..."`);
+
+    // Opcional: Limpiar archivo después de procesar
+    if (process.env.CLEANUP_AFTER_PROCESS === 'true') {
+      setTimeout(() => {
+        fs.unlink(audioPath, (err) => {
+          if (err) console.log(`⚠️ No se pudo eliminar ${audioPath}:`, err.message);
+          else console.log(`🗑️ Archivo temporal eliminado: ${req.file.filename}`);
+        });
+      }, 5000); // Esperar 5 segundos antes de eliminar
+    }
 
     res.json({
       success: true,
@@ -156,10 +190,11 @@ app.post('/api/transcribe-upload', upload.single('audio'), async (req, res) => {
     });
 
   } catch (error) {
-    console.error(`[${new Date().toISOString()}] Error:`, error);
+    console.error(`[${new Date().toISOString()}] ❌ Error detallado:`, error);
     res.status(500).json({
       error: 'Error al transcribir el archivo',
-      details: error.message
+      details: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 });

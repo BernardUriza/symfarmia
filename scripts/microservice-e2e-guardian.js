@@ -157,6 +157,7 @@ class MicroserviceE2EGuardian {
 
   async runTranscriptionTest() {
     const fetch = (await import('node-fetch')).default;
+    const FormData = (await import('form-data')).default;
     
     try {
       // Step 1: Health check
@@ -167,8 +168,13 @@ class MicroserviceE2EGuardian {
       }
       console.log('   ✅ Server is healthy');
 
-      // Step 2: Check test file exists
-      console.log('   2️⃣  Checking test audio file...');
+      // Step 2: Test uploads directory (FILE PATH FIX TEST)
+      console.log('   2️⃣  Testing uploads directory handling...');
+      await this.testUploadsDirectory();
+      console.log('   ✅ Uploads directory test passed');
+
+      // Step 3: Check test file exists
+      console.log('   3️⃣  Checking test audio file...');
       // Use sample.wav if jfk.wav doesn't exist
       let testFile = 'jfk.wav';
       let testFilePath = path.join(this.microserviceDir, 'test-audio', testFile);
@@ -184,57 +190,47 @@ class MicroserviceE2EGuardian {
       }
       console.log('   ✅ Test file found');
 
-      // Step 3: Run transcription
-      console.log('   3️⃣  Running transcription...');
-      const startTime = Date.now();
+      // Step 4: Run server file transcription
+      console.log('   4️⃣  Running server file transcription...');
+      const serverFileResult = await this.testServerFileTranscription(testFile);
+      console.log('   ✅ Server file transcription passed');
+
+      // Step 5: Test file upload transcription (FILE PATH FIX TEST)
+      console.log('   5️⃣  Testing file upload transcription...');
+      const uploadResult = await this.testFileUploadTranscription(testFilePath);
+      console.log('   ✅ File upload transcription passed');
+
+      // Step 6: Verify both transcriptions contain "Americans"
+      console.log('   6️⃣  Verifying transcripts...');
+      const verifyResult = (result, testName) => {
+        if (!result.transcript || typeof result.transcript !== 'string') {
+          throw new Error(`Invalid transcript in ${testName} response`);
+        }
+
+        const transcriptLower = result.transcript.toLowerCase();
+        const containsAmericans = transcriptLower.includes('americans');
+
+        if (!containsAmericans) {
+          console.error(`   ❌ ${testName} transcript does not contain the word "Americans"`);
+          console.error(`   Expected: Text containing "Americans"`);
+          console.error(`   Received: "${result.transcript}"`);
+          throw new Error(`${testName} transcript verification failed: "Americans" not found`);
+        }
+      };
+
+      verifyResult(serverFileResult, 'Server file');
+      verifyResult(uploadResult, 'File upload');
+      console.log('   ✅ Both transcripts contain "Americans" - TESTS PASSED!');
       
-      const transcribeResponse = await fetch(`${this.serverUrl}/api/transcribe-server-file`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          filename: testFile
-        }),
-        timeout: this.testTimeout
-      });
-
-      if (!transcribeResponse.ok) {
-        const errorText = await transcribeResponse.text();
-        throw new Error(`Transcription failed: ${errorText}`);
-      }
-
-      const result = await transcribeResponse.json();
-      const duration = Date.now() - startTime;
-      
-      console.log(`   ✅ Transcription completed in ${duration}ms`);
-      console.log(`   📝 Transcript: "${result.transcript}"`);
-
-      // Step 4: Verify "Americans" is in the transcript
-      console.log('   4️⃣  Verifying transcript contains "Americans"...');
-      
-      if (!result.transcript || typeof result.transcript !== 'string') {
-        throw new Error('Invalid transcript in response');
-      }
-
-      const transcriptLower = result.transcript.toLowerCase();
-      const containsAmericans = transcriptLower.includes('americans');
-
-      if (!containsAmericans) {
-        console.error('   ❌ Transcript does not contain the word "Americans"');
-        console.error(`   Expected: Text containing "Americans"`);
-        console.error(`   Received: "${result.transcript}"`);
-        throw new Error('Transcript verification failed: "Americans" not found');
-      }
-
-      console.log('   ✅ Transcript contains "Americans" - TEST PASSED!');
-      
-      // Step 5: Display test summary
+      // Step 7: Display test summary
       console.log('\n   📊 Test Summary:');
-      console.log(`   • Processing time: ${result.processing_time_ms}ms`);
-      console.log(`   • Model used: ${result.model_used}`);
-      console.log(`   • File processed: ${result.filename}`);
-      console.log(`   • Transcript length: ${result.transcript.length} characters`);
+      console.log('   Server File Test:');
+      console.log(`   • Processing time: ${serverFileResult.processing_time_ms}ms`);
+      console.log(`   • Transcript length: ${serverFileResult.transcript.length} characters`);
+      console.log('   File Upload Test:');
+      console.log(`   • Processing time: ${uploadResult.processing_time_ms}ms`);
+      console.log(`   • Transcript length: ${uploadResult.transcript.length} characters`);
+      console.log(`   • Upload filename: ${uploadResult.filename}`);
 
       return true;
 
@@ -246,10 +242,98 @@ class MicroserviceE2EGuardian {
       console.error('   1. Check if nodejs-whisper is installed: cd microservices/susurro-test && npm install');
       console.error('   2. Download whisper model: cd microservices/susurro-test && npm run download-model');
       console.error('   3. Verify test audio exists: ls microservices/susurro-test/test-audio/');
-      console.error('   4. Check server logs above for errors');
+      console.error('   4. Check uploads directory exists: ls -la microservices/susurro-test/uploads/');
+      console.error('   5. Check server logs above for errors');
       
       return false;
     }
+  }
+
+  async testUploadsDirectory() {
+    const uploadsDir = path.join(this.microserviceDir, 'uploads');
+    
+    // Check if uploads directory exists
+    if (!fs.existsSync(uploadsDir)) {
+      throw new Error(`Uploads directory not found: ${uploadsDir}`);
+    }
+    
+    // Check if directory is writable
+    try {
+      const testFile = path.join(uploadsDir, '.write-test');
+      fs.writeFileSync(testFile, 'test');
+      fs.unlinkSync(testFile);
+    } catch (error) {
+      throw new Error(`Uploads directory not writable: ${error.message}`);
+    }
+    
+    console.log(`   ✅ Uploads directory exists and is writable: ${uploadsDir}`);
+  }
+
+  async testServerFileTranscription(testFile) {
+    const fetch = (await import('node-fetch')).default;
+    const startTime = Date.now();
+    
+    const transcribeResponse = await fetch(`${this.serverUrl}/api/transcribe-server-file`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        filename: testFile
+      }),
+      timeout: this.testTimeout
+    });
+
+    if (!transcribeResponse.ok) {
+      const errorText = await transcribeResponse.text();
+      throw new Error(`Server file transcription failed: ${errorText}`);
+    }
+
+    const result = await transcribeResponse.json();
+    const duration = Date.now() - startTime;
+    
+    console.log(`   ✅ Server file transcription completed in ${duration}ms`);
+    console.log(`   📝 Transcript: "${result.transcript.substring(0, 50)}..."`);
+    
+    return result;
+  }
+
+  async testFileUploadTranscription(testFilePath) {
+    const fetch = (await import('node-fetch')).default;
+    const FormData = (await import('form-data')).default;
+    const startTime = Date.now();
+    
+    // Create form data with file upload
+    const form = new FormData();
+    form.append('audio', fs.createReadStream(testFilePath), 'test-audio.wav');
+    
+    const transcribeResponse = await fetch(`${this.serverUrl}/api/transcribe-upload`, {
+      method: 'POST',
+      body: form,
+      headers: form.getHeaders(),
+      timeout: this.testTimeout
+    });
+
+    if (!transcribeResponse.ok) {
+      const errorText = await transcribeResponse.text();
+      throw new Error(`File upload transcription failed: ${errorText}`);
+    }
+
+    const result = await transcribeResponse.json();
+    const duration = Date.now() - startTime;
+    
+    console.log(`   ✅ File upload transcription completed in ${duration}ms`);
+    console.log(`   📝 Transcript: "${result.transcript.substring(0, 50)}..."`);
+    console.log(`   📁 Uploaded as: ${result.filename}`);
+    
+    // Verify the file was saved with absolute path handling
+    const uploadedFilePath = path.join(this.microserviceDir, 'uploads', result.filename);
+    if (!fs.existsSync(uploadedFilePath)) {
+      throw new Error(`Uploaded file not found at expected path: ${uploadedFilePath}`);
+    }
+    console.log(`   ✅ File saved correctly at: ${uploadedFilePath}`);
+    
+    return result;
   }
 }
 
