@@ -24,7 +24,6 @@
 .last_build_timestamp
 build-reports/
 coverage/
-.turbo/
 
 # misc
 .DS_Store

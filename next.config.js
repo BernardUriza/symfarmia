@@ -9,8 +9,11 @@ const nextConfig = {
 
   serverExternalPackages: ['@xenova/transformers'],
 
+  // Allow cross-origin requests from localhost
+  allowedDevOrigins: ['http://127.0.0.1:3002', 'http://localhost:3002'],
+
   // Webpack configuration only for production builds
-  ...(process.env.NODE_ENV === 'production' && {
+  ...({
     webpack: (config, { dev, isServer }) => {
       config.resolve.fallback = {
         ...config.resolve.fallback,

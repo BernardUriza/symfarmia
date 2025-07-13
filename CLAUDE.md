@@ -196,7 +196,7 @@ These are the actively maintained scripts in the `scripts/` directory:
 
 ### Build & Validation Scripts
 
-- **`build-guardian.js`** - Validates translations and Turbo before builds
+- **`build-guardian.js`** - Validates translations  before builds
   ```bash
   npm run build:guardian
   ```
@@ -210,9 +210,6 @@ These are the actively maintained scripts in the `scripts/` directory:
   ```bash
   npm run translations:validate
   ```
-
-- **`validate-turbo.js`** - Ensures dev server uses Turbopack
-  - Used internally by build-guardian.js
 
 ### Microservice Scripts
 

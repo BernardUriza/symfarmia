@@ -19,11 +19,15 @@ let transcriptionPipeline = null;
  * Lazy load transformers module
  */
 async function loadTransformers() {
-  if (transformersLoaded) return { pipeline, env };
+  if (transformersLoaded) {
+    console.log('👍 Transformers already loaded');
+    return { pipeline, env };
+  }
   
+  console.log('🚀 Loading @xenova/transformers...');
   try {
     const transformers = await import('@xenova/transformers');
-console.log("XENOVA IMPORTADO:", Object.keys(transformers));
+    console.log('📦 XENOVA IMPORTADO:', Object.keys(transformers));
     pipeline = transformers.pipeline;
     env = transformers.env;
     
@@ -43,9 +47,10 @@ console.log("XENOVA IMPORTADO:", Object.keys(transformers));
     }
     
     transformersLoaded = true;
+    console.log('✅ Transformers loaded successfully!');
     return { pipeline, env };
   } catch (error) {
-    console.error('Failed to import transformers:', error.message);
+    console.error('🚨 Failed to import transformers:', error.message);
     throw new Error('Transformers.js is not available in this environment');
   }
 }
@@ -55,6 +60,7 @@ console.log("XENOVA IMPORTADO:", Object.keys(transformers));
  * Uses global cache to optimize cold/warm starts
  */
 export async function getTranscriptionPipeline() {
+  console.log('🎙️ Initializing transcription pipeline...');
   // Ensure transformers is loaded
   const { pipeline: pipelineFunc } = await loadTransformers();
   
@@ -65,6 +71,7 @@ export async function getTranscriptionPipeline() {
   if (!transcriptionPipeline) {
     const startTime = Date.now();
     
+    console.log('🎯 Loading Whisper model...');
     try {
       transcriptionPipeline = await pipelineFunc(
         'automatic-speech-recognition',
@@ -74,6 +81,7 @@ export async function getTranscriptionPipeline() {
           revision: 'main'
         }
       );
+      console.log('✅ Whisper model loaded successfully!');
     } catch (error) {
       throw new Error(`Failed to initialize Whisper model: ${error.message}`);
     }
@@ -112,20 +120,24 @@ export async function transcribeAudio(audioBuffer, options = {}) {
   
   try {
     // Write buffer to temporary file
+    console.log(`💾 Writing audio to temp file: ${tempFileName} (${(audioBuffer.length / 1024).toFixed(2)} KB)`);
     writeFileSync(tempFilePath, audioBuffer);
     
     // Pass the file path to the transcriber
+    console.log('🎵 Transcribing audio...');
     result = await transcriber(tempFilePath, transcriptionOptions);
+    console.log('✅ Transcription complete:', result.text ? result.text.substring(0, 50) + '...' : 'No text');
     
   } catch (error) {
-    console.error('Transcription error:', error.message);
+    console.error('🚨 Transcription error:', error.message);
+    console.error('Stack trace:', error.stack);
     throw new Error(`Transcription failed: ${error.message}`);
   } finally {
     // Always clean up the temporary file
     try {
       unlinkSync(tempFilePath);
     } catch (cleanupError) {
-      console.error('Failed to clean up temp file:', cleanupError.message);
+      console.error('🗿 Failed to clean up temp file:', cleanupError.message);
     }
   }
   
