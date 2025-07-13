@@ -250,7 +250,7 @@ Ubicación: `/scripts/kill-ports.js`
 node scripts/kill-ports.js
 
 # O usar el comando npm
-npm run kill-ports
+npm run kill:ports
 ```
 
 ### Funcionamiento
@@ -318,7 +318,7 @@ El `build-guardian.js` ejecuta automáticamente las pruebas E2E del microservici
 **Síntoma**: Error "EADDRINUSE: address already in use"
 ```bash
 # Solución
-npm run kill-ports
+npm run kill:ports
 # o
 node scripts/kill-ports.js
 ```

@@ -261,7 +261,7 @@ class BuildGuardian {
       console.log('4. Test microservice manually:');
       console.log('   cd microservices/susurro-test && npm test\n');
       console.log('5. Check if port 3001 is available:');
-      console.log('   npm run kill-ports\n');
+      console.log('   npm run kill:ports\n');
       console.log('⚠️  IMPORTANT: The microservice must:');
       console.log('   • Have uploads/ directory with write permissions');
       console.log('   • Successfully transcribe audio files');

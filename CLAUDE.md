@@ -10,7 +10,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Build**: `npm run build` - Generates Prisma client and builds the application
 - **Production server**: `npm start` - Start production server
 - **Linting**: `npm run lint` - Run Next.js ESLint
-- **Deploy**: `npm run deploy` - Generates date and runs git-commit.bat
 
 ### Permanent Development Server
 
@@ -52,9 +51,7 @@ npm start
 ### Gestión de Puertos
 ```bash
 # Limpiar puertos ocupados (3000 y 3001)
-node scripts/kill-ports.js
-# o
-npm run kill-ports
+npm run kill:ports
 ```
 
 ### Distribución de Puertos
@@ -182,7 +179,7 @@ These are the actively maintained scripts in the `scripts/` directory:
 
 - **`kill-ports.js`** - Cleans ports 3000 and 3001 before starting servers
   ```bash
-  npm run kill-ports
+  npm run kill:ports
   ```
 
 - **`permanent-dev-simple.js`** - Simplified permanent dev server on port 3002

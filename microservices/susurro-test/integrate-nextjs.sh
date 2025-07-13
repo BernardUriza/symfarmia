@@ -321,7 +321,7 @@ Este servicio ha sido integrado exitosamente en tu proyecto Next.js.
 
 ### Iniciar ambos servicios:
 \`\`\`bash
-npm run dev:all
+npm run dev
 \`\`\`
 
 ### Iniciar solo el servicio Whisper:
@@ -372,7 +372,7 @@ echo -e "🧩 Componente React en: ${BLUE}components/AudioTranscriber.jsx${NC}"
 echo -e "📖 Documentación en: ${BLUE}$APPS_DIR/$SERVICE_NAME/INTEGRATION.md${NC}"
 echo
 echo -e "${YELLOW}Próximos pasos:${NC}"
-echo "1. Iniciar ambos servicios: ${BLUE}npm run dev:all${NC}"
+echo "1. Iniciar ambos servicios: ${BLUE}npm run dev${NC}"
 echo "2. Importar y usar el componente AudioTranscriber en tus páginas"
 echo "3. Personalizar el componente según tus necesidades"
 echo
