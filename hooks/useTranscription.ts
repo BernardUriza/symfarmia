@@ -102,12 +102,32 @@ export function useTranscription(options = {}): UseTranscriptionReturn {
       console.log(`📦 [setupAudioMonitoring] Array de datos creado con ${dataArray.length} elementos`);
       
       let frameCount = 0;
+      let retryCount = 0;
+      const maxRetries = 10; // 🔄 Máximo de reintentos para esperar que la grabación comience
+      
       const updateAudioLevel = () => {
-        if (!isRecordingRef.current) {
-          console.log('⏹️ [updateAudioLevel] Deteniendo monitoreo - no está grabando');
+        // 🔄 RESILIENCE: Si no está grabando pero estamos en los primeros intentos, seguir intentando
+        if (!isRecordingRef.current && retryCount < maxRetries) {
+          retryCount++;
+          console.log(`⏳ [updateAudioLevel] Esperando inicio de grabación... intento ${retryCount}/${maxRetries}`);
+          // Reintentar en 100ms
+          setTimeout(() => {
+            animationFrameRef.current = requestAnimationFrame(updateAudioLevel);
+          }, 100);
+          return;
+        }
+        
+        if (!isRecordingRef.current && retryCount >= maxRetries) {
+          console.log('⏹️ [updateAudioLevel] Deteniendo monitoreo - no está grabando después de reintentos');
           console.log(`📊 [updateAudioLevel] isRecordingRef.current = ${isRecordingRef.current}`);
           setAudioLevel(0); // 🔄 Resetear nivel de audio al detener
           return;
+        }
+        
+        // 🎉 Si llegamos aquí, estamos grabando
+        if (retryCount > 0) {
+          console.log(`✅ [updateAudioLevel] Grabación detectada después de ${retryCount} intentos`);
+          retryCount = 0; // Reset retry count
         }
         
         analyser.getByteFrequencyData(dataArray);
@@ -155,8 +175,15 @@ export function useTranscription(options = {}): UseTranscriptionReturn {
       console.log('✅ [startTranscription] Permisos de micrófono concedidos');
       console.log(`📊 [startTranscription] Stream activo con ${stream.getTracks().length} tracks`);
       
-      // Setup audio monitoring
-      console.log('📈 [startTranscription] Configurando monitoreo de audio...');
+      // 🔴 CRITICAL FIX: Set recording state BEFORE audio monitoring
+      console.log('🔴 [startTranscription] ORDEN CRÍTICO: Estableciendo estado de grabación ANTES del monitoreo');
+      isRecordingRef.current = true;
+      setIsRecording(true);
+      console.log('✅ [startTranscription] isRecordingRef.current = true establecido ANTES del monitoreo');
+      console.log('✅ [startTranscription] setIsRecording(true) llamado ANTES del monitoreo');
+      
+      // Setup audio monitoring AFTER recording state is set
+      console.log('📈 [startTranscription] Configurando monitoreo de audio (ahora con isRecording = true)...');
       await setupAudioMonitoring(stream);
       console.log('✅ [startTranscription] Monitoreo de audio configurado');
       
@@ -263,9 +290,6 @@ export function useTranscription(options = {}): UseTranscriptionReturn {
       console.log('▶️ [startTranscription] Iniciando grabación...');
       mediaRecorder.start(1000); // Chunk every second
       console.log('✅ [startTranscription] MediaRecorder.start() llamado con chunks de 1 segundo');
-      
-      setIsRecording(true);
-      console.log('✅ [startTranscription] Estado isRecording = true');
       console.log('🎉 [startTranscription] Transcripción iniciada exitosamente!');
       
       return true;

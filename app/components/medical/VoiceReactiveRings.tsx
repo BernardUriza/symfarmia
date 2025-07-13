@@ -1,18 +1,19 @@
 'use client';
-
-import React, { useState, useEffect, useRef } from 'react';
-import { useMicrophoneLevel } from '../../../src/domains/medical-ai/hooks/useMicrophoneLevel';
+import React, { useState, useEffect } from 'react';
+import type { ReactNode } from 'react';
 
 interface VoiceReactiveRingsProps {
   isRecording: boolean;
+  audioLevel: number;
   size?: 'sm' | 'md' | 'lg' | 'xl';
   intensity?: 'subtle' | 'normal' | 'dramatic';
   colorScheme?: 'blue' | 'red' | 'green' | 'purple' | 'medical';
   className?: string;
-  children?: React.ReactNode;
+  children?: ReactNode;
+  minLevel?: number; // Nuevo: mínimo tolerable
+  maxLevel?: number; // Nuevo: máximo tolerable
 }
 
-// 🎨 Configuraciones de tamaño
 const SIZE_CONFIG = {
   sm: { base: 40, rings: [50, 65, 80, 100] },
   md: { base: 60, rings: [75, 95, 120, 150] },
@@ -20,19 +21,18 @@ const SIZE_CONFIG = {
   xl: { base: 100, rings: [130, 170, 220, 280] }
 };
 
-// 🌈 Esquemas de color
 const COLOR_SCHEMES = {
   blue: {
-    core: 'rgb(59, 130, 246)',      // blue-500
+    core: 'rgb(59, 130, 246)',
     rings: [
-      'rgba(59, 130, 246, 0.4)',   // Ring 1
-      'rgba(59, 130, 246, 0.25)',  // Ring 2  
-      'rgba(59, 130, 246, 0.15)',  // Ring 3
-      'rgba(59, 130, 246, 0.08)'   // Ring 4
+      'rgba(59, 130, 246, 0.4)',
+      'rgba(59, 130, 246, 0.25)',
+      'rgba(59, 130, 246, 0.15)',
+      'rgba(59, 130, 246, 0.08)'
     ]
   },
   red: {
-    core: 'rgb(239, 68, 68)',       // red-500
+    core: 'rgb(239, 68, 68)',
     rings: [
       'rgba(239, 68, 68, 0.5)',
       'rgba(239, 68, 68, 0.3)',
@@ -41,7 +41,7 @@ const COLOR_SCHEMES = {
     ]
   },
   green: {
-    core: 'rgb(34, 197, 94)',       // green-500
+    core: 'rgb(34, 197, 94)',
     rings: [
       'rgba(34, 197, 94, 0.4)',
       'rgba(34, 197, 94, 0.25)',
@@ -50,7 +50,7 @@ const COLOR_SCHEMES = {
     ]
   },
   purple: {
-    core: 'rgb(168, 85, 247)',      // purple-500
+    core: 'rgb(168, 85, 247)',
     rings: [
       'rgba(168, 85, 247, 0.4)',
       'rgba(168, 85, 247, 0.25)',
@@ -59,7 +59,7 @@ const COLOR_SCHEMES = {
     ]
   },
   medical: {
-    core: 'rgb(16, 185, 129)',      // emerald-500
+    core: 'rgb(16, 185, 129)',
     rings: [
       'rgba(16, 185, 129, 0.4)',
       'rgba(16, 185, 129, 0.25)',
@@ -69,135 +69,106 @@ const COLOR_SCHEMES = {
   }
 };
 
+// --- Rango por default ---
+const DEFAULT_MIN = 8;
+const DEFAULT_MAX = 60;
+
 export const VoiceReactiveRings = ({
   isRecording,
   size = 'lg',
   intensity = 'normal',
   colorScheme = 'medical',
   className = '',
-  children
+  audioLevel = 0,
+  children,
+  minLevel = DEFAULT_MIN,
+  maxLevel = DEFAULT_MAX
 }: VoiceReactiveRingsProps) => {
-  // 🎤 Audio level desde el hook existente
-  const audioLevel = useMicrophoneLevel(isRecording);
-  
-  // 🎯 Estados para cada anillo (con smoothing)
   const [ringLevels, setRingLevels] = useState([0, 0, 0, 0]);
-  const smoothingFactors = [0.8, 0.6, 0.4, 0.2]; // Ring 1 más reactivo
-  const ringDelays = useRef([0, 0, 0, 0]); // Para delays escalonados
-  
-  // ⚙️ Configuración
-  const config = SIZE_CONFIG[size];
-  const colors = COLOR_SCHEMES[colorScheme];
-  const intensityMultiplier = intensity === 'subtle' ? 0.5 : intensity === 'dramatic' ? 1.5 : 1;
-  
-  // 🔄 Efecto para smoothing y delays
+  const smoothingFactors = [0.8, 0.6, 0.4, 0.2];
+
   useEffect(() => {
     if (!isRecording) {
       setRingLevels([0, 0, 0, 0]);
       return;
     }
-    
-    const updateRings = () => {
-      setRingLevels(prev => {
-        return prev.map((currentLevel, index) => {
-          // Calcular target level con delay escalonado
-          const delayedLevel = ringDelays.current?.[index] || audioLevel;
-          if (ringDelays.current) {
-            ringDelays.current[index] = audioLevel;
-          }
-          
-          // Aplicar smoothing
+    const intervalId = setInterval(() => {
+      setRingLevels(prev =>
+        prev.map((currentLevel, index) => {
           const smoothing = smoothingFactors[index];
-          const targetLevel = (delayedLevel / 255) * intensityMultiplier;
-          
+          const targetLevel = (audioLevel / 255) *
+            (intensity === 'subtle' ? 0.5 : intensity === 'dramatic' ? 1.5 : 1);
           return currentLevel + (targetLevel - currentLevel) * smoothing;
-        });
-      });
-    };
-    
-    const intervalId = setInterval(updateRings, 16); // ~60fps
+        })
+      );
+    }, 16);
     return () => clearInterval(intervalId);
-  }, [audioLevel, isRecording, intensityMultiplier]);
-  
-  // 🎨 Calcular escalas para cada anillo
-  const getRingScale = (ringIndex: number): number => {
+  }, [audioLevel, isRecording, intensity]);
+
+  const config = SIZE_CONFIG[size];
+  const colors = COLOR_SCHEMES[colorScheme];
+
+  // NIVELES visuales
+  let levelStyle = 'font-bold transition-all select-none';
+  let ringPulseClass = '';
+  let text = `${audioLevel}`;
+
+  if (audioLevel < minLevel) {
+    levelStyle += ' text-gray-400 opacity-60 text-sm blur-[1px]';
+    text = `⭑${audioLevel}`;
+  } else if (audioLevel >= minLevel && audioLevel < maxLevel) {
+    levelStyle += ' text-white text-xl drop-shadow';
+    text = `${audioLevel}`;
+  } else if (audioLevel >= maxLevel) {
+    levelStyle += ' text-4xl text-white animate-pulse-explode drop-shadow-xl';
+    ringPulseClass = 'animate-pulse-ring';
+    text = `¡${audioLevel}!`;
+  }
+
+  const getRingScale = (ringIndex: number) => {
     if (!isRecording) return 1;
-    
     const level = ringLevels[ringIndex];
-    const baseScale = 1;
-    const scaleRange = 0.3 + (ringIndex * 0.1); // Anillos externos menos expansión
-    
-    return baseScale + (level * scaleRange);
+    return 1 + level * (0.3 + ringIndex * 0.1);
   };
-  
-  // 🌊 Calcular opacidad reactiva
-  const getRingOpacity = (ringIndex: number): number => {
+
+  const getRingOpacity = (ringIndex: number) => {
     if (!isRecording) return 0.1;
-    
     const level = ringLevels[ringIndex];
-    const baseOpacity = 0.2;
-    const opacityRange = 0.6;
-    
-    return Math.min(1, baseOpacity + (level * opacityRange));
+    return Math.min(1, 0.2 + level * 0.6);
   };
-  
+
   return (
-    <div className={`relative flex items-center justify-center ${className}`}>
-      
-      {/* 🎯 Micrófono Central */}
-      <div 
-        className="relative z-10 rounded-full flex items-center justify-center transition-all duration-300"
-        style={{
-          width: config.base,
-          height: config.base,
-          backgroundColor: colors.core,
-          transform: `scale(${1 + (ringLevels[0] * 0.1)})`
-        }}
-      >
-        {/* Icono del micrófono se pasa como children */}
-        <div className="text-white">
-          {children}
-        </div>
-      </div>
-      
-      {/* 🌊 Anillos Concéntricos */}
-      {config.rings.map((ringSize, index) => (
+    <div className={`flex flex-col items-center gap-1 ${className}`}>
+  
+      <div className="relative flex items-center justify-center">
         <div
-          key={index}
-          className="absolute rounded-full border-2 transition-all duration-75 ease-out"
+          className={`relative z-10 rounded-full flex items-center justify-center transition-all duration-300 bg-opacity-90 ${ringPulseClass}`}
           style={{
-            width: ringSize,
-            height: ringSize,
-            borderColor: colors.rings[index],
-            backgroundColor: 'transparent',
-            transform: `scale(${getRingScale(index)})`,
-            opacity: getRingOpacity(index),
-            animationName: isRecording ? `pulse-ring-${index}` : 'none',
-            animationDuration: '2s',
-            animationIterationCount: 'infinite',
-            animationTimingFunction: 'ease-in-out',
-            animationDelay: `${index * 0.2}s`
+            width: config.base,
+            height: config.base,
+            backgroundColor: colors.core,
+            transform: `scale(${1 + ringLevels[0] * 0.1})`
           }}
-        />
-      ))}
-      
-      {/* 💫 Partículas adicionales (opcional) */}
-      {intensity === 'dramatic' && isRecording && ringLevels[0] > 0.7 && (
-        <div className="absolute inset-0">
-          {[...Array(6)].map((_, i) => (
-            <div
-              key={i}
-              className="absolute w-2 h-2 rounded-full animate-ping"
-              style={{
-                backgroundColor: colors.core,
-                top: `${20 + Math.sin(i * 60) * 30}%`,
-                left: `${20 + Math.cos(i * 60) * 30}%`,
-                opacity: ringLevels[0] * 0.6
-              }}
-            />
-          ))}
+        >
+          <div className={`flex flex-col items-center w-full h-full justify-center ${levelStyle}`}>
+            {children ?? null}
+          </div>
         </div>
-      )}
+        {config.rings.map((ringSize, index) => (
+          <div
+            key={index}
+            className="absolute rounded-full border-2 transition-all duration-75 ease-out"
+            style={{
+              width: ringSize,
+              height: ringSize,
+              borderColor: colors.rings[index],
+              backgroundColor: 'transparent',
+              transform: `scale(${getRingScale(index)})`,
+              opacity: getRingOpacity(index)
+            }}
+          />
+        ))}
+      </div>
     </div>
   );
 };

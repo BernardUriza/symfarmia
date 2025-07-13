@@ -66,6 +66,22 @@ module.exports = {
         "tremor-title": ["1.125rem", { lineHeight: "1.75rem" }],
         "tremor-metric": ["1.875rem", { lineHeight: "2.25rem" }],
       },
+      keyframes: {
+        'pulse-explode': {
+          '0%':   { transform: 'scale(1)',   filter: 'brightness(1)', boxShadow: '0 0 30px 8px #fff3' },
+          '70%':  { transform: 'scale(1.16)', filter: 'brightness(2)', boxShadow: '0 0 48px 18px #fff' },
+          '100%': { transform: 'scale(1)',   filter: 'brightness(1)', boxShadow: '0 0 30px 8px #fff3' }
+        },
+        'pulse-ring': {
+          '0%':   { boxShadow: '0 0 0 0 #fff2' },
+          '70%':  { boxShadow: '0 0 24px 14px #fff9' },
+          '100%': { boxShadow: '0 0 0 0 #fff2' }
+        }
+      },
+      animation: {
+        'pulse-explode': 'pulse-explode 0.8s cubic-bezier(.2,.7,.5,1.2) infinite alternate',
+        'pulse-ring': 'pulse-ring 1.5s cubic-bezier(.2,.7,.5,1.2) infinite'
+      }
     },
   },
   safelist: [

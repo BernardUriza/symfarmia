@@ -118,6 +118,7 @@ export const ConversationCapture = ({
             <VoiceReactiveRings
               isRecording={isRecording}
               size="lg"
+              audioLevel={audioLevel}
               intensity="normal" 
               colorScheme={isRecording ? "red" : "medical"}
             >
