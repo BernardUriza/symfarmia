@@ -108,7 +108,7 @@ describe('LandingPage', () => {
       </ThemeProvider>
     )
     const loginLink = screen.getByRole('link', { name: /iniciar sesión/i })
-    expect(loginLink).toHaveAttribute('href', '/api/auth/login?returnTo=/legacy')
+    expect(loginLink).toHaveAttribute('href', '/api/auth/login?returnTo=/dashboard')
   })
 
   it('has correct Register link href', () => {
@@ -122,7 +122,7 @@ describe('LandingPage', () => {
       </ThemeProvider>
     )
     const registerLink = screen.getByRole('link', { name: /registrarse/i })
-    expect(registerLink).toHaveAttribute('href', '/api/auth/login?returnTo=/legacy')
+    expect(registerLink).toHaveAttribute('href', '/api/auth/login?returnTo=/dashboard')
   })
 
   it('renders footer copyright', () => {

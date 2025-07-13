@@ -10,3 +10,25 @@
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+
+  # ✅ CONFIGURACIÓN CORRECTA:
+[[redirects]]
+  from = "/auth/login"
+  to = "/.netlify/functions/api-auth-login"
+  status = 200
+
+[[redirects]]
+  from = "/auth/logout" 
+  to = "/.netlify/functions/api-auth-logout"
+  status = 200
+
+[[redirects]]
+  from = "/auth/callback"
+  to = "/.netlify/functions/api-auth-callback"
+  status = 200
+
+# ✅ SPA fallback debe ser el último
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
