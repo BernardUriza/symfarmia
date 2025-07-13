@@ -8,7 +8,6 @@ import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { Mic, MicOff, Activity, Play, Square as Stop, RotateCcw, Copy } from 'lucide-react';
 import { VoiceReactiveRings } from './VoiceReactiveRings';
-
 interface ConversationCaptureProps {
   onNext?: () => void;
   onTranscriptionComplete?: (transcript: string) => void;
@@ -75,7 +74,12 @@ export const ConversationCapture = ({
           <div className="bg-white p-6 rounded-lg max-w-md">
             <h3 className="text-lg font-semibold mb-2">{t('conversation.capture.permission_title')}</h3>
             <p className="text-gray-600 mb-4">{t('conversation.capture.permission_message')}</p>
-            <Button onClick={() => setShowPermissionDialog(false)}>
+            <Button 
+              onClick={() => setShowPermissionDialog(false)} 
+              className=""
+              variant="default"
+              size="md"
+            >
               {t('common.close')}
             </Button>
           </div>
@@ -178,12 +182,17 @@ export const ConversationCapture = ({
 
             {transcription && (
               <>
-                <Button variant="outline" onClick={resetTranscription}>
+                <Button variant="outline" size="md" className="" onClick={resetTranscription}>
                   <RotateCcw className="w-5 h-5 mr-2" />
                   {t('common.reset')}
                 </Button>
                 
-                <Button variant="outline" onClick={handleCopy}>
+                <Button
+                  variant="outline"
+                  size="md"
+                  className=""
+                  onClick={handleCopy}
+                >
                   <Copy className="w-5 h-5 mr-2" />
                   {t('common.copy')}
                 </Button>
