@@ -45,6 +45,14 @@ export function useTranscription(options = {}): UseTranscriptionReturn {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const isRecordingRef = useRef<boolean>(false); // 🔧 Ref para estado de grabación en tiempo real
+  const animationFrameRef = useRef<number | null>(null); // 🔧 Para cancelar el loop de monitoreo
+  
+  // Mantener ref sincronizada con estado
+  useEffect(() => {
+    console.log(`🔄 [useEffect] Actualizando isRecordingRef.current = ${isRecording}`);
+    isRecordingRef.current = isRecording;
+  }, [isRecording]);
   
   // Timer de grabación
   useEffect(() => {
@@ -95,8 +103,10 @@ export function useTranscription(options = {}): UseTranscriptionReturn {
       
       let frameCount = 0;
       const updateAudioLevel = () => {
-        if (!isRecording) {
+        if (!isRecordingRef.current) {
           console.log('⏹️ [updateAudioLevel] Deteniendo monitoreo - no está grabando');
+          console.log(`📊 [updateAudioLevel] isRecordingRef.current = ${isRecordingRef.current}`);
+          setAudioLevel(0); // 🔄 Resetear nivel de audio al detener
           return;
         }
         
@@ -106,14 +116,17 @@ export function useTranscription(options = {}): UseTranscriptionReturn {
         
         // Log cada 30 frames (aproximadamente cada segundo a 30fps)
         if (frameCount % 30 === 0) {
-          console.log(`📈 [updateAudioLevel] Nivel de audio: ${average.toFixed(1)}/255 (${((average/255)*100).toFixed(1)}%)`);
+          console.log(`📈 [updateAudioLevel] Frame ${frameCount} - Nivel de audio: ${average.toFixed(1)}/255 (${((average/255)*100).toFixed(1)}%)`);
+          console.log(`🔄 [updateAudioLevel] isRecordingRef.current = ${isRecordingRef.current}`);
         }
         frameCount++;
         
-        requestAnimationFrame(updateAudioLevel);
+        // 🔄 Guardar el ID del frame para poder cancelarlo
+        animationFrameRef.current = requestAnimationFrame(updateAudioLevel);
       };
       
       console.log('▶️ [setupAudioMonitoring] Iniciando loop de monitoreo...');
+      console.log(`📊 [setupAudioMonitoring] Estado inicial isRecordingRef.current = ${isRecordingRef.current}`);
       updateAudioLevel();
       console.log('✅ [setupAudioMonitoring] Monitoreo de audio configurado exitosamente');
       
@@ -122,7 +135,7 @@ export function useTranscription(options = {}): UseTranscriptionReturn {
       console.error(`🔍 [setupAudioMonitoring] Tipo de error: ${error instanceof Error ? error.constructor.name : typeof error}`);
       console.error(`📝 [setupAudioMonitoring] Mensaje: ${error instanceof Error ? error.message : String(error)}`);
     }
-  }, [isRecording]);
+  }, []); // 🔧 Sin dependencia de isRecording - usamos ref
   
   // Start transcription
   const startTranscription = useCallback(async (): Promise<boolean> => {
@@ -289,6 +302,23 @@ export function useTranscription(options = {}): UseTranscriptionReturn {
         
         setIsRecording(false);
         console.log('✅ [stopTranscription] Estado isRecording = false');
+        
+        // 🔄 Cancelar el loop de monitoreo de audio
+        if (animationFrameRef.current) {
+          console.log(`🛑 [stopTranscription] Cancelando animation frame: ${animationFrameRef.current}`);
+          cancelAnimationFrame(animationFrameRef.current);
+          animationFrameRef.current = null;
+          console.log('✅ [stopTranscription] Animation frame cancelado');
+        }
+        
+        // 🔄 Limpiar el contexto de audio
+        if (audioContextRef.current) {
+          console.log('🔌 [stopTranscription] Cerrando AudioContext...');
+          audioContextRef.current.close();
+          audioContextRef.current = null;
+          console.log('✅ [stopTranscription] AudioContext cerrado');
+        }
+        
         console.log('🎉 [stopTranscription] Detención completada exitosamente');
         
         return true;
