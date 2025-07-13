@@ -2,6 +2,9 @@
   "name": "netlify-whisper-functions",
   "version": "1.0.0",
   "description": "Netlify Functions for audio transcription using nodejs-whisper",
+  "scripts": {
+    "postinstall": "echo '📥 Running postinstall - downloading Whisper model (medium)...' && npx nodejs-whisper download medium && echo '✅ Whisper medium model downloaded successfully'"
+  },
   "dependencies": {
     "nodejs-whisper": "^0.2.9",
     "lambda-multipart-parser": "^1.0.1"

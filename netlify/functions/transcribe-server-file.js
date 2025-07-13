@@ -2,6 +2,12 @@ const { nodewhisper } = require('nodejs-whisper');
 const path = require('path');
 const fs = require('fs');
 
+// Debug logs para verificar el modelo
+console.log('📁 [Server File Function Init] Checking model files...');
+console.log('📁 Current directory:', process.cwd());
+console.log('📁 Node modules exists:', fs.existsSync('./node_modules'));
+console.log('📁 Whisper module exists:', fs.existsSync('./node_modules/nodejs-whisper'));
+
 exports.handler = async (event, context) => {
   // Solo acepta POST
   if (event.httpMethod !== 'POST') {
@@ -77,7 +83,7 @@ exports.handler = async (event, context) => {
     
     // Usar nodejs-whisper igual que en el microservicio
     const result = await nodewhisper(audioPath, {
-      modelName: 'tiny.en',
+      modelName: 'medium',
       removeWavFileAfterTranscription: false,
       whisperOptions: {
         wordTimestamps: true,
@@ -104,7 +110,7 @@ exports.handler = async (event, context) => {
         raw_result: result,
         processing_time_ms: processingTime,
         audio_path: audioPath,
-        model_used: 'nodejs-whisper tiny.en (Netlify Function)',
+        model_used: 'nodejs-whisper medium (Netlify Function)',
         timestamp: new Date().toISOString()
       })
     };
