@@ -1,4 +1,4 @@
-import multipart from "lambda-multipart-parser";
+import { readFile } from "fs/promises";
 import { pipeline } from "@xenova/transformers";
 
 export const handler = async (event) => {
@@ -21,22 +21,24 @@ export const handler = async (event) => {
   }
 
   try {
-    const result = await multipart.parse(event);
+    const { filePath } = JSON.parse(event.body);
     
-    if (!result.files || result.files.length === 0) {
+    if (!filePath) {
       return {
         statusCode: 400,
         headers,
-        body: JSON.stringify({ error: "No file uploaded" })
+        body: JSON.stringify({ error: "File path is required" })
       };
     }
 
+    // Read the audio file
+    const audioData = await readFile(filePath);
+    
     // Initialize transcription pipeline
     const transcriber = await pipeline("automatic-speech-recognition", "Xenova/whisper-tiny");
     
     // Process the audio file
-    const file = result.files[0];
-    const transcription = await transcriber(file.content, {
+    const transcription = await transcriber(audioData, {
       return_timestamps: true
     });
 

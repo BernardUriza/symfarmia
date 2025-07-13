@@ -1,9 +1,10 @@
 [dev]
-  command = "next dev"
+  command = "npm run dev:next"
   port = 8888
   targetPort = 3000
   publish = ".next"
   autoLaunch = false
+  framework = "#custom"
 
 [build]
   command = "echo '🔍 Starting build...' && npm install --production=false && echo '📦 Installing function deps...' && cd netlify/functions && npm install && cd ../.. && npm run build"
