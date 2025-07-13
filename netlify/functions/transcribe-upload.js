@@ -5,24 +5,14 @@ const fsSync = require('fs');
 const path = require('path');
 const os = require('os');
 
-// Set model paths - base (multilingual) as primary, base.en as fallback
-const MODEL_PATH_BASE = path.join(process.cwd(), 'public', 'models', 'ggml-base.bin');
-const MODEL_PATH_EN = path.join(process.cwd(), 'public', 'models', 'ggml-base.en.bin');
-
-// Check which model exists and use appropriately
-const baseExists = fsSync.existsSync(MODEL_PATH_BASE);
-const enExists = fsSync.existsSync(MODEL_PATH_EN);
-
-console.log('📁 [Init] Base model (multilingual) exists:', baseExists);
-console.log('📁 [Init] Base.en model (English) exists:', enExists);
-
-// Use base (multilingual) if available, fallback to base.en
-const MODEL_PATH = baseExists ? MODEL_PATH_BASE : MODEL_PATH_EN;
-console.log('📁 [Init] Using model:', MODEL_PATH);
+// Note: nodejs-whisper will use the model downloaded during build
+// The model should be in node_modules/nodejs-whisper/lib/whisper/models/
+console.log('📁 [Init] Using nodejs-whisper with base model');
 
 // Debug logs para verificar el modelo
 console.log('📁 [Function Init] Checking model files...');
 console.log('📁 Current directory:', process.cwd());
+console.log('📁 __dirname:', __dirname);
 console.log('📁 Node modules exists:', fsSync.existsSync('./node_modules'));
 console.log('📁 Whisper module exists:', fsSync.existsSync('./node_modules/nodejs-whisper'));
 
@@ -32,14 +22,23 @@ try {
   if (fsSync.existsSync(modelPath)) {
     console.log('📁 Whisper module contents:', fsSync.readdirSync(modelPath).slice(0, 10));
     
-    // Verificar si el modelo tiny.en existe
+    // Verificar si el modelo base existe
     const modelsPath = path.join(modelPath, 'lib', 'whisper', 'models');
     if (fsSync.existsSync(modelsPath)) {
       console.log('📁 Models directory contents:', fsSync.readdirSync(modelsPath));
+      
+      // Check specific model files
+      const baseModel = path.join(modelsPath, 'ggml-base.bin');
+      console.log('📁 Base model exists:', fsSync.existsSync(baseModel));
     } else {
       console.log('❌ Models directory not found at:', modelsPath);
     }
   }
+  
+  // Also check absolute path
+  const absoluteModelPath = path.join(__dirname, 'node_modules', 'nodejs-whisper', 'lib', 'whisper', 'models');
+  console.log('📁 Absolute model path:', absoluteModelPath);
+  console.log('📁 Absolute path exists:', fsSync.existsSync(absoluteModelPath));
 } catch (error) {
   console.log('📁 Error checking model path:', error.message);
 }
@@ -101,13 +100,25 @@ exports.handler = async (event, context) => {
     console.log(`[${new Date().toISOString()}] Archivo subido: ${audioFile.filename}`);
     console.log(`[${new Date().toISOString()}] Tamaño: ${audioFile.content.length} bytes`);
     console.log(`[${new Date().toISOString()}] Archivo temporal: ${tempPath}`);
-    console.log(`[${new Date().toISOString()}] Verificando modelo antes de transcribir...`);
+    console.log(`[${new Date().toISOString()}] Verificando que el archivo existe...`);
+    
+    // Verificar que el archivo temporal existe
+    const fileExists = await fs.access(tempPath).then(() => true).catch(() => false);
+    console.log(`[${new Date().toISOString()}] Archivo temporal existe: ${fileExists}`);
+    
+    if (!fileExists) {
+      throw new Error(`Archivo temporal no existe: ${tempPath}`);
+    }
+    
+    console.log(`[${new Date().toISOString()}] Iniciando transcripción...`);
     
     const startTime = Date.now();
     
     // Usar nodejs-whisper para transcribir con modelo existente
+    // El modelo base se descarga durante el build en node_modules/nodejs-whisper/lib/whisper/models/
     const transcriptionResult = await nodewhisper(tempPath, {
-      modelPath: MODEL_PATH,
+      modelName: 'base', // Use the base model downloaded during build
+      modelPath: path.join(__dirname, 'node_modules', 'nodejs-whisper', 'lib', 'whisper', 'models'),
       removeWavFileAfterTranscription: false,
       whisperOptions: {
         wordTimestamps: true,
@@ -144,7 +155,7 @@ exports.handler = async (event, context) => {
         transcript: transcriptText,
         processing_time_ms: processingTime,
         file_size: audioFile.content.length,
-        model_used: `nodejs-whisper ${MODEL_PATH.includes('base.en') ? 'base.en' : 'base (multilingual)'} (Netlify Function)`,
+        model_used: 'nodejs-whisper base (Netlify Function)',
         timestamp: new Date().toISOString(),
         confidence: 0.95 // nodejs-whisper no devuelve confidence, usar valor por defecto
       })
