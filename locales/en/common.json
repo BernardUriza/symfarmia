@@ -116,5 +116,8 @@
     "priority": {
       "${item.priority}": "priority variable"
     }
-  }
+  },
+  "reset": "Reset",
+  "copy": "Copy",
+  "next": "Next"
 }

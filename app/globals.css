@@ -1073,3 +1073,32 @@ div[role="menu"] div:hover {
     @apply shadow-lg dark:shadow-gray-900/50;
   }
 }
+
+/* 🌊 Voice Reactive Rings Animations */
+@keyframes pulse-ring-0 {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.05) rotate(180deg); }
+}
+
+@keyframes pulse-ring-1 {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.03) rotate(120deg); }
+}
+
+@keyframes pulse-ring-2 {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.02) rotate(240deg); }
+}
+
+@keyframes pulse-ring-3 {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.01) rotate(360deg); }
+}
+
+/* 🔥 Ring glow effects for dramatic intensity */
+.ring-glow {
+  box-shadow: 
+    0 0 20px rgba(16, 185, 129, 0.3),
+    0 0 40px rgba(16, 185, 129, 0.2),
+    0 0 60px rgba(16, 185, 129, 0.1);
+}
