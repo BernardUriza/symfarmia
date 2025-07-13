@@ -8,13 +8,14 @@ import { writeFile, unlink, readFile } from 'fs/promises';
 import { spawn } from 'child_process';
 import path from 'path';
 import { tmpdir } from 'os';
+import susurroConfig from '../../../microservice.config.js';
 
-// Configuración del microservicio
+// Configuración del microservicio desde archivo centralizado
 const SUSURRO_CONFIG = {
-  baseUrl: process.env.SUSURRO_SERVICE_URL || 'http://localhost:3001',
-  endpoint: '/api/transcribe-upload',
-  timeout: 30000, // 30 segundos
-  maxFileSize: 10 * 1024 * 1024, // 10MB
+  baseUrl: process.env.SUSURRO_SERVICE_URL || susurroConfig.integration.envVars.SUSURRO_SERVICE_URL,
+  endpoint: susurroConfig.microservice.transcription,
+  timeout: parseInt(susurroConfig.integration.envVars.TRANSCRIPTION_TIMEOUT) || 30000,
+  maxFileSize: parseInt(susurroConfig.integration.envVars.MAX_FILE_SIZE) || 50000000,
   allowedTypes: ['audio/wav', 'audio/webm', 'audio/webm;codecs=opus', 'audio/mp3', 'audio/m4a']
 };
 
