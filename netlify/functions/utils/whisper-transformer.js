@@ -7,49 +7,65 @@ if (typeof process !== 'undefined' && !process.env.TRANSFORMERS_CACHE) {
   process.env.TRANSFORMERS_CACHE = '/tmp/.cache';
 }
 
-// Import transformers after setting env vars
-let pipeline, env;
-try {
-  const transformers = await import('@xenova/transformers');
-  pipeline = transformers.pipeline;
-  env = transformers.env;
-  
-  // Configure Xenova environment for serverless
-  if (env) {
-    env.cacheDir = '/tmp/.cache';
-    env.allowRemoteModels = true;
-    env.allowLocalModels = false;
-    env.backends = {
-      onnx: {
-        wasm: {
-          proxy: false,
-          numThreads: 1
-        }
-      }
-    };
-  }
-} catch (error) {
-  console.error('Failed to import transformers:', error.message);
-  // Provide a fallback or error handling
-}
+// Global variables for lazy loading
+let pipeline = null;
+let env = null;
+let transformersLoaded = false;
 
 // Global pipeline cache for warm starts
 let transcriptionPipeline = null;
+
+/**
+ * Lazy load transformers module
+ */
+async function loadTransformers() {
+  if (transformersLoaded) return { pipeline, env };
+  
+  try {
+    const transformers = await import('@xenova/transformers');
+    pipeline = transformers.pipeline;
+    env = transformers.env;
+    
+    // Configure Xenova environment for serverless
+    if (env) {
+      env.cacheDir = '/tmp/.cache';
+      env.allowRemoteModels = true;
+      env.allowLocalModels = false;
+      env.backends = {
+        onnx: {
+          wasm: {
+            proxy: false,
+            numThreads: 1
+          }
+        }
+      };
+    }
+    
+    transformersLoaded = true;
+    return { pipeline, env };
+  } catch (error) {
+    console.error('Failed to import transformers:', error.message);
+    throw new Error('Transformers.js is not available in this environment');
+  }
+}
 
 /**
  * Get or initialize the Whisper transcription pipeline
  * Uses global cache to optimize cold/warm starts
  */
 export async function getTranscriptionPipeline() {
-  if (!pipeline) {
-    throw new Error('Transformers.js is not available in this environment');
+  // Ensure transformers is loaded
+  const { pipeline: pipelineFunc } = await loadTransformers();
+  
+  if (!pipelineFunc) {
+    throw new Error('Pipeline function is not available');
   }
   
   if (!transcriptionPipeline) {
     const startTime = Date.now();
     
     try {
-      transcriptionPipeline = await pipeline(
+      transcriptionPipeline = await pipelineFunc(
         'automatic-speech-recognition',
         'Xenova/whisper-tiny',
         {
@@ -164,6 +180,10 @@ export function getErrorResponse(error) {
   } else if (error.code === 'ENOENT') {
     statusCode = 404;
     errorResponse.error = 'Archivo no encontrado';
+  } else if (error.message.includes('Transformers.js is not available')) {
+    statusCode = 503;
+    errorResponse.error = 'Servicio de transcripción no disponible';
+    errorResponse.help = 'El módulo de transcripción no pudo cargarse en este entorno';
   }
   
   return { statusCode, errorResponse };
