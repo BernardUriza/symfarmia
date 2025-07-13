@@ -1,0 +1,11 @@
+[build]
+  command = "npm install && npm run dev"
+  publish = "."
+
+[dev]
+  command = "npm run dev"
+  targetPort = 3001
+  framework = "node"
+
+[functions]
+  directory = "netlify/functions"

@@ -20,7 +20,13 @@
     Access-Control-Allow-Methods = "GET, POST, OPTIONS"
     Access-Control-Allow-Headers = "Content-Type"
 
-  # ✅ CONFIGURACIÓN CORRECTA:
+# ✅ API ROUTES para Next.js (genérico)
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api-:splat"
+  status = 200
+
+# Auth routes específicos
 [[redirects]]
   from = "/auth/login"
   to = "/.netlify/functions/api-auth-login"
