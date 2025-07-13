@@ -1,5 +1,5 @@
 [build]
-  command = "echo '🔍 Starting build...' && npm install --production=false && echo '📦 Installing function deps...' && cd netlify/functions && npm install && echo '⬇️ Downloading Whisper base model...' && npx nodejs-whisper download base && echo '✅ Base model downloaded' && cd ../.. && npm run build"
+  command = "echo '🔍 Starting build...' && npm install --production=false && echo '📦 Installing function deps...' && cd netlify/functions && npm install && cd ../.. && npm run build"
   functions = "netlify/functions"
 
 [build.environment]

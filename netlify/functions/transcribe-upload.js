@@ -5,42 +5,44 @@ const fsSync = require('fs');
 const path = require('path');
 const os = require('os');
 
-// Note: nodejs-whisper will use the model downloaded during build
-// The model should be in node_modules/nodejs-whisper/lib/whisper/models/
-console.log('📁 [Init] Using nodejs-whisper with base model');
+// In Netlify Functions, we'll use the models from public/models/
+console.log('📁 [Init] Using nodejs-whisper with pre-existing models');
 
-// Debug logs para verificar el modelo
-console.log('📁 [Function Init] Checking model files...');
-console.log('📁 Current directory:', process.cwd());
-console.log('📁 __dirname:', __dirname);
-console.log('📁 Node modules exists:', fsSync.existsSync('./node_modules'));
-console.log('📁 Whisper module exists:', fsSync.existsSync('./node_modules/nodejs-whisper'));
-
-// Listar archivos de modelos si existen
-try {
-  const modelPath = './node_modules/nodejs-whisper';
-  if (fsSync.existsSync(modelPath)) {
-    console.log('📁 Whisper module contents:', fsSync.readdirSync(modelPath).slice(0, 10));
-    
-    // Verificar si el modelo base existe
-    const modelsPath = path.join(modelPath, 'lib', 'whisper', 'models');
-    if (fsSync.existsSync(modelsPath)) {
-      console.log('📁 Models directory contents:', fsSync.readdirSync(modelsPath));
-      
-      // Check specific model files
-      const baseModel = path.join(modelsPath, 'ggml-base.bin');
-      console.log('📁 Base model exists:', fsSync.existsSync(baseModel));
-    } else {
-      console.log('❌ Models directory not found at:', modelsPath);
-    }
-  }
+// Function to ensure model is available
+async function ensureModel() {
+  // In Netlify, public files are at the root level
+  const sourceModelPath = path.join(process.cwd(), 'public', 'models', 'ggml-base.bin');
+  const sourceModelEnPath = path.join(process.cwd(), 'public', 'models', 'ggml-base.en.bin');
   
-  // Also check absolute path
-  const absoluteModelPath = path.join(__dirname, 'node_modules', 'nodejs-whisper', 'lib', 'whisper', 'models');
-  console.log('📁 Absolute model path:', absoluteModelPath);
-  console.log('📁 Absolute path exists:', fsSync.existsSync(absoluteModelPath));
-} catch (error) {
-  console.log('📁 Error checking model path:', error.message);
+  // Create models directory in temp if it doesn't exist
+  const tempModelsDir = path.join(os.tmpdir(), 'whisper-models');
+  
+  try {
+    await fs.mkdir(tempModelsDir, { recursive: true });
+    
+    // Check if we need to copy the model
+    const targetModelPath = path.join(tempModelsDir, 'ggml-base.bin');
+    const targetModelEnPath = path.join(tempModelsDir, 'ggml-base.en.bin');
+    
+    // Copy multilingual model if not exists
+    if (!fsSync.existsSync(targetModelPath) && fsSync.existsSync(sourceModelPath)) {
+      console.log('📦 Copying multilingual base model to temp...');
+      await fs.copyFile(sourceModelPath, targetModelPath);
+      console.log('✅ Model copied successfully');
+    }
+    
+    // Copy English model if not exists
+    if (!fsSync.existsSync(targetModelEnPath) && fsSync.existsSync(sourceModelEnPath)) {
+      console.log('📦 Copying English base model to temp...');
+      await fs.copyFile(sourceModelEnPath, targetModelEnPath);
+      console.log('✅ English model copied successfully');
+    }
+    
+    return tempModelsDir;
+  } catch (error) {
+    console.error('❌ Error setting up models:', error);
+    throw error;
+  }
 }
 
 exports.handler = async (event, context) => {
@@ -112,13 +114,16 @@ exports.handler = async (event, context) => {
     
     console.log(`[${new Date().toISOString()}] Iniciando transcripción...`);
     
+    // Ensure model is available
+    const modelPath = await ensureModel();
+    console.log(`[${new Date().toISOString()}] Using model path: ${modelPath}`);
+    
     const startTime = Date.now();
     
-    // Usar nodejs-whisper para transcribir con modelo existente
-    // El modelo base se descarga durante el build en node_modules/nodejs-whisper/lib/whisper/models/
+    // Usar nodejs-whisper para transcribir con modelo pre-existente
     const transcriptionResult = await nodewhisper(tempPath, {
-      modelName: 'base', // Use the base model downloaded during build
-      modelPath: path.join(__dirname, 'node_modules', 'nodejs-whisper', 'lib', 'whisper', 'models'),
+      modelName: 'base', // Use the base model from public/models/
+      modelPath: modelPath,
       removeWavFileAfterTranscription: false,
       whisperOptions: {
         wordTimestamps: true,
@@ -167,18 +172,22 @@ exports.handler = async (event, context) => {
     console.error(`[${new Date().toISOString()}] Error type:`, error.constructor.name);
     
     // Información adicional para debug de modelo
-    if (error.message && error.message.includes('model')) {
+    if (error.message && error.message.includes('model') || error.message.includes('path')) {
       console.error('🔍 Model-related error detected');
-      console.error('🔍 Checking model locations...');
+      console.error('🔍 Checking pre-existing model locations...');
       try {
-        const possiblePaths = [
-          './node_modules/nodejs-whisper/lib/whisper/models',
-          '/var/task/node_modules/nodejs-whisper/lib/whisper/models',
-          path.join(process.cwd(), 'node_modules/nodejs-whisper/lib/whisper/models')
-        ];
-        possiblePaths.forEach(p => {
-          console.error(`🔍 Checking ${p}:`, fsSync.existsSync(p) ? 'EXISTS' : 'NOT FOUND');
-        });
+        const publicModelsPath = path.join(process.cwd(), 'public', 'models');
+        const tempModelsPath = path.join(os.tmpdir(), 'whisper-models');
+        
+        console.error(`🔍 Public models path ${publicModelsPath}:`, fsSync.existsSync(publicModelsPath) ? 'EXISTS' : 'NOT FOUND');
+        if (fsSync.existsSync(publicModelsPath)) {
+          console.error('🔍 Public models:', fsSync.readdirSync(publicModelsPath));
+        }
+        
+        console.error(`🔍 Temp models path ${tempModelsPath}:`, fsSync.existsSync(tempModelsPath) ? 'EXISTS' : 'NOT FOUND');
+        if (fsSync.existsSync(tempModelsPath)) {
+          console.error('🔍 Temp models:', fsSync.readdirSync(tempModelsPath));
+        }
       } catch (debugError) {
         console.error('🔍 Error during debug:', debugError.message);
       }
