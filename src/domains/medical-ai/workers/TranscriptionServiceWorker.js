@@ -869,25 +869,7 @@ self.addEventListener('sync', (event) => {
   }
 });
 
-// Fetch event for offline support
-self.addEventListener('fetch', (event) => {
-  if (event.request.url.includes('/api/transcribe-upload')) {
-    event.respondWith(
-      caches.open(API_CACHE_NAME).then((cache) => {
-        return fetch(event.request).then((response) => {
-          // Cache successful responses
-          if (response.status === 200) {
-            cache.put(event.request, response.clone());
-          }
-          return response;
-        }).catch(() => {
-          // Return cached response if available
-          return cache.match(event.request);
-        });
-      })
-    );
-  }
-});
+// Fetch event removed - transcription now runs client-side
 
 // Initialize service worker
 function handleInit(message) {

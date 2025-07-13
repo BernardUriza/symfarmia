@@ -34,7 +34,7 @@ export const ConversationCapture = ({
     startTranscription,
     stopTranscription,
     resetTranscription
-  } = useTranscription({ realTimeUpdates: true });
+  } = useTranscription();
 
   const toggleRecording = async () => {
     try {
@@ -248,7 +248,7 @@ export const ConversationCapture = ({
       {/* Next Button */}
       {onNext && transcription && (
         <div className="mt-6 flex justify-center">
-          <Button onClick={onNext} size="lg" variant="default">
+          <Button onClick={onNext} size="lg" variant="default" className="">
             {t('common.next')}
           </Button>
         </div>

@@ -3,18 +3,15 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useTranslation } from '../app/providers/I18nProvider';
 
-// 📊 Types que ConversationCapture necesita
+// ---------- Types ----------
 export interface TranscriptionResult {
   text: string;
   confidence: number;
   medicalTerms: string[];
   processingTime: number;
 }
-
 export type TranscriptionStatus = 'idle' | 'recording' | 'processing' | 'completed' | 'error';
-
 export interface UseTranscriptionReturn {
-  // Estados que ConversationCapture consume
   transcription: TranscriptionResult | null;
   status: TranscriptionStatus;
   isRecording: boolean;
@@ -22,17 +19,37 @@ export interface UseTranscriptionReturn {
   engineStatus: 'ready' | 'loading' | 'error' | 'fallback';
   audioLevel: number;
   recordingTime: number;
-  
-  // Métodos que ConversationCapture necesita
   startTranscription: () => Promise<boolean>;
   stopTranscription: () => Promise<boolean>;
   resetTranscription: () => void;
 }
 
-export function useTranscription(options = {}): UseTranscriptionReturn {
+// ----------- Utils -----------
+function extractMedicalTerms(text: string): string[] {
+  const medicalTerms = [
+    'dolor', 'fiebre', 'presión', 'sangre', 'corazón', 'pulmón', 
+    'respiración', 'síntoma', 'diagnóstico', 'tratamiento', 
+    'medicamento', 'alergia', 'diabetes', 'hipertensión', 'cefalea'
+  ];
+  const words = text.toLowerCase().split(/\s+/);
+  return medicalTerms.filter(term => words.some(word => word.includes(term)));
+}
+
+// ----------- Xenova loader (Singleton) -----------
+let xenovaWhisperSingleton: any = null;
+async function getXenovaWhisper() {
+  if (!xenovaWhisperSingleton) {
+    const { pipeline } = await import('@xenova/transformers');
+    xenovaWhisperSingleton = await pipeline('automatic-speech-recognition', 'Xenova/whisper-tiny');
+  }
+  return xenovaWhisperSingleton;
+}
+
+// ----------- Main hook -----------
+export function useTranscription(): UseTranscriptionReturn {
   const { t } = useTranslation();
-  
-  // Estados internos
+
+  // States
   const [transcription, setTranscription] = useState<TranscriptionResult | null>(null);
   const [status, setStatus] = useState<TranscriptionStatus>('idle');
   const [isRecording, setIsRecording] = useState(false);
@@ -40,356 +57,159 @@ export function useTranscription(options = {}): UseTranscriptionReturn {
   const [engineStatus, setEngineStatus] = useState<'ready' | 'loading' | 'error' | 'fallback'>('ready');
   const [audioLevel, setAudioLevel] = useState(0);
   const [recordingTime, setRecordingTime] = useState(0);
-  
+
   // Refs
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<BlobPart[]>([]);
   const audioContextRef = useRef<AudioContext | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const isRecordingRef = useRef<boolean>(false); // 🔧 Ref para estado de grabación en tiempo real
-  const animationFrameRef = useRef<number | null>(null); // 🔧 Para cancelar el loop de monitoreo
-  
-  // Mantener ref sincronizada con estado
-  useEffect(() => {
-    console.log(`🔄 [useEffect] Actualizando isRecordingRef.current = ${isRecording}`);
-    isRecordingRef.current = isRecording;
-  }, [isRecording]);
-  
-  // Timer de grabación
+  const animationFrameRef = useRef<number | null>(null);
+  const isRecordingRef = useRef<boolean>(false);
+
+  // --- Effect: keep isRecordingRef synced ---
+  useEffect(() => { isRecordingRef.current = isRecording; }, [isRecording]);
+
+  // --- Effect: recording timer ---
   useEffect(() => {
     if (isRecording) {
-      timerRef.current = setInterval(() => {
-        setRecordingTime(prev => prev + 1);
-      }, 1000);
-    } else {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = null;
-      }
+      timerRef.current = setInterval(() => setRecordingTime(prev => prev + 1), 1000);
+    } else if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
     }
-    
-    return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
-    };
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [isRecording]);
-  
-  // Inicializar audio level monitoring
-  const setupAudioMonitoring = useCallback(async (stream: MediaStream) => {
-    console.log('🎧 [setupAudioMonitoring] Iniciando configuración de monitoreo de audio...');
-    
-    try {
-      console.log('🔊 [setupAudioMonitoring] Creando AudioContext...');
-      audioContextRef.current = new AudioContext();
-      console.log(`✅ [setupAudioMonitoring] AudioContext creado - sampleRate: ${audioContextRef.current.sampleRate}Hz`);
-      
-      console.log('📊 [setupAudioMonitoring] Creando AnalyserNode...');
-      const analyser = audioContextRef.current.createAnalyser();
-      console.log(`✅ [setupAudioMonitoring] AnalyserNode creado - fftSize: ${analyser.fftSize}`);
-      
-      console.log('🎤 [setupAudioMonitoring] Creando MediaStreamSource...');
-      const source = audioContextRef.current.createMediaStreamSource(stream);
-      console.log('✅ [setupAudioMonitoring] MediaStreamSource creado');
-      
-      analyser.fftSize = 256;
-      console.log(`📏 [setupAudioMonitoring] FFT Size configurado a: ${analyser.fftSize}`);
-      console.log(`📊 [setupAudioMonitoring] Frequency bin count: ${analyser.frequencyBinCount}`);
-      
-      source.connect(analyser);
-      console.log('🔗 [setupAudioMonitoring] Source conectado a analyser');
-      
-      const dataArray = new Uint8Array(analyser.frequencyBinCount);
-      console.log(`📦 [setupAudioMonitoring] Array de datos creado con ${dataArray.length} elementos`);
-      
-      let frameCount = 0;
-      let retryCount = 0;
-      const maxRetries = 10; // 🔄 Máximo de reintentos para esperar que la grabación comience
-      
-      const updateAudioLevel = () => {
-        // 🔄 RESILIENCE: Si no está grabando pero estamos en los primeros intentos, seguir intentando
-        if (!isRecordingRef.current && retryCount < maxRetries) {
-          retryCount++;
-          console.log(`⏳ [updateAudioLevel] Esperando inicio de grabación... intento ${retryCount}/${maxRetries}`);
-          // Reintentar en 100ms
-          setTimeout(() => {
-            animationFrameRef.current = requestAnimationFrame(updateAudioLevel);
-          }, 100);
-          return;
-        }
-        
-        if (!isRecordingRef.current && retryCount >= maxRetries) {
-          console.log('⏹️ [updateAudioLevel] Deteniendo monitoreo - no está grabando después de reintentos');
-          console.log(`📊 [updateAudioLevel] isRecordingRef.current = ${isRecordingRef.current}`);
-          setAudioLevel(0); // 🔄 Resetear nivel de audio al detener
-          return;
-        }
-        
-        // 🎉 Si llegamos aquí, estamos grabando
-        if (retryCount > 0) {
-          console.log(`✅ [updateAudioLevel] Grabación detectada después de ${retryCount} intentos`);
-          retryCount = 0; // Reset retry count
-        }
-        
-        analyser.getByteFrequencyData(dataArray);
-        const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
-        setAudioLevel(average);
-        
-        // Log cada 30 frames (aproximadamente cada segundo a 30fps)
-        if (frameCount % 30 === 0) {
-          console.log(`📈 [updateAudioLevel] Frame ${frameCount} - Nivel de audio: ${average.toFixed(1)}/255 (${((average/255)*100).toFixed(1)}%)`);
-          console.log(`🔄 [updateAudioLevel] isRecordingRef.current = ${isRecordingRef.current}`);
-        }
-        frameCount++;
-        
-        // 🔄 Guardar el ID del frame para poder cancelarlo
-        animationFrameRef.current = requestAnimationFrame(updateAudioLevel);
-      };
-      
-      console.log('▶️ [setupAudioMonitoring] Iniciando loop de monitoreo...');
-      console.log(`📊 [setupAudioMonitoring] Estado inicial isRecordingRef.current = ${isRecordingRef.current}`);
-      updateAudioLevel();
-      console.log('✅ [setupAudioMonitoring] Monitoreo de audio configurado exitosamente');
-      
-    } catch (error) {
-      console.error('💥 [setupAudioMonitoring] Error al configurar monitoreo de audio:', error);
-      console.error(`🔍 [setupAudioMonitoring] Tipo de error: ${error instanceof Error ? error.constructor.name : typeof error}`);
-      console.error(`📝 [setupAudioMonitoring] Mensaje: ${error instanceof Error ? error.message : String(error)}`);
-    }
-  }, []); // 🔧 Sin dependencia de isRecording - usamos ref
-  
-  // Start transcription
+
+  // --- Audio Monitoring ---
+  const setupAudioMonitoring = useCallback((stream: MediaStream) => {
+    audioContextRef.current = new AudioContext();
+    const analyser = audioContextRef.current.createAnalyser();
+    const source = audioContextRef.current.createMediaStreamSource(stream);
+    analyser.fftSize = 256;
+    source.connect(analyser);
+    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+    const updateAudioLevel = () => {
+      if (!isRecordingRef.current) {
+        setAudioLevel(0);
+        return;
+      }
+      analyser.getByteFrequencyData(dataArray);
+      setAudioLevel(dataArray.reduce((a, b) => a + b, 0) / dataArray.length);
+      animationFrameRef.current = requestAnimationFrame(updateAudioLevel);
+    };
+    updateAudioLevel();
+  }, []);
+
+  // --- Start Transcription ---
   const startTranscription = useCallback(async (): Promise<boolean> => {
-    console.log('🚀 [startTranscription] Iniciando función de transcripción...');
-    
     try {
-      console.log('🧹 [startTranscription] Limpiando estados previos...');
       setError(null);
       setStatus('recording');
       setEngineStatus('ready');
       setRecordingTime(0);
-      console.log('✅ [startTranscription] Estados inicializados correctamente');
-      
-      // Verificar permisos de micrófono
-      console.log('🎤 [startTranscription] Solicitando permisos de micrófono...');
+      audioChunksRef.current = [];
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      console.log('✅ [startTranscription] Permisos de micrófono concedidos');
-      console.log(`📊 [startTranscription] Stream activo con ${stream.getTracks().length} tracks`);
-      
-      // 🔴 CRITICAL FIX: Set recording state BEFORE audio monitoring
-      console.log('🔴 [startTranscription] ORDEN CRÍTICO: Estableciendo estado de grabación ANTES del monitoreo');
       isRecordingRef.current = true;
       setIsRecording(true);
-      console.log('✅ [startTranscription] isRecordingRef.current = true establecido ANTES del monitoreo');
-      console.log('✅ [startTranscription] setIsRecording(true) llamado ANTES del monitoreo');
-      
-      // Setup audio monitoring AFTER recording state is set
-      console.log('📈 [startTranscription] Configurando monitoreo de audio (ahora con isRecording = true)...');
-      await setupAudioMonitoring(stream);
-      console.log('✅ [startTranscription] Monitoreo de audio configurado');
-      
-      // Setup MediaRecorder
-      console.log('🎙️ [startTranscription] Creando MediaRecorder...');
-      const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') 
-        ? 'audio/webm;codecs=opus' 
+      setupAudioMonitoring(stream);
+
+      const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+        ? 'audio/webm;codecs=opus'
         : 'audio/webm';
-      console.log(`📹 [startTranscription] Usando mimeType: ${mimeType}`);
-      
       const mediaRecorder = new MediaRecorder(stream, { mimeType });
       mediaRecorderRef.current = mediaRecorder;
-      console.log('✅ [startTranscription] MediaRecorder creado exitosamente');
-      
-      const audioChunks: Blob[] = [];
-      console.log('🗂️ [startTranscription] Array de chunks de audio inicializado');
-      
+
       mediaRecorder.ondataavailable = (event) => {
-        console.log(`📦 [ondataavailable] Chunk recibido: ${event.data.size} bytes`);
-        audioChunks.push(event.data);
-        console.log(`📊 [ondataavailable] Total chunks: ${audioChunks.length}`);
+        if (audioChunksRef.current) {
+          audioChunksRef.current.push(event.data);
+        }
       };
-      
+
       mediaRecorder.onstop = async () => {
-        console.log('🛑 [onstop] MediaRecorder detenido, procesando audio...');
         setStatus('processing');
-        
         try {
-          // Crear blob de audio
-          console.log('🎵 [onstop] Creando blob de audio...');
-          console.log(`📊 [onstop] Total chunks a combinar: ${audioChunks.length}`);
-          const totalSize = audioChunks.reduce((acc, chunk) => acc + chunk.size, 0);
-          console.log(`📏 [onstop] Tamaño total del audio: ${totalSize} bytes (${(totalSize / 1024 / 1024).toFixed(2)} MB)`);
-          
-          const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-          console.log(`✅ [onstop] Blob creado: ${audioBlob.size} bytes, tipo: ${audioBlob.type}`);
-          
-          // Enviar al endpoint de Xenova /api/transcribe-upload
-          console.log('📤 [onstop] Preparando FormData para envío...');
-          const formData = new FormData();
-          formData.append('audio', audioBlob, 'recording.webm');
-          console.log('✅ [onstop] FormData preparado con archivo de audio');
-          console.log('✨ [onstop] Usando Xenova/Transformers.js - no requiere conversión de formato');
-          
-          console.log('🌐 [onstop] Enviando audio a /api/transcribe-upload (Xenova)...');
-          const startTime = Date.now();
-          const response = await fetch('/api/transcribe-upload', {
-            method: 'POST',
-            body: formData
+          // Combine chunks
+          const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+          const arrayBuffer = await audioBlob.arrayBuffer();
+          const audioBuffer = new Uint8Array(arrayBuffer);
+
+          setEngineStatus('loading');
+          const whisper = await getXenovaWhisper();
+          setEngineStatus('ready');
+          const start = performance.now();
+
+          const result = await whisper(audioBuffer, { chunk_length_s: 30, return_timestamps: false });
+          const end = performance.now();
+
+          setTranscription({
+            text: result.text || '',
+            confidence: result.score || 0.95,
+            medicalTerms: extractMedicalTerms(result.text || ''),
+            processingTime: Math.round(end - start),
           });
-          const fetchTime = Date.now() - startTime;
-          console.log(`⏱️ [onstop] Respuesta recibida en ${fetchTime}ms`);
-          console.log(`📡 [onstop] Status HTTP: ${response.status} ${response.statusText}`);
-          
-          if (!response.ok) {
-            console.error(`❌ [onstop] Error HTTP: ${response.status} ${response.statusText}`);
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-          }
-          
-          console.log('📄 [onstop] Parseando respuesta JSON...');
-          const result = await response.json();
-          console.log('✅ [onstop] Respuesta parseada:', result);
-          
-          if (result.success) {
-            console.log('🎉 [onstop] Transcripción exitosa!');
-            console.log(`📝 [onstop] Texto transcrito: "${result.transcript?.substring(0, 50)}..."`);
-            console.log(`🔢 [onstop] Confianza: ${result.confidence}`);
-            console.log(`⏱️ [onstop] Tiempo de procesamiento: ${result.processing_time_ms}ms`);
-            
-            const medicalTerms = extractMedicalTerms(result.transcript || '');
-            console.log(`🏥 [onstop] Términos médicos encontrados: ${medicalTerms.length}`);
-            
-            setTranscription({
-              text: result.transcript || '',
-              confidence: result.confidence || 0,
-              medicalTerms: medicalTerms,
-              processingTime: result.processing_time_ms || 0
-            });
-            setStatus('completed');
-            console.log('✅ [onstop] Estado de transcripción actualizado a "completed"');
-          } else {
-            console.error('❌ [onstop] Transcripción falló:', result.error);
-            throw new Error(result.error || 'Transcription failed');
-          }
-          
-        } catch (error) {
-          console.error('💥 [onstop] Error en procesamiento de transcripción:', error);
-          setError(error instanceof Error ? error.message : 'Transcription failed');
+          setStatus('completed');
+        } catch (err: any) {
+          setError(err?.message || 'Transcription failed');
           setStatus('error');
           setEngineStatus('error');
-          console.log('❌ [onstop] Estados actualizados a error');
         }
-        
-        // Cleanup
-        console.log('🧹 [onstop] Iniciando limpieza...');
-        stream.getTracks().forEach((track, index) => {
-          console.log(`🔌 [onstop] Deteniendo track ${index}: ${track.kind}`);
-          track.stop();
-        });
-        setAudioLevel(0);
-        console.log('✅ [onstop] Limpieza completada');
+        cleanup(stream);
       };
-      
-      // Start recording
-      console.log('▶️ [startTranscription] Iniciando grabación...');
-      mediaRecorder.start(1000); // Chunk every second
-      console.log('✅ [startTranscription] MediaRecorder.start() llamado con chunks de 1 segundo');
-      console.log('🎉 [startTranscription] Transcripción iniciada exitosamente!');
-      
+
+      mediaRecorder.start(1000); // 1 sec chunks
       return true;
-      
-    } catch (error) {
-      console.error('💥 [startTranscription] Error crítico al iniciar transcripción:', error);
-      console.error(`🔍 [startTranscription] Tipo de error: ${error instanceof Error ? error.constructor.name : typeof error}`);
-      console.error(`📝 [startTranscription] Mensaje: ${error instanceof Error ? error.message : String(error)}`);
-      
-      setError(error instanceof Error ? error.message : 'Failed to start recording');
+    } catch (err: any) {
+      setError(err.message || 'Failed to start recording');
       setStatus('error');
       setEngineStatus('error');
       setIsRecording(false);
-      
-      console.log('❌ [startTranscription] Estados actualizados a error, retornando false');
       return false;
     }
   }, [setupAudioMonitoring]);
-  
-  // Stop transcription
+
+  // --- Stop Transcription ---
   const stopTranscription = useCallback(async (): Promise<boolean> => {
-    console.log('🛑 [stopTranscription] Iniciando detención de transcripción...');
-    
-    try {
-      console.log(`📊 [stopTranscription] Estado actual - isRecording: ${isRecording}`);
-      console.log(`📊 [stopTranscription] MediaRecorder existe: ${!!mediaRecorderRef.current}`);
-      
-      if (mediaRecorderRef.current && isRecording) {
-        console.log(`📊 [stopTranscription] MediaRecorder state: ${mediaRecorderRef.current.state}`);
-        console.log('⏹️ [stopTranscription] Llamando mediaRecorder.stop()...');
-        
-        mediaRecorderRef.current.stop();
-        console.log('✅ [stopTranscription] MediaRecorder.stop() llamado exitosamente');
-        
-        setIsRecording(false);
-        console.log('✅ [stopTranscription] Estado isRecording = false');
-        
-        // 🔄 Cancelar el loop de monitoreo de audio
-        if (animationFrameRef.current) {
-          console.log(`🛑 [stopTranscription] Cancelando animation frame: ${animationFrameRef.current}`);
-          cancelAnimationFrame(animationFrameRef.current);
-          animationFrameRef.current = null;
-          console.log('✅ [stopTranscription] Animation frame cancelado');
-        }
-        
-        // 🔄 Limpiar el contexto de audio
-        if (audioContextRef.current) {
-          console.log('🔌 [stopTranscription] Cerrando AudioContext...');
-          audioContextRef.current.close();
-          audioContextRef.current = null;
-          console.log('✅ [stopTranscription] AudioContext cerrado');
-        }
-        
-        console.log('🎉 [stopTranscription] Detención completada exitosamente');
-        
-        return true;
+    if (mediaRecorderRef.current && isRecording) {
+      setIsRecording(false);
+      mediaRecorderRef.current.stop();
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
       }
-      
-      console.log('⚠️ [stopTranscription] No se puede detener - condiciones no cumplidas');
-      console.log(`   - mediaRecorderRef.current: ${!!mediaRecorderRef.current}`);
-      console.log(`   - isRecording: ${isRecording}`);
-      return false;
-      
-    } catch (error) {
-      console.error('💥 [stopTranscription] Error al detener transcripción:', error);
-      console.error(`🔍 [stopTranscription] Tipo de error: ${error instanceof Error ? error.constructor.name : typeof error}`);
-      console.error(`📝 [stopTranscription] Mensaje: ${error instanceof Error ? error.message : String(error)}`);
-      
-      setError('Failed to stop recording');
-      console.log('❌ [stopTranscription] Error guardado en estado');
-      return false;
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+        audioContextRef.current = null;
+      }
+      return true;
     }
+    return false;
   }, [isRecording]);
-  
-  // Reset transcription
+
+  // --- Reset Transcription ---
   const resetTranscription = useCallback(() => {
-    console.log('🔄 [resetTranscription] Reiniciando estados de transcripción...');
-    
     setTranscription(null);
-    console.log('✅ [resetTranscription] Transcripción = null');
-    
     setStatus('idle');
-    console.log('✅ [resetTranscription] Status = idle');
-    
     setError(null);
-    console.log('✅ [resetTranscription] Error = null');
-    
     setRecordingTime(0);
-    console.log('✅ [resetTranscription] Tiempo de grabación = 0');
-    
     setAudioLevel(0);
-    console.log('✅ [resetTranscription] Nivel de audio = 0');
-    
     setEngineStatus('ready');
-    console.log('✅ [resetTranscription] Estado del motor = ready');
-    
-    console.log('🎉 [resetTranscription] Reinicio completado - todos los estados limpiados');
   }, []);
-  
+
+  // --- Cleanup ---
+  function cleanup(stream: MediaStream) {
+    stream.getTracks().forEach(track => track.stop());
+    setAudioLevel(0);
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+    if (audioContextRef.current) {
+      audioContextRef.current.close();
+      audioContextRef.current = null;
+    }
+  }
+
   return {
     transcription,
     status,
@@ -402,20 +222,6 @@ export function useTranscription(options = {}): UseTranscriptionReturn {
     stopTranscription,
     resetTranscription
   };
-}
-
-// Utility function to extract medical terms
-function extractMedicalTerms(text: string): string[] {
-  const medicalTerms = [
-    'dolor', 'fiebre', 'presión', 'sangre', 'corazón', 'pulmón', 
-    'respiración', 'síntoma', 'diagnóstico', 'tratamiento', 
-    'medicamento', 'alergia', 'diabetes', 'hipertensión', 'cefalea'
-  ];
-  
-  const words = text.toLowerCase().split(/\s+/);
-  return medicalTerms.filter(term => 
-    words.some(word => word.includes(term))
-  );
 }
 
 export default useTranscription;

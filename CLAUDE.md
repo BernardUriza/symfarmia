@@ -31,36 +31,11 @@ npm run permanent:logs    # View server logs (real-time)
 - **No Build Guards**: Bypasses translation locks and type checks
 - **Quick Start**: Usually ready in 10-20 seconds
 
-## Microservicios
+## Development Ports
 
-SYMFARMIA utiliza una arquitectura de microservicios para separar responsabilidades y mejorar la escalabilidad. Ver documentación completa en `docs/development/dev-notes/microservices.md`.
-
-### Susurro-Test (Transcripción de Audio) - Puerto 3001
-```bash
-cd microservices/susurro-test
-npm install
-npm start
-```
-- **Función**: Servicio de transcripción usando nodejs-whisper
-- **Endpoints principales**:
-  - `GET /api/health` - Health check
-  - `POST /api/transcribe-upload` - Transcribir archivo subido
-  - `GET /api/files` - Listar archivos disponibles
-- **Uso**: Transcripción de consultas médicas, notas de voz y dictado médico
-
-### Gestión de Puertos
-```bash
-# Limpiar puertos ocupados (3000 y 3001)
-npm run kill:ports
-```
-
-### Distribución de Puertos
-- **3000**: Aplicación principal Next.js
-- **3001**: Microservicio de transcripción (Susurro-Test)
-- **3002**: Servidor de desarrollo permanente
-- **3003**: [Reservado] Medical AI Service (futuro)
-
-**Importante**: Los microservicios usan puertos específicos que no deben entrar en conflicto. Ejecutar `kill-ports.js` si hay problemas de puertos ocupados.
+### Port Distribution
+- **3000**: Main Next.js application
+- **3002**: Permanent development server (optional)
 
 ## Architecture Overview
 
