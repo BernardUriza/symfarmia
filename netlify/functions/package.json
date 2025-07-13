@@ -1,0 +1,9 @@
+{
+  "name": "netlify-whisper-functions",
+  "version": "1.0.0",
+  "description": "Netlify Functions for audio transcription using nodejs-whisper",
+  "dependencies": {
+    "nodejs-whisper": "^0.2.9",
+    "lambda-multipart-parser": "^1.0.1"
+  }
+}

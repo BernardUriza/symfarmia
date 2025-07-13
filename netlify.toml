@@ -1,6 +1,7 @@
 [build]
   command = "npm run build"
-  
+  functions = "netlify/functions"
+
 [build.environment]
   NODE_ENV = "production"
   NETLIFY = "true"
@@ -11,13 +12,21 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# ✅ AGREGAR ESTA LÍNEA CRÍTICA PARA API ROUTES:
+# Headers para CORS en Netlify Functions
+[[headers]]
+  for = "/.netlify/functions/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Methods = "GET, POST, OPTIONS"
+    Access-Control-Allow-Headers = "Content-Type"
+
+# ✅ API ROUTES para Next.js (genérico)
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/api-:splat"
   status = 200
 
-# Auth routes
+# Auth routes específicos
 [[redirects]]
   from = "/auth/login"
   to = "/.netlify/functions/api-auth-login"
