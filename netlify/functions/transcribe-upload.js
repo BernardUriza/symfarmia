@@ -92,7 +92,7 @@ exports.handler = async (event, context) => {
     
     // Usar nodejs-whisper para transcribir
     const transcriptionResult = await nodewhisper(tempPath, {
-      modelName: 'medium',
+      modelName: 'base',
       removeWavFileAfterTranscription: false,
       whisperOptions: {
         wordTimestamps: true,
@@ -129,7 +129,7 @@ exports.handler = async (event, context) => {
         transcript: transcriptText,
         processing_time_ms: processingTime,
         file_size: audioFile.content.length,
-        model_used: 'nodejs-whisper medium (Netlify Function)',
+        model_used: 'nodejs-whisper base (Netlify Function)',
         timestamp: new Date().toISOString(),
         confidence: 0.95 // nodejs-whisper no devuelve confidence, usar valor por defecto
       })

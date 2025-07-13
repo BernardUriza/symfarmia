@@ -83,7 +83,7 @@ exports.handler = async (event, context) => {
     
     // Usar nodejs-whisper igual que en el microservicio
     const result = await nodewhisper(audioPath, {
-      modelName: 'medium',
+      modelName: 'base',
       removeWavFileAfterTranscription: false,
       whisperOptions: {
         wordTimestamps: true,
@@ -110,7 +110,7 @@ exports.handler = async (event, context) => {
         raw_result: result,
         processing_time_ms: processingTime,
         audio_path: audioPath,
-        model_used: 'nodejs-whisper medium (Netlify Function)',
+        model_used: 'nodejs-whisper base (Netlify Function)',
         timestamp: new Date().toISOString()
       })
     };

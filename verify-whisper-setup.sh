@@ -58,20 +58,20 @@ if [ -d "$MODEL_PATH" ]; then
     echo "📁 Contenido del directorio de modelos:"
     ls -la "$MODEL_PATH"
     
-    # Verificar específicamente medium
-    if [ -f "$MODEL_PATH/ggml-medium.bin" ]; then
-        echo -e "${GREEN}✅ Modelo medium encontrado${NC}"
-        echo "📏 Tamaño del modelo: $(ls -lh "$MODEL_PATH/ggml-medium.bin" | awk '{print $5}')"
+    # Verificar específicamente base
+    if [ -f "$MODEL_PATH/ggml-base.bin" ]; then
+        echo -e "${GREEN}✅ Modelo base encontrado${NC}"
+        echo "📏 Tamaño del modelo: $(ls -lh "$MODEL_PATH/ggml-base.bin" | awk '{print $5}')"
     else
-        echo -e "${RED}❌ Modelo medium NO encontrado${NC}"
+        echo -e "${RED}❌ Modelo base NO encontrado${NC}"
     fi
 else
     echo -e "${YELLOW}⚠️ Directorio de modelos no existe${NC}"
     echo "🔄 Intentando descargar modelo manualmente..."
-    npx nodejs-whisper download medium
+    npx nodejs-whisper download base
     
     # Verificar de nuevo
-    if [ -f "$MODEL_PATH/ggml-medium.bin" ]; then
+    if [ -f "$MODEL_PATH/ggml-base.bin" ]; then
         echo -e "${GREEN}✅ Modelo descargado exitosamente${NC}"
     else
         echo -e "${RED}❌ No se pudo descargar el modelo${NC}"
@@ -112,7 +112,7 @@ cd "$CURRENT_DIR"
 
 echo ""
 echo -e "${YELLOW}📊 Resumen:${NC}"
-echo "- Si el modelo medium existe y pesa ~1.5GB: ✅"
+echo "- Si el modelo base existe y pesa ~142MB: ✅"
 echo "- Si el postinstall script se ejecutó: ✅"
 echo "- Si nodejs-whisper se puede importar: ✅"
 echo ""

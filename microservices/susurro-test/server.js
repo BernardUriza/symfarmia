@@ -89,7 +89,7 @@ app.post('/api/transcribe-server-file', async (req, res) => {
     
     // USAR NODEJS-WHISPER (NO Hugging Face)
     const result = await nodewhisper(audioPath, {
-      modelName: process.env.WHISPER_MODEL || 'medium',
+      modelName: process.env.WHISPER_MODEL || 'base',
       removeWavFileAfterTranscription: false,
       whisperOptions: {
         wordTimestamps: true,
@@ -112,7 +112,7 @@ app.post('/api/transcribe-server-file', async (req, res) => {
       raw_result: result,
       processing_time_ms: processingTime,
       audio_path: audioPath,
-      model_used: `nodejs-whisper ${process.env.WHISPER_MODEL || 'medium'}`,
+      model_used: `nodejs-whisper ${process.env.WHISPER_MODEL || 'base'}`,
       timestamp: new Date().toISOString()
     });
 
@@ -153,7 +153,7 @@ app.post('/api/transcribe-upload', upload.single('audio'), async (req, res) => {
     
     console.log(`🎙️ Iniciando transcripción con nodejs-whisper...`);
     const result = await nodewhisper(audioPath, {
-      modelName: process.env.WHISPER_MODEL || 'medium',
+      modelName: process.env.WHISPER_MODEL || 'base',
       removeWavFileAfterTranscription: false,
       whisperOptions: {
         wordTimestamps: true,
@@ -185,7 +185,7 @@ app.post('/api/transcribe-upload', upload.single('audio'), async (req, res) => {
       transcript: transcriptText,
       processing_time_ms: processingTime,
       file_size: req.file.size,
-      model_used: `nodejs-whisper ${process.env.WHISPER_MODEL || 'medium'}`,
+      model_used: `nodejs-whisper ${process.env.WHISPER_MODEL || 'base'}`,
       timestamp: new Date().toISOString()
     });
 
