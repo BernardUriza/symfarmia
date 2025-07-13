@@ -21,8 +21,11 @@
 
 # Legacy routes
 /legacy  /index.html  200
-/dashboard  /legacy  302
 /home  /  301
+
+# Dashboard routes (client-side, protected by middleware)
+/dashboard  /index.html  200
+/dashboard/*  /index.html  200
 
 # Default SPA fallback (must be last)
 /*  /index.html  200
