@@ -9,7 +9,6 @@ interface HealthStatus {
   environment: string;
   services: {
     database: 'connected' | 'disconnected' | 'error';
-    turbo: 'enforced' | 'missing' | 'not_applicable' | 'error';
     translations: 'complete' | 'incomplete' | 'error';
     build: 'ready' | 'building' | 'error';
   };
@@ -25,7 +24,6 @@ interface HealthStatus {
   };
   locks: {
     translation: boolean;
-    turbo: boolean;
   };
   buildInfo: {
     buildTime?: string;
@@ -45,33 +43,6 @@ async function checkDatabase(): Promise<'connected' | 'disconnected' | 'error'> 
   } catch (error) {
     console.error('Database health check failed:', error);
     return 'error';
-  }
-}
-
-async function checkTurbo(): Promise<'enforced' | 'missing' | 'not_applicable'> {
-  try {
-    // Check if we're in development mode
-    if (process.env.NODE_ENV !== 'development') {
-      return 'not_applicable';
-    }
-    
-    // Check if turbo validation script exists and runs
-    const turboScript = path.join(process.cwd(), 'scripts', 'validate-turbo.js');
-    if (!fs.existsSync(turboScript)) {
-      return 'missing';
-    }
-    
-    // Quick validation - check if dev script has --turbo flag
-    const packageJson = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'package.json'), 'utf8'));
-    const devScript = packageJson.scripts?.dev;
-    if (devScript && devScript.includes('--turbo')) {
-      return 'enforced';
-    }
-    
-    return 'missing';
-  } catch (error) {
-    console.error('Turbo health check failed:', error);
-    return 'missing';
   }
 }
 
@@ -102,13 +73,11 @@ async function checkTranslations(): Promise<'complete' | 'incomplete' | 'error'>
   }
 }
 
-function checkLocks(): { translation: boolean; turbo: boolean } {
+function checkLocks(): { translation: boolean; } {
   const translationLock = fs.existsSync(path.join(process.cwd(), '.translation-lock'));
-  const turboLock = fs.existsSync(path.join(process.cwd(), '.turbo-lock'));
   
   return {
-    translation: translationLock,
-    turbo: turboLock
+    translation: translationLock
   };
 }
 
@@ -155,9 +124,8 @@ export async function GET(): Promise<NextResponse<HealthStatus>> {
   
   try {
     // Run health checks
-    const [database, turbo, translations] = await Promise.all([
+    const [database, translations] = await Promise.all([
       checkDatabase(),
-      checkTurbo(),
       checkTranslations()
     ]);
     
@@ -168,12 +136,12 @@ export async function GET(): Promise<NextResponse<HealthStatus>> {
     // Determine overall health status
     let status: 'healthy' | 'unhealthy' | 'degraded' = 'healthy';
     
-    if (database === 'error' || translations === 'error' || locks.translation || locks.turbo) {
+    if (database === 'error' || translations === 'error' || locks.translation ) {
       status = 'unhealthy';
     } else if (
       database === 'disconnected' || 
       translations === 'incomplete' || 
-      (process.env.NODE_ENV === 'development' && turbo === 'missing')
+      (process.env.NODE_ENV === 'development')
     ) {
       status = 'degraded';
     }
@@ -185,7 +153,6 @@ export async function GET(): Promise<NextResponse<HealthStatus>> {
       environment: process.env.NODE_ENV || 'unknown',
       services: {
         database,
-        turbo,
         translations,
         build: 'ready'
       },
@@ -215,12 +182,11 @@ export async function GET(): Promise<NextResponse<HealthStatus>> {
       environment: process.env.NODE_ENV || 'unknown',
       services: {
         database: 'error',
-        turbo: 'error',
         translations: 'error',
         build: 'error'
       },
       system: getSystemInfo(),
-      locks: { translation: false, turbo: false },
+      locks: { translation: false },
       buildInfo: getBuildInfo()
     };
     

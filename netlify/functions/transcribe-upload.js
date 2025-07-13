@@ -1,100 +1,87 @@
-const { nodewhisper } = require('nodejs-whisper');
-const multipart = require('lambda-multipart-parser');
-const fs = require('fs').promises;
-const path = require('path');
-const os = require('os');
+import multipart from "lambda-multipart-parser";
+import {
+  transcribeAudio,
+  validateAudioFile,
+  getErrorResponse,
+  getCORSHeaders,
+} from "./utils/whisper-transformer.js";
 
-exports.handler = async (event, context) => {
-  // Solo acepta POST
-  if (event.httpMethod !== 'POST') {
+export const handler = async (event, context) => {
+  console.log('🎙️ Transcribe-upload function called:', event.httpMethod);
+  
+  const corsHeaders = getCORSHeaders();
+
+  // Handle OPTIONS for CORS
+  if (event.httpMethod === "OPTIONS") {
+    console.log('✅ Handling CORS preflight');
     return {
-      statusCode: 405,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
-      },
-      body: JSON.stringify({ error: 'Method not allowed' })
+      statusCode: 200,
+      headers: corsHeaders,
+      body: "",
     };
   }
 
-  // Handle CORS preflight
-  if (event.httpMethod === 'OPTIONS') {
+  // Only accept POST
+  if (event.httpMethod !== "POST") {
+    console.log('❌ Method not allowed:', event.httpMethod);
     return {
-      statusCode: 200,
+      statusCode: 405,
       headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type'
+        "Content-Type": "application/json",
+        ...corsHeaders,
       },
-      body: ''
+      body: JSON.stringify({ error: "Method not allowed" }),
     };
   }
 
   try {
-    // Parsear multipart data
+    console.log('📦 Parsing multipart data...');
+    // Parse multipart data
     const result = await multipart.parse(event);
-    
-    if (!result.files || !result.files.audio) {
+    console.log('📋 Files received:', result.files ? Object.keys(result.files) : 'No files');
+
+    // Manejo robusto del archivo subido (por nombre o por primer archivo)
+    const audioFile = Array.isArray(result.files)
+      ? result.files.find((f) => f.fieldname === "audio") || result.files[0]
+      : result.files.audio;
+
+    if (!audioFile) {
+      console.log('❌ No audio file found in request');
       return {
         statusCode: 400,
         headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*'
+          "Content-Type": "application/json",
+          ...corsHeaders,
         },
-        body: JSON.stringify({ 
-          error: 'No se subió ningún archivo de audio',
-          help: 'Envíe un archivo de audio con el campo "audio" en multipart/form-data'
-        })
+        body: JSON.stringify({
+          error: "No se subió ningún archivo de audio",
+          help: 'Envíe un archivo de audio con el campo "audio" en multipart/form-data',
+        }),
       };
     }
 
-    const audioFile = result.files.audio;
-    
-    // Crear archivo temporal
-    const tempDir = os.tmpdir();
-    const tempFileName = `audio-${Date.now()}-${Math.random().toString(36).substring(7)}.wav`;
-    const tempPath = path.join(tempDir, tempFileName);
-    
-    // Escribir el archivo temporal
-    await fs.writeFile(tempPath, audioFile.content);
+    // Validate audio file
+    console.log(`🎵 Audio file received: ${audioFile.filename} (${(audioFile.content.length / 1024).toFixed(2)} KB)`);
+    validateAudioFile(audioFile);
 
-    console.log(`[${new Date().toISOString()}] Archivo subido: ${audioFile.filename}`);
-    console.log(`[${new Date().toISOString()}] Tamaño: ${audioFile.content.length} bytes`);
-    console.log(`[${new Date().toISOString()}] Archivo temporal: ${tempPath}`);
-    
     const startTime = Date.now();
-    
-    // Usar nodejs-whisper para transcribir
-    const transcriptionResult = await nodewhisper(tempPath, {
-      modelName: 'tiny.en',
-      removeWavFileAfterTranscription: false,
-      whisperOptions: {
-        wordTimestamps: true,
-        outputInJson: true,
-        language: result.fields?.language || 'es' // Usar español por defecto
-      }
+
+    // Transcribe directly from buffer
+    console.log('🔄 Starting transcription...');
+    const transcriptionResult = await transcribeAudio(audioFile.content, {
+      language: result.fields?.language || null,
     });
+    console.log('✅ Transcription completed!');
 
     const processingTime = Date.now() - startTime;
-    const transcriptText = transcriptionResult.text || transcriptionResult || '';
-
-    console.log(`[${new Date().toISOString()}] Transcripción completada en ${processingTime}ms`);
-
-    // Limpiar archivo temporal
-    try {
-      await fs.unlink(tempPath);
-      console.log(`[${new Date().toISOString()}] Archivo temporal eliminado`);
-    } catch (cleanupError) {
-      console.error('Error al eliminar archivo temporal:', cleanupError);
-    }
+    const transcriptText = transcriptionResult.text || "";
 
     return {
       statusCode: 200,
       headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type'
+        "Content-Type": "application/json",
+        "Cache-Control": "no-cache",
+        ...corsHeaders,
       },
       body: JSON.stringify({
         success: true,
@@ -103,25 +90,26 @@ exports.handler = async (event, context) => {
         transcript: transcriptText,
         processing_time_ms: processingTime,
         file_size: audioFile.content.length,
-        model_used: 'nodejs-whisper tiny.en (Netlify Function)',
+        model_used: "Xenova/whisper-tiny (Transformers.js)",
         timestamp: new Date().toISOString(),
-        confidence: 0.95 // nodejs-whisper no devuelve confidence, usar valor por defecto
-      })
+        confidence: 0.95, // Default confidence
+        language: result.fields?.language || "auto-detected",
+      }),
     };
-
   } catch (error) {
-    console.error(`[${new Date().toISOString()}] Error:`, error);
+    console.error('🚨 Error in transcribe-upload:', error.message);
+    console.error('Stack trace:', error.stack);
+    
+    // Get standardized error response
+    const { statusCode, errorResponse } = getErrorResponse(error);
+
     return {
-      statusCode: 500,
+      statusCode,
       headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
+        "Content-Type": "application/json",
+        ...corsHeaders,
       },
-      body: JSON.stringify({
-        error: 'Error al transcribir el archivo',
-        details: error.message,
-        timestamp: new Date().toISOString()
-      })
+      body: JSON.stringify(errorResponse),
     };
   }
 };

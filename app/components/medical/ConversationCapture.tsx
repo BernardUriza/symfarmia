@@ -8,6 +8,7 @@ import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { Mic, MicOff, Activity, Play, Square as Stop, RotateCcw, Copy } from 'lucide-react';
 import { VoiceReactiveRings } from './VoiceReactiveRings';
+import TestXenova from './test-xenova';
 interface ConversationCaptureProps {
   onNext?: () => void;
   onTranscriptionComplete?: (transcript: string) => void;
@@ -33,7 +34,7 @@ export const ConversationCapture = ({
     startTranscription,
     stopTranscription,
     resetTranscription
-  } = useTranscription({ realTimeUpdates: true });
+  } = useTranscription();
 
   const toggleRecording = async () => {
     try {
@@ -85,7 +86,7 @@ export const ConversationCapture = ({
           </div>
         </div>
       )}
-      
+      <TestXenova />
       {/* Engine Status */}
       {engineStatus !== 'ready' && (
         <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded">
@@ -247,7 +248,7 @@ export const ConversationCapture = ({
       {/* Next Button */}
       {onNext && transcription && (
         <div className="mt-6 flex justify-center">
-          <Button onClick={onNext} size="lg" variant="default">
+          <Button onClick={onNext} size="lg" variant="default" className="">
             {t('common.next')}
           </Button>
         </div>

@@ -7,21 +7,27 @@ const nextConfig = {
     unoptimized: true,
   },
 
-  serverExternalPackages: ['@xenova/transformers'],
+  // Allow cross-origin requests from localhost
+  allowedDevOrigins: [
+    'http://127.0.0.1:3000',
+    'http://127.0.0.1:3002',
+    'http://127.0.0.1:8888',
+    'http://localhost:3000',
+    'http://localhost:3002',
+    'http://localhost:8888'
+  ],
 
-  // Webpack configuration only for production builds
-  ...(process.env.NODE_ENV === 'production' && {
-    webpack: (config, { dev, isServer }) => {
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        fs: false,
-        path: false,
-        crypto: false,
-      };
-      
-      return config;
-    },
-  }),
+  // Webpack configuration
+  webpack: (config, { dev, isServer }) => {
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false,
+      path: false,
+      crypto: false,
+    };
+    
+    return config;
+  },
 
   async headers() {
     return [

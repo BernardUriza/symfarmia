@@ -1,7 +1,3 @@
-# Medical app SPA routing rules for Netlify
-
-# API routes (server-side)
-/api/*  /api/:splat  200
 
 # Authentication routes
 /auth/login  /auth/login  200

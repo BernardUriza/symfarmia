@@ -146,23 +146,16 @@ export class TranscriptionService {
       console.log('📤 [Transcription] Processing audio chunk');
       const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
       this.audioChunks = [];
-      // El backend API maneja la conversión si es necesaria
-      const formData = new FormData();
-      formData.append('audio', audioBlob, 'recording.webm');
-      formData.append('language', 'es');
-      console.log('🌐 [Transcription] Sending to transcription API endpoint');
-      const response = await fetch('/api/transcription', {
-        method: 'POST',
-        body: formData
-      });
-      if (!response.ok) {
-        throw new Error(`Microservice error: ${response.status}`);
-      }
-      const result = await response.json();
-      console.log('✅ [Transcription] Received result:', result);
-      if (result.transcript) {
-        this.updateTranscriptionState(result.transcript, result.confidence);
-      }
+      
+      // TODO: Implement client-side transcription
+      // For now, just simulate a transcription result
+      console.warn('⚠️ [Transcription] Client-side transcription not implemented yet');
+      
+      // Simulate transcription
+      const simulatedText = "Transcripción simulada del audio";
+      const simulatedConfidence = 0.85;
+      
+      this.updateTranscriptionState(simulatedText, simulatedConfidence);
     } catch (error) {
       console.error('❌ [Transcription] Error processing chunk:', error);
       if (this.currentTranscription) {

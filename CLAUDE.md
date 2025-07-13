@@ -10,7 +10,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Build**: `npm run build` - Generates Prisma client and builds the application
 - **Production server**: `npm start` - Start production server
 - **Linting**: `npm run lint` - Run Next.js ESLint
-- **Deploy**: `npm run deploy` - Generates date and runs git-commit.bat
 
 ### Permanent Development Server
 
@@ -32,38 +31,11 @@ npm run permanent:logs    # View server logs (real-time)
 - **No Build Guards**: Bypasses translation locks and type checks
 - **Quick Start**: Usually ready in 10-20 seconds
 
-## Microservicios
+## Development Ports
 
-SYMFARMIA utiliza una arquitectura de microservicios para separar responsabilidades y mejorar la escalabilidad. Ver documentación completa en `docs/development/dev-notes/microservices.md`.
-
-### Susurro-Test (Transcripción de Audio) - Puerto 3001
-```bash
-cd microservices/susurro-test
-npm install
-npm start
-```
-- **Función**: Servicio de transcripción usando nodejs-whisper
-- **Endpoints principales**:
-  - `GET /api/health` - Health check
-  - `POST /api/transcribe-upload` - Transcribir archivo subido
-  - `GET /api/files` - Listar archivos disponibles
-- **Uso**: Transcripción de consultas médicas, notas de voz y dictado médico
-
-### Gestión de Puertos
-```bash
-# Limpiar puertos ocupados (3000 y 3001)
-node scripts/kill-ports.js
-# o
-npm run kill-ports
-```
-
-### Distribución de Puertos
-- **3000**: Aplicación principal Next.js
-- **3001**: Microservicio de transcripción (Susurro-Test)
-- **3002**: Servidor de desarrollo permanente
-- **3003**: [Reservado] Medical AI Service (futuro)
-
-**Importante**: Los microservicios usan puertos específicos que no deben entrar en conflicto. Ejecutar `kill-ports.js` si hay problemas de puertos ocupados.
+### Port Distribution
+- **3000**: Main Next.js application
+- **3002**: Permanent development server (optional)
 
 ## Architecture Overview
 
@@ -182,7 +154,7 @@ These are the actively maintained scripts in the `scripts/` directory:
 
 - **`kill-ports.js`** - Cleans ports 3000 and 3001 before starting servers
   ```bash
-  npm run kill-ports
+  npm run kill:ports
   ```
 
 - **`permanent-dev-simple.js`** - Simplified permanent dev server on port 3002
@@ -199,7 +171,7 @@ These are the actively maintained scripts in the `scripts/` directory:
 
 ### Build & Validation Scripts
 
-- **`build-guardian.js`** - Validates translations and Turbo before builds
+- **`build-guardian.js`** - Validates translations  before builds
   ```bash
   npm run build:guardian
   ```
@@ -213,9 +185,6 @@ These are the actively maintained scripts in the `scripts/` directory:
   ```bash
   npm run translations:validate
   ```
-
-- **`validate-turbo.js`** - Ensures dev server uses Turbopack
-  - Used internally by build-guardian.js
 
 ### Microservice Scripts
 

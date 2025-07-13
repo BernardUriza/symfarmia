@@ -1,5 +1,12 @@
+[dev]
+  command = "next dev"
+  port = 8888
+  targetPort = 3000
+  publish = ".next"
+  autoLaunch = false
+
 [build]
-  command = "npm run build"
+  command = "echo '🔍 Starting build...' && npm install --production=false && echo '📦 Installing function deps...' && cd netlify/functions && npm install && cd ../.. && npm run build"
   functions = "netlify/functions"
 
 [build.environment]
@@ -9,10 +16,29 @@
   NODE_VERSION = "18.20.5"
   NPM_VERSION = "9.8.1"
 
+# Optimized function configuration for transcription
+[functions]
+  node_bundler = "esbuild"
+  
+[functions."transcribe-upload"]
+  timeout = 180 # Maximum allowed timeout (3 minutes)
+  memory = 3008 # Maximum allowed memory (3GB)
+  
+[functions."transcribe-server-file"]
+  timeout = 180 # Maximum allowed timeout (3 minutes)
+  memory = 3008 # Maximum allowed memory (3GB)
+
+[functions.environment]
+  # Xenova/transformers.js configuration
+  TRANSFORMERS_CACHE = "/tmp/.cache"
+  HF_HOME = "/tmp/.cache"
+  # Disable telemetry for performance
+  DO_NOT_TRACK = "1"
+
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# Headers para CORS en Netlify Functions
+# Headers para CORS
 [[headers]]
   for = "/.netlify/functions/*"
   [headers.values]
@@ -20,17 +46,15 @@
     Access-Control-Allow-Methods = "GET, POST, OPTIONS"
     Access-Control-Allow-Headers = "Content-Type"
 
-# ✅ REDIRECT ESPECÍFICO PARA TRANSCRIPTION (debe ir ANTES del genérico)
+# ✅ ESPECÍFICOS PRIMERO - Transcription endpoints
 [[redirects]]
-  from = "/api/transcription"
-  to = "/.netlify/functions/transcribe-upload"
+  from = "/api/transcribe-server-file"
+  to = "/.netlify/functions/transcribe-server-file"
   status = 200
-  force = true
 
-# ✅ API ROUTES para Next.js (genérico)
 [[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/api-:splat"
+  from = "/api/transcribe-upload"
+  to = "/.netlify/functions/transcribe-upload"
   status = 200
 
 # Auth routes específicos
@@ -49,7 +73,13 @@
   to = "/.netlify/functions/api-auth-callback"
   status = 200
 
-# ✅ SPA fallback debe ser el último
+# ✅ GENÉRICO AL FINAL - para otras API routes
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api-:splat"
+  status = 200
+
+# ✅ SPA fallback - ÚLTIMO
 [[redirects]]
   from = "/*"
   to = "/index.html"

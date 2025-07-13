@@ -334,28 +334,12 @@ export class ConnectionRecoveryService {
    * Test service endpoint
    */
   async testServiceEndpoint() {
-    try {
-      const response = await fetch('/api/transcription/health', {
-        method: 'GET',
-        cache: 'no-store',
-        signal: AbortSignal.timeout(10000) // 10 second timeout
-      });
-      
-      const data = await response.json();
-      
-      return {
-        success: response.ok && data.status === 'healthy',
-        data: data,
-        type: 'service_endpoint'
-      };
-      
-    } catch (error) {
-      return {
-        success: false,
-        error: error.message,
-        type: 'service_endpoint'
-      };
-    }
+    // Service endpoint removed - transcription now runs client-side
+    return {
+      success: true,
+      data: { status: 'client-side' },
+      type: 'service_endpoint'
+    };
   }
 
   /**

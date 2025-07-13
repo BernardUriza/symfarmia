@@ -4,3 +4,4 @@ export { ClinicalNotes } from './ClinicalNotes';
 export { OrderEntry } from './OrderEntry';
 export { SummaryExport } from './SummaryExport';
 export { VoiceReactiveRings } from './VoiceReactiveRings';
+export { TestXenova } from './test-xenova';
