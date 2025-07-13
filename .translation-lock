@@ -1,0 +1,6 @@
+{
+  "timestamp": 1752396831130,
+  "reason": "Command failed: node \"/workspaces/symfarmia/scripts/revolutionary-translation-validator.js\"\n",
+  "mode": "dev",
+  "message": "Translation validation failed. Fix all missing translations before proceeding."
+}
