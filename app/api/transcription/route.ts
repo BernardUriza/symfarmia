@@ -64,51 +64,24 @@ export async function POST(request: NextRequest) {
 
     console.log(`🎵 [Transcription API] Archivo recibido: ${audioFile.name} (${audioFile.size} bytes)`);
 
-    // 🚀 Si estamos en Netlify, usar Netlify Functions
+    // 🚀 Si estamos en Netlify, esta ruta no debería ejecutarse debido al redirect
+    // Pero si por alguna razón llega aquí, devolver un error informativo
     if (isNetlify && !isDevelopment) {
-      console.log('☁️ [Transcription API] Usando Netlify Functions en producción');
+      console.log('⚠️ [Transcription API] Esta ruta no debería ejecutarse en Netlify');
+      console.log('🔄 [Transcription API] El redirect en netlify.toml debería manejar esta petición');
       
-      // Preparar FormData para Netlify Function
-      const netlifyFormData = new FormData();
-      netlifyFormData.append('audio', audioFile);
-      netlifyFormData.append('language', 'es');
-
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), SUSURRO_CONFIG.timeout);
-
-      try {
-        // Llamar a la Netlify Function
-        const response = await fetch('/.netlify/functions/transcribe-upload', {
-          method: 'POST',
-          body: netlifyFormData,
-          signal: controller.signal
-        });
-
-        clearTimeout(timeoutId);
-
-        if (!response.ok) {
-          throw new Error(`Netlify Function error: ${response.status} ${response.statusText}`);
+      // Devolver información de debug
+      return NextResponse.json({
+        error: 'Esta ruta debería ser manejada por Netlify redirect',
+        debug: {
+          message: 'Verifica que el redirect en netlify.toml esté funcionando correctamente',
+          expected_redirect: '/api/transcription -> /.netlify/functions/transcribe-upload',
+          environment: {
+            NODE_ENV: process.env.NODE_ENV,
+            NETLIFY: process.env.NETLIFY
+          }
         }
-
-        const result = await response.json();
-        const processingTime = Date.now() - startTime;
-
-        console.log(`✅ [Transcription API] Netlify Function completada en ${processingTime}ms`);
-        console.log(`📝 [Transcription API] Transcripción: "${result.transcript}"`);
-        
-        return NextResponse.json({
-          success: true,
-          transcript: result.transcript || '',
-          confidence: result.confidence || 0,
-          processing_time_ms: processingTime,
-          source: 'netlify-function',
-          timestamp: new Date().toISOString()
-        });
-
-      } catch (error) {
-        clearTimeout(timeoutId);
-        throw error;
-      }
+      }, { status: 503 });
     }
 
     // 🏠 En desarrollo o sin Netlify, usar microservicio local
@@ -273,11 +246,20 @@ async function convertToWAV(audioFile: File): Promise<File> {
 }
 
 export async function GET() {
+  const isNetlify = process.env.NETLIFY === 'true';
+  const isDevelopment = process.env.NODE_ENV === 'development';
+  
   return NextResponse.json({
     message: '🎙️ Transcription API - Endpoint para procesamiento de audio',
     methods: ['POST'],
     maxFileSize: `${SUSURRO_CONFIG.maxFileSize / 1024 / 1024}MB`,
     allowedTypes: SUSURRO_CONFIG.allowedTypes,
-    microservice: SUSURRO_CONFIG.baseUrl
+    service: isNetlify && !isDevelopment 
+      ? 'Netlify Functions (/.netlify/functions/transcribe-upload)' 
+      : SUSURRO_CONFIG.baseUrl,
+    environment: {
+      NODE_ENV: process.env.NODE_ENV,
+      NETLIFY: process.env.NETLIFY
+    }
   });
 }

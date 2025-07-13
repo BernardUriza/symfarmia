@@ -20,6 +20,13 @@
     Access-Control-Allow-Methods = "GET, POST, OPTIONS"
     Access-Control-Allow-Headers = "Content-Type"
 
+# ✅ REDIRECT ESPECÍFICO PARA TRANSCRIPTION (debe ir ANTES del genérico)
+[[redirects]]
+  from = "/api/transcription"
+  to = "/.netlify/functions/transcribe-upload"
+  status = 200
+  force = true
+
 # ✅ API ROUTES para Next.js (genérico)
 [[redirects]]
   from = "/api/*"
