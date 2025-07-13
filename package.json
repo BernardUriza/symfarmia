@@ -35,6 +35,8 @@
     "permanent:logs": "node scripts/permanent-dev-simple.js logs",
     "dev:susurro": "cd microservices/susurro-test && npm run dev",
     "dev:all": "concurrently \"npm run dev\" \"npm run dev:susurro\"",
+    "setup:susurro": "cd microservices/susurro-test && npm run setup",
+    "health:susurro": "curl -f http://localhost:3001/api/health",
     "setup:microservices": "./scripts/setup-microservices.sh",
     "test:microservice": "node scripts/microservice-e2e-guardian.js",
     "test:microservice:susurro": "cd microservices/susurro-test && npm test",

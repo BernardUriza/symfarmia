@@ -212,14 +212,16 @@ class BuildGuardian {
 
   async runMicroserviceE2E() {
     console.log('🔬 Running microservice E2E tests...');
+    console.log('   Including file path fix validation tests...');
     try {
       const result = await this.microserviceGuardian.guard();
       if (!result) {
-        const error = new Error('Microservice E2E tests failed');
+        const error = new Error('Microservice E2E tests failed - File path or transcription issue');
         error.type = 'microservice';
         throw error;
       }
       console.log('✅ Microservice E2E tests passed');
+      console.log('✅ File path fix validated - uploads directory working correctly');
       return true;
     } catch (error) {
       error.type = 'microservice';
@@ -253,12 +255,17 @@ class BuildGuardian {
       console.log('   cd microservices/susurro-test && npm install\n');
       console.log('2. Download Whisper model:');
       console.log('   cd microservices/susurro-test && npm run download-model\n');
-      console.log('3. Test microservice manually:');
+      console.log('3. Check uploads directory (FILE PATH FIX):');
+      console.log('   mkdir -p microservices/susurro-test/uploads');
+      console.log('   ls -la microservices/susurro-test/uploads/\n');
+      console.log('4. Test microservice manually:');
       console.log('   cd microservices/susurro-test && npm test\n');
-      console.log('4. Check if port 3001 is available:');
+      console.log('5. Check if port 3001 is available:');
       console.log('   npm run kill-ports\n');
-      console.log('⚠️  IMPORTANT: The microservice must successfully transcribe');
-      console.log('   audio and return the word "Americans" in the transcript.');
+      console.log('⚠️  IMPORTANT: The microservice must:');
+      console.log('   • Have uploads/ directory with write permissions');
+      console.log('   • Successfully transcribe audio files');
+      console.log('   • Return the word "Americans" in the transcript');
       console.log('━'.repeat(50));
     } else if (errorType === 'turbo') {
       console.log('\n🔧 HOW TO FIX TURBO ISSUES:');
