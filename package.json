@@ -33,7 +33,7 @@
     "health:susurro": "curl -f http://localhost:3001/api/health",
     "setup:microservices": "./scripts/setup-microservices.sh",
     "test:microservice": "node scripts/microservice-e2e-guardian.js",
-    "test:microservice:susurro": "cd microservices/susurro-test && npm test",
+    "test:microservice:susurro": "cd microservices/susurro-test && npm test"
   },
   "dependencies": {
     "@auth0/nextjs-auth0": "^4.8.0",

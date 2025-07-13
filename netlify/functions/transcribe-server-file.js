@@ -2,14 +2,20 @@ const { nodewhisper } = require('nodejs-whisper');
 const path = require('path');
 const fs = require('fs');
 
-// Set model path - in Netlify, the public folder is accessible from the function
-// Using base.en model which is complete (142MB), base.bin is incomplete (50K)
-const MODEL_PATH = process.env.NETLIFY
-  ? path.join(process.cwd(), 'public', 'models', 'ggml-base.en.bin')
-  : path.join(process.cwd(), 'public', 'models', 'ggml-base.en.bin');
+// Set model paths - base (multilingual) as primary, base.en as fallback
+const MODEL_PATH_BASE = path.join(process.cwd(), 'public', 'models', 'ggml-base.bin');
+const MODEL_PATH_EN = path.join(process.cwd(), 'public', 'models', 'ggml-base.en.bin');
 
-console.log('📁 [Server File Function Init] Model path:', MODEL_PATH);
-console.log('📁 [Server File Function Init] Model exists:', fs.existsSync(MODEL_PATH));
+// Check which model exists and use appropriately
+const baseExists = fs.existsSync(MODEL_PATH_BASE);
+const enExists = fs.existsSync(MODEL_PATH_EN);
+
+console.log('📁 [Server File Function Init] Base model (multilingual) exists:', baseExists);
+console.log('📁 [Server File Function Init] Base.en model (English) exists:', enExists);
+
+// Use base (multilingual) if available, fallback to base.en
+const MODEL_PATH = baseExists ? MODEL_PATH_BASE : MODEL_PATH_EN;
+console.log('📁 [Server File Function Init] Using model:', MODEL_PATH);
 
 exports.handler = async (event, context) => {
   // Solo acepta POST
@@ -113,7 +119,7 @@ exports.handler = async (event, context) => {
         raw_result: result,
         processing_time_ms: processingTime,
         audio_path: audioPath,
-        model_used: 'nodejs-whisper base.en (Netlify Function)',
+        model_used: `nodejs-whisper ${MODEL_PATH.includes('base.en') ? 'base.en' : 'base (multilingual)'} (Netlify Function)`,
         timestamp: new Date().toISOString()
       })
     };

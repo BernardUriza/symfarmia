@@ -5,14 +5,20 @@ const fsSync = require('fs');
 const path = require('path');
 const os = require('os');
 
-// Set model path - in Netlify, the public folder is accessible from the function
-// Using base.en model which is complete (142MB), base.bin is incomplete (50K)
-const MODEL_PATH = process.env.NETLIFY
-  ? path.join(process.cwd(), 'public', 'models', 'ggml-base.en.bin')
-  : path.join(process.cwd(), 'public', 'models', 'ggml-base.en.bin');
+// Set model paths - base (multilingual) as primary, base.en as fallback
+const MODEL_PATH_BASE = path.join(process.cwd(), 'public', 'models', 'ggml-base.bin');
+const MODEL_PATH_EN = path.join(process.cwd(), 'public', 'models', 'ggml-base.en.bin');
 
-console.log('📁 [Init] Model path:', MODEL_PATH);
-console.log('📁 [Init] Model exists:', fsSync.existsSync(MODEL_PATH));
+// Check which model exists and use appropriately
+const baseExists = fsSync.existsSync(MODEL_PATH_BASE);
+const enExists = fsSync.existsSync(MODEL_PATH_EN);
+
+console.log('📁 [Init] Base model (multilingual) exists:', baseExists);
+console.log('📁 [Init] Base.en model (English) exists:', enExists);
+
+// Use base (multilingual) if available, fallback to base.en
+const MODEL_PATH = baseExists ? MODEL_PATH_BASE : MODEL_PATH_EN;
+console.log('📁 [Init] Using model:', MODEL_PATH);
 
 // Debug logs para verificar el modelo
 console.log('📁 [Function Init] Checking model files...');
@@ -138,7 +144,7 @@ exports.handler = async (event, context) => {
         transcript: transcriptText,
         processing_time_ms: processingTime,
         file_size: audioFile.content.length,
-        model_used: 'nodejs-whisper base.en (Netlify Function)',
+        model_used: `nodejs-whisper ${MODEL_PATH.includes('base.en') ? 'base.en' : 'base (multilingual)'} (Netlify Function)`,
         timestamp: new Date().toISOString(),
         confidence: 0.95 // nodejs-whisper no devuelve confidence, usar valor por defecto
       })
