@@ -137,7 +137,7 @@ export async function transcribeAudio(audioBuffer, options = {}) {
     try {
       unlinkSync(tempFilePath);
     } catch (cleanupError) {
-      console.error('🗿 Failed to clean up temp file:', cleanupError.message);
+      console.error('🗑️ Failed to clean up temp file:', cleanupError.message);
     }
   }
   
