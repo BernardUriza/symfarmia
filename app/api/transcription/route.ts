@@ -26,6 +26,13 @@ export async function POST(request: NextRequest) {
     // 📝 Logs con emojis (mantener estilo existente)
     console.log('🎙️ [Transcription API] Iniciando procesamiento...');
     
+    // 🌐 Detectar entorno
+    const isNetlify = process.env.NETLIFY === 'true';
+    const isDevelopment = process.env.NODE_ENV === 'development';
+    const isProduction = process.env.NODE_ENV === 'production';
+    
+    console.log(`🌍 [Transcription API] Entorno: Netlify=${isNetlify}, Production=${isProduction}, Development=${isDevelopment}`);
+    
     // 📋 Validar Content-Type
     const contentType = request.headers.get('content-type');
     if (!contentType?.includes('multipart/form-data')) {
@@ -56,6 +63,56 @@ export async function POST(request: NextRequest) {
     }
 
     console.log(`🎵 [Transcription API] Archivo recibido: ${audioFile.name} (${audioFile.size} bytes)`);
+
+    // 🚀 Si estamos en Netlify, usar Netlify Functions
+    if (isNetlify && !isDevelopment) {
+      console.log('☁️ [Transcription API] Usando Netlify Functions en producción');
+      
+      // Preparar FormData para Netlify Function
+      const netlifyFormData = new FormData();
+      netlifyFormData.append('audio', audioFile);
+      netlifyFormData.append('language', 'es');
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), SUSURRO_CONFIG.timeout);
+
+      try {
+        // Llamar a la Netlify Function
+        const response = await fetch('/.netlify/functions/transcribe-upload', {
+          method: 'POST',
+          body: netlifyFormData,
+          signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          throw new Error(`Netlify Function error: ${response.status} ${response.statusText}`);
+        }
+
+        const result = await response.json();
+        const processingTime = Date.now() - startTime;
+
+        console.log(`✅ [Transcription API] Netlify Function completada en ${processingTime}ms`);
+        console.log(`📝 [Transcription API] Transcripción: "${result.transcript}"`);
+        
+        return NextResponse.json({
+          success: true,
+          transcript: result.transcript || '',
+          confidence: result.confidence || 0,
+          processing_time_ms: processingTime,
+          source: 'netlify-function',
+          timestamp: new Date().toISOString()
+        });
+
+      } catch (error) {
+        clearTimeout(timeoutId);
+        throw error;
+      }
+    }
+
+    // 🏠 En desarrollo o sin Netlify, usar microservicio local
+    console.log('🏠 [Transcription API] Usando microservicio local');
 
     // 🔄 Verificar tipo de archivo y procesar si es necesario
     let processedFile = audioFile;
@@ -135,8 +192,11 @@ export async function POST(request: NextRequest) {
       } else if (error.message.includes('SusurroTest')) {
         errorMessage = '🔴 Microservicio SusurroTest no disponible';
         statusCode = 503;
+      } else if (error.message.includes('Netlify Function')) {
+        errorMessage = '☁️ Netlify Function no disponible';
+        statusCode = 503;
       } else if (error.message.includes('fetch')) {
-        errorMessage = '🌐 Error de conectividad con SusurroTest';
+        errorMessage = '🌐 Error de conectividad';
         statusCode = 502;
       }
     }
