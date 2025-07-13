@@ -1,0 +1,173 @@
+[build]
+<<<<<<< HEAD
+  command = "npm run build"
+  publish = ".next"
+=======
+  command = "NETLIFY=true npm run build"
+  publish = "out"
+>>>>>>> d32067efce8283b8035e6ab3d0bb73c7d4fe13f7
+
+[build.environment]
+  NODE_VERSION = "18"
+  NPM_VERSION = "9"
+  NEXT_TELEMETRY_DISABLED = "1"
+
+# Headers for security
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+<<<<<<< HEAD
+    Permissions-Policy = "geolocation=(), microphone=(self), camera=()"
+=======
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+>>>>>>> d32067efce8283b8035e6ab3d0bb73c7d4fe13f7
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
+
+# CORS headers for API routes
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
+    Access-Control-Allow-Headers = "Content-Type, Authorization"
+    Cache-Control = "no-store, max-age=0"
+
+# Cache control for static assets
+[[headers]]
+  for = "/_next/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# API Routes handling
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api-:splat"
+  status = 200
+
+# Medical app specific routes
+[[redirects]]
+  from = "/medical"
+  to = "/medical"
+  status = 200
+
+[[redirects]]
+  from = "/medical/*"
+  to = "/medical/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/patients"
+  to = "/patients"
+  status = 200
+
+[[redirects]]
+  from = "/patients/*"
+  to = "/patients/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/reports"
+  to = "/reports"
+  status = 200
+
+[[redirects]]
+  from = "/reports/*"
+  to = "/reports/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/studies"
+  to = "/studies"
+  status = 200
+
+[[redirects]]
+  from = "/studies/*"
+  to = "/studies/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/categories"
+  to = "/categories"
+  status = 200
+
+[[redirects]]
+  from = "/categories/*"
+  to = "/categories/:splat"
+  status = 200
+
+# Authentication routes
+[[redirects]]
+  from = "/auth/login"
+  to = "/auth/login"
+  status = 200
+  query = {returnTo = ":returnTo"}
+
+[[redirects]]
+  from = "/auth/*"
+  to = "/auth/:splat"
+  status = 200
+
+# Legacy route with query params
+[[redirects]]
+  from = "/legacy"
+  to = "/legacy"
+  status = 200
+  query = {demo = ":demo"}
+
+# Dashboard redirect
+[[redirects]]
+  from = "/dashboard"
+  to = "/legacy"
+  status = 302
+
+# Home redirect
+[[redirects]]
+  from = "/home"
+  to = "/"
+  status = 301
+
+# SPA fallback - must be last
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Next.js plugin configuration
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+# Production environment
+[context.production.environment]
+  NODE_ENV = "production"
+  NETLIFY = "true"
+  NEXT_PUBLIC_API_URL = "/.netlify/functions"
+
+# Deploy preview environment
+[context.deploy-preview.environment]
+  NODE_ENV = "development"
+  NETLIFY = "true"
+  NEXT_PUBLIC_API_URL = "/.netlify/functions"
+
+# Branch deploy environment
+[context.branch-deploy.environment]
+  NODE_ENV = "development"
+  NETLIFY = "true"
+  NEXT_PUBLIC_API_URL = "/.netlify/functions"
