@@ -335,17 +335,19 @@ export class ConnectionRecoveryService {
    */
   async testServiceEndpoint() {
     try {
-      const response = await fetch('/api/transcription/health', {
-        method: 'GET',
+      // Xenova endpoint doesn't have a health check, so we check if the endpoint is accessible
+      const response = await fetch('/api/transcribe-upload', {
+        method: 'OPTIONS',
         cache: 'no-store',
         signal: AbortSignal.timeout(10000) // 10 second timeout
       });
       
-      const data = await response.json();
+      // For OPTIONS request, we just check if it returns 200
+      const isHealthy = response.ok;
       
       return {
-        success: response.ok && data.status === 'healthy',
-        data: data,
+        success: isHealthy,
+        data: { status: isHealthy ? 'healthy' : 'unhealthy' },
         type: 'service_endpoint'
       };
       

@@ -16,7 +16,7 @@ export const susurroConfig = {
 
   // Integration with Next.js
   integration: {
-    nextjsProxy: '/api/transcription',
+    nextjsProxy: '/api/transcribe-upload',
     envVars: {
       SUSURRO_SERVICE_URL: 'http://localhost:3001',
       TRANSCRIPTION_TIMEOUT: '30000',

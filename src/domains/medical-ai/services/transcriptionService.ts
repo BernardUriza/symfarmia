@@ -150,8 +150,8 @@ export class TranscriptionService {
       const formData = new FormData();
       formData.append('audio', audioBlob, 'recording.webm');
       formData.append('language', 'es');
-      console.log('🌐 [Transcription] Sending to transcription API endpoint');
-      const response = await fetch('/api/transcription', {
+      console.log('🌐 [Transcription] Sending to Xenova transcription endpoint');
+      const response = await fetch('/api/transcribe-upload', {
         method: 'POST',
         body: formData
       });

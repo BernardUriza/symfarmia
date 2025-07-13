@@ -221,15 +221,16 @@ export function useTranscription(options = {}): UseTranscriptionReturn {
           const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
           console.log(`✅ [onstop] Blob creado: ${audioBlob.size} bytes, tipo: ${audioBlob.type}`);
           
-          // Enviar al endpoint /api/transcription
+          // Enviar al endpoint de Xenova /api/transcribe-upload
           console.log('📤 [onstop] Preparando FormData para envío...');
           const formData = new FormData();
           formData.append('audio', audioBlob, 'recording.webm');
           console.log('✅ [onstop] FormData preparado con archivo de audio');
+          console.log('✨ [onstop] Usando Xenova/Transformers.js - no requiere conversión de formato');
           
-          console.log('🌐 [onstop] Enviando audio a /api/transcription...');
+          console.log('🌐 [onstop] Enviando audio a /api/transcribe-upload (Xenova)...');
           const startTime = Date.now();
-          const response = await fetch('/api/transcription', {
+          const response = await fetch('/api/transcribe-upload', {
             method: 'POST',
             body: formData
           });

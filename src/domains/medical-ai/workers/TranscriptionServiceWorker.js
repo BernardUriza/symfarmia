@@ -809,8 +809,7 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll([
-        '/js/transcription-worker.js',
-        '/api/transcription/health'
+        '/js/transcription-worker.js'
       ]);
     })
   );
@@ -872,7 +871,7 @@ self.addEventListener('sync', (event) => {
 
 // Fetch event for offline support
 self.addEventListener('fetch', (event) => {
-  if (event.request.url.includes('/api/transcription/')) {
+  if (event.request.url.includes('/api/transcribe-upload')) {
     event.respondWith(
       caches.open(API_CACHE_NAME).then((cache) => {
         return fetch(event.request).then((response) => {

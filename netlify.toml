@@ -41,11 +41,6 @@
 
 # ✅ ESPECÍFICOS PRIMERO - Transcription endpoints
 [[redirects]]
-  from = "/api/transcription"
-  to = "/.netlify/functions/transcribe-upload"
-  status = 200
-
-[[redirects]]
   from = "/api/transcribe-server-file"
   to = "/.netlify/functions/transcribe-server-file"
   status = 200

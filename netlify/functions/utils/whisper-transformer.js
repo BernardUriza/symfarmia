@@ -1,13 +1,37 @@
-import { pipeline, env } from '@xenova/transformers';
 import path from 'path';
-import { Blob } from 'buffer';
 import { writeFileSync, unlinkSync } from 'fs';
 import crypto from 'crypto';
 
-// Configure Xenova environment for serverless
-env.cacheDir = '/tmp/.cache';
-env.allowRemoteModels = true;
-env.allowLocalModels = false;
+// Set required environment variables before importing transformers
+if (typeof process !== 'undefined' && !process.env.TRANSFORMERS_CACHE) {
+  process.env.TRANSFORMERS_CACHE = '/tmp/.cache';
+}
+
+// Import transformers after setting env vars
+let pipeline, env;
+try {
+  const transformers = await import('@xenova/transformers');
+  pipeline = transformers.pipeline;
+  env = transformers.env;
+  
+  // Configure Xenova environment for serverless
+  if (env) {
+    env.cacheDir = '/tmp/.cache';
+    env.allowRemoteModels = true;
+    env.allowLocalModels = false;
+    env.backends = {
+      onnx: {
+        wasm: {
+          proxy: false,
+          numThreads: 1
+        }
+      }
+    };
+  }
+} catch (error) {
+  console.error('Failed to import transformers:', error.message);
+  // Provide a fallback or error handling
+}
 
 // Global pipeline cache for warm starts
 let transcriptionPipeline = null;
@@ -17,6 +41,10 @@ let transcriptionPipeline = null;
  * Uses global cache to optimize cold/warm starts
  */
 export async function getTranscriptionPipeline() {
+  if (!pipeline) {
+    throw new Error('Transformers.js is not available in this environment');
+  }
+  
   if (!transcriptionPipeline) {
     const startTime = Date.now();
     
