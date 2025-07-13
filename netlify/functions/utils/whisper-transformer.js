@@ -1,4 +1,8 @@
-const { pipeline, env } = require('@xenova/transformers');
+import { pipeline, env } from '@xenova/transformers';
+import path from 'path';
+import { Blob } from 'buffer';
+import { writeFileSync, unlinkSync } from 'fs';
+import crypto from 'crypto';
 
 // Configure Xenova environment for serverless
 env.cacheDir = '/tmp/.cache';
@@ -12,9 +16,8 @@ let transcriptionPipeline = null;
  * Get or initialize the Whisper transcription pipeline
  * Uses global cache to optimize cold/warm starts
  */
-async function getTranscriptionPipeline() {
+export async function getTranscriptionPipeline() {
   if (!transcriptionPipeline) {
-    console.log('🚀 Initializing Whisper pipeline...');
     const startTime = Date.now();
     
     try {
@@ -26,10 +29,7 @@ async function getTranscriptionPipeline() {
           revision: 'main'
         }
       );
-      
-      console.log(`✅ Pipeline initialized in ${Date.now() - startTime}ms`);
     } catch (error) {
-      console.error('❌ Pipeline initialization error:', error);
       throw new Error(`Failed to initialize Whisper model: ${error.message}`);
     }
   }
@@ -38,12 +38,12 @@ async function getTranscriptionPipeline() {
 }
 
 /**
- * Transcribe audio file with optimized settings
- * @param {string} audioPath - Path to audio file
+ * Transcribe audio from buffer with optimized settings
+ * @param {Buffer|Uint8Array} audioBuffer - Audio data buffer
  * @param {Object} options - Transcription options
  * @returns {Promise<Object>} Transcription result
  */
-async function transcribeAudio(audioPath, options = {}) {
+export async function transcribeAudio(audioBuffer, options = {}) {
   const transcriber = await getTranscriptionPipeline();
   
   const defaultOptions = {
@@ -58,13 +58,31 @@ async function transcribeAudio(audioPath, options = {}) {
   
   const transcriptionOptions = { ...defaultOptions, ...options };
   
-  console.log(`[${new Date().toISOString()}] Starting transcription with options:`, {
-    language: transcriptionOptions.language || 'auto',
-    chunk_length_s: transcriptionOptions.chunk_length_s,
-    return_timestamps: transcriptionOptions.return_timestamps
-  });
+  // In serverless Node.js, Xenova/Transformers expects a file path
+  // We need to write the buffer to a temporary file
+  const tempFileName = `audio_${crypto.randomBytes(16).toString('hex')}.wav`;
+  const tempFilePath = path.join('/tmp', tempFileName);
   
-  const result = await transcriber(audioPath, transcriptionOptions);
+  let result;
+  
+  try {
+    // Write buffer to temporary file
+    writeFileSync(tempFilePath, audioBuffer);
+    
+    // Pass the file path to the transcriber
+    result = await transcriber(tempFilePath, transcriptionOptions);
+    
+  } catch (error) {
+    console.error('Transcription error:', error.message);
+    throw new Error(`Transcription failed: ${error.message}`);
+  } finally {
+    // Always clean up the temporary file
+    try {
+      unlinkSync(tempFilePath);
+    } catch (cleanupError) {
+      console.error('Failed to clean up temp file:', cleanupError.message);
+    }
+  }
   
   return result;
 }
@@ -74,7 +92,7 @@ async function transcribeAudio(audioPath, options = {}) {
  * @param {Object} audioFile - Audio file object with content and filename
  * @throws {Error} If file is invalid
  */
-function validateAudioFile(audioFile) {
+export function validateAudioFile(audioFile) {
   const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
   const ALLOWED_FORMATS = ['.wav', '.mp3', '.m4a', '.ogg', '.webm', '.flac', '.aac'];
   
@@ -83,7 +101,6 @@ function validateAudioFile(audioFile) {
   }
   
   if (audioFile.filename) {
-    const path = require('path');
     const ext = path.extname(audioFile.filename).toLowerCase();
     if (!ALLOWED_FORMATS.includes(ext)) {
       throw new Error(`Formato no soportado: ${ext}. Formatos permitidos: ${ALLOWED_FORMATS.join(', ')}`);
@@ -98,7 +115,7 @@ function validateAudioFile(audioFile) {
  * @param {Error} error - Error object
  * @returns {Object} Error response with status code and body
  */
-function getErrorResponse(error) {
+export function getErrorResponse(error) {
   let statusCode = 500;
   let errorResponse = {
     error: 'Error al transcribir el archivo',
@@ -127,7 +144,7 @@ function getErrorResponse(error) {
 /**
  * Get CORS headers for responses
  */
-function getCORSHeaders() {
+export function getCORSHeaders() {
   return {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
@@ -135,11 +152,3 @@ function getCORSHeaders() {
     'Access-Control-Max-Age': '86400'
   };
 }
-
-module.exports = {
-  getTranscriptionPipeline,
-  transcribeAudio,
-  validateAudioFile,
-  getErrorResponse,
-  getCORSHeaders
-};

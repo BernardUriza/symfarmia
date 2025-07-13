@@ -19,11 +19,24 @@ This migration replaces the C++ binary-based `nodejs-whisper` with the JavaScrip
 - **Before**: ggml-base.bin (binary model files)
 - **After**: Xenova/whisper-tiny (ONNX model, 39MB)
 
-### 3. Performance Optimizations
+### 3. Module System (January 2025)
+- **Before**: CommonJS (`require`, `module.exports`)
+- **After**: ES Modules (`import`, `export`)
+- Added `"type": "module"` to package.json
+- Updated all function files to use ESM syntax
+
+### 4. Audio Processing
+- **Before**: Files saved to temp directory then processed
+- **After**: Direct buffer processing without file I/O
+- Improved serverless performance by eliminating file system operations
+
+### 5. Performance Optimizations
 - Global pipeline caching for warm starts
 - Disabled timestamps for better performance
 - Configured /tmp cache directory
 - 180-second timeout with 3GB memory allocation
+- Removed unnecessary console.log statements
+- Direct buffer processing for faster transcription
 
 ## API Compatibility
 

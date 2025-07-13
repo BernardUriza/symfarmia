@@ -1,17 +1,19 @@
-const path = require('path');
-const fs = require('fs');
-const { 
+import path from 'path';
+import fs from 'fs';
+import { 
   transcribeAudio, 
   getErrorResponse, 
   getCORSHeaders 
-} = require('./utils/whisper-transformer');
+} from './utils/whisper-transformer.js';
 
-exports.handler = async (event, context) => {
+export const handler = async (event, context) => {
+  const corsHeaders = getCORSHeaders();
+  
   // Handle OPTIONS for CORS
   if (event.httpMethod === 'OPTIONS') {
     return {
       statusCode: 200,
-      headers: getCORSHeaders(),
+      headers: corsHeaders,
       body: ''
     };
   }
@@ -22,7 +24,7 @@ exports.handler = async (event, context) => {
       statusCode: 405,
       headers: {
         'Content-Type': 'application/json',
-        ...getCORSHeaders()
+        ...corsHeaders
       },
       body: JSON.stringify({ error: 'Method not allowed' })
     };
@@ -36,7 +38,7 @@ exports.handler = async (event, context) => {
         statusCode: 400,
         headers: {
           'Content-Type': 'application/json',
-          ...getCORSHeaders()
+          ...corsHeaders
         },
         body: JSON.stringify({ 
           error: 'Se requiere el nombre del archivo',
@@ -57,7 +59,7 @@ exports.handler = async (event, context) => {
           statusCode: 404,
           headers: {
             'Content-Type': 'application/json',
-            ...getCORSHeaders()
+            ...corsHeaders
           },
           body: JSON.stringify({ 
             error: 'Archivo no encontrado',
@@ -73,9 +75,6 @@ exports.handler = async (event, context) => {
       // Use alternative path if exists
       audioPath = altPath;
     }
-
-    console.log(`[${new Date().toISOString()}] Processing: ${audioPath}`);
-    console.log(`[${new Date().toISOString()}] Language: ${language || 'auto'}`);
     
     // Get file stats for validation
     const stats = fs.statSync(audioPath);
@@ -86,7 +85,7 @@ exports.handler = async (event, context) => {
         statusCode: 400,
         headers: {
           'Content-Type': 'application/json',
-          ...getCORSHeaders()
+          ...corsHeaders
         },
         body: JSON.stringify({ 
           error: `El archivo excede el límite de 10MB (${fileSizeMB.toFixed(2)}MB)`,
@@ -97,23 +96,23 @@ exports.handler = async (event, context) => {
     
     const startTime = Date.now();
     
-    // Transcribe using shared utility
-    const result = await transcribeAudio(audioPath, {
+    // Read file as buffer
+    const audioBuffer = fs.readFileSync(audioPath);
+    
+    // Transcribe using buffer
+    const result = await transcribeAudio(audioBuffer, {
       language: language || null
     });
 
     const processingTime = Date.now() - startTime;
     const transcriptText = result.text || '';
 
-    console.log(`[${new Date().toISOString()}] Transcription completed in ${processingTime}ms`);
-    console.log(`[${new Date().toISOString()}] Text length: ${transcriptText.length} chars`);
-
     return {
       statusCode: 200,
       headers: {
         'Content-Type': 'application/json',
         'Cache-Control': 'no-cache',
-        ...getCORSHeaders()
+        ...corsHeaders
       },
       body: JSON.stringify({
         success: true,
@@ -133,9 +132,6 @@ exports.handler = async (event, context) => {
     };
 
   } catch (error) {
-    console.error(`[${new Date().toISOString()}] Error:`, error);
-    console.error(`[${new Date().toISOString()}] Error stack:`, error.stack);
-    
     // Get standardized error response
     const { statusCode, errorResponse } = getErrorResponse(error);
     
@@ -143,7 +139,7 @@ exports.handler = async (event, context) => {
       statusCode,
       headers: {
         'Content-Type': 'application/json',
-        ...getCORSHeaders()
+        ...corsHeaders
       },
       body: JSON.stringify(errorResponse)
     };
