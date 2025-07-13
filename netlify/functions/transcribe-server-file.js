@@ -3,9 +3,10 @@ const path = require('path');
 const fs = require('fs');
 
 // Set model path - in Netlify, the public folder is accessible from the function
+// Using base.en model which is complete (142MB), base.bin is incomplete (50K)
 const MODEL_PATH = process.env.NETLIFY
-  ? path.join(process.cwd(), 'public', 'models', 'ggml-base.bin')
-  : path.join(process.cwd(), 'public', 'models', 'ggml-base.bin');
+  ? path.join(process.cwd(), 'public', 'models', 'ggml-base.en.bin')
+  : path.join(process.cwd(), 'public', 'models', 'ggml-base.en.bin');
 
 console.log('📁 [Server File Function Init] Model path:', MODEL_PATH);
 console.log('📁 [Server File Function Init] Model exists:', fs.existsSync(MODEL_PATH));
@@ -112,7 +113,7 @@ exports.handler = async (event, context) => {
         raw_result: result,
         processing_time_ms: processingTime,
         audio_path: audioPath,
-        model_used: 'nodejs-whisper base (Netlify Function)',
+        model_used: 'nodejs-whisper base.en (Netlify Function)',
         timestamp: new Date().toISOString()
       })
     };
