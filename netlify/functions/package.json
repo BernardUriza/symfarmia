@@ -1,9 +1,9 @@
 {
   "name": "netlify-whisper-functions",
   "version": "1.0.0",
-  "description": "Netlify Functions for audio transcription using nodejs-whisper",
+  "description": "Netlify Functions for audio transcription using Xenova/transformers.js",
   "dependencies": {
-    "nodejs-whisper": "^0.2.9",
+    "@xenova/transformers": "^2.7.0",
     "lambda-multipart-parser": "^1.0.1"
   }
 }

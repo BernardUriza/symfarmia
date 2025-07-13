@@ -9,6 +9,25 @@
   NODE_VERSION = "18.20.5"
   NPM_VERSION = "9.8.1"
 
+# Optimized function configuration for transcription
+[functions]
+  node_bundler = "esbuild"
+  
+[functions."transcribe-upload"]
+  timeout = 180 # Maximum allowed timeout (3 minutes)
+  memory = 3008 # Maximum allowed memory (3GB)
+  
+[functions."transcribe-server-file"]
+  timeout = 180 # Maximum allowed timeout (3 minutes)
+  memory = 3008 # Maximum allowed memory (3GB)
+
+[functions.environment]
+  # Xenova/transformers.js configuration
+  TRANSFORMERS_CACHE = "/tmp/.cache"
+  HF_HOME = "/tmp/.cache"
+  # Disable telemetry for performance
+  DO_NOT_TRACK = "1"
+
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 

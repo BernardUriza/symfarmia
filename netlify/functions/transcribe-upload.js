@@ -1,78 +1,40 @@
-const { nodewhisper } = require('nodejs-whisper');
 const multipart = require('lambda-multipart-parser');
 const fs = require('fs').promises;
-const fsSync = require('fs');
 const path = require('path');
 const os = require('os');
-
-// In Netlify Functions, we'll use the models from public/models/
-console.log('📁 [Init] Using nodejs-whisper with pre-existing models');
-
-// Function to ensure model is available
-async function ensureModel() {
-  // In Netlify, public files are at the root level
-  const sourceModelPath = path.join(process.cwd(), 'public', 'models', 'ggml-base.bin');
-  const sourceModelEnPath = path.join(process.cwd(), 'public', 'models', 'ggml-base.en.bin');
-  
-  // Create models directory in temp if it doesn't exist
-  const tempModelsDir = path.join(os.tmpdir(), 'whisper-models');
-  
-  try {
-    await fs.mkdir(tempModelsDir, { recursive: true });
-    
-    // Check if we need to copy the model
-    const targetModelPath = path.join(tempModelsDir, 'ggml-base.bin');
-    const targetModelEnPath = path.join(tempModelsDir, 'ggml-base.en.bin');
-    
-    // Copy multilingual model if not exists
-    if (!fsSync.existsSync(targetModelPath) && fsSync.existsSync(sourceModelPath)) {
-      console.log('📦 Copying multilingual base model to temp...');
-      await fs.copyFile(sourceModelPath, targetModelPath);
-      console.log('✅ Model copied successfully');
-    }
-    
-    // Copy English model if not exists
-    if (!fsSync.existsSync(targetModelEnPath) && fsSync.existsSync(sourceModelEnPath)) {
-      console.log('📦 Copying English base model to temp...');
-      await fs.copyFile(sourceModelEnPath, targetModelEnPath);
-      console.log('✅ English model copied successfully');
-    }
-    
-    return tempModelsDir;
-  } catch (error) {
-    console.error('❌ Error setting up models:', error);
-    throw error;
-  }
-}
+const { 
+  transcribeAudio, 
+  validateAudioFile, 
+  getErrorResponse, 
+  getCORSHeaders 
+} = require('./utils/whisper-transformer');
 
 exports.handler = async (event, context) => {
-  // Solo acepta POST
+  // Handle OPTIONS for CORS
+  if (event.httpMethod === 'OPTIONS') {
+    return {
+      statusCode: 200,
+      headers: getCORSHeaders(),
+      body: ''
+    };
+  }
+
+  // Only accept POST
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
       headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
+        ...getCORSHeaders()
       },
       body: JSON.stringify({ error: 'Method not allowed' })
     };
   }
 
-  // Handle CORS preflight
-  if (event.httpMethod === 'OPTIONS') {
-    return {
-      statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type'
-      },
-      body: ''
-    };
-  }
-
+  let tempPath = null;
+  
   try {
-    // Parsear multipart data
+    // Parse multipart data
     const result = await multipart.parse(event);
     
     if (!result.files || !result.files.audio) {
@@ -80,7 +42,7 @@ exports.handler = async (event, context) => {
         statusCode: 400,
         headers: {
           'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*'
+          ...getCORSHeaders()
         },
         body: JSON.stringify({ 
           error: 'No se subió ningún archivo de audio',
@@ -91,67 +53,49 @@ exports.handler = async (event, context) => {
 
     const audioFile = result.files.audio;
     
-    // Crear archivo temporal
-    const tempDir = os.tmpdir();
-    const tempFileName = `audio-${Date.now()}-${Math.random().toString(36).substring(7)}.wav`;
-    const tempPath = path.join(tempDir, tempFileName);
+    // Validate audio file
+    validateAudioFile(audioFile);
     
-    // Escribir el archivo temporal
+    // Create temporary file
+    const tempDir = os.tmpdir();
+    const tempFileName = `audio-${Date.now()}-${Math.random().toString(36).substring(7)}${path.extname(audioFile.filename)}`;
+    tempPath = path.join(tempDir, tempFileName);
+    
+    // Write temporary file
     await fs.writeFile(tempPath, audioFile.content);
 
-    console.log(`[${new Date().toISOString()}] Archivo subido: ${audioFile.filename}`);
-    console.log(`[${new Date().toISOString()}] Tamaño: ${audioFile.content.length} bytes`);
-    console.log(`[${new Date().toISOString()}] Archivo temporal: ${tempPath}`);
-    console.log(`[${new Date().toISOString()}] Verificando que el archivo existe...`);
-    
-    // Verificar que el archivo temporal existe
-    const fileExists = await fs.access(tempPath).then(() => true).catch(() => false);
-    console.log(`[${new Date().toISOString()}] Archivo temporal existe: ${fileExists}`);
-    
-    if (!fileExists) {
-      throw new Error(`Archivo temporal no existe: ${tempPath}`);
-    }
-    
-    console.log(`[${new Date().toISOString()}] Iniciando transcripción...`);
-    
-    // Ensure model is available
-    const modelPath = await ensureModel();
-    console.log(`[${new Date().toISOString()}] Using model path: ${modelPath}`);
+    console.log(`[${new Date().toISOString()}] Processing: ${audioFile.filename}`);
+    console.log(`[${new Date().toISOString()}] Size: ${audioFile.content.length} bytes`);
+    console.log(`[${new Date().toISOString()}] Language: ${result.fields?.language || 'auto'}`);
     
     const startTime = Date.now();
     
-    // Usar nodejs-whisper para transcribir con modelo pre-existente
-    const transcriptionResult = await nodewhisper(tempPath, {
-      modelName: 'base', // Use the base model from public/models/
-      modelPath: modelPath,
-      removeWavFileAfterTranscription: false,
-      whisperOptions: {
-        wordTimestamps: true,
-        outputInJson: true,
-        language: result.fields?.language || 'es' // Usar español por defecto
-      }
+    // Transcribe using shared utility
+    const transcriptionResult = await transcribeAudio(tempPath, {
+      language: result.fields?.language || null
     });
 
     const processingTime = Date.now() - startTime;
-    const transcriptText = transcriptionResult.text || transcriptionResult || '';
+    const transcriptText = transcriptionResult.text || '';
 
-    console.log(`[${new Date().toISOString()}] Transcripción completada en ${processingTime}ms`);
+    console.log(`[${new Date().toISOString()}] Transcription completed in ${processingTime}ms`);
+    console.log(`[${new Date().toISOString()}] Text length: ${transcriptText.length} chars`);
 
-    // Limpiar archivo temporal
+    // Clean up temporary file
     try {
       await fs.unlink(tempPath);
-      console.log(`[${new Date().toISOString()}] Archivo temporal eliminado`);
+      tempPath = null;
+      console.log(`[${new Date().toISOString()}] Temporary file deleted`);
     } catch (cleanupError) {
-      console.error('Error al eliminar archivo temporal:', cleanupError);
+      console.error('Error deleting temporary file:', cleanupError);
     }
 
     return {
       statusCode: 200,
       headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type'
+        'Cache-Control': 'no-cache',
+        ...getCORSHeaders()
       },
       body: JSON.stringify({
         success: true,
@@ -160,50 +104,36 @@ exports.handler = async (event, context) => {
         transcript: transcriptText,
         processing_time_ms: processingTime,
         file_size: audioFile.content.length,
-        model_used: 'nodejs-whisper base (Netlify Function)',
+        model_used: 'Xenova/whisper-tiny (Transformers.js)',
         timestamp: new Date().toISOString(),
-        confidence: 0.95 // nodejs-whisper no devuelve confidence, usar valor por defecto
+        confidence: 0.95, // Default confidence
+        language: result.fields?.language || 'auto-detected'
       })
     };
 
   } catch (error) {
     console.error(`[${new Date().toISOString()}] Error:`, error);
     console.error(`[${new Date().toISOString()}] Error stack:`, error.stack);
-    console.error(`[${new Date().toISOString()}] Error type:`, error.constructor.name);
     
-    // Información adicional para debug de modelo
-    if (error.message && error.message.includes('model') || error.message.includes('path')) {
-      console.error('🔍 Model-related error detected');
-      console.error('🔍 Checking pre-existing model locations...');
+    // Clean up temporary file on error
+    if (tempPath) {
       try {
-        const publicModelsPath = path.join(process.cwd(), 'public', 'models');
-        const tempModelsPath = path.join(os.tmpdir(), 'whisper-models');
-        
-        console.error(`🔍 Public models path ${publicModelsPath}:`, fsSync.existsSync(publicModelsPath) ? 'EXISTS' : 'NOT FOUND');
-        if (fsSync.existsSync(publicModelsPath)) {
-          console.error('🔍 Public models:', fsSync.readdirSync(publicModelsPath));
-        }
-        
-        console.error(`🔍 Temp models path ${tempModelsPath}:`, fsSync.existsSync(tempModelsPath) ? 'EXISTS' : 'NOT FOUND');
-        if (fsSync.existsSync(tempModelsPath)) {
-          console.error('🔍 Temp models:', fsSync.readdirSync(tempModelsPath));
-        }
-      } catch (debugError) {
-        console.error('🔍 Error during debug:', debugError.message);
+        await fs.unlink(tempPath);
+      } catch (cleanupError) {
+        console.error('Error cleaning up on failure:', cleanupError);
       }
     }
     
+    // Get standardized error response
+    const { statusCode, errorResponse } = getErrorResponse(error);
+    
     return {
-      statusCode: 500,
+      statusCode,
       headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
+        ...getCORSHeaders()
       },
-      body: JSON.stringify({
-        error: 'Error al transcribir el archivo',
-        details: error.message,
-        timestamp: new Date().toISOString()
-      })
+      body: JSON.stringify(errorResponse)
     };
   }
 };
