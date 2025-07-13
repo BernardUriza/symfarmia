@@ -49,33 +49,31 @@ else
 fi
 echo ""
 
-# 3. Verificar si el modelo se descargó
-echo -e "${BLUE}3. Verificando modelo de Whisper:${NC}"
-MODEL_PATH="node_modules/nodejs-whisper/lib/whisper/models"
+# 3. Verificar si el modelo existe en public/models
+echo -e "${BLUE}3. Verificando modelo de Whisper en public/models:${NC}"
+PUBLIC_MODEL_PATH="public/models"
 
-if [ -d "$MODEL_PATH" ]; then
-    echo -e "${GREEN}✅ Directorio de modelos existe${NC}"
+if [ -d "$PUBLIC_MODEL_PATH" ]; then
+    echo -e "${GREEN}✅ Directorio public/models existe${NC}"
     echo "📁 Contenido del directorio de modelos:"
-    ls -la "$MODEL_PATH"
+    ls -la "$PUBLIC_MODEL_PATH"
     
     # Verificar específicamente base
-    if [ -f "$MODEL_PATH/ggml-base.bin" ]; then
-        echo -e "${GREEN}✅ Modelo base encontrado${NC}"
-        echo "📏 Tamaño del modelo: $(ls -lh "$MODEL_PATH/ggml-base.bin" | awk '{print $5}')"
+    if [ -f "$PUBLIC_MODEL_PATH/ggml-base.bin" ]; then
+        echo -e "${GREEN}✅ Modelo base encontrado en public/models${NC}"
+        echo "📏 Tamaño del modelo: $(ls -lh "$PUBLIC_MODEL_PATH/ggml-base.bin" | awk '{print $5}')"
     else
-        echo -e "${RED}❌ Modelo base NO encontrado${NC}"
+        echo -e "${RED}❌ Modelo base NO encontrado en public/models${NC}"
+    fi
+    
+    # Verificar base.en también
+    if [ -f "$PUBLIC_MODEL_PATH/ggml-base.en.bin" ]; then
+        echo -e "${GREEN}✅ Modelo base.en también encontrado${NC}"
+        echo "📏 Tamaño: $(ls -lh "$PUBLIC_MODEL_PATH/ggml-base.en.bin" | awk '{print $5}')"
     fi
 else
-    echo -e "${YELLOW}⚠️ Directorio de modelos no existe${NC}"
-    echo "🔄 Intentando descargar modelo manualmente..."
-    npx nodejs-whisper download base
-    
-    # Verificar de nuevo
-    if [ -f "$MODEL_PATH/ggml-base.bin" ]; then
-        echo -e "${GREEN}✅ Modelo descargado exitosamente${NC}"
-    else
-        echo -e "${RED}❌ No se pudo descargar el modelo${NC}"
-    fi
+    echo -e "${RED}❌ Directorio public/models NO existe${NC}"
+    echo -e "${YELLOW}⚠️ Los modelos deben estar en public/models/${NC}"
 fi
 echo ""
 

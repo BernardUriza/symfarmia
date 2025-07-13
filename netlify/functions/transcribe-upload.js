@@ -5,6 +5,14 @@ const fsSync = require('fs');
 const path = require('path');
 const os = require('os');
 
+// Set model path - in Netlify, the public folder is accessible from the function
+const MODEL_PATH = process.env.NETLIFY
+  ? path.join(process.cwd(), 'public', 'models', 'ggml-base.bin')
+  : path.join(process.cwd(), 'public', 'models', 'ggml-base.bin');
+
+console.log('📁 [Init] Model path:', MODEL_PATH);
+console.log('📁 [Init] Model exists:', fsSync.existsSync(MODEL_PATH));
+
 // Debug logs para verificar el modelo
 console.log('📁 [Function Init] Checking model files...');
 console.log('📁 Current directory:', process.cwd());
@@ -90,9 +98,9 @@ exports.handler = async (event, context) => {
     
     const startTime = Date.now();
     
-    // Usar nodejs-whisper para transcribir
+    // Usar nodejs-whisper para transcribir con modelo existente
     const transcriptionResult = await nodewhisper(tempPath, {
-      modelName: 'base',
+      modelPath: MODEL_PATH,
       removeWavFileAfterTranscription: false,
       whisperOptions: {
         wordTimestamps: true,

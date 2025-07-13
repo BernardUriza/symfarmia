@@ -2,11 +2,13 @@ const { nodewhisper } = require('nodejs-whisper');
 const path = require('path');
 const fs = require('fs');
 
-// Debug logs para verificar el modelo
-console.log('📁 [Server File Function Init] Checking model files...');
-console.log('📁 Current directory:', process.cwd());
-console.log('📁 Node modules exists:', fs.existsSync('./node_modules'));
-console.log('📁 Whisper module exists:', fs.existsSync('./node_modules/nodejs-whisper'));
+// Set model path - in Netlify, the public folder is accessible from the function
+const MODEL_PATH = process.env.NETLIFY
+  ? path.join(process.cwd(), 'public', 'models', 'ggml-base.bin')
+  : path.join(process.cwd(), 'public', 'models', 'ggml-base.bin');
+
+console.log('📁 [Server File Function Init] Model path:', MODEL_PATH);
+console.log('📁 [Server File Function Init] Model exists:', fs.existsSync(MODEL_PATH));
 
 exports.handler = async (event, context) => {
   // Solo acepta POST
@@ -81,9 +83,9 @@ exports.handler = async (event, context) => {
     
     const startTime = Date.now();
     
-    // Usar nodejs-whisper igual que en el microservicio
+    // Usar nodejs-whisper con modelo existente
     const result = await nodewhisper(audioPath, {
-      modelName: 'base',
+      modelPath: MODEL_PATH,
       removeWavFileAfterTranscription: false,
       whisperOptions: {
         wordTimestamps: true,
