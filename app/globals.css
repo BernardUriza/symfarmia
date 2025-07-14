@@ -1,10 +1,14 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* Define custom CSS variables */
-@theme {
-  --color-foreground-rgb: 0 0 0;
-  --color-background-start-rgb: 214 219 220;
-  --color-background-end-rgb: 255 255 255;
+@layer base {
+  :root {
+    --color-foreground-rgb: 0 0 0;
+    --color-background-start-rgb: 214 219 220;
+    --color-background-end-rgb: 255 255 255;
+  }
 }
 
 

@@ -25,22 +25,7 @@ const nextConfig = {
       path: false,
       crypto: false,
     };
-    config.module.rules.push({
-      test: /\.module\.css$/,
-      use: [
-        "style-loader",
-        {
-          loader: "css-loader",
-          options: {
-            modules: true,
-          },
-        },
-      ],
-    });
-    config.module.rules.push({
-      test: /\.s[ac]ss$/i,
-      use: ["style-loader", "css-loader", "sass-loader"],
-    });
+    // Remove custom CSS rules that conflict with Next.js built-in CSS support
     return config;
   },
 
