@@ -119,5 +119,9 @@
   },
   "reset": "Reset",
   "copy": "Copy",
-  "next": "Next"
+  "next": "Next",
+  "conversation.capture.title": "Conversation Capture",
+  "conversation.capture.subtitle": "Press record to start medical transcription",
+  "medical.transcription.start": "Start Recording",
+  "medical.transcription.stop": "Stop Recording"
 }
