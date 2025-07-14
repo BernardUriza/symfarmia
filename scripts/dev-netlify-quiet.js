@@ -125,6 +125,10 @@ netlify.on('error', (err) => {
 netlify.on('close', (code) => {
   if (code !== 0) {
     console.error(`\n❌ Netlify Dev exited with code ${code}`);
+    console.error('\n💡 Debug tips:');
+    console.error('   1. Run "npm run dev:debug" to see all output');
+    console.error('   2. Run "npm run dev" to bypass Netlify');
+    console.error('   3. Check if dependencies are installed: "npm install"');
   }
   process.exit(code);
 });
