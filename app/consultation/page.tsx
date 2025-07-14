@@ -11,11 +11,11 @@ import {
   CheckCircle,
   Mic
 } from 'lucide-react';
-import ThemeToggle from '../../components/ThemeToggle';
-import ActionButton from '../../components/ui/ActionButton';
+import { ThemeToggle } from '@/src/components/layout';
+import { ActionButton } from '@/src/components/ui';
 import { UserPlusIcon } from '@heroicons/react/24/outline';
-// import { TranscriptionPanel } from '../../src/domains/medical-ai/components/TranscriptionPanel';
-import { useTranslation } from '../providers/I18nProvider';
+// import { TranscriptionPanel } from '@/src/domains/medical-ai/components/TranscriptionPanel';
+import { useTranslation } from '@/src/providers/I18nProvider';
 
 interface Patient {
   id: string;

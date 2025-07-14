@@ -2,13 +2,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from '../providers/I18nProvider';
-import { ConversationCapture } from '../components/medical/ConversationCapture';
-import { DialogueFlow } from '../components/medical/DialogueFlow';
-import { ClinicalNotes } from '../components/medical/ClinicalNotes';
-import { OrderEntry } from '../components/medical/OrderEntry';
-import { SummaryExport } from '../components/medical/SummaryExport';
-import { Button } from '../components/ui/button';
-import { Progress } from '../components/ui/progress';
+import { 
+  ConversationCapture, 
+  DialogueFlow, 
+  ClinicalNotes, 
+  OrderEntry, 
+  SummaryExport 
+} from '@/src/components/medical';
+import { Button, Progress } from '@/src/components/ui';
 import { Mic, MicOff, Clock, User, ArrowLeft, Stethoscope, FileText, Users, FolderOpen, MessageSquare, Activity, ClipboardList, Download } from 'lucide-react';
 import Link from 'next/link';
 import { DemoResetButton } from '../../src/domains/demo';

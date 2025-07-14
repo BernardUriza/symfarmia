@@ -10,19 +10,21 @@
 
 import "./globals.css";
 import MedicalErrorBoundary from "../src/components/MedicalErrorBoundary";
-import RouteErrorBoundary from "./components/RouteErrorBoundary";
-import { ThemeProvider } from "./providers/ThemeProviderBulletproof";
+import { 
+  RouteErrorBoundary, 
+  DemoModeBanner, 
+  VersionInfo,
+  HeaderLanguageSwitcher,
+  ThemeToggle,
+  BraveCacheBuster
+} from "@/src/components/layout";
+import { MedicalAssistantWrapper as MedicalAssistant } from "@/src/components/medical";
+import { ThemeProvider } from "@/src/providers/ThemeProviderBulletproof";
 import { Auth0Provider } from "@auth0/nextjs-auth0";
-import { AppModeProvider } from "./providers/AppModeProvider";
-import DemoModeBanner from "./components/DemoModeBanner";
-import I18nServerProvider from "./providers/I18nServerProvider";
-import { PatientContextProvider } from "./providers/PatientContextProvider";
-import MedicalAssistant from "./components/MedicalAssistantWrapper";
-import VersionInfo from "./components/VersionInfo";
-import { HeaderLanguageSwitcher } from "../components/layout/GlobalLanguageSwitcher";
-import { SITE_CONFIG } from "./lib/site-config";
-import ThemeToggle from "../components/ThemeToggle";
-import BraveCacheBuster from "../components/BraveCacheBuster";
+import { AppModeProvider } from "@/src/providers/AppModeProvider";
+import I18nServerProvider from "@/src/providers/I18nServerProvider";
+import { PatientContextProvider } from "@/src/providers/PatientContextProvider";
+import { SITE_CONFIG } from "@/src/lib/site-config";
 
 // MEDICAL-GRADE Critical CSS with hydration safety
 const MedicalCriticalCSS = `

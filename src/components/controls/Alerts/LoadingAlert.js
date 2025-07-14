@@ -1,6 +1,6 @@
 import React from "react";
-import { useLoading } from "../../providers/LoadingContext";
-import { Progress } from "../../components/ui/progress";
+import { useLoading } from "@/src/providers/LoadingContext";
+import { Progress } from "../../ui/progress";
 
 export default function LoadingAlert() {
   const { loadingState } = useLoading();

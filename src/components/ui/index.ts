@@ -1,13 +1,33 @@
+/**
+ * UI Components
+ * 
+ * Core UI components for the application
+ */
+
+// Basic UI Components
+export { AlertDialog } from './alert-dialog';
+export { Alert } from './alert';
+export { Badge } from './badge';
+export { Button } from './button';
+export { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './card';
+export { Progress } from './progress';
+export { Tabs, TabsContent, TabsList, TabsTrigger } from './tabs';
+export { Textarea } from './textarea';
+export { default as ActionButton } from './ActionButton';
+export { default as LanguageSwitcher } from './LanguageSwitcher';
+
 // Enhanced Transcription UI Components
 export { VoiceReactiveMicrophone } from './VoiceReactiveMicrophone';
 export { AudioSpectrum } from './AudioSpectrum';
 export { LiveTranscriptionDisplay } from './LiveTranscriptionDisplay';
 export { TranscriptionModelInfo } from './TranscriptionModelInfo';
 
-// Enhanced Transcription Hook
-// Note: useEnhancedTranscription is now exported from @/domains/medical-ai
-// Import it directly from there instead of re-exporting here
+// Utilities
+export { cn } from './utils';
+export { useMobile } from './use-mobile';
 
+// Network Indicators
+export { VisualNetworkIndicator } from './VisualNetworkIndicator';
 
 // Types
 export type {

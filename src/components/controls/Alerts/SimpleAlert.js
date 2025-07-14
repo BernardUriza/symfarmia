@@ -5,7 +5,7 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogAction,
-} from "../../components/ui/alert-dialog";
+} from "../../ui/alert-dialog";
 
 export function SimpleAlert({ open, onClose, text }) {
   return (

@@ -11,6 +11,7 @@
     "dev:netlify": "netlify dev",
     "dev:clean": "node scripts/dev-clean.js",
     "dev:quiet": "node scripts/dev-netlify-quiet.js",
+    "dev:debug": "node scripts/dev-debug.js",
     "kill:ports": "node scripts/kill-ports.js",
     "dev:brave": "npm run kill:brave-cache && npm run dev",
     "dev:reset": "rm -rf .next && npm run kill:brave-cache && npm run dev",

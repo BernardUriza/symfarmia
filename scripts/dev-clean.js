@@ -23,8 +23,8 @@ killPorts.on('close', (code) => {
   console.log('🚀 Starting Next.js development server...');
   console.log('📍 URL: http://localhost:3000\n');
 
-  // Start Next.js directly
-  const next = spawn('npx', ['next', 'dev'], {
+  // Start Next.js directly (use npx to avoid "next: not found" error)
+  const next = spawn('npx', ['--yes', 'next', 'dev'], {
     stdio: 'inherit',
     env: {
       ...process.env,
