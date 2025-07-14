@@ -26,12 +26,7 @@
     "type-check": "tsc --noEmit",
     "test": "jest",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
-    "version:generate": "node scripts/generate-version.js",
-    "permanent:start": "node scripts/permanent-dev-simple.js start",
-    "permanent:stop": "node scripts/permanent-dev-simple.js stop",
-    "permanent:restart": "node scripts/permanent-dev-simple.js restart",
-    "permanent:status": "node scripts/permanent-dev-simple.js status",
-    "permanent:logs": "node scripts/permanent-dev-simple.js logs"
+    "version:generate": "node scripts/generate-version.js"
   },
   "dependencies": {
     "@auth0/nextjs-auth0": "^4.8.0",
