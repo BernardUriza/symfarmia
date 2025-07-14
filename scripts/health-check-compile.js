@@ -146,14 +146,24 @@ async function captureBrowserErrors() {
 async function startHealthCheck() {
   console.log('🚀 Starting development server...\n');
   
-  // Clean ports 3000 and 8888 before starting
+  // Clean ports 3000 and 8888 before starting - gracefully
   await new Promise((resolve) => {
-    exec('lsof -ti:3000 | xargs kill -9 2>/dev/null || true', () => {});
-    exec('lsof -ti:8888 | xargs kill -9 2>/dev/null || true', (error) => {
-      if (!error) {
-        console.log('✅ Ports 3000 and 8888 cleaned before start\n');
+    // First try to identify if processes are ours
+    exec('lsof -i:3000 -i:8888 | grep -E "node|netlify" | awk \'{print $2}\' | sort -u', (error, stdout) => {
+      if (stdout && stdout.trim()) {
+        const pids = stdout.trim().split('\n');
+        console.log(`Found processes on ports: ${pids.join(', ')}`);
+        // Try graceful shutdown first (SIGTERM)
+        pids.forEach(pid => {
+          try {
+            process.kill(parseInt(pid), 'SIGTERM');
+          } catch (e) {
+            // Process might not exist or we don't have permission
+          }
+        });
+        console.log('✅ Sent graceful shutdown signal to processes\n');
       }
-      setTimeout(resolve, 1000); // Wait for ports to be fully released
+      setTimeout(resolve, 2000); // Give processes time to shut down gracefully
     });
   });
   
@@ -178,6 +188,11 @@ async function startHealthCheck() {
   devServerProcess.stderr.on('data', (data) => {
     const output = data.toString();
     console.error(`[ERROR] ${output.trim()}`);
+    
+    // Capture webpack module parse errors
+    if (output.includes('Module parse failed') || output.includes('You may need an appropriate loader')) {
+      compilationError = output;
+    }
   });
 
   // Wait for server to be ready
@@ -208,6 +223,16 @@ async function startHealthCheck() {
       console.log('⚠️  Server not responding, waiting...');
       await new Promise(resolve => setTimeout(resolve, 3000));
       continue;
+    }
+    
+    // Check for compilation errors from stderr
+    if (compilationError) {
+      hasErrors = true;
+      console.log('\n❌ Webpack compilation error detected:');
+      console.log('─'.repeat(80));
+      console.log(compilationError);
+      console.log('─'.repeat(80));
+      compilationError = null; // Reset for next attempt
     }
     
     // Capture browser console errors
@@ -265,13 +290,30 @@ async function cleanup() {
   }
   
   if (devServerProcess) {
+    // First try graceful shutdown
     devServerProcess.kill('SIGTERM');
     
-    // Clean up ports 3000 and 8888 (Netlify uses both)
-    exec('lsof -ti:3000 | xargs kill -9 2>/dev/null || true', () => {});
-    exec('lsof -ti:8888 | xargs kill -9 2>/dev/null || true', (error) => {
-      if (!error) {
-        console.log('✅ Ports cleaned up');
+    // Wait a bit for graceful shutdown
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    // Check if process is still running and force kill only if necessary
+    if (!devServerProcess.killed) {
+      console.log('⚠️  Process didn\'t terminate gracefully, forcing shutdown...');
+      devServerProcess.kill('SIGKILL');
+    }
+    
+    // Only clean up specific netlify dev processes, not all Node processes
+    exec('lsof -i:3000 -i:8888 | grep "netlify dev" | awk \'{print $2}\' | sort -u', (error, stdout) => {
+      if (stdout && stdout.trim()) {
+        const pids = stdout.trim().split('\n');
+        pids.forEach(pid => {
+          try {
+            process.kill(parseInt(pid), 'SIGTERM');
+          } catch (e) {
+            // Process might already be gone
+          }
+        });
+        console.log('✅ Netlify dev processes cleaned up');
       }
     });
   }
