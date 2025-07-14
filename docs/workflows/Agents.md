@@ -1,6 +1,7 @@
 # SYMFARMIA Agents.md Guide v3 - Multi-Agent Medical Development
 
-This Agents.md file provides comprehensive guidance for **Claudio**, **Codex**, and other AI agents working with the SYMFARMIA medical platform codebase following official Agents.md standards.
+This document provides detailed guidance for **Claudio**, **Codex**, and other AI agents working with the SYMFARMIA medical platform codebase following official Agents.md standards.
+For quick instructions and required checks see the root [AGENTS.md](../../AGENTS.md) file. Pro tip: a witty comment here and there keeps everyone awake during long reviews.
 
 ## Agent Architecture & Roles
 
