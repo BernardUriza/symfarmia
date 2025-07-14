@@ -1,15 +1,148 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
-/* Define custom CSS variables */
-@layer base {
+/* Colores médicos P3 wide gamut */
+@theme {
+  --color-medical-primary: oklch(0.65 0.15 150);
+  --color-medical-accent: oklch(0.6 0.2 200);
+  --color-medical-success: oklch(0.7 0.15 140);
+  --color-medical-warning: oklch(0.8 0.15 60);
+  --color-medical-error: oklch(0.65 0.2 15);
+  --color-medical-surface: oklch(0.98 0.005 150);
+  --color-medical-text: oklch(0.2 0.01 150);
+  
+  /* Gradientes médicos con interpolación OKLCH */
+  --gradient-medical-hero: linear-gradient(135deg in oklch, var(--color-medical-primary), var(--color-medical-accent));
+  --gradient-dark-surface: linear-gradient(180deg in oklch, oklch(0.1 0.02 150), oklch(0.05 0.01 150));
+  
+  /* Espaciado médico profesional */
+  --spacing-medical-xs: 0.25rem;
+  --spacing-medical-sm: 0.5rem;
+  --spacing-medical-md: 1rem;
+  --spacing-medical-lg: 2rem;
+  --spacing-medical-xl: 4rem;
+  
+  /* Animaciones médicas */
+  --duration-medical-fast: 150ms;
+  --duration-medical-normal: 300ms;
+  --duration-medical-slow: 500ms;
+  --ease-medical: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Mejoras de dark mode */
+@media (prefers-color-scheme: dark) {
   :root {
-    --color-foreground-rgb: 0 0 0;
-    --color-background-start-rgb: 214 219 220;
-    --color-background-end-rgb: 255 255 255;
+    color-scheme: dark;
   }
 }
 
+/* Base styles */
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground;
+  }
+  
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  /* Better focus styles */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-medical-primary/50 ring-offset-2 ring-offset-background;
+  }
+}
 
+/* Custom utilities */
+@layer utilities {
+  /* 3D transformations */
+  .transform-3d {
+    transform-style: preserve-3d;
+  }
+  
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+  
+  .translate-z-0 {
+    transform: translateZ(0);
+  }
+  
+  .translate-z-4 {
+    transform: translateZ(1rem);
+  }
+  
+  .translate-z-8 {
+    transform: translateZ(2rem);
+  }
+  
+  .rotate-x-2 {
+    transform: rotateX(2deg);
+  }
+  
+  .rotate-y-1 {
+    transform: rotateY(1deg);
+  }
+  
+  .rotate-x-0 {
+    transform: rotateX(0deg);
+  }
+  
+  .rotate-y-0 {
+    transform: rotateY(0deg);
+  }
+  
+  /* Medical gradients */
+  .bg-medical-gradient {
+    background: var(--gradient-medical-hero);
+  }
+  
+  .bg-dark-surface {
+    background: var(--gradient-dark-surface);
+  }
+  
+  /* Custom animations */
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+  
+  .animate-shimmer {
+    animation: shimmer 1s ease-out;
+  }
+  
+  /* Medical scrollbar */
+  .scrollbar-medical {
+    scrollbar-width: thin;
+    scrollbar-color: theme('colors.gray.400') theme('colors.gray.100');
+  }
+  
+  .dark .scrollbar-medical {
+    scrollbar-color: theme('colors.gray.600') theme('colors.gray.800');
+  }
+}
+
+/* Container queries support */
+@layer components {
+  .medical-dashboard {
+    container-type: inline-size;
+    container-name: medical-dashboard;
+  }
+  
+  .medical-form {
+    container-type: inline-size;
+    container-name: medical-form;
+  }
+}
+
+/* Global resets */
 * {
   box-sizing: border-box;
   padding: 0;
@@ -20,14 +153,43 @@ html,
 body {
   max-width: 100vw;
   overflow-x: hidden;
+  @apply antialiased;
 }
 
+/* Medical color scheme */
 body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  @apply bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-50;
+}
+
+/* Loading states */
+@layer utilities {
+  .skeleton {
+    @apply animate-pulse bg-gray-200 dark:bg-gray-800;
+  }
+  
+  .skeleton-text {
+    @apply h-4 bg-gray-200 dark:bg-gray-800 rounded;
+  }
+}
+
+/* Form states */
+@layer components {
+  .input-medical {
+    @apply w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-600
+           bg-white dark:bg-gray-800
+           focus:border-medical-primary dark:focus:border-medical-accent
+           focus:ring-4 focus:ring-medical-primary/20 dark:focus:ring-medical-accent/20
+           text-gray-900 dark:text-gray-100
+           placeholder:text-gray-400 dark:placeholder:text-gray-500
+           transition-all duration-300 ease-out
+           hover:border-gray-300 dark:hover:border-gray-500;
+  }
+  
+  .btn-medical-primary {
+    @apply px-6 py-3 rounded-xl font-medium
+           bg-gradient-to-r from-medical-primary to-medical-accent
+           text-white shadow-lg hover:shadow-xl
+           transform hover:scale-105 transition-all duration-300
+           active:scale-100;
+  }
 }
