@@ -16,7 +16,12 @@ export { DemoResetButton } from './components/DemoResetButton';
 
 // Hooks
 export { useDemoMode } from './hooks/useDemoMode';
-export { useDemoTranscription } from './hooks/useDemoTranscription';
+// Re-export demo transcription hook from the medical-ai legacy hooks.
+// The previous local hook file was removed during the medical AI refactor
+// but the public API still expects `useDemoTranscription` to be available
+// from this domain. Redirect to the maintained implementation to avoid
+// import errors during the build.
+export { useDemoTranscription } from '../medical-ai/hooks/legacy/useDemoTranscription';
 export { useDemoPatients } from './hooks/useDemoPatients';
 export { useDemoSettings } from './hooks/useDemoSettings';
 export { useDemoHighlight } from './hooks/useDemoHighlight';
