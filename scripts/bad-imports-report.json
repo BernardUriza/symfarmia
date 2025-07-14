@@ -1,0 +1,50 @@
+{
+  "timestamp": "2025-07-14T02:25:13.875Z",
+  "filesWithIssues": [
+    {
+      "file": "src/components/MedicalAssistant.jsx",
+      "issues": [
+        {
+          "type": "wrong relative utils imports",
+          "match": "from '../utils/",
+          "line": 5
+        }
+      ]
+    },
+    {
+      "file": "src/domains/demo/services/demoDataService.ts",
+      "issues": [
+        {
+          "type": "wrong relative utils imports",
+          "match": "from '../utils/",
+          "line": 1
+        }
+      ]
+    },
+    {
+      "file": "src/store/middleware/index.ts",
+      "issues": [
+        {
+          "type": "wrong relative utils imports",
+          "match": "from '../utils/",
+          "line": 3
+        },
+        {
+          "type": "wrong relative utils imports",
+          "match": "from '../utils/",
+          "line": 3
+        }
+      ]
+    },
+    {
+      "file": "src/store/reducers/consultationReducer.ts",
+      "issues": [
+        {
+          "type": "wrong relative utils imports",
+          "match": "from '../utils/",
+          "line": 15
+        }
+      ]
+    }
+  ]
+}

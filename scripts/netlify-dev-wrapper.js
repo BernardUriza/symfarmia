@@ -40,7 +40,7 @@ killPorts.on('close', (code) => {
 });
 
 function startNext() {
-  const next = spawn('npx', ['next', 'dev'], {
+  const next = spawn('npm', ['run', 'dev'], {
     stdio: 'inherit',
     env: {
       ...process.env,
