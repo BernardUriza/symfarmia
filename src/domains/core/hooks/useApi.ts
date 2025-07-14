@@ -3,7 +3,7 @@
  * Provides a comprehensive interface for API operations with TypeScript support
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { apiClient, handleApiResponse, parseApiError } from '@/utils/api';
 import { ApiResponse } from '@/types/api';
 import Logger from '@/utils/logger';
@@ -132,6 +132,11 @@ export function useApi<T>(
     return execute();
   }, [execute]);
 
+  // Memoize dependencies to prevent infinite loops
+  const memoizedDependencies = useMemo(() => {
+    return dependencies;
+  }, dependencies);
+
   // Execute immediately on mount or dependency change
   useEffect(() => {
     if (immediate) {
@@ -143,7 +148,7 @@ export function useApi<T>(
         abortControllerRef.current.abort();
       }
     };
-  }, dependencies);
+  }, [immediate, execute, ...memoizedDependencies]);
 
   return {
     ...state,
