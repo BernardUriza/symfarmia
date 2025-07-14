@@ -7,7 +7,7 @@ export { PatientContextProvider } from './PatientContextProvider';
 export { I18nProvider } from './I18nProvider';
 
 // Type exports
-export type { Database } from '@/app/infrastructure/database';
+export type { Database } from '@/src/infrastructure/database';
 export type {
   APIResponse,
   Category,

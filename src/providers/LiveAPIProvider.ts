@@ -1,5 +1,5 @@
 import { APIProvider } from './APIProvider';
-import type { Database } from '@/app/infrastructure/database';
+import type { Database } from '@/src/infrastructure/database';
 import type {
   APIResponse,
   Category,

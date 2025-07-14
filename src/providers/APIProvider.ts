@@ -9,7 +9,7 @@ import type {
   StudyType,
   APIResponse
 } from '@/types/providers';
-import type { Database } from '@/app/infrastructure/database';
+import type { Database } from '@/src/infrastructure/database';
 
 export abstract class APIProvider {
   protected readonly db?: Database;

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createDatabase } from '@/app/infrastructure/database';
+import { createDatabase } from '@/src/infrastructure/database';
 
 export async function GET() {
   const { patientRepository } = createDatabase();
