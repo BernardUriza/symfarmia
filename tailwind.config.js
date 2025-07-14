@@ -1,16 +1,44 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
+    './app/**/*.{js,ts,jsx,tsx,mdx}',
     './pages/**/*.{js,ts,jsx,tsx,mdx}',
     './components/**/*.{js,ts,jsx,tsx,mdx}',
-    './app/**/*.{js,ts,jsx,tsx,mdx}',
+    './node_modules/@tremor/**/*.{js,ts,jsx,tsx}',
   ],
   theme: {
     extend: {
+      // Tremor colors for medical components
       colors: {
-        'foreground-rgb': 'rgb(var(--color-foreground-rgb) / <alpha-value>)',
-        'background-start-rgb': 'rgb(var(--color-background-start-rgb) / <alpha-value>)',
-        'background-end-rgb': 'rgb(var(--color-background-end-rgb) / <alpha-value>)',
+        tremor: {
+          brand: {
+            faint: '#e0f2fe',
+            muted: '#bae6fd',
+            subtle: '#7dd3fc',
+            DEFAULT: '#38bdf8',
+            emphasis: '#0284c7',
+            inverted: '#fff',
+          },
+          background: {
+            muted: '#f9fafb',
+            subtle: '#f3f4f6',
+            DEFAULT: '#ffffff',
+            emphasis: '#374151',
+          },
+          border: {
+            DEFAULT: '#e5e7eb',
+          },
+          ring: {
+            DEFAULT: '#e5e7eb',
+          },
+          content: {
+            subtle: '#9ca3af',
+            DEFAULT: '#6b7280',
+            emphasis: '#374151',
+            strong: '#111827',
+            inverted: '#ffffff',
+          },
+        },
       },
     },
   },

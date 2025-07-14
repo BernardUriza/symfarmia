@@ -71,7 +71,7 @@
     "slick-carousel": "1.8.1",
     "sonner": "^2.0.6",
     "tailwind-merge": "^3.3.1",
-    "tailwindcss": "^3.4.17",
+    "tailwindcss": "^4",
     "zod": "3.25.67",
     "zustand": "^5.0.6"
   },
@@ -92,6 +92,7 @@
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
     "autoprefixer": "^10.4.21",
+    "@tailwindcss/postcss": "^4",
     "concurrently": "^7.6.0",
     "critters": "^0.0.23",
     "css-loader": "^7.1.2",
