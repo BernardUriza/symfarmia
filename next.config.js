@@ -27,10 +27,6 @@ const nextConfig = {
       path: false,
       crypto: false,
     };
-     config.module.rules.push({
-      test: /\.css$/,
-      use: ['style-loader', 'css-loader', 'postcss-loader'],
-    });
     return config;
   },
 
