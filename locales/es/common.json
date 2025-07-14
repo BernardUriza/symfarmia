@@ -119,5 +119,9 @@
   },
   "reset": "Reiniciar",
   "copy": "Copiar",
-  "next": "Siguiente"
+  "next": "Siguiente",
+  "conversation.capture.title": "Captura de Conversación",
+  "conversation.capture.subtitle": "Presiona grabar para comenzar la transcripción médica",
+  "medical.transcription.start": "Iniciar Grabación",
+  "medical.transcription.stop": "Detener Grabación"
 }
