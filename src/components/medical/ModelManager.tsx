@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
-import { useTranslation } from '../app/providers/I18nProvider';
+import { useTranslation } from '../../providers/I18nProvider';
 
 export interface FieldDef {
   name: string;

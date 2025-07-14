@@ -1,8 +1,8 @@
 "use client";
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { usePatientContext } from '../../app/providers/PatientContextProvider';
-import { mockMedicalAI } from '../utils/medicalUtils';
+import { usePatientContext } from '../providers/PatientContextProvider';
+import { mockMedicalAI } from '../../utils/medicalUtils';
 import {
   XMarkIcon,
   PaperAirplaneIcon,

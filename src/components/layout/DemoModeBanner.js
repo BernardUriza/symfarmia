@@ -1,6 +1,6 @@
 "use client"
-import { useAppMode } from '../providers/AppModeProvider';
-import { useTranslation } from '../providers/I18nProvider';
+import { useAppMode } from '../../providers/AppModeProvider';
+import { useTranslation } from '../../providers/I18nProvider';
 import dynamic from 'next/dynamic';
 
 function DemoBannerContent() {

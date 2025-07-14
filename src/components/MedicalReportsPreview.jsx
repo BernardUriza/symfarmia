@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { mockMedicalReports } from '../data/mockMedicalReports';
-import { useTranslation } from '../../app/providers/I18nProvider';
+import { useTranslation } from '../providers/I18nProvider';
 
 const MedicalReportsPreview = ({ isOpen, onClose }) => {
   const { t } = useTranslation();

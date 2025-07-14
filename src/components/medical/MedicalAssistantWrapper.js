@@ -2,7 +2,7 @@
 import dynamic from "next/dynamic";
 
 const MedicalAssistant = dynamic(
-  () => import("../../src/components/MedicalAssistant"),
+  () => import("../MedicalAssistant"),
   { ssr: false },
 );
 

@@ -1,7 +1,7 @@
 "use client"
 import React, { useState } from 'react'
-import mockAPI from '../utils/mockApi'
-import Logger from '../utils/logger'
+import mockAPI from '../../utils/mockApi'
+import Logger from '../../utils/logger'
 
 const SmokeTest = () => {
   const [testing, setTesting] = useState(false)

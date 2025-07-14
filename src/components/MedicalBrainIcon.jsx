@@ -1,6 +1,6 @@
 "use client";
 import React from 'react';
-import { usePatientContext } from '../../app/providers/PatientContextProvider';
+import { usePatientContext } from '../providers/PatientContextProvider';
 import { motion } from 'framer-motion';
 
 const MedicalBrainIcon = ({ className = '' }) => {

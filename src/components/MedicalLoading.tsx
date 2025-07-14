@@ -1,6 +1,6 @@
 "use client";
 import { motion } from "framer-motion";
-import { medicalLoadingStates } from "../utils/medicalLoadingStates";
+import { medicalLoadingStates } from "../../utils/medicalLoadingStates";
 
 const iconMap: Record<string, () => JSX.Element> = {
   "brain-circuit": () => <span className="nav-icon">🧠</span>,

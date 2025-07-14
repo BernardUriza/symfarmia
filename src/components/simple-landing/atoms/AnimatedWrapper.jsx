@@ -1,7 +1,7 @@
 "use client";
 import React, { Suspense, lazy } from 'react';
 import { useAnimations } from '../hooks/useAnimations';
-import { createScrollAnimation } from '../utils/animations';
+import { createScrollAnimation } from '../../../../utils/animations';
 
 // Lazy load framer-motion to avoid bundle bloat when animations are disabled
 const MotionDiv = lazy(() => 

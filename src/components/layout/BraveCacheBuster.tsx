@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState, useCallback, useMemo } from 'react'
-import { logWarn, logError } from '../utils/logger/ProductionLogger'
+import { logWarn, logError } from '../../../utils/logger/ProductionLogger'
 
 // Throttled logging to prevent excessive console output
 const throttledLoggers = new Map()
