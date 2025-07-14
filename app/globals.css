@@ -1,10 +1,12 @@
-/* Tailwind CSS v4 styles */
+@import "tailwindcss";
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+/* Define custom CSS variables */
+@theme {
+  --color-foreground-rgb: 0 0 0;
+  --color-background-start-rgb: 214 219 220;
+  --color-background-end-rgb: 255 255 255;
 }
+
 
 * {
   box-sizing: border-box;
