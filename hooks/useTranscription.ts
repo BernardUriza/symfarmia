@@ -54,7 +54,7 @@ export function useTranscription(): UseTranscriptionReturn {
   const [status, setStatus] = useState<TranscriptionStatus>('idle');
   const [isRecording, setIsRecording] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [engineStatus, setEngineStatus] = useState<'ready' | 'loading' | 'error' | 'fallback'>('ready');
+  const [engineStatus, setEngineStatus] = useState<'ready' | 'loading' | 'error' | 'fallback'>('loading');
   const [audioLevel, setAudioLevel] = useState(0);
   const [recordingTime, setRecordingTime] = useState(0);
 
@@ -68,6 +68,13 @@ export function useTranscription(): UseTranscriptionReturn {
 
   // --- Effect: keep isRecordingRef synced ---
   useEffect(() => { isRecordingRef.current = isRecording; }, [isRecording]);
+
+  // --- Effect: preload Xenova model ---
+  useEffect(() => {
+    getXenovaWhisper()
+      .then(() => setEngineStatus('ready'))
+      .catch(() => setEngineStatus('error'));
+  }, []);
 
   // --- Effect: recording timer ---
   useEffect(() => {
@@ -132,14 +139,19 @@ export function useTranscription(): UseTranscriptionReturn {
           // Combine chunks
           const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
           const arrayBuffer = await audioBlob.arrayBuffer();
-          const audioBuffer = new Uint8Array(arrayBuffer);
+          
+          // Convert audio to Float32Array for Whisper
+          const audioContext = new AudioContext();
+          const audioData = await audioContext.decodeAudioData(arrayBuffer);
+          const channelData = audioData.getChannelData(0);
+          const audioFloat32 = new Float32Array(channelData);
 
           setEngineStatus('loading');
           const whisper = await getXenovaWhisper();
           setEngineStatus('ready');
           const start = performance.now();
 
-          const result = await whisper(audioBuffer, { chunk_length_s: 30, return_timestamps: false });
+          const result = await whisper(audioFloat32, { chunk_length_s: 30, return_timestamps: false });
           const end = performance.now();
 
           setTranscription({
