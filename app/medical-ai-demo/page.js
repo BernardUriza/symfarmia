@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { useTranslation } from '../providers/I18nProvider';
+import { useTranslation } from '@/src/providers/I18nProvider';
 import { 
   ConversationCapture, 
   DialogueFlow, 

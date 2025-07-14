@@ -1,8 +1,8 @@
 "use client"
 import React from 'react';
 import AnalyticsDashboard from '../../src/components/AnalyticsDashboard';
-import { I18nProvider } from '../providers/I18nProvider';
-import { AppModeProvider } from '../providers/AppModeProvider';
+import { I18nProvider } from '@/src/providers/I18nProvider';
+import { AppModeProvider } from '@/src/providers/AppModeProvider';
 
 export default function AnalyticsPage() {
   return (
