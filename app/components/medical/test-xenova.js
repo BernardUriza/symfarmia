@@ -2,26 +2,26 @@
 import { useEffect, useState } from 'react';
 
 export default function TestXenova() {
-  const [output, setOutput] = useState('');
+  const [output, setOutput] = useState('Inicializando...');
 
   useEffect(() => {
     async function run() {
-      setOutput('Loading...');
-      const { pipeline } = await import('@xenova/transformers');
-      const transcriber = await pipeline(
-        'automatic-speech-recognition', 
-        'Xenova/whisper-tiny'
-      );
-      // Puedes poner un audio aquí, pero prueba solo que carga:
-      setOutput('Model loaded! Now transcribe something.');
+      try {
+        setOutput('Cargando modelo Whisper...');
+        const { pipeline } = await import('@xenova/transformers');
+        await pipeline('automatic-speech-recognition', 'Xenova/whisper-tiny');
+        setOutput('✅ Modelo Whisper cargado correctamente');
+      } catch (error) {
+        setOutput('❌ Error cargando modelo: ' + error.message);
+      }
     }
     run();
   }, []);
 
   return (
-    <div>
-      <h1>Test Xenova en cliente</h1>
-      <pre>{output}</pre>
+    <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded text-sm">
+      <h3 className="font-medium text-green-800 mb-1">Test Xenova en cliente</h3>
+      <p className="text-green-700">{output}</p>
     </div>
   );
 }

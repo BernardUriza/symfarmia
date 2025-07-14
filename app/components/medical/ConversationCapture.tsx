@@ -88,18 +88,21 @@ export const ConversationCapture = ({
       )}
       <TestXenova />
       {/* Engine Status */}
-      {engineStatus !== 'ready' && (
-        <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded">
-          <span className="text-sm">
-            {t('conversation.capture.engine_status')}: {
-              engineStatus === 'loading' ? t('conversation.capture.engine_loading') :
-              engineStatus === 'error' ? t('conversation.capture.engine_error') :
-              engineStatus === 'fallback' ? t('conversation.capture.engine_fallback') :
-              engineStatus
-            }
-          </span>
-        </div>
-      )}
+      <div className={`px-4 py-3 rounded ${
+        engineStatus === 'ready' ? 'bg-green-50 border border-green-200 text-green-700' :
+        engineStatus === 'loading' ? 'bg-yellow-50 border border-yellow-200 text-yellow-700' :
+        'bg-red-50 border border-red-200 text-red-700'
+      }`}>
+        <span className="text-sm">
+          {t('conversation.capture.engine_status')}: {
+            engineStatus === 'ready' ? t('conversation.capture.engine_ready') :
+            engineStatus === 'loading' ? t('conversation.capture.engine_loading') :
+            engineStatus === 'error' ? t('conversation.capture.engine_error') :
+            engineStatus === 'fallback' ? t('conversation.capture.engine_fallback') :
+            engineStatus
+          }
+        </span>
+      </div>
 
       {/* Title */}
       <div className="text-center mb-6">
