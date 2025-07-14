@@ -1,5 +1,5 @@
 // Core services - lightweight utilities
-export * from '../../config/MedicalAIConfig.js';
+export * from '../../lib/config/MedicalAIConfig.js';
 
 // Lazy loaders for heavy services
 export const getMedicalSpecialtyService = () => import('../MedicalSpecialtyService.js').then(m => m.MedicalSpecialtyService);

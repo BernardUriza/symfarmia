@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createDatabase } from '@/app/infrastructure/database';
+import { createDatabase } from '@/src/infrastructure/database';
 
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { patientRepository } = createDatabase();

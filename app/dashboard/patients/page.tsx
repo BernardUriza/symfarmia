@@ -1,4 +1,4 @@
-import ModelManager, { FieldDef } from '@/components/ModelManager';
+import ModelManager, { FieldDef } from '@/src/components/medical/ModelManager';
 import { GENDER, DOCUMENT_TYPE, BLOOD_TYPE } from '@/types/constants';
 
 const fields: FieldDef[] = [

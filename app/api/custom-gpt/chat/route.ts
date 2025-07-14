@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { customGPTService } from '@/app/services/customGPTService';
+import { customGPTService } from '@/src/services/customGPTService';
 
 export async function POST(request: Request) {
   try {

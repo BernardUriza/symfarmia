@@ -24,10 +24,10 @@ export { TranscriptionModelInfo } from './TranscriptionModelInfo';
 
 // Utilities
 export { cn } from './utils';
-export { useMobile } from './use-mobile';
+export { useIsMobile } from './use-mobile';
 
 // Network Indicators
-export { VisualNetworkIndicator } from './VisualNetworkIndicator';
+export { default as VisualNetworkIndicator } from './VisualNetworkIndicator';
 
 // Types
 export type {

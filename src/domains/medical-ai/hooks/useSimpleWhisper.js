@@ -4,7 +4,11 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 // Singleton para el modelo Whisper
 let whisperModel = null;
 
-export function useSimpleWhisper() {
+export function useSimpleWhisper({
+  autoPreload = true,
+  retryCount = 3,
+  retryDelay = 1000
+} = {}) {
   // Estados principales
   const [transcription, setTranscription] = useState(null);
   const [status, setStatus] = useState('idle'); // idle, recording, processing, completed, error
@@ -13,6 +17,7 @@ export function useSimpleWhisper() {
   const [engineStatus, setEngineStatus] = useState('loading'); // ready, loading, error, fallback
   const [audioLevel, setAudioLevel] = useState(0);
   const [recordingTime, setRecordingTime] = useState(0);
+  const [loadProgress, setLoadProgress] = useState(0);
 
   // Referencias
   const mediaRecorderRef = useRef(null);
@@ -23,24 +28,41 @@ export function useSimpleWhisper() {
   const timerRef = useRef(null);
   const animationFrameRef = useRef(null);
 
-  // Cargar modelo Whisper al montar
-  useEffect(() => {
-    const loadModel = async () => {
+  const loadModelWithRetries = useCallback(async () => {
+    for (let attempt = 1; attempt <= retryCount; attempt++) {
       try {
         setEngineStatus('loading');
         if (!whisperModel) {
           const { pipeline } = await import('@xenova/transformers');
-          whisperModel = await pipeline('automatic-speech-recognition', 'Xenova/whisper-tiny');
+          whisperModel = await pipeline('automatic-speech-recognition', 'Xenova/whisper-tiny', {
+            progress_callback: (p) => setLoadProgress(p.progress || 0)
+          });
         }
         setEngineStatus('ready');
+        return;
       } catch (err) {
-        console.error('Error loading Whisper model:', err);
-        setEngineStatus('error');
-        setError('Error cargando el modelo de transcripción');
+        console.error(`Error loading Whisper model (attempt ${attempt}):`, err);
+        if (attempt < retryCount) {
+          await new Promise(res => setTimeout(res, retryDelay));
+        } else {
+          setEngineStatus('error');
+          setError('Error cargando el modelo de transcripción');
+        }
       }
-    };
-    loadModel();
-  }, []);
+    }
+  }, [retryCount, retryDelay]);
+
+  const preloadModel = useCallback(async () => {
+    if (engineStatus === 'ready') return;
+    await loadModelWithRetries();
+  }, [loadModelWithRetries, engineStatus]);
+
+  // Cargar modelo Whisper al montar si autoPreload
+  useEffect(() => {
+    if (autoPreload) {
+      preloadModel();
+    }
+  }, [autoPreload, preloadModel]);
 
   // Monitor de nivel de audio
   const setupAudioMonitoring = useCallback((stream) => {
@@ -249,10 +271,12 @@ export function useSimpleWhisper() {
     isRecording,
     error,
     engineStatus,
+    loadProgress,
     audioLevel,
     recordingTime,
     startTranscription,
     stopTranscription,
-    resetTranscription
+    resetTranscription,
+    preloadModel
   };
 }
