@@ -43,8 +43,10 @@ model Patient {
   /// Misc
   avatarUrl String?
   isActive Boolean @default(true)
+  consentToAI Boolean @default(false)
 
   medicalReports MedicalReport[]
+  consultations Consultation[]
 }
 
 enum Gender {
@@ -131,7 +133,8 @@ model User {
   email String @unique
   name  String
   picture String?
-  role   String?
+  role   UserRole @default(DOCTOR)
+  auditLogs AuditLog[]
   customAssistant CustomAssistant?
 }
 
@@ -214,3 +217,62 @@ model AssistantMessage {
   @@map("assistant_messages")
 }
 
+
+/// New schema models for consultations and treatments
+model Consultation {
+  id           Int       @id @default(autoincrement())
+  patientId    Int
+  patient      Patient   @relation(fields: [patientId], references: [id])
+  reason       String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  version      Int       @default(1)
+  diagnoses    Diagnosis[]
+  treatments   Treatment[]
+  transcriptions Transcription[]
+}
+
+model Diagnosis {
+  id           Int       @id @default(autoincrement())
+  consultationId Int
+  consultation Consultation @relation(fields: [consultationId], references: [id])
+  description  String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  version      Int       @default(1)
+}
+
+model Treatment {
+  id            Int       @id @default(autoincrement())
+  consultationId Int
+  consultation Consultation @relation(fields: [consultationId], references: [id])
+  description   String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  version       Int       @default(1)
+}
+
+model Transcription {
+  id            Int      @id @default(autoincrement())
+  consultationId Int
+  consultation  Consultation @relation(fields: [consultationId], references: [id])
+  content       String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  version       Int       @default(1)
+}
+
+model AuditLog {
+  id          Int      @id @default(autoincrement())
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id])
+  action      String
+  details     Json?
+  createdAt   DateTime @default(now())
+}
+
+enum UserRole {
+  DOCTOR
+  NURSE
+  ADMIN
+}
