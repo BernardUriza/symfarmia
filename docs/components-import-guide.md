@@ -28,6 +28,10 @@ import { ConversationCapture, DialogueFlow } from '@/src/components/medical';
 import { ThemeToggle, BraveCacheBuster } from '@/src/components/layout';
 ```
 
+`BraveCacheBuster` is a lightweight helper that displays a translucent **Brave Reload**
+button while in development. Pressing the button forces the page to reload,
+which helps bypass Brave's aggressive caching.
+
 ### Multiple components:
 ```typescript
 import { 
