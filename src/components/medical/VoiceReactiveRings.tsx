@@ -173,7 +173,6 @@ export const VoiceReactiveRings = ({
         </div>
         {config.rings.map((ringSize, index) => {
           // Brutalidad visual: el ring explota en color y glow cuando gritas
-          const level = ringLevels[index];
           let extraStyle: React.CSSProperties = {};
 
           // Si el audioLevel está en modo grito, cambia color y añade glow
