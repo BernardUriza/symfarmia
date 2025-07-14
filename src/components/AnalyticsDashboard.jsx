@@ -1,8 +1,8 @@
 "use client"
 import React, { useState } from 'react';
-import { useTranslation } from '../../app/providers/I18nProvider';
-import { useAppMode } from '../../app/providers/AppModeProvider';
-import ThemeToggle from '../../components/ThemeToggle';
+import { useTranslation } from '../providers/I18nProvider';
+import { useAppMode } from '../providers/AppModeProvider';
+import ThemeToggle from './layout/ThemeToggle';
 import MedicalKPICards from './MedicalKPICards';
 import MedicalCharts from './MedicalCharts';
 import AIChat from './AIChat';

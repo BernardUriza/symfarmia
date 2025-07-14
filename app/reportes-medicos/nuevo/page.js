@@ -1,6 +1,6 @@
 "use client";
 import React from 'react';
-import { useTranslation } from '../../providers/I18nProvider';
+import { useTranslation } from '@/src/providers/I18nProvider';
 
 export default function NuevoReportePage() {
   const { t } = useTranslation();

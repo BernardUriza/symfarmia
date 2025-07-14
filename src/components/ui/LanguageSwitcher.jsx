@@ -16,7 +16,7 @@
 import React, { useState, useEffect } from 'react';
 import { useI18n } from '@/domains/core';
 import { GlobeAltIcon, ChevronDownIcon, CheckIcon } from '@heroicons/react/24/outline';
-import { useTranslation } from '@/app/providers/I18nProvider';
+import { useTranslation } from '@/src/providers/I18nProvider';
 
 // 🌍 SUPPORTED LANGUAGES
 const SUPPORTED_LANGUAGES = [

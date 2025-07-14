@@ -26,12 +26,7 @@
     "type-check": "tsc --noEmit",
     "test": "jest",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
-    "version:generate": "node scripts/generate-version.js",
-    "permanent:start": "node scripts/permanent-dev-simple.js start",
-    "permanent:stop": "node scripts/permanent-dev-simple.js stop",
-    "permanent:restart": "node scripts/permanent-dev-simple.js restart",
-    "permanent:status": "node scripts/permanent-dev-simple.js status",
-    "permanent:logs": "node scripts/permanent-dev-simple.js logs"
+    "version:generate": "node scripts/generate-version.js"
   },
   "dependencies": {
     "@auth0/nextjs-auth0": "^4.8.0",
@@ -76,12 +71,13 @@
     "slick-carousel": "1.8.1",
     "sonner": "^2.0.6",
     "tailwind-merge": "^3.3.1",
+    "tailwindcss": "^4",
     "zod": "3.25.67",
     "zustand": "^5.0.6"
   },
   "devDependencies": {
     "@faker-js/faker": "9.8.0",
-    "@headlessui/tailwindcss": "0.2.1",
+    "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "6.6.3",
     "@testing-library/react": "15.0.7",
     "@testing-library/user-event": "14.6.1",
@@ -106,13 +102,14 @@
     "jest": "29.7.0",
     "jest-environment-jsdom": "29.7.0",
     "netlify-cli": "^21.6.0",
-    "next": "^15.3.5",
+    "next": "15.3.5",
+    "node-sass": "^9.0.0",
     "postcss": "^8.5.6",
-    "postcss-loader": "^7.3.4",
+    "postcss-import": "^16.1.1",
     "prettier": "^3.2.5",
     "prisma": "^6.11.1",
-    "style-loader": "^4.0.0",
-    "tailwindcss": "^3.4.17",
+    "puppeteer": "^24.12.1",
+    "sass-loader": "^16.0.5",
     "ts-node": "10.9.2",
     "typescript": "5.8.3"
   },

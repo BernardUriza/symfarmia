@@ -1,4 +1,4 @@
-import I18nProvider from "./I18nProvider";
+import { I18nProvider } from "./I18nProvider";
 
 const translationFiles = [
   "common",

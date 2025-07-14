@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useScroll, useTransform } from 'framer-motion';
-import { isAnimationSupported } from '../utils/animations';
+import { isAnimationSupported } from '../../../../utils/animations';
 
 /**
  * Safe hook for managing animation state with error handling

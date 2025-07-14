@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { useApi, UseApiOptions } from './useApi';
-import { useAppMode } from '@/app/providers/AppModeProvider';
-import { APIProvider } from '@/app/providers/APIProvider';
+import { useAppMode } from '@/src/providers/AppModeProvider';
+import { APIProvider } from '@/src/providers/APIProvider';
 
 export function useAppApi<T>(
   method: keyof APIProvider,

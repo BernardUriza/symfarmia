@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { useTranslation } from '../app/providers/I18nProvider'
+import { useTranslation } from '../../providers/I18nProvider'
 
 interface DemoLoginModalProps {
   isOpen: boolean

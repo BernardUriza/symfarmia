@@ -1,6 +1,6 @@
 'use client'
-import { useTheme } from '../app/providers/ThemeProviderBulletproof'
-import { useTranslation } from '../app/providers/I18nProvider'
+import { useTheme } from '../../providers/ThemeProviderBulletproof'
+import { useTranslation } from '../../providers/I18nProvider'
 import { MoonIcon, SunIcon } from '@heroicons/react/24/outline'
 
 export default function ThemeToggle({ className = '' }: { className?: string }) {

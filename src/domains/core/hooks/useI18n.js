@@ -8,7 +8,7 @@
 'use client';
 
 import { useContext, useEffect, useState } from 'react';
-import { I18nContext } from '@/app/providers/I18nProvider';
+import { I18nContext } from '@/src/providers/I18nProvider';
 
 
 // 🔄 PARAMETER SUBSTITUTION

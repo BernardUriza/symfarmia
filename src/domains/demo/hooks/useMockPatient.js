@@ -1,5 +1,5 @@
 "use client";
-import { usePatientContext } from '../../app/providers/PatientContextProvider';
+import { usePatientContext } from '../../../providers/PatientContextProvider';
 import { mockPatients } from '../data/medicalMockData';
 
 // Hook to load mock patient data for demo purposes

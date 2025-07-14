@@ -26,7 +26,7 @@ import {
 } from 'lucide-react';
 import { useI18n } from '@/domains/core';
 import { generateCompleteMockData } from '../../data/mockMedicalData';
-import { calculateWeeklyTrend } from '../../utils/metrics/MedicalKPICalculator';
+import { calculateWeeklyTrend } from '../../lib/utils/metrics/MedicalKPICalculator';
 
 /**
  * Custom Tooltip Component

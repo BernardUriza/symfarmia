@@ -1,7 +1,7 @@
 "use client";
 import React from 'react';
 import MedicalReportList from '../../src/components/medical-reports/MedicalReportList';
-import { useTranslation } from '../providers/I18nProvider';
+import { useTranslation } from '@/src/providers/I18nProvider';
 
 export default function ReportesMedicosPage() {
   const { t } = useTranslation();

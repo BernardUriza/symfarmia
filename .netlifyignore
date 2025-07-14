@@ -1,0 +1,8 @@
+# Ignore cache directories
+.next/
+node_modules/.cache/
+.cache/
+
+# Ignore temporary files
+*.tmp
+*.temp

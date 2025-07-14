@@ -1,0 +1,15 @@
+{
+  "timestamp": "2025-07-14T02:24:17.659Z",
+  "filesFixed": 1,
+  "details": [
+    {
+      "file": "src/domains/demo/hooks/useDemoHighlight.ts",
+      "changes": [
+        {
+          "description": "@/app/providers → @/src/providers",
+          "count": 1
+        }
+      ]
+    }
+  ]
+}

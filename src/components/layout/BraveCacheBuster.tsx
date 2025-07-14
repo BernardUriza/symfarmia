@@ -1,6 +1,24 @@
 'use client'
-import { useCallback, useEffect, useState } from 'react'
-import { logWarn } from '../utils/logger/ProductionLogger'
+import { useEffect, useState, useCallback, useMemo } from 'react'
+import { logWarn, logError } from '../../../utils/logger/ProductionLogger'
+
+// Throttled logging to prevent excessive console output
+const throttledLoggers = new Map()
+const getThrottledLogger = (key: string, delay: number = 60000) => {
+  if (!throttledLoggers.has(key)) {
+    let lastLog = 0
+    throttledLoggers.set(key, (message: string, data?: any) => {
+      const now = Date.now()
+      if (now - lastLog > delay) {
+        logWarn(message, data)
+        lastLog = now
+      }
+    })
+  }
+  return throttledLoggers.get(key)
+}
+
+const throttledLogWarn = getThrottledLogger('brave-cache-buster')
 
 /**
  * Simplified Brave cache helper.
