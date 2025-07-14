@@ -7,12 +7,13 @@ Removed deprecated and unused npm scripts from package.json to reduce confusion 
 ## ❌ Scripts Removed
 
 1. **`deve`** - Internal script, merged into `dev` command
-2. **`dev:original`** - Internal script, merged into `dev` command  
+2. **`dev:original`** - Internal script, merged into `dev` command
 3. **`kill:brave-cache:bash`** - Duplicate of `kill:brave-cache` (JS version)
 4. **`build:original`** - Deprecated, replaced by `build:guardian`
 5. **`deploy`** - Incomplete script that only ran version:generate and build
 6. **`dev:all`** - Duplicate of `dev` (both run Next.js + susurro)
 7. **`kill-ports`** - Duplicate of `kill:ports`
+8. **`check-compile`** - Legacy shell script replaced by `health-check-compile.js`
 
 ## ✅ Scripts Kept
 
@@ -35,9 +36,9 @@ Removed deprecated and unused npm scripts from package.json to reduce confusion 
 - `microservices/susurro-test/integrate-nextjs.sh` - Changed `dev:all` to `dev`
 - `scripts/build-guardian.js` - Updated console output
 
-## 📊 Impact
+-## 📊 Impact
 
-- **Before**: 30 scripts (with 7 unused/duplicates)
+- **Before**: 31 scripts (with 8 unused/duplicates)
 - **After**: 23 scripts (all actively used)
 - **Benefit**: Cleaner package.json, less confusion for developers
 
