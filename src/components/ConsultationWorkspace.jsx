@@ -7,7 +7,7 @@ import {
   AdjustmentsHorizontalIcon
 } from '@heroicons/react/24/outline';
 import { ConsultationProvider, useConsultation } from '../contexts/ConsultationContext';
-import { useTranslation } from '../../app/providers/I18nProvider';
+import { useTranslation } from '../providers/I18nProvider';
 import TranscriptionPanel from './consultation/TranscriptionPanel';
 import AIAssistantPanel from './consultation/AIAssistantPanel';
 import DocumentationOutput from './consultation/DocumentationOutput';

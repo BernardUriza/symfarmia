@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import '../../styles/accessibility.css';
-import { useTranslation } from '../../../app/providers/I18nProvider';
+import { useTranslation } from '../../providers/I18nProvider';
 import { 
   XMarkIcon,
   MicrophoneIcon,

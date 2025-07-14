@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { mockPatients } from '../data/mockPatients'
-import { useTranslation } from '../../app/providers/I18nProvider'
+import { useTranslation } from '../providers/I18nProvider'
 
 interface PatientManagementPreviewProps {
   isOpen: boolean

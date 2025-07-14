@@ -5,37 +5,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Development Commands
 
 - **Development server**: `npm run dev` - Start Next.js development server on http://localhost:3000
-- **Permanent dev server**: `npm run permanent:start` - Start stable dev server on http://localhost:3002 (TypeScript errors bypassed)
-- **Permanent server status**: `npm run permanent:status` - Check permanent server status
 - **Build**: `npm run build` - Generates Prisma client and builds the application
 - **Production server**: `npm start` - Start production server
 - **Linting**: `npm run lint` - Run Next.js ESLint
-
-### Permanent Development Server
-
-A simplified, reliable dev server that runs on port 3002:
-
-```bash
-npm run permanent:start   # Start server on port 3002
-npm run permanent:status  # Check server status (with health check)
-npm run permanent:stop    # Stop server
-npm run permanent:restart # Restart server
-npm run permanent:logs    # View server logs (real-time)
-```
-
-**Key features:**
-- **Simple & Reliable**: Direct Next.js execution without complex wrappers
-- **Persistent**: Runs in background with proper process detachment
-- **Smart Status**: Checks both process and HTTP response
-- **Log File**: All output saved to `/tmp/symfarmia-permanent.log`
-- **No Build Guards**: Bypasses translation locks and type checks
-- **Quick Start**: Usually ready in 10-20 seconds
 
 ## Development Ports
 
 ### Port Distribution
 - **3000**: Main Next.js application
-- **3002**: Permanent development server (optional)
 
 ## Architecture Overview
 
@@ -155,13 +132,6 @@ These are the actively maintained scripts in the `scripts/` directory:
 - **`kill-ports.js`** - Cleans ports 3000 and 3001 before starting servers
   ```bash
   npm run kill:ports
-  ```
-
-- **`permanent-dev-simple.js`** - Simplified permanent dev server on port 3002
-  ```bash
-  npm run permanent:start  # Start server
-  npm run permanent:stop   # Stop server
-  npm run permanent:status # Check status
   ```
 
 - **`generate-version.js`** - Generates version info for builds

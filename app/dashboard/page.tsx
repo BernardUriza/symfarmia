@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import DashboardLanding from '../components/dashboard/DashboardLanding';
+import { DashboardLanding } from '@/src/components/dashboard';
 
 export default function DashboardPage() {
   return <DashboardLanding />;

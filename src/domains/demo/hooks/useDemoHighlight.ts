@@ -1,4 +1,4 @@
-import { useAppMode } from '@/app/providers/AppModeProvider';
+import { useAppMode } from '@/src/providers/AppModeProvider';
 
 export function useDemoHighlight() {
   const { isDemoMode } = useAppMode();

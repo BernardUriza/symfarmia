@@ -1,5 +1,5 @@
 import React, { Suspense, lazy } from 'react';
-import { useTranslation } from '../../app/providers/I18nProvider';
+import { useTranslation } from '../providers/I18nProvider';
 import { useMouseTracking, useOptimizedScroll } from './landing';
 
 // Lazy load sections for better performance

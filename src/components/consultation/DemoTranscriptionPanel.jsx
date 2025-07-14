@@ -16,7 +16,7 @@ import {
   ChevronDownIcon,
 } from "@heroicons/react/24/outline";
 import { CheckIcon } from "@heroicons/react/24/solid";
-import { useTranslation } from "../../../app/providers/I18nProvider";
+import { useTranslation } from "../../providers/I18nProvider";
 import { useDemoTranscription } from "@/domains/demo";
 import { useRouter } from 'next/navigation';
 

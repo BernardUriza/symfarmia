@@ -10,23 +10,24 @@
  */
 
 // Components
-export { TranscriptionPanel } from './components/TranscriptionPanel';
 export { AIAnalysisDisplay } from './components/AIAnalysisDisplay';
 export { MedicalConfidenceIndicator } from './components/MedicalConfidenceIndicator';
 export { StrategySelector } from './components/StrategySelector';
 
 // Hooks
-export { useTranscription } from './hooks/useTranscription';
+export { useSimpleWhisper } from './hooks/useSimpleWhisper';
 export { useMedicalAI } from './hooks/useMedicalAI';
-export { useAudioCapture } from './hooks/useAudioCapture';
 export { useMedicalValidation } from './hooks/useMedicalValidation';
-export { useMicrophoneLevel } from './hooks/useMicrophoneLevel';
-export { useMicrophoneDiagnostics } from './hooks/useMicrophoneDiagnostics';
-export { useRealAudioCapture } from './hooks/useRealAudioCapture';
 export { useMedicalTranslation } from './hooks/useMedicalTranslation';
 
+// Legacy Hooks (deprecated - will be removed in future versions)
+export { useAudioCapture } from './hooks/legacy/useAudioCapture';
+export { useMicrophoneDiagnostics } from './hooks/legacy/useMicrophoneDiagnostics';
+export { useRealAudioCapture } from './hooks/legacy/useRealAudioCapture';
+export { useModelDownload } from './hooks/legacy/useModelDownload';
+export { useDemoTranscription } from './hooks/legacy/useDemoTranscription';
+
 // Services
-export { transcriptionService } from './services/transcriptionService';
 export { medicalAIService } from './services/medicalAIService';
 export { audioProcessingService } from './services/audioProcessingService';
 export { medicalValidationService } from './services/medicalValidationService';

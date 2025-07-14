@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useTranslation } from '../../app/providers/I18nProvider';
+import { useTranslation } from '../providers/I18nProvider';
 import {
   HeroSection,
   ProblemSection,

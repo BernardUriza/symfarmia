@@ -11,10 +11,10 @@ import {
   HeartIcon
 } from '@heroicons/react/24/outline';
 import dynamic from 'next/dynamic';
-const DemoLoginModal = dynamic(() => import('../../components/DemoLoginModal'));
+const DemoLoginModal = dynamic(() => import('./layout/DemoLoginModal'));
 // Removed DashboardLanding import - redirecting to main dashboard
-import { useTranslation } from '../../app/providers/I18nProvider';
-import { useAppMode } from '../../app/providers/AppModeProvider';
+import { useTranslation } from '../providers/I18nProvider';
+import { useAppMode } from '../providers/AppModeProvider';
 
 const MinimalistLandingPage = ({ isDemo = false }) => {
   const { isDemoMode: contextDemo } = useAppMode();

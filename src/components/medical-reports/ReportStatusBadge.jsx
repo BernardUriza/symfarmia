@@ -1,5 +1,5 @@
 import React from 'react';
-import { useTranslation } from '../../../app/providers/I18nProvider';
+import { useTranslation } from '../../providers/I18nProvider';
 
 const statusClasses = {
   draft: 'bg-gray-100 text-gray-800',
