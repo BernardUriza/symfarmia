@@ -26,26 +26,38 @@ const WorkflowStep = ({
   isActive = false 
 }) => {
   const statusStyles = {
-    pending: 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400',
-    active: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 ring-2 ring-blue-500',
-    completed: 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400',
-    in_progress: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400'
+    pending: 'bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 text-gray-600 dark:text-gray-400',
+    active: 'bg-gradient-to-br from-medical-primary/10 to-medical-accent/10 dark:from-medical-primary/20 dark:to-medical-accent/20 text-medical-primary dark:text-medical-accent ring-2 ring-medical-primary/50',
+    completed: 'bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 text-green-600 dark:text-green-400',
+    in_progress: 'bg-gradient-to-br from-yellow-100 to-amber-100 dark:from-yellow-900/30 dark:to-amber-900/30 text-yellow-600 dark:text-yellow-400'
   };
 
   return (
-    <div 
-      className={`p-4 rounded-xl border-2 transition-all duration-200 hover:shadow-md cursor-pointer ${statusStyles[status]}`}
-      onClick={onClick}
-    >
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 rounded-lg bg-white bg-opacity-20 flex items-center justify-center">
-            <Icon className="h-5 w-5" />
-          </div>
-          <div>
-            <h4 className="font-semibold text-sm">{title}</h4>
-            <p className="text-xs opacity-80">{description}</p>
-          </div>
+    <div className="group perspective-1000">
+      <div 
+        className={`p-4 rounded-2xl border-2 transition-all duration-500 hover:shadow-xl cursor-pointer 
+                    transform-3d hover:translate-z-4 hover:scale-[1.02] hover:-rotate-y-1
+                    backdrop-blur-sm ${statusStyles[status]}
+                    relative overflow-hidden`}
+        onClick={onClick}
+      >
+        {/* Shimmer overlay on hover */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent
+                        translate-x-[-100%] group-hover:translate-x-[100%] 
+                        transition-transform duration-1000 ease-out"></div>
+        <div className="flex items-center justify-between mb-2 relative z-10">
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-white/30 to-white/10 
+                            dark:from-white/20 dark:to-white/5 
+                            backdrop-blur-sm shadow-inner
+                            flex items-center justify-center
+                            transform group-hover:rotate-12 transition-transform duration-300">
+              <Icon className="h-5 w-5" />
+            </div>
+            <div>
+              <h4 className="font-semibold text-sm group-hover:text-medical-primary dark:group-hover:text-medical-accent transition-colors duration-300">{title}</h4>
+              <p className="text-xs opacity-80">{description}</p>
+            </div>
         </div>
         <div className="flex items-center space-x-2">
           {status === 'completed' && <CheckCircle className="h-4 w-4" />}
@@ -53,14 +65,15 @@ const WorkflowStep = ({
           {status === 'pending' && <span className="text-xs font-medium">PASO {step}</span>}
         </div>
       </div>
-      {isActive && (
-        <div className="mt-2 pt-2 border-t border-current opacity-50">
-          <div className="flex items-center space-x-2">
-            <div className="w-2 h-2 bg-current rounded-full animate-pulse"></div>
-            <span className="text-xs font-medium">ACTIVO</span>
+        {isActive && (
+          <div className="mt-2 pt-2 border-t border-current/30 relative z-10">
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-gradient-to-r from-medical-primary to-medical-accent rounded-full animate-pulse"></div>
+              <span className="text-xs font-medium bg-gradient-to-r from-medical-primary to-medical-accent bg-clip-text text-transparent">ACTIVO</span>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

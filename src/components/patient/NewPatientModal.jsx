@@ -103,16 +103,25 @@ const NewPatientModal = ({ isOpen, onClose, onSave, isLoading = false }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4
+                    opacity-100 @starting-style:opacity-0
+                    transition-opacity duration-300 ease-out">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden
+                      scale-100 translate-y-0 @starting-style:scale-95 @starting-style:translate-y-4
+                      transition-all duration-300 ease-out
+                      border border-gray-200/50 dark:border-gray-700/50
+                      relative">
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-medical-primary/5 to-medical-accent/5 dark:from-medical-primary/10 dark:to-medical-accent/10 pointer-events-none rounded-2xl"></div>
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between p-6 border-b border-gray-200/50 dark:border-gray-700/50 relative z-10">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-              <User className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            <div className="w-10 h-10 bg-gradient-to-br from-medical-primary/20 to-medical-accent/20 dark:from-medical-primary/30 dark:to-medical-accent/30 
+                            rounded-xl flex items-center justify-center shadow-inner">
+              <User className="h-5 w-5 text-medical-primary dark:text-medical-accent" />
             </div>
             <div>
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+              <h2 className="text-xl font-semibold bg-gradient-to-r from-medical-primary to-medical-accent bg-clip-text text-transparent">
                 Nuevo Paciente
               </h2>
               <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -122,15 +131,17 @@ const NewPatientModal = ({ isOpen, onClose, onSave, isLoading = false }) => {
           </div>
           <button
             onClick={handleClose}
-            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+            className="group p-2 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 
+                       hover:bg-gray-100 dark:hover:bg-gray-800 
+                       transition-all duration-300"
             disabled={isLoading}
           >
-            <X className="h-6 w-6" />
+            <X className="h-6 w-6 transform group-hover:rotate-90 transition-transform duration-300" />
           </button>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-6 overflow-y-auto max-h-[calc(90vh-140px)]">
+        <form onSubmit={handleSubmit} className="p-6 space-y-6 overflow-y-auto max-h-[calc(90vh-140px)] relative z-10 scrollbar-medical">
           {/* Status and Basic Info Row */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
@@ -141,7 +152,9 @@ const NewPatientModal = ({ isOpen, onClose, onSave, isLoading = false }) => {
               <select
                 value={formData.status}
                 onChange={(e) => handleChange('status', e.target.value)}
-                className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full p-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white 
+                           focus:border-medical-primary dark:focus:border-medical-accent focus:ring-4 focus:ring-medical-primary/20 dark:focus:ring-medical-accent/20
+                           transition-all duration-300 hover:border-gray-300 dark:hover:border-gray-500"
                 disabled={isLoading}
               >
                 <option value="Activo">Activo</option>
@@ -158,8 +171,8 @@ const NewPatientModal = ({ isOpen, onClose, onSave, isLoading = false }) => {
                 type="text"
                 value={formData.name}
                 onChange={(e) => handleChange('name', e.target.value)}
-                className={`w-full p-3 border rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                  errors.name ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                className={`input-medical ${
+                  errors.name ? 'border-red-500 dark:border-red-500 focus:border-red-500 dark:focus:border-red-500 focus:ring-red-500/20 dark:focus:ring-red-500/20' : ''
                 }`}
                 placeholder="Ingresa el nombre completo"
                 disabled={isLoading}

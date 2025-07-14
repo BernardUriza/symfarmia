@@ -29,6 +29,14 @@ import { SITE_CONFIG } from "@/src/lib/site-config";
 // MEDICAL-GRADE Critical CSS with hydration safety
 const MedicalCriticalCSS = `
   /* MEDICAL SYSTEM CRITICAL STYLES */
+  :root {
+    color-scheme: light;
+  }
+  
+  [data-theme="dark"] {
+    color-scheme: dark;
+  }
+  
   .medical-error-recovery { 
     font-family: system-ui, -apple-system, sans-serif !important; 
   }
@@ -45,16 +53,18 @@ const MedicalCriticalCSS = `
     z-index: 1000;
   }
   
-  /* BULLETPROOF THEME STYLES */
+  /* BULLETPROOF THEME STYLES WITH P3 COLORS */
   [data-theme="light"] {
     --medical-bg: #ffffff;
     --medical-text: #1f2937;
     --medical-border: #e5e7eb;
+    color-scheme: light;
   }
   [data-theme="dark"] {
     --medical-bg: #1f2937;
     --medical-text: #f9fafb;
     --medical-border: #374151;
+    color-scheme: dark;
   }
   
   /* HYDRATION SAFETY STYLES */
@@ -220,7 +230,7 @@ export const metadata = {
  */
 export default function RootLayout({ children }) {
   return (
-    <html lang="es" suppressHydrationWarning>
+    <html lang="es" suppressHydrationWarning className="h-full">
       <head>
         {/* MEDICAL CRITICAL CSS */}
         <style dangerouslySetInnerHTML={{ __html: MedicalCriticalCSS }} />
@@ -234,10 +244,11 @@ export default function RootLayout({ children }) {
         <meta name="medical-system" content="SYMFARMIA" />
         <meta name="medical-reliability" content="99.9%" />
         <meta name="error-recovery" content="automatic" />
+        <meta name="color-scheme" content="light dark" />
       </head>
       
       <body 
-        className="font-sans bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-gray-100"
+        className="h-full font-sans bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-950 dark:to-gray-900 text-gray-900 dark:text-gray-100 antialiased"
         suppressHydrationWarning
       >
         {/* MEDICAL-GRADE ERROR BOUNDARY SYSTEM */}

@@ -160,8 +160,11 @@ const QuickActions = ({ onStartWorkflow }) => {
   return (
     <div className="space-y-6">
       {/* Primary Actions */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-        <div className="flex items-center justify-between mb-4">
+      <div className="@container bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 p-6
+                      backdrop-blur-sm relative overflow-hidden">
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-medical-primary/5 to-medical-accent/5 dark:from-medical-primary/10 dark:to-medical-accent/10 pointer-events-none"></div>
+        <div className="flex items-center justify-between mb-4 relative z-10">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Acciones Rápidas</h3>
           <div className="flex items-center space-x-2">
             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
