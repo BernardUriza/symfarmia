@@ -14,7 +14,7 @@ import {
 import ThemeToggle from '../../components/ThemeToggle';
 import ActionButton from '../../components/ui/ActionButton';
 import { UserPlusIcon } from '@heroicons/react/24/outline';
-import { TranscriptionPanel } from '../../src/domains/medical-ai/components/TranscriptionPanel';
+// import { TranscriptionPanel } from '../../src/domains/medical-ai/components/TranscriptionPanel';
 import { useTranslation } from '../providers/I18nProvider';
 
 interface Patient {

@@ -119,7 +119,7 @@ export const ConversationCapture = ({
       {/* Next Button */}
       {onNext && transcript && (
         <div className="mt-6 flex justify-center">
-          <Button onClick={onNext} size="lg" variant="default">
+          <Button onClick={onNext} size="lg" variant="default" className="">
             Siguiente
           </Button>
         </div>
