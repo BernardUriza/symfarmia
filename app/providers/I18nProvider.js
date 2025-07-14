@@ -98,11 +98,11 @@ function detectUserLanguage() {
   return 'es'; // Default to Spanish
 }
 
-export function I18nProvider({ children }) {
-  const [locale, setLocale] = useState('es'); // Always start with 'es' for consistent SSR
+export function I18nProvider({ children, initialLocale = 'es', initialTranslations = {} }) {
+  const [locale, setLocale] = useState(initialLocale);
   const [hasHydrated, setHasHydrated] = useState(false);
-  const [translations, setTranslations] = useState({});
-  const [isLoadingTranslations, setIsLoadingTranslations] = useState(true);
+  const [translations, setTranslations] = useState(initialTranslations);
+  const [isLoadingTranslations, setIsLoadingTranslations] = useState(Object.keys(initialTranslations).length === 0);
   const [loadError, setLoadError] = useState(null);
   const [retryCount, setRetryCount] = useState(0);
   const loadingRef = useRef(false);
@@ -160,8 +160,10 @@ export function I18nProvider({ children }) {
 
   // Load translations when locale changes
   useEffect(() => {
-    loadAndSetTranslations(locale);
-  }, [locale, loadAndSetTranslations]);
+    if (Object.keys(translations).length === 0 || locale !== initialLocale) {
+      loadAndSetTranslations(locale);
+    }
+  }, [locale, loadAndSetTranslations, translations, initialLocale]);
 
   useEffect(() => {
     // Only run once on client side - detect and set user language after hydration

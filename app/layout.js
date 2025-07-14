@@ -15,7 +15,7 @@ import { ThemeProvider } from "./providers/ThemeProviderBulletproof";
 import { Auth0Provider } from "@auth0/nextjs-auth0";
 import { AppModeProvider } from "./providers/AppModeProvider";
 import DemoModeBanner from "./components/DemoModeBanner";
-import { I18nProvider } from "./providers/I18nProvider";
+import I18nServerProvider from "./providers/I18nServerProvider";
 import { PatientContextProvider } from "./providers/PatientContextProvider";
 import MedicalAssistant from "./components/MedicalAssistantWrapper";
 import VersionInfo from "./components/VersionInfo";
@@ -251,7 +251,7 @@ export default function RootLayout({ children }) {
                   
                   {/* PROVIDERS ERROR BOUNDARY */}
                   <MedicalErrorBoundary context="Providers" medicalWorkflow="App Context">
-                    <I18nProvider>
+                    <I18nServerProvider>
                       <PatientContextProvider>
                         <AppModeProvider>
                           
@@ -294,7 +294,7 @@ export default function RootLayout({ children }) {
                           
                         </AppModeProvider>
                       </PatientContextProvider>
-                    </I18nProvider>
+                    </I18nServerProvider>
                   </MedicalErrorBoundary>
                   
                 </Auth0Provider>
