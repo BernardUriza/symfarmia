@@ -118,13 +118,14 @@ export function PatientContextProvider({ children }) {
     const handleKeyDown = (event) => {
       if (event.ctrlKey && event.shiftKey && event.key === 'A') {
         event.preventDefault();
-        store.toggleAssistant();
+        // Use the store directly from Zustand
+        usePatientStore.getState().toggleAssistant();
       }
     };
     
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [store]);
+  }, []); // Remove store dependency to prevent unnecessary re-registration
   
   useEffect(() => {
     // Subscribe to patient changes to generate clinical alerts
@@ -134,7 +135,8 @@ export function PatientContextProvider({ children }) {
         if (activePatient) {
           // Generate contextual alerts based on patient
           setTimeout(() => {
-            store.addClinicalAlert({
+            // Use the store directly from Zustand, not from props
+            usePatientStore.getState().addClinicalAlert({
               type: 'info',
               title: 'Patient Context Loaded',
               message: `Medical AI assistant is now optimized for ${activePatient.name}`,
@@ -146,7 +148,7 @@ export function PatientContextProvider({ children }) {
     );
     
     return unsubscribe;
-  }, [store]);
+  }, []); // Remove store from dependencies to prevent infinite loop
   
   return (
     <PatientContext.Provider value={store}>

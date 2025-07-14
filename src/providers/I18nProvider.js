@@ -163,7 +163,7 @@ export function I18nProvider({ children, initialLocale = 'es', initialTranslatio
     if (Object.keys(translations).length === 0 || locale !== initialLocale) {
       loadAndSetTranslations(locale);
     }
-  }, [locale, loadAndSetTranslations, translations, initialLocale]);
+  }, [locale, loadAndSetTranslations, initialLocale]); // Removed translations from dependencies to prevent infinite loop
 
   useEffect(() => {
     // Only run once on client side - detect and set user language after hydration
