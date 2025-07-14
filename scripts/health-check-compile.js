@@ -3,7 +3,7 @@
 const { spawn, exec } = require('child_process');
 const puppeteer = require('puppeteer');
 
-console.log('🏥 Starting Health Check & Compilation Monitor with Browser Console...\n');
+console.log('🏥 Starting Health Check & Compilation Monitor with Netlify Dev...\n');
 
 let devServerProcess = null;
 let browser = null;
@@ -146,17 +146,18 @@ async function captureBrowserErrors() {
 async function startHealthCheck() {
   console.log('🚀 Starting development server...\n');
   
-  // Clean port 3000 before starting
+  // Clean ports 3000 and 8888 before starting
   await new Promise((resolve) => {
-    exec('lsof -ti:3000 | xargs kill -9 2>/dev/null || true', (error) => {
+    exec('lsof -ti:3000 | xargs kill -9 2>/dev/null || true', () => {});
+    exec('lsof -ti:8888 | xargs kill -9 2>/dev/null || true', (error) => {
       if (!error) {
-        console.log('✅ Port 3000 cleaned before start\n');
+        console.log('✅ Ports 3000 and 8888 cleaned before start\n');
       }
-      setTimeout(resolve, 1000); // Wait for port to be fully released
+      setTimeout(resolve, 1000); // Wait for ports to be fully released
     });
   });
   
-  devServerProcess = spawn('npm', ['run', 'dev'], {
+  devServerProcess = spawn('netlify', ['dev'], {
     shell: true,
     stdio: 'pipe'
   });
@@ -168,7 +169,7 @@ async function startHealthCheck() {
     const output = data.toString();
     console.log(`[DEV] ${output.trim()}`);
     
-    if (output.includes('Ready in') || output.includes('started server on')) {
+    if (output.includes('Ready in') || output.includes('started server on') || output.includes('Server now ready on') || output.includes('Waiting for framework port')) {
       serverReady = true;
       console.log('\n✅ Server is ready! Testing compilation...\n');
     }
@@ -266,10 +267,11 @@ async function cleanup() {
   if (devServerProcess) {
     devServerProcess.kill('SIGTERM');
     
-    // Clean up port 3000 specifically
-    exec('lsof -ti:3000 | xargs kill -9 2>/dev/null || true', (error) => {
+    // Clean up ports 3000 and 8888 (Netlify uses both)
+    exec('lsof -ti:3000 | xargs kill -9 2>/dev/null || true', () => {});
+    exec('lsof -ti:8888 | xargs kill -9 2>/dev/null || true', (error) => {
       if (!error) {
-        console.log('✅ Port 3000 cleaned up');
+        console.log('✅ Ports cleaned up');
       }
     });
   }
