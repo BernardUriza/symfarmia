@@ -5,6 +5,10 @@
   publish = ".next"
   autoLaunch = false
   framework = "#custom"
+  
+[dev.environment]
+  NETLIFY_DEV_DEBUG = "false"
+  DEBUG = ""
 
 [build]
   command = "echo '🔍 Starting build...' && npm install --production=false && echo '📦 Installing function deps...' && cd netlify/functions && npm install && cd ../.. && npm run build"
