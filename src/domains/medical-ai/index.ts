@@ -15,6 +15,7 @@ export { MedicalConfidenceIndicator } from './components/MedicalConfidenceIndica
 export { StrategySelector } from './components/StrategySelector';
 
 // Hooks
+export { useSimpleWhisper } from './hooks/useSimpleWhisper';
 export { useMedicalAI } from './hooks/useMedicalAI';
 export { useMedicalValidation } from './hooks/useMedicalValidation';
 export { useMedicalTranslation } from './hooks/useMedicalTranslation';
