@@ -35,6 +35,7 @@ Welcome to the SYMFARMIA documentation hub. This directory contains all project 
 
 ### 🔄 [Workflows](./workflows/)
 - [**Agents**](./workflows/Agents.md) - Multi-agent workflow documentation
+- [**Root AGENTS Guide**](../AGENTS.md) - Quick instructions for all AI assistants (and a reminder to keep the docs fun)
 
 ### 📝 [Changelog](./changelog/)
 - [**CHANGELOG**](./changelog/CHANGELOG.md) - Version history and updates
