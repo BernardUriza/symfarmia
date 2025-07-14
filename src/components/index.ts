@@ -1,8 +1,7 @@
 /**
  * Components Index
  * 
- * Central export point for all components
- * Use specific exports for better tree-shaking
+ * Central export point for all application components
  */
 
 // Re-export all UI components
@@ -20,24 +19,30 @@ export * from './dashboard';
 // Re-export all patient components
 export * from './patient';
 
-// Re-export specific commonly used components for convenience
+// Re-export commonly used components directly
 export { 
   Button, 
   Card, 
+  CardContent, 
   Badge, 
   Alert,
   Progress,
-  ActionButton 
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger
 } from './ui';
 
-export { 
+export {
   ConversationCapture,
   DialogueFlow,
-  ClinicalNotes 
+  ClinicalNotes,
+  OrderEntry,
+  SummaryExport
 } from './medical';
 
-export { 
+export {
   ThemeToggle,
-  GlobalLanguageSwitcher,
-  HeaderLanguageSwitcher 
+  BraveCacheBuster,
+  GlobalLanguageSwitcher
 } from './layout';
