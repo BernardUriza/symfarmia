@@ -21,6 +21,7 @@ Welcome to the SYMFARMIA documentation hub. This directory contains all project 
 - [**I18n Implementation**](./development/REVOLUTIONARY-I18N-SUMMARY.md) - Internationalization features
 - [**Language Switcher**](./development/LANGUAGE-SWITCHER-SUMMARY.md) - Language switching functionality
 - [**Design Prompts**](./development/dalle-prompts.md) - AI-generated design prompts
+- [**Whisper Xenova Enhancements**](./development/whisper-xenova-enhancements.md) - Mejora de la precarga y reintentos
 
 #### Development Notes
 - [**Dev Notes**](./development/dev-notes/) - Daily development logs and notes
