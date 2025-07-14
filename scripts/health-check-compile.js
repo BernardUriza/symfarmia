@@ -1,17 +1,19 @@
 #!/usr/bin/env node
 
 const { spawn, exec } = require('child_process');
-const http = require('http');
+const puppeteer = require('puppeteer');
 
-console.log('🏥 Starting Health Check & Compilation Monitor...\n');
+console.log('🏥 Starting Health Check & Compilation Monitor with Browser Console...\n');
 
 let devServerProcess = null;
+let browser = null;
 let attemptCount = 0;
-const MAX_ATTEMPTS = 2;
+const MAX_ATTEMPTS = 3;
 
-// Function to check if server is ready
+// Function to check if server is ready via HTTP
 function checkServerReady() {
   return new Promise((resolve) => {
+    const http = require('http');
     const options = {
       hostname: 'localhost',
       port: 3000,
@@ -38,25 +40,106 @@ function checkServerReady() {
   });
 }
 
-// Function to capture compilation errors
-function captureCompilationErrors(data) {
-  const output = data.toString();
-  const errorPatterns = [
-    /Module parse failed/i,
-    /Unexpected character/i,
-    /You may need an appropriate loader/i,
-    /Import trace for requested module/i,
-    /Error:/i,
-    /Failed/i,
-    /@import.*tailwindcss/i
-  ];
-
-  for (const pattern of errorPatterns) {
-    if (pattern.test(output)) {
-      return output;
+// Function to capture browser console errors
+async function captureBrowserErrors() {
+  const errors = [];
+  const warnings = [];
+  const logs = [];
+  
+  try {
+    console.log('🌐 Launching headless browser...');
+    browser = await puppeteer.launch({
+      headless: 'new',
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-web-security', '--disable-features=IsolateOrigins', '--disable-site-isolation-trials']
+    });
+    
+    const page = await browser.newPage();
+    
+    // Capture console messages
+    page.on('console', async (msg) => {
+      const type = msg.type();
+      let text = msg.text();
+      
+      // Try to get more details from the message
+      try {
+        const args = await Promise.all(msg.args().map(arg => arg.jsonValue().catch(() => 'Unable to serialize')));
+        if (args.length > 0 && args[0] !== text) {
+          text = args.join(' ');
+        }
+      } catch (e) {
+        // Keep original text if we can't get more details
+      }
+      
+      if (type === 'error') {
+        errors.push(text);
+        console.log(`🔴 [BROWSER ERROR] ${text}`);
+      } else if (type === 'warning') {
+        warnings.push(text);
+        console.log(`🟡 [BROWSER WARN] ${text}`);
+      } else if (type === 'log' && text.toLowerCase().includes('error')) {
+        logs.push(text);
+        console.log(`🟠 [BROWSER LOG] ${text}`);
+      }
+    });
+    
+    // Capture page errors
+    page.on('pageerror', (error) => {
+      errors.push(error.toString());
+      console.log(`💥 [PAGE ERROR] ${error}`);
+    });
+    
+    // Capture request failures
+    page.on('requestfailed', (request) => {
+      const failure = `${request.failure().errorText} ${request.url()}`;
+      errors.push(failure);
+      console.log(`❌ [REQUEST FAILED] ${failure}`);
+    });
+    
+    console.log('📱 Navigating to http://localhost:3000...');
+    
+    try {
+      // Set viewport
+      await page.setViewport({ width: 1280, height: 720 });
+      
+      // Go to page with less strict waiting
+      await page.goto('http://localhost:3000', {
+        waitUntil: 'domcontentloaded',
+        timeout: 15000
+      });
+      
+      // Wait a bit for any JS errors to appear
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Try to get React errors from the page
+      const reactErrors = await page.evaluate(() => {
+        const errorElements = document.querySelectorAll('[data-nextjs-error], .error-boundary, #__next-build-error-boundary');
+        return Array.from(errorElements).map(el => el.textContent);
+      });
+      
+      if (reactErrors.length > 0) {
+        reactErrors.forEach(error => {
+          errors.push(`React Error: ${error}`);
+          console.log(`⚛️ [REACT ERROR] ${error}`);
+        });
+      }
+      
+    } catch (navError) {
+      errors.push(`Navigation error: ${navError.message}`);
+      console.log(`🚫 [NAVIGATION ERROR] ${navError.message}`);
     }
+    
+    await browser.close();
+    browser = null;
+    
+    return { errors, warnings, logs };
+  } catch (error) {
+    console.error('❌ Browser automation failed:', error);
+    if (browser) {
+      await browser.close();
+      browser = null;
+    }
+    return { errors: [error.message], warnings: [], logs: [] };
   }
-  return null;
 }
 
 // Start dev server and monitor
@@ -89,21 +172,11 @@ async function startHealthCheck() {
       serverReady = true;
       console.log('\n✅ Server is ready! Testing compilation...\n');
     }
-    
-    const error = captureCompilationErrors(data);
-    if (error) {
-      compilationError = error;
-    }
   });
 
   devServerProcess.stderr.on('data', (data) => {
     const output = data.toString();
     console.error(`[ERROR] ${output.trim()}`);
-    
-    const error = captureCompilationErrors(data);
-    if (error) {
-      compilationError = error;
-    }
   });
 
   // Wait for server to be ready
@@ -118,90 +191,79 @@ async function startHealthCheck() {
     process.exit(1);
   }
 
-  // Now test compilation by making requests
-  console.log('\n🔄 Testing compilation by making requests...\n');
+  // Now test compilation and browser errors
+  console.log('\n🔄 Testing compilation and browser console...\n');
+  
+  let hasErrors = false;
   
   for (let i = 0; i < MAX_ATTEMPTS; i++) {
     console.log(`\n📍 Attempt ${i + 1}/${MAX_ATTEMPTS}`);
+    console.log('─'.repeat(80));
     
-    // Make request to trigger compilation
+    // First check if server responds
     const isHealthy = await checkServerReady();
     
-    // Wait a bit to capture any compilation errors
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    if (!isHealthy) {
+      console.log('⚠️  Server not responding, waiting...');
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      continue;
+    }
     
-    if (compilationError) {
-      console.log('\n❌ Compilation error detected:');
+    // Capture browser console errors
+    const { errors, warnings, logs } = await captureBrowserErrors();
+    
+    if (errors.length > 0) {
+      hasErrors = true;
+      console.log('\n❌ Browser errors detected:');
       console.log('─'.repeat(80));
-      console.log(compilationError);
+      errors.forEach((error, index) => {
+        console.log(`${index + 1}. ${error}`);
+      });
       console.log('─'.repeat(80));
-      
-      // Analyze the error and provide solution
-      if (compilationError.includes('@import') && compilationError.includes('tailwindcss')) {
-        console.log('\n🔧 Tailwind CSS import error detected!');
-        console.log('📝 The issue is with the CSS import syntax.');
-        console.log('\n💡 Current globals.css needs to be updated...\n');
-        
-        // Auto-fix attempt
-        console.log('🔄 Attempting automatic fix...');
-        await fixTailwindImport();
-        
-        // Reset for next attempt
-        compilationError = null;
-        console.log('\n⏳ Waiting for hot reload...');
-        await new Promise(resolve => setTimeout(resolve, 5000));
+    }
+    
+    if (warnings.length > 0) {
+      console.log('\n⚠️  Browser warnings:');
+      warnings.forEach((warning, index) => {
+        console.log(`${index + 1}. ${warning}`);
+      });
+    }
+    
+    if (errors.length === 0) {
+      console.log('\n✅ No browser console errors detected!');
+      if (i > 0) { // If we had to retry, consider it success after one clean run
+        cleanup();
+        process.exit(0);
       }
-    } else if (isHealthy) {
-      console.log('\n✅ Server is healthy and compiling correctly!');
-      cleanup();
-      process.exit(0);
     }
     
     // Wait before next attempt
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    if (i < MAX_ATTEMPTS - 1) {
+      console.log('\n⏳ Waiting before next attempt...');
+      await new Promise(resolve => setTimeout(resolve, 5000));
+    }
   }
   
-  console.error('\n❌ Failed to resolve compilation errors after maximum attempts');
-  cleanup();
-  process.exit(1);
-}
-
-// Function to fix Tailwind import issues
-async function fixTailwindImport() {
-  return new Promise((resolve, reject) => {
-    exec('cat app/globals.css | head -5', (error, stdout) => {
-      if (error) {
-        console.error('Failed to read globals.css:', error);
-        reject(error);
-        return;
-      }
-      
-      console.log('Current globals.css first lines:');
-      console.log(stdout);
-      
-      // The fix is already applied in globals.css, but let's verify PostCSS config
-      exec('cat postcss.config.js', (error, stdout) => {
-        if (error) {
-          console.log('PostCSS config not found, might be using .mjs');
-          // Check for .mjs version
-          exec('ls postcss.config.*', (error, stdout) => {
-            console.log('PostCSS files found:', stdout);
-            resolve();
-          });
-        } else {
-          console.log('PostCSS config:', stdout);
-          resolve();
-        }
-      });
-    });
-  });
+  if (hasErrors) {
+    console.error('\n❌ Browser console errors persist after maximum attempts');
+    cleanup();
+    process.exit(1);
+  } else {
+    console.log('\n✅ All checks passed! No browser errors detected.');
+    cleanup();
+    process.exit(0);
+  }
 }
 
 // Cleanup function
-function cleanup() {
+async function cleanup() {
+  console.log('\n🧹 Cleaning up...');
+  
+  if (browser) {
+    await browser.close();
+  }
+  
   if (devServerProcess) {
-    console.log('\n🧹 Cleaning up...');
-    // Kill only the specific dev server process, not all Node processes
     devServerProcess.kill('SIGTERM');
     
     // Clean up port 3000 specifically
@@ -214,19 +276,19 @@ function cleanup() {
 }
 
 // Handle exit
-process.on('SIGINT', () => {
-  cleanup();
+process.on('SIGINT', async () => {
+  await cleanup();
   process.exit(0);
 });
 
-process.on('SIGTERM', () => {
-  cleanup();
+process.on('SIGTERM', async () => {
+  await cleanup();
   process.exit(0);
 });
 
 // Start the health check
-startHealthCheck().catch(err => {
+startHealthCheck().catch(async err => {
   console.error('❌ Health check failed:', err);
-  cleanup();
+  await cleanup();
   process.exit(1);
 });

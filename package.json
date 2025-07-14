@@ -109,6 +109,7 @@
     "postcss-import": "^16.1.1",
     "prettier": "^3.2.5",
     "prisma": "^6.11.1",
+    "puppeteer": "^24.12.1",
     "sass-loader": "^16.0.5",
     "ts-node": "10.9.2",
     "typescript": "5.8.3"
