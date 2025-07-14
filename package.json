@@ -72,6 +72,7 @@
     "slick-carousel": "1.8.1",
     "sonner": "^2.0.6",
     "tailwind-merge": "^3.3.1",
+    "tailwindcss": "^4.1.11",
     "zod": "3.25.67",
     "zustand": "^5.0.6"
   },
@@ -102,10 +103,9 @@
     "jest-environment-jsdom": "29.7.0",
     "netlify-cli": "^21.6.0",
     "next": "^15.3.5",
-    "postcss": "^8.4.31",
+    "postcss": "^8.5.6",
     "prettier": "^3.2.5",
     "prisma": "^6.11.1",
-    "tailwindcss": "^4.1.11",
     "ts-node": "10.9.2",
     "typescript": "5.8.3"
   },
