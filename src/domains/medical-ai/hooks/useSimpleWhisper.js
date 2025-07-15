@@ -1,17 +1,17 @@
 "use client";
 import { useState, useRef, useEffect, useCallback } from "react";
-import {
-  loadWhisperModel,
-  transcribeAudio,
-} from "../services/audioProcessingService";
+import { loadWhisperModel, transcribeAudio } from "../services/audioProcessingService";
 import { extractMedicalTermsFromText } from "../utils/medicalTerms";
+import { resampleTo16kHz, normalizeFloat32 } from "../utils/audioHelpers";
+import { DefaultLogger } from "../utils/LoggerStrategy";
 
 export function useSimpleWhisper({
   autoPreload = true,
   retryCount = 3,
   retryDelay = 1000,
+  logger = DefaultLogger,
 } = {}) {
-  // ... (mismos estados y referencias que tu versión original)
+  // Estados y refs
   const [transcription, setTranscription] = useState(null);
   const [status, setStatus] = useState("idle");
   const [isRecording, setIsRecording] = useState(false);
@@ -31,6 +31,11 @@ export function useSimpleWhisper({
   const timerRef = useRef(null);
   const animationFrameRef = useRef(null);
 
+  // Logger strategy pattern
+  const log = (...args) => logger.log(...args);
+  const errorLog = (...args) => logger.error(...args);
+
+  // PRELOAD MODEL
   const preloadModel = useCallback(async () => {
     try {
       setEngineStatus("loading");
@@ -43,8 +48,9 @@ export function useSimpleWhisper({
     } catch (err) {
       setEngineStatus("error");
       setError("Error cargando el modelo de transcripción");
+      errorLog("🛑 [preloadModel] ERROR:", err);
     }
-  }, [retryCount, retryDelay]);
+  }, [retryCount, retryDelay, logger]);
 
   useEffect(() => {
     if (autoPreload) preloadModel();
@@ -52,78 +58,43 @@ export function useSimpleWhisper({
 
   useEffect(() => {
     return () => {
-      if (animationFrameRef.current)
-        cancelAnimationFrame(animationFrameRef.current);
-      if (
-        mediaRecorderRef.current &&
-        mediaRecorderRef.current.state === "recording"
-      )
+      if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording")
         mediaRecorderRef.current.stop();
-      if (streamRef.current)
-        streamRef.current.getTracks().forEach((track) => track.stop());
+      if (streamRef.current) streamRef.current.getTracks().forEach((track) => track.stop());
       if (audioContextRef.current && audioContextRef.current.state !== "closed")
         audioContextRef.current.close();
       if (audioUrl) URL.revokeObjectURL(audioUrl);
     };
   }, [audioUrl]);
 
+  // AUDIO MONITORING
   const setupAudioMonitoring = useCallback((stream) => {
-    console.log(
-      "🎤 [AudioMonitoring] Iniciando configuración de monitoreo de audio"
-    );
-
+    log("🎤 [AudioMonitoring] Setup audio monitor");
     const audioContext = new AudioContext();
-    console.log("🎧 [AudioMonitoring] AudioContext creado:", audioContext);
-
     const analyser = audioContext.createAnalyser();
-    console.log("🧪 [AudioMonitoring] AnalyserNode creado:", analyser);
-
     const source = audioContext.createMediaStreamSource(stream);
-    console.log(
-      "🔗 [AudioMonitoring] MediaStreamSource creado y conectado:",
-      source
-    );
-
     analyser.fftSize = 256;
-    console.log("⚙️ [AudioMonitoring] fftSize configurado:", analyser.fftSize);
-
     source.connect(analyser);
-    console.log("🔌 [AudioMonitoring] Fuente conectada al analyser.");
-
     audioContextRef.current = audioContext;
     analyserRef.current = analyser;
-
     const dataArray = new Uint8Array(analyser.frequencyBinCount);
-    console.log(
-      "📊 [AudioMonitoring] dataArray inicializado, tamaño:",
-      dataArray.length
-    );
 
     const updateLevel = () => {
-      if (
-        !mediaRecorderRef.current ||
-        mediaRecorderRef.current.state !== "recording"
-      ) {
-        console.log(
-          "⛔ [AudioMonitoring] MediaRecorder no está grabando. AudioLevel a 0."
-        );
+      if (!mediaRecorderRef.current || mediaRecorderRef.current.state !== "recording") {
+        log("⛔ [AudioMonitoring] Not recording. AudioLevel 0.");
         setAudioLevel(0);
         return;
       }
-
       analyser.getByteFrequencyData(dataArray);
-
       const average = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
-
-      const level = Math.round(average);
-      setAudioLevel(level);
+      setAudioLevel(Math.round(average));
       animationFrameRef.current = requestAnimationFrame(updateLevel);
     };
-
-    console.log("🚀 [AudioMonitoring] Iniciando loop de monitoreo de audio");
     updateLevel();
-  }, []);
+  }, [logger]);
 
+  // TIMER
   useEffect(() => {
     if (isRecording) {
       const startTime = Date.now();
@@ -141,17 +112,8 @@ export function useSimpleWhisper({
       if (timerRef.current) clearInterval(timerRef.current);
     };
   }, [isRecording]);
-  function resampleTo16kHz(input, originalSampleRate) {
-    if (originalSampleRate === 16000) return input;
-    const ratio = originalSampleRate / 16000;
-    const newLength = Math.round(input.length / ratio);
-    const result = new Float32Array(newLength);
-    for (let i = 0; i < newLength; i++) {
-      result[i] = input[Math.floor(i * ratio)] || 0;
-    }
-    return result;
-  }
 
+  // TRANSCRIPTION
   const startTranscription = async () => {
     try {
       setError(null);
@@ -170,12 +132,11 @@ export function useSimpleWhisper({
       };
       mediaRecorder.start();
 
+      // Wait for recording state
       const waitForRecording = () => {
-        console.log("⏳ Esperando MediaRecorder...");
+        log("⏳ Esperando MediaRecorder...");
         if (mediaRecorder.state === "recording") {
-          console.log(
-            "✅ MediaRecorder ahora SÍ está grabando. Iniciando monitoreo."
-          );
+          log("✅ MediaRecorder grabando. Monitoreo iniciado.");
           setupAudioMonitoring(stream);
         } else {
           setTimeout(waitForRecording, 50);
@@ -185,6 +146,7 @@ export function useSimpleWhisper({
       setIsRecording(true);
       return true;
     } catch (err) {
+      errorLog("🛑 [startTranscription] ERROR:", err);
       setError("Error al iniciar la grabación: " + err.message);
       setStatus("error");
       setEngineStatus("error");
@@ -192,6 +154,7 @@ export function useSimpleWhisper({
     }
   };
 
+  // STOP TRANSCRIPTION
   const stopTranscription = async () => {
     if (mediaRecorderRef.current && isRecording) {
       setIsRecording(false);
@@ -213,76 +176,42 @@ export function useSimpleWhisper({
     return false;
   };
 
+  // PROCESS AUDIO
   const processAudio = async () => {
-    console.log("🧪 [processAudio] Iniciando procesamiento de audio");
+    log("🧪 [processAudio] Procesando audio...");
     setStatus("processing");
     try {
-      const audioBlob = new Blob(audioChunksRef.current, {
-        type: "audio/webm",
-      });
-      console.log("💾 [processAudio] Blob creado:", audioBlob);
-
+      const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
       setAudioBlob(audioBlob);
-
       const url = URL.createObjectURL(audioBlob);
       setAudioUrl(url);
-      console.log("🔗 [processAudio] URL de audio creada:", url);
 
       const arrayBuffer = await audioBlob.arrayBuffer();
-      console.log(
-        "📦 [processAudio] ArrayBuffer obtenido. Bytes:",
-        arrayBuffer.byteLength
-      );
-
       const audioContext = new AudioContext();
-      console.log("🎧 [processAudio] AudioContext creado:", audioContext);
-
       const audioData = await audioContext.decodeAudioData(arrayBuffer);
-      console.log("🔬 [processAudio] Audio decodificado:", audioData);
-
       const float32Audio = audioData.getChannelData(0);
-      console.log(
-        "📈 [processAudio] Canal 0 extraído. Samples:",
-        float32Audio.length
-      );
-
       if (!float32Audio || float32Audio.length === 0)
         throw new Error("No se obtuvo audio válido");
 
-      console.log("⏳ [processAudio] Pre-cargando modelo...");
       await preloadModel();
-      console.log("✅ [processAudio] Modelo cargado.");
+
+      // RESAMPLE + NORMALIZE
+      const resampledAudio = resampleTo16kHz(float32Audio, audioData.sampleRate);
+      const normalizedAudio = normalizeFloat32(resampledAudio);
+      log("🔁 [processAudio] Audio resampleado y normalizado. Samples:", normalizedAudio.length);
 
       const start = performance.now();
-      console.log("🤖 [processAudio] Transcribiendo audio...");
-      const resampledAudio = resampleTo16kHz(
-        float32Audio,
-        audioData.sampleRate
-      );
-      console.log(
-        "🔁 [processAudio] Audio resampleado a 16kHz. Samples:",
-        resampledAudio.length
-      );
-
-      const result = await transcribeAudio(resampledAudio, {
+      const result = await transcribeAudio(normalizedAudio, {
         chunk_length_s: 30,
         return_timestamps: false,
       });
-
       const end = performance.now();
       const duration = Math.round(end - start);
-      console.log(
-        "📝 [processAudio] Transcripción completada en",
-        duration,
-        "ms:",
-        result
-      );
+
+      log("📝 [processAudio] Transcripción completada en", duration, "ms:", result);
 
       const medicalTerms = extractMedicalTermsFromText(result.text || "");
-      console.log(
-        "🏥 [processAudio] Términos médicos extraídos:",
-        medicalTerms
-      );
+      log("🏥 [processAudio] Términos médicos extraídos:", medicalTerms);
 
       setTranscription({
         text: result.text || "",
@@ -291,15 +220,16 @@ export function useSimpleWhisper({
         processingTime: duration,
       });
       setStatus("completed");
-      console.log("🎉 [processAudio] Estado: COMPLETED");
+      log("🎉 [processAudio] Estado: COMPLETED");
     } catch (err) {
-      console.error("🔥 [processAudio] ERROR:", err);
+      errorLog("🔥 [processAudio] ERROR:", err);
       setError("Error al procesar el audio: " + err.message);
       setStatus("error");
       setEngineStatus("error");
     }
   };
 
+  // RESET
   const resetTranscription = () => {
     setTranscription(null);
     setStatus("idle");
@@ -314,6 +244,7 @@ export function useSimpleWhisper({
     setAudioBlob(null);
   };
 
+  // API
   return {
     transcription,
     status,
@@ -329,5 +260,6 @@ export function useSimpleWhisper({
     stopTranscription,
     resetTranscription,
     preloadModel,
+    setLogger: logger.setEnabled ? logger.setEnabled.bind(logger) : undefined,
   };
 }
