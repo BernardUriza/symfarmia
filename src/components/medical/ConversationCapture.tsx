@@ -266,6 +266,7 @@ export const ConversationCapture = ({
                 <Button 
                   variant="outline" 
                   size="md" 
+                  className="px-8"
                   onClick={() => {
                     resetTranscription();
                     setLiveTranscript('');
@@ -278,6 +279,7 @@ export const ConversationCapture = ({
                 <Button
                   variant="outline"
                   size="md"
+                  className="px-8"
                   onClick={handleCopy}
                 >
                   <Copy className="w-5 h-5 mr-2" />
