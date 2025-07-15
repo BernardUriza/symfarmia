@@ -18,6 +18,8 @@ export function useSimpleWhisper({
   const [audioLevel, setAudioLevel] = useState(0);
   const [recordingTime, setRecordingTime] = useState(0);
   const [loadProgress, setLoadProgress] = useState(0);
+  const [audioUrl, setAudioUrl] = useState(null);
+  const [audioBlob, setAudioBlob] = useState(null);
 
   // Referencias
   const mediaRecorderRef = useRef(null);
@@ -79,8 +81,11 @@ export function useSimpleWhisper({
       if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
         audioContextRef.current.close();
       }
+      if (audioUrl) {
+        URL.revokeObjectURL(audioUrl);
+      }
     };
-  }, []);
+  }, [audioUrl]);
 
   // Monitor de nivel de audio
   const setupAudioMonitoring = useCallback((stream) => {
@@ -216,6 +221,12 @@ export function useSimpleWhisper({
     
     try {
       const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+      
+      // Guardar el blob y crear URL temporal
+      setAudioBlob(audioBlob);
+      const url = URL.createObjectURL(audioBlob);
+      setAudioUrl(url);
+      
       const arrayBuffer = await audioBlob.arrayBuffer();
       
       // Convertir a Float32Array para Whisper
@@ -266,6 +277,13 @@ export function useSimpleWhisper({
     setRecordingTime(0);
     setAudioLevel(0);
     audioChunksRef.current = [];
+    
+    // Limpiar URL de audio
+    if (audioUrl) {
+      URL.revokeObjectURL(audioUrl);
+      setAudioUrl(null);
+    }
+    setAudioBlob(null);
   };
 
   // Extraer términos médicos básicos
@@ -292,6 +310,8 @@ export function useSimpleWhisper({
     loadProgress,
     audioLevel,
     recordingTime,
+    audioUrl,
+    audioBlob,
     startTranscription,
     stopTranscription,
     resetTranscription,
