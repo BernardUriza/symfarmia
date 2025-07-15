@@ -5,8 +5,8 @@ import { useSimpleWhisper } from '../../../src/domains/medical-ai/hooks/useSimpl
 import { Card, CardContent } from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
-import { Mic, MicOff, Activity, Play, Square as Stop, RotateCcw, Copy } from 'lucide-react';
-import { VoiceReactiveRings } from './VoiceReactiveRings';
+import { Activity, Play, Square as Stop, RotateCcw, Copy } from 'lucide-react';
+import { VoiceReactiveMicrophone } from '../ui/VoiceReactiveMicrophone';
 
 interface ConversationCaptureProps {
   onNext?: () => void;
@@ -120,20 +120,14 @@ export const ConversationCapture = ({
       <Card className="border-2 border-dashed border-blue-200 dark:border-blue-700 bg-white dark:bg-gray-800 shadow-sm">
         <CardContent className="p-8 text-center">
           <div className="flex flex-col items-center space-y-4">
-            {/* Micrófono con Anillos Reactivos */}
-            <VoiceReactiveRings
-              isRecording={isRecording}
-              size="lg"
-              audioLevel={audioLevel}
-              intensity="normal" 
-              colorScheme={isRecording ? "red" : "medical"}
-            >
-              {isRecording ? (
-                <MicOff className="h-10 w-10 text-white" />
-              ) : (
-                <Mic className="h-10 w-10 text-white" />
-              )}
-            </VoiceReactiveRings>
+            {/* Micrófono con Animaciones Voice-Reactive */}
+            <div className="mb-4">
+              <VoiceReactiveMicrophone
+                isRecording={isRecording}
+                audioLevel={audioLevel}
+                size="lg"
+              />
+            </div>
             
             {/* Badge de Estado */}
             <Badge
@@ -143,12 +137,16 @@ export const ConversationCapture = ({
               {isRecording ? 'Grabando...' : 'Listo para grabar'}
             </Badge>
 
+            {/* Timer de Duración */}
+            {isRecording && (
+              <div className="text-3xl font-mono font-semibold text-blue-600 dark:text-blue-400 mb-4">
+                {formatTime(recordingTime)}
+              </div>
+            )}
+            
             {/* Información de Grabación */}
             {isRecording && (
               <div className="space-y-2">
-                <div className="text-sm text-gray-600 dark:text-gray-300">
-                  Tiempo de grabación: {formatTime(recordingTime)}
-                </div>
                 
                 <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-gray-300">
                   <Activity className="h-4 w-4" />
