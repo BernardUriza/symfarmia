@@ -1,5 +1,4 @@
-// audioHelpers.js
-export function resampleTo16kHz(input, originalSampleRate) {
+export function resampleTo16kHz(input: Float32Array, originalSampleRate: number): Float32Array {
   if (originalSampleRate === 16000) return input;
   const ratio = originalSampleRate / 16000;
   const newLength = Math.round(input.length / ratio);
@@ -10,7 +9,7 @@ export function resampleTo16kHz(input, originalSampleRate) {
   return result;
 }
 
-export function normalizeFloat32(array) {
+export function normalizeFloat32(array: Float32Array): Float32Array {
   let max = 0;
   for (let i = 0; i < array.length; i++) {
     if (Math.abs(array[i]) > max) max = Math.abs(array[i]);

@@ -4,7 +4,7 @@
  * Components for medical workflows and AI assistance
  */
 
-export { default as ConversationCapture } from './ConversationCapture';
+export { ConversationCapture } from './ConversationCapture';
 export { DialogueFlow } from './DialogueFlow';
 export { ClinicalNotes } from './ClinicalNotes';
 export { OrderEntry } from './OrderEntry';

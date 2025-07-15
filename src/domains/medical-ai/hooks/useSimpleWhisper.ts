@@ -5,35 +5,77 @@ import { extractMedicalTermsFromText } from "../utils/medicalTerms";
 import { resampleTo16kHz, normalizeFloat32 } from "../utils/audioHelpers";
 import { DefaultLogger } from "../utils/LoggerStrategy";
 
+// Types and Interfaces
+interface Transcription {
+  text: string;
+  confidence: number;
+  medicalTerms: string[];
+  processingTime: number;
+}
+
+type Status = "idle" | "recording" | "processing" | "completed" | "error";
+type EngineStatus = "loading" | "ready" | "error";
+
+interface Logger {
+  log: (...args: unknown[]) => void;
+  error: (...args: unknown[]) => void;
+  setEnabled?: (value: boolean) => void;
+}
+
+interface UseSimpleWhisperOptions {
+  autoPreload?: boolean;
+  retryCount?: number;
+  retryDelay?: number;
+  logger?: Logger;
+}
+
+interface UseSimpleWhisperReturn {
+  transcription: Transcription | null;
+  status: Status;
+  isRecording: boolean;
+  error: string | null;
+  engineStatus: EngineStatus;
+  loadProgress: number;
+  audioLevel: number;
+  recordingTime: number;
+  audioUrl: string | null;
+  audioBlob: Blob | null;
+  startTranscription: () => Promise<boolean>;
+  stopTranscription: () => Promise<boolean>;
+  resetTranscription: () => void;
+  preloadModel: () => Promise<void>;
+  setLogger?: (enabled: boolean) => void;
+}
+
 export function useSimpleWhisper({
   autoPreload = true,
   retryCount = 3,
   retryDelay = 1000,
   logger = DefaultLogger,
-} = {}) {
+}: UseSimpleWhisperOptions = {}): UseSimpleWhisperReturn {
   // Estados y refs
-  const [transcription, setTranscription] = useState(null);
-  const [status, setStatus] = useState("idle");
+  const [transcription, setTranscription] = useState<Transcription | null>(null);
+  const [status, setStatus] = useState<Status>("idle");
   const [isRecording, setIsRecording] = useState(false);
-  const [error, setError] = useState(null);
-  const [engineStatus, setEngineStatus] = useState("loading");
+  const [error, setError] = useState<string | null>(null);
+  const [engineStatus, setEngineStatus] = useState<EngineStatus>("loading");
   const [audioLevel, setAudioLevel] = useState(0);
   const [recordingTime, setRecordingTime] = useState(0);
   const [loadProgress, setLoadProgress] = useState(0);
-  const [audioUrl, setAudioUrl] = useState(null);
-  const [audioBlob, setAudioBlob] = useState(null);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
 
-  const mediaRecorderRef = useRef(null);
-  const audioChunksRef = useRef([]);
-  const audioContextRef = useRef(null);
-  const analyserRef = useRef(null);
-  const streamRef = useRef(null);
-  const timerRef = useRef(null);
-  const animationFrameRef = useRef(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const animationFrameRef = useRef<number | null>(null);
 
   // Logger strategy pattern
-  const log = (...args) => logger.log(...args);
-  const errorLog = (...args) => logger.error(...args);
+  const log = (...args: unknown[]) => logger.log(...args);
+  const errorLog = (...args: unknown[]) => logger.error(...args);
 
   // PRELOAD MODEL
   const preloadModel = useCallback(async () => {
@@ -42,7 +84,7 @@ export function useSimpleWhisper({
       await loadWhisperModel({
         retryCount,
         retryDelay,
-        onProgress: (p) => setLoadProgress(p?.progress || 0),
+        progress_callback: (p) => setLoadProgress(p?.progress || 0),
       });
       setEngineStatus("ready");
     } catch (err) {
@@ -50,7 +92,7 @@ export function useSimpleWhisper({
       setError("Error cargando el modelo de transcripción");
       errorLog("🛑 [preloadModel] ERROR:", err);
     }
-  }, [retryCount, retryDelay, logger]);
+  }, [retryCount, retryDelay, errorLog]);
 
   useEffect(() => {
     if (autoPreload) preloadModel();
@@ -69,7 +111,7 @@ export function useSimpleWhisper({
   }, [audioUrl]);
 
   // AUDIO MONITORING
-  const setupAudioMonitoring = useCallback((stream) => {
+  const setupAudioMonitoring = useCallback((stream: MediaStream) => {
     log("🎤 [AudioMonitoring] Setup audio monitor");
     const audioContext = new AudioContext();
     const analyser = audioContext.createAnalyser();
@@ -92,7 +134,7 @@ export function useSimpleWhisper({
       animationFrameRef.current = requestAnimationFrame(updateLevel);
     };
     updateLevel();
-  }, [logger]);
+  }, [log]);
 
   // TIMER
   useEffect(() => {
@@ -112,69 +154,6 @@ export function useSimpleWhisper({
       if (timerRef.current) clearInterval(timerRef.current);
     };
   }, [isRecording]);
-
-  // TRANSCRIPTION
-  const startTranscription = async () => {
-    try {
-      setError(null);
-      setStatus("recording");
-      audioChunksRef.current = [];
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      streamRef.current = stream;
-      const mediaRecorder = new MediaRecorder(stream);
-      mediaRecorderRef.current = mediaRecorder;
-      setupAudioMonitoring(stream);
-      mediaRecorder.ondataavailable = (e) => {
-        if (e.data.size > 0) audioChunksRef.current.push(e.data);
-      };
-      mediaRecorder.onstop = async () => {
-        await processAudio();
-      };
-      mediaRecorder.start();
-
-      // Wait for recording state
-      const waitForRecording = () => {
-        log("⏳ Esperando MediaRecorder...");
-        if (mediaRecorder.state === "recording") {
-          log("✅ MediaRecorder grabando. Monitoreo iniciado.");
-          setupAudioMonitoring(stream);
-        } else {
-          setTimeout(waitForRecording, 50);
-        }
-      };
-      waitForRecording();
-      setIsRecording(true);
-      return true;
-    } catch (err) {
-      errorLog("🛑 [startTranscription] ERROR:", err);
-      setError("Error al iniciar la grabación: " + err.message);
-      setStatus("error");
-      setEngineStatus("error");
-      return false;
-    }
-  };
-
-  // STOP TRANSCRIPTION
-  const stopTranscription = async () => {
-    if (mediaRecorderRef.current && isRecording) {
-      setIsRecording(false);
-      mediaRecorderRef.current.stop();
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-        animationFrameRef.current = null;
-      }
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach((track) => track.stop());
-        streamRef.current = null;
-      }
-      if (audioContextRef.current) {
-        audioContextRef.current.close();
-        audioContextRef.current = null;
-      }
-      return true;
-    }
-    return false;
-  };
 
   // PROCESS AUDIO
   const processAudio = async () => {
@@ -210,7 +189,8 @@ export function useSimpleWhisper({
 
       log("📝 [processAudio] Transcripción completada en", duration, "ms:", result);
 
-      const medicalTerms = extractMedicalTermsFromText(result.text || "");
+      const medicalTermsData = extractMedicalTermsFromText(result.text || "");
+      const medicalTerms = medicalTermsData.map(item => item.term);
       log("🏥 [processAudio] Términos médicos extraídos:", medicalTerms);
 
       setTranscription({
@@ -223,10 +203,73 @@ export function useSimpleWhisper({
       log("🎉 [processAudio] Estado: COMPLETED");
     } catch (err) {
       errorLog("🔥 [processAudio] ERROR:", err);
-      setError("Error al procesar el audio: " + err.message);
+      setError("Error al procesar el audio: " + (err as Error).message);
       setStatus("error");
       setEngineStatus("error");
     }
+  };
+
+  // TRANSCRIPTION
+  const startTranscription = async (): Promise<boolean> => {
+    try {
+      setError(null);
+      setStatus("recording");
+      audioChunksRef.current = [];
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      setupAudioMonitoring(stream);
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunksRef.current.push(e.data);
+      };
+      mediaRecorder.onstop = async () => {
+        await processAudio();
+      };
+      mediaRecorder.start();
+
+      // Wait for recording state
+      const waitForRecording = () => {
+        log("⏳ Esperando MediaRecorder...");
+        if (mediaRecorder.state === "recording") {
+          log("✅ MediaRecorder grabando. Monitoreo iniciado.");
+          setupAudioMonitoring(stream);
+        } else {
+          setTimeout(waitForRecording, 50);
+        }
+      };
+      waitForRecording();
+      setIsRecording(true);
+      return true;
+    } catch (err) {
+      errorLog("🛑 [startTranscription] ERROR:", err);
+      setError("Error al iniciar la grabación: " + (err as Error).message);
+      setStatus("error");
+      setEngineStatus("error");
+      return false;
+    }
+  };
+
+  // STOP TRANSCRIPTION
+  const stopTranscription = async (): Promise<boolean> => {
+    if (mediaRecorderRef.current && isRecording) {
+      setIsRecording(false);
+      mediaRecorderRef.current.stop();
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((track) => track.stop());
+        streamRef.current = null;
+      }
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+        audioContextRef.current = null;
+      }
+      return true;
+    }
+    return false;
   };
 
   // RESET

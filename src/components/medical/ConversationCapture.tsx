@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useSimpleWhisper } from '../domains/medical-ai/hooks/useSimpleWhisper';
-import { useRealAudioCapture } from '../domains/medical-ai/hooks/useRealAudioCapture';
-import { Button } from '../ui/button';
-import { WhisperPreloader } from '../domains/medical-ai/components/WhisperPreloader';
+import { useSimpleWhisper } from '@/src/domains/medical-ai/hooks/useSimpleWhisper';
+import { useRealAudioCapture } from '@/src/domains/medical-ai/hooks/useRealAudioCapture';
+import { Button } from '@/src/components/ui/button';
+import WhisperPreloader from '@/src/domains/medical-ai/components/WhisperPreloader';
 import { useI18n } from '@/src/domains/core/hooks/useI18n';
 import {
   PermissionDialog,
@@ -13,7 +13,7 @@ import {
   TranscriptionResult,
   ErrorDisplay,
   ProcessingStatus
-} from './conversation-capture/components';
+} from '@/src/components/medical/conversation-capture/components';
 
 interface ConversationCaptureProps {
   onNext?: () => void;
