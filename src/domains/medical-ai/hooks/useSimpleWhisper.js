@@ -1,27 +1,25 @@
 'use client';
 import { useState, useRef, useEffect, useCallback } from 'react';
-
-// Singleton para el modelo Whisper
-let whisperModel = null;
+import { loadWhisperModel, transcribeAudio } from '../services/audioProcessingService';
+import { extractMedicalTermsFromText } from '../utils/medicalTerms';
 
 export function useSimpleWhisper({
   autoPreload = true,
   retryCount = 3,
   retryDelay = 1000
 } = {}) {
-  // Estados principales
+  // ... (mismos estados y referencias que tu versión original)   
   const [transcription, setTranscription] = useState(null);
-  const [status, setStatus] = useState('idle'); // idle, recording, processing, completed, error
+  const [status, setStatus] = useState('idle');
   const [isRecording, setIsRecording] = useState(false);
   const [error, setError] = useState(null);
-  const [engineStatus, setEngineStatus] = useState('loading'); // ready, loading, error, fallback
+  const [engineStatus, setEngineStatus] = useState('loading');
   const [audioLevel, setAudioLevel] = useState(0);
   const [recordingTime, setRecordingTime] = useState(0);
   const [loadProgress, setLoadProgress] = useState(0);
   const [audioUrl, setAudioUrl] = useState(null);
   const [audioBlob, setAudioBlob] = useState(null);
 
-  // Referencias
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
   const audioContextRef = useRef(null);
@@ -30,94 +28,92 @@ export function useSimpleWhisper({
   const timerRef = useRef(null);
   const animationFrameRef = useRef(null);
 
-  const loadModelWithRetries = useCallback(async () => {
-    for (let attempt = 1; attempt <= retryCount; attempt++) {
-      try {
-        setEngineStatus('loading');
-        if (!whisperModel) {
-          const { pipeline } = await import('@xenova/transformers');
-          whisperModel = await pipeline('automatic-speech-recognition', 'Xenova/whisper-tiny', {
-            progress_callback: (p) => setLoadProgress(p.progress || 0)
-          });
-        }
-        setEngineStatus('ready');
-        return;
-      } catch (err) {
-        console.error(`Error loading Whisper model (attempt ${attempt}):`, err);
-        if (attempt < retryCount) {
-          await new Promise(res => setTimeout(res, retryDelay));
-        } else {
-          setEngineStatus('error');
-          setError('Error cargando el modelo de transcripción');
-        }
-      }
+  const preloadModel = useCallback(async () => {
+    try {
+      setEngineStatus('loading');
+      await loadWhisperModel({
+        retryCount,
+        retryDelay,
+        onProgress: (p) => setLoadProgress(p?.progress || 0),
+      });
+      setEngineStatus('ready');
+    } catch (err) {
+      setEngineStatus('error');
+      setError('Error cargando el modelo de transcripción');
     }
   }, [retryCount, retryDelay]);
 
-  const preloadModel = useCallback(async () => {
-    if (engineStatus === 'ready') return;
-    await loadModelWithRetries();
-  }, [loadModelWithRetries, engineStatus]);
-
-  // Cargar modelo Whisper al montar si autoPreload
   useEffect(() => {
-    if (autoPreload) {
-      preloadModel();
-    }
+    if (autoPreload) preloadModel();
   }, [autoPreload, preloadModel]);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-      if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
-        mediaRecorderRef.current.stop();
-      }
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop());
-      }
-      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
-        audioContextRef.current.close();
-      }
-      if (audioUrl) {
-        URL.revokeObjectURL(audioUrl);
-      }
+      if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') mediaRecorderRef.current.stop();
+      if (streamRef.current) streamRef.current.getTracks().forEach(track => track.stop());
+      if (audioContextRef.current && audioContextRef.current.state !== 'closed') audioContextRef.current.close();
+      if (audioUrl) URL.revokeObjectURL(audioUrl);
     };
   }, [audioUrl]);
 
-  // Monitor de nivel de audio
-  const setupAudioMonitoring = useCallback((stream) => {
-    const audioContext = new AudioContext();
-    const analyser = audioContext.createAnalyser();
-    const source = audioContext.createMediaStreamSource(stream);
-    
-    analyser.fftSize = 256;
-    source.connect(analyser);
-    
-    audioContextRef.current = audioContext;
-    analyserRef.current = analyser;
-    
-    const dataArray = new Uint8Array(analyser.frequencyBinCount);
-    
-    const updateLevel = () => {
-      if (!mediaRecorderRef.current || mediaRecorderRef.current.state !== 'recording') {
-        setAudioLevel(0);
-        return;
-      }
-      
-      analyser.getByteFrequencyData(dataArray);
-      const average = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
-      setAudioLevel(Math.round(average));
-      
-      animationFrameRef.current = requestAnimationFrame(updateLevel);
-    };
-    
-    updateLevel();
-  }, []);
+const setupAudioMonitoring = useCallback((stream) => {
+  console.log('🎤 [AudioMonitoring] Iniciando configuración de monitoreo de audio');
 
-  // Timer de grabación
+  const audioContext = new AudioContext();
+  console.log('🎧 [AudioMonitoring] AudioContext creado:', audioContext);
+
+  const analyser = audioContext.createAnalyser();
+  console.log('🧪 [AudioMonitoring] AnalyserNode creado:', analyser);
+
+  const source = audioContext.createMediaStreamSource(stream);
+  console.log('🔗 [AudioMonitoring] MediaStreamSource creado y conectado:', source);
+
+  analyser.fftSize = 256;
+  console.log('⚙️ [AudioMonitoring] fftSize configurado:', analyser.fftSize);
+
+  source.connect(analyser);
+  console.log('🔌 [AudioMonitoring] Fuente conectada al analyser.');
+
+  audioContextRef.current = audioContext;
+  analyserRef.current = analyser;
+
+  const dataArray = new Uint8Array(analyser.frequencyBinCount);
+  console.log('📊 [AudioMonitoring] dataArray inicializado, tamaño:', dataArray.length);
+
+  const updateLevel = () => {
+    if (!mediaRecorderRef.current || mediaRecorderRef.current.state !== 'recording') {
+      console.log('⛔ [AudioMonitoring] MediaRecorder no está grabando. AudioLevel a 0.');
+      setAudioLevel(0);
+      return;
+    }
+
+    analyser.getByteFrequencyData(dataArray);
+    console.log('🔄 [AudioMonitoring] getByteFrequencyData ejecutado:', dataArray);
+
+    const average = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
+    console.log('📈 [AudioMonitoring] Promedio de nivel de audio calculado:', average);
+
+    const level = Math.round(average);
+    setAudioLevel(level);
+
+    // Log visual con emojis y colores
+    if (level < 10) {
+      console.log(`🔈 Nivel bajo: %c${level}`, 'color: gray; font-weight: bold;');
+    } else if (level < 40) {
+      console.log(`🔉 Nivel medio: %c${level}`, 'color: orange; font-weight: bold;');
+    } else {
+      console.log(`🔊 NIVEL ALTO: %c${level}`, 'color: red; font-weight: bold;');
+    }
+
+    animationFrameRef.current = requestAnimationFrame(updateLevel);
+  };
+
+  console.log('🚀 [AudioMonitoring] Iniciando loop de monitoreo de audio');
+  updateLevel();
+}, []);
+
+
   useEffect(() => {
     if (isRecording) {
       const startTime = Date.now();
@@ -131,145 +127,98 @@ export function useSimpleWhisper({
       }
       setRecordingTime(0);
     }
-    
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
   }, [isRecording]);
 
-  // Iniciar transcripción
   const startTranscription = async () => {
     try {
       setError(null);
       setStatus('recording');
       audioChunksRef.current = [];
-      
-      // Solicitar permisos de micrófono
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
-      
-      // Configurar MediaRecorder
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
-      
-      // Configurar monitor de audio
+      debugger
       setupAudioMonitoring(stream);
-      
-      // Configurar eventos
       mediaRecorder.ondataavailable = (e) => {
-        if (e.data.size > 0) {
-          audioChunksRef.current.push(e.data);
+        if (e.data.size > 0) audioChunksRef.current.push(e.data);
+      };
+      mediaRecorder.onstop = async () => { await processAudio(); };
+      mediaRecorder.start();
+      
+      const waitForRecording = () => {
+        console.log('⏳ Esperando MediaRecorder...');
+        if (mediaRecorder.state === 'recording') {
+          console.log('✅ MediaRecorder ahora SÍ está grabando. Iniciando monitoreo.');
+          setupAudioMonitoring(stream);
+        } else {
+          setTimeout(waitForRecording, 50);
         }
       };
-      
-      mediaRecorder.onstop = async () => {
-        await processAudio();
-      };
-      
-      // Iniciar grabación
-      mediaRecorder.start();
+      waitForRecording();
       setIsRecording(true);
-      
       return true;
     } catch (err) {
-      console.error('Error starting recording:', err);
-      
-      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-        setError('Permisos de micrófono denegados. Por favor, permite el acceso al micrófono.');
-      } else {
-        setError('Error al iniciar la grabación: ' + err.message);
-      }
-      
+      setError('Error al iniciar la grabación: ' + err.message);
       setStatus('error');
       setEngineStatus('error');
       return false;
     }
   };
 
-  // Detener transcripción
   const stopTranscription = async () => {
     if (mediaRecorderRef.current && isRecording) {
       setIsRecording(false);
       mediaRecorderRef.current.stop();
-      
-      // Limpiar monitor de audio
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
         animationFrameRef.current = null;
       }
-      
-      // Limpiar stream
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop());
         streamRef.current = null;
       }
-      
-      // Cerrar audio context
       if (audioContextRef.current) {
         audioContextRef.current.close();
         audioContextRef.current = null;
       }
-      
       return true;
     }
     return false;
   };
 
-  // Procesar audio y transcribir
   const processAudio = async () => {
     setStatus('processing');
-    
     try {
       const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-      
-      // Guardar el blob y crear URL temporal
       setAudioBlob(audioBlob);
       const url = URL.createObjectURL(audioBlob);
       setAudioUrl(url);
-      
       const arrayBuffer = await audioBlob.arrayBuffer();
-      
-      // Convertir a Float32Array para Whisper
       const audioContext = new AudioContext();
       const audioData = await audioContext.decodeAudioData(arrayBuffer);
       const float32Audio = audioData.getChannelData(0);
-      
-      console.log('Transcribiendo audio con Whisper...');
-      const startTime = performance.now();
-      
-      if (!whisperModel) {
-        throw new Error('Modelo no cargado');
-      }
-      
-      const result = await whisperModel(float32Audio, { 
-        chunk_length_s: 30, 
-        return_timestamps: false 
-      });
-      
-      const processingTime = Math.round(performance.now() - startTime);
-      
-      // Extraer términos médicos simples
-      const medicalTerms = extractMedicalTerms(result.text || '');
-      
+      if (!float32Audio || float32Audio.length === 0) throw new Error('No se obtuvo audio válido');
+      await preloadModel();
+      const result = await transcribeAudio(float32Audio, { chunk_length_s: 30, return_timestamps: false });
+      const medicalTerms = extractMedicalTermsFromText(result.text || '');
       setTranscription({
         text: result.text || '',
-        confidence: 0.95, // Whisper no devuelve confidence, usar valor por defecto
+        confidence: 0.95,
         medicalTerms,
-        processingTime
+        processingTime: null, // set if needed
       });
-      
       setStatus('completed');
-      console.log('Transcripción completada:', result.text);
-      
     } catch (err) {
-      console.error('Error en transcripción:', err);
       setError('Error al procesar el audio: ' + err.message);
       setStatus('error');
       setEngineStatus('error');
     }
   };
 
-  // Resetear transcripción
   const resetTranscription = () => {
     setTranscription(null);
     setStatus('idle');
@@ -277,28 +226,11 @@ export function useSimpleWhisper({
     setRecordingTime(0);
     setAudioLevel(0);
     audioChunksRef.current = [];
-    
-    // Limpiar URL de audio
     if (audioUrl) {
       URL.revokeObjectURL(audioUrl);
       setAudioUrl(null);
     }
     setAudioBlob(null);
-  };
-
-  // Extraer términos médicos básicos
-  const extractMedicalTerms = (text) => {
-    const medicalKeywords = [
-      'dolor', 'fiebre', 'presión', 'sangre', 'corazón', 'pulmón',
-      'respiración', 'síntoma', 'diagnóstico', 'tratamiento',
-      'medicamento', 'alergia', 'diabetes', 'hipertensión', 'cefalea',
-      'náusea', 'mareo', 'fatiga', 'tos', 'gripe'
-    ];
-    
-    const words = text.toLowerCase().split(/\s+/);
-    return medicalKeywords.filter(term => 
-      words.some(word => word.includes(term))
-    );
   };
 
   return {

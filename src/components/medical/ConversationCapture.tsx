@@ -177,7 +177,7 @@ export const ConversationCapture = ({
       {/* Título */}
       <div className="text-center mb-6">
         <h1 className="text-2xl font-medium text-gray-900 dark:text-white mb-2">
-          Captura de Conversación
+          Captura de Conversación dolor puro
         </h1>
         <p className="text-gray-700 dark:text-gray-300">
           Presiona el botón para grabar tu consulta médica
