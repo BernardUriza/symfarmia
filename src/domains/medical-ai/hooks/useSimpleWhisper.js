@@ -64,6 +64,24 @@ export function useSimpleWhisper({
     }
   }, [autoPreload, preloadModel]);
 
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+        mediaRecorderRef.current.stop();
+      }
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+      }
+      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+        audioContextRef.current.close();
+      }
+    };
+  }, []);
+
   // Monitor de nivel de audio
   const setupAudioMonitoring = useCallback((stream) => {
     const audioContext = new AudioContext();
@@ -79,7 +97,7 @@ export function useSimpleWhisper({
     const dataArray = new Uint8Array(analyser.frequencyBinCount);
     
     const updateLevel = () => {
-      if (!isRecording) {
+      if (!mediaRecorderRef.current || mediaRecorderRef.current.state !== 'recording') {
         setAudioLevel(0);
         return;
       }
@@ -92,7 +110,7 @@ export function useSimpleWhisper({
     };
     
     updateLevel();
-  }, [isRecording]);
+  }, []);
 
   // Timer de grabación
   useEffect(() => {
