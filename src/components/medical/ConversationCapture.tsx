@@ -8,6 +8,16 @@ import { Badge } from '../ui/badge';
 import { Activity, Play, Square as Stop, RotateCcw, Copy } from 'lucide-react';
 import { VoiceReactiveMicrophone } from '../ui/VoiceReactiveMicrophone';
 
+// Speech Recognition API types
+interface SpeechRecognitionEvent extends Event {
+  resultIndex: number;
+  results: SpeechRecognitionResultList;
+}
+
+interface SpeechRecognitionErrorEvent extends Event {
+  error: string;
+}
+
 interface ConversationCaptureProps {
   onNext?: () => void;
   onTranscriptionComplete?: (transcript: string) => void;
@@ -22,7 +32,7 @@ export const ConversationCapture = ({
   const [showPermissionDialog, setShowPermissionDialog] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
   const [liveTranscript, setLiveTranscript] = useState('');
-  const [speechRecognition, setSpeechRecognition] = useState<any>(null);
+  const [speechRecognition, setSpeechRecognition] = useState<SpeechRecognition | null>(null);
   
   const {
     transcription,
@@ -81,30 +91,30 @@ export const ConversationCapture = ({
       return;
     }
     
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const SpeechRecognition = (window as Window & { SpeechRecognition?: new () => SpeechRecognition; webkitSpeechRecognition?: new () => SpeechRecognition }).SpeechRecognition || 
+                              (window as Window & { SpeechRecognition?: new () => SpeechRecognition; webkitSpeechRecognition?: new () => SpeechRecognition }).webkitSpeechRecognition;
     const recognition = new SpeechRecognition();
     
     recognition.continuous = true;
     recognition.interimResults = true;
     recognition.lang = 'es-ES';
     
-    recognition.onresult = (event: any) => {
+    recognition.onresult = (event: SpeechRecognitionEvent) => {
       let finalTranscript = '';
-      let interimTranscript = '';
       
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const transcript = event.results[i][0].transcript;
         if (event.results[i].isFinal) {
           finalTranscript += transcript + ' ';
-        } else {
-          interimTranscript += transcript;
         }
       }
       
-      setLiveTranscript(prev => prev + finalTranscript);
+      if (finalTranscript) {
+        setLiveTranscript(prev => prev + finalTranscript);
+      }
     };
     
-    recognition.onerror = (event: any) => {
+    recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
       console.error('Error en reconocimiento de voz:', event.error);
     };
     
