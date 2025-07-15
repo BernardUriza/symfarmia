@@ -19,6 +19,7 @@ export { useSimpleWhisper } from './hooks/useSimpleWhisper';
 export { useMedicalAI } from './hooks/useMedicalAI';
 export { useMedicalValidation } from './hooks/useMedicalValidation';
 export { useMedicalTranslation } from './hooks/useMedicalTranslation';
+export { useTranscription } from './hooks/useTranscription';
 
 // Legacy Hooks (deprecated - will be removed in future versions)
 export { useAudioCapture } from './hooks/legacy/useAudioCapture';
@@ -31,6 +32,9 @@ export { useDemoTranscription } from './hooks/legacy/useDemoTranscription';
 export { medicalAIService } from './services/medicalAIService';
 export { audioProcessingService } from './services/audioProcessingService';
 export { medicalValidationService } from './services/medicalValidationService';
+
+// Engines
+export { WebSpeechEngine, webSpeechEngine } from './engines/WebSpeechEngine';
 
 // Types - Export all types and enums
 export {

@@ -3,29 +3,35 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "validate:translations": "node scripts/validate-translations.js",
-    "validate:translations:revolutionary": "node scripts/revolutionary-translation-validator.js",
-    "test:translations": "jest tests/medical-components/translations.test.js",
+    "lint": "next lint",
+    "type-check": "tsc --noEmit",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+
     "dev": "node scripts/dev-clean.js",
     "dev:next": "node scripts/kill-ports.js && next dev",
     "dev:netlify": "netlify dev",
     "dev:clean": "node scripts/dev-clean.js",
     "dev:quiet": "node scripts/dev-netlify-quiet.js",
     "dev:debug": "node scripts/dev-debug.js",
-    "kill:ports": "node scripts/kill-ports.js",
     "dev:brave": "npm run kill:brave-cache && npm run dev",
     "dev:reset": "rm -rf .next && npm run kill:brave-cache && npm run dev",
+    "kill:ports": "node scripts/kill-ports.js",
     "kill:brave-cache": "node scripts/kill-brave-cache.js",
+
     "build": "npm run version:generate && npx prisma generate && next build",
     "build:guardian": "node scripts/build-guardian.js --build && npm run build",
     "build:enhanced": "node scripts/enhanced-build.js",
     "build:emergency": "node scripts/build-recovery.js emergency",
     "build:fast": "NODE_OPTIONS='--max-old-space-size=1024' WEBPACK_MINIMIZE=false next build --no-lint",
     "start": "next start",
-    "lint": "next lint",
-    "type-check": "tsc --noEmit",
+
+    "validate:translations": "node scripts/validate-translations.js",
+    "validate:translations:revolutionary": "node scripts/revolutionary-translation-validator.js",
+    "test:translations": "jest tests/medical-components/translations.test.js",
+
     "test": "jest",
-    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "test:unit": "jest __tests__ tests/ai-integration/useDemoTranscription.test.ts",
+
     "version:generate": "node scripts/generate-version.js"
   },
   "dependencies": {

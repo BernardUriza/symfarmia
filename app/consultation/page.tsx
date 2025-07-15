@@ -114,13 +114,6 @@ const ConsultationPage = () => {
     setShowPatientSelector(false);
   };
 
-  const handleTranscriptionComplete = (text: string) => {
-    setConsultationState(prev => ({
-      ...prev,
-      transcriptionText: text,
-      status: 'completed'
-    }));
-  };
 
 
   const handleSaveConsultation = async () => {
@@ -334,20 +327,7 @@ const ConsultationPage = () => {
             </div>
           </div>
 
-          {/* Transcription Panel */}
-          <TranscriptionPanel
-            specialty="general"
-            patientContext={{
-              patientId: selectedPatient?.id || '',
-              patientName: selectedPatient?.name || '',
-              age: selectedPatient?.age || 0,
-              medicalHistory: []
-            }}
-            onTranscriptionComplete={handleTranscriptionComplete}
-            className="mb-6"
-            medicalOptimization={true}
-            realTimeAnalysis={true}
-          />
+          {/* Transcription Panel (deprecated) */}
 
           {/* Quick Actions */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">

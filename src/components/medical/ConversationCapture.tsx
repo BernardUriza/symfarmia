@@ -5,8 +5,18 @@ import { useSimpleWhisper } from '../../../src/domains/medical-ai/hooks/useSimpl
 import { Card, CardContent } from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
-import { Mic, MicOff, Activity, Play, Square as Stop, RotateCcw, Copy } from 'lucide-react';
-import { VoiceReactiveRings } from './VoiceReactiveRings';
+import { Activity, Play, Square as Stop, RotateCcw, Copy } from 'lucide-react';
+import { VoiceReactiveMicrophone } from '../ui/VoiceReactiveMicrophone';
+
+// Speech Recognition API types
+interface SpeechRecognitionEvent extends Event {
+  resultIndex: number;
+  results: SpeechRecognitionResultList;
+}
+
+interface SpeechRecognitionErrorEvent extends Event {
+  error: string;
+}
 
 interface ConversationCaptureProps {
   onNext?: () => void;
@@ -21,6 +31,8 @@ export const ConversationCapture = ({
 }: ConversationCaptureProps) => {
   const [showPermissionDialog, setShowPermissionDialog] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
+  const [liveTranscript, setLiveTranscript] = useState('');
+  const [speechRecognition, setSpeechRecognition] = useState<SpeechRecognition | null>(null);
   
   const {
     transcription,
@@ -30,6 +42,7 @@ export const ConversationCapture = ({
     engineStatus,
     audioLevel,
     recordingTime,
+    audioUrl,
     startTranscription,
     stopTranscription,
     resetTranscription
@@ -38,6 +51,7 @@ export const ConversationCapture = ({
   const toggleRecording = async () => {
     try {
       if (isRecording) {
+        stopLiveTranscription();
         await stopTranscription();
         if (transcription?.text && onTranscriptionComplete) {
           onTranscriptionComplete(transcription.text);
@@ -46,6 +60,9 @@ export const ConversationCapture = ({
         const started = await startTranscription();
         if (!started && error?.includes('permiso')) {
           setShowPermissionDialog(true);
+        } else if (started) {
+          // Iniciar Web Speech API para transcripción en tiempo real
+          startLiveTranscription();
         }
       }
     } catch (error) {
@@ -65,6 +82,57 @@ export const ConversationCapture = ({
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+  
+  // Web Speech API para transcripción en tiempo real
+  const startLiveTranscription = () => {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      console.warn('Web Speech API no soportada en este navegador');
+      return;
+    }
+    
+    const SpeechRecognition = (window as Window & { SpeechRecognition?: new () => SpeechRecognition; webkitSpeechRecognition?: new () => SpeechRecognition }).SpeechRecognition || 
+                              (window as Window & { SpeechRecognition?: new () => SpeechRecognition; webkitSpeechRecognition?: new () => SpeechRecognition }).webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'es-ES';
+    
+    recognition.onresult = (event: SpeechRecognitionEvent) => {
+      let finalTranscript = '';
+      
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalTranscript += transcript + ' ';
+        }
+      }
+      
+      if (finalTranscript) {
+        setLiveTranscript(prev => prev + finalTranscript);
+      }
+    };
+    
+    recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+      console.error('Error en reconocimiento de voz:', event.error);
+    };
+    
+    recognition.onend = () => {
+      if (isRecording) {
+        recognition.start();
+      }
+    };
+    
+    setSpeechRecognition(recognition);
+    recognition.start();
+  };
+  
+  const stopLiveTranscription = () => {
+    if (speechRecognition) {
+      speechRecognition.stop();
+      setSpeechRecognition(null);
+    }
   };
 
   return (
@@ -120,20 +188,14 @@ export const ConversationCapture = ({
       <Card className="border-2 border-dashed border-blue-200 dark:border-blue-700 bg-white dark:bg-gray-800 shadow-sm">
         <CardContent className="p-8 text-center">
           <div className="flex flex-col items-center space-y-4">
-            {/* Micrófono con Anillos Reactivos */}
-            <VoiceReactiveRings
-              isRecording={isRecording}
-              size="lg"
-              audioLevel={audioLevel}
-              intensity="normal" 
-              colorScheme={isRecording ? "red" : "medical"}
-            >
-              {isRecording ? (
-                <MicOff className="h-10 w-10 text-white" />
-              ) : (
-                <Mic className="h-10 w-10 text-white" />
-              )}
-            </VoiceReactiveRings>
+            {/* Micrófono con Animaciones Voice-Reactive */}
+            <div className="mb-4">
+              <VoiceReactiveMicrophone
+                isRecording={isRecording}
+                audioLevel={audioLevel}
+                size="lg"
+              />
+            </div>
             
             {/* Badge de Estado */}
             <Badge
@@ -143,12 +205,24 @@ export const ConversationCapture = ({
               {isRecording ? 'Grabando...' : 'Listo para grabar'}
             </Badge>
 
+            {/* Timer de Duración */}
+            {isRecording && (
+              <div className="text-3xl font-mono font-semibold text-blue-600 dark:text-blue-400 mb-4">
+                {formatTime(recordingTime)}
+              </div>
+            )}
+            
+            {/* Transcripción en tiempo real */}
+            {isRecording && liveTranscript && (
+              <div className="w-full max-w-md mt-4 p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Transcripción en tiempo real:</p>
+                <p className="text-sm text-gray-800 dark:text-gray-200">{liveTranscript}</p>
+              </div>
+            )}
+            
             {/* Información de Grabación */}
             {isRecording && (
               <div className="space-y-2">
-                <div className="text-sm text-gray-600 dark:text-gray-300">
-                  Tiempo de grabación: {formatTime(recordingTime)}
-                </div>
                 
                 <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-gray-300">
                   <Activity className="h-4 w-4" />
@@ -192,7 +266,10 @@ export const ConversationCapture = ({
                 <Button 
                   variant="outline" 
                   size="md" 
-                  onClick={resetTranscription}
+                  onClick={() => {
+                    resetTranscription();
+                    setLiveTranscript('');
+                  }}
                 >
                   <RotateCcw className="w-5 h-5 mr-2" />
                   Reiniciar
@@ -220,6 +297,20 @@ export const ConversationCapture = ({
             <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded text-sm mb-3">
               {transcription.text}
             </div>
+            
+            {/* Reproductor de Audio */}
+            {audioUrl && (
+              <div className="mb-3">
+                <p className="text-sm font-medium mb-2">Audio grabado:</p>
+                <audio 
+                  controls 
+                  className="w-full"
+                  src={audioUrl}
+                >
+                  Tu navegador no soporta el elemento de audio.
+                </audio>
+              </div>
+            )}
             
             {/* Estadísticas */}
             <div className="flex gap-4 text-xs text-gray-600">

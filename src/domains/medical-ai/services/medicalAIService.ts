@@ -12,7 +12,8 @@ import {
   UrgencyLevel,
   ConfidenceLevel,
   ServiceResponse,
-  MedicalAIServiceConfig
+  MedicalAIServiceConfig,
+  SOAPNotes
 } from '../types';
 
 export class MedicalAIService {
@@ -387,6 +388,52 @@ export class MedicalAIService {
   private generateTermSuggestions(terms: string[], _specialty: MedicalSpecialty): string[] {
     // Generate term suggestions
     return terms.map(term => `${term} (suggested correction)`);
+  }
+
+  /**
+   * Generate SOAP notes from transcript text using existing OpenAI endpoint
+   */
+  async generateSOAPNotes(text: string): Promise<ServiceResponse<SOAPNotes>> {
+    try {
+      const response = await fetch('/api/medical-openai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: text, type: 'soap' })
+      });
+
+      if (!response.ok) {
+        throw new Error('SOAP generation failed');
+      }
+
+      const data = await response.json();
+      const notes = this.parseSOAP(data.response);
+      return { success: true, data: notes, timestamp: new Date() };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'SOAP generation failed',
+        timestamp: new Date()
+      };
+    }
+  }
+
+  /**
+   * Basic SOAP text parser
+   */
+  private parseSOAP(text: string): SOAPNotes {
+    const sections: SOAPNotes = { subjective: '', objective: '', assessment: '', plan: '' };
+
+    const subj = text.match(/(?:SUBJETIVO|Subjective)[:\-]\s*(.+?)(?=\n\s*(?:OBJETIVO|Objective|An[aá]lisis|Assessment|PLAN|Plan|$))/is);
+    const obj = text.match(/(?:OBJETIVO|Objective)[:\-]\s*(.+?)(?=\n\s*(?:An[aá]lisis|Assessment|PLAN|Plan|$))/is);
+    const ass = text.match(/(?:An[aá]lisis|Assessment)[:\-]\s*(.+?)(?=\n\s*(?:PLAN|Plan|$))/is);
+    const plan = text.match(/(?:PLAN|Plan)[:\-]\s*(.+)/is);
+
+    if (subj) sections.subjective = subj[1].trim();
+    if (obj) sections.objective = obj[1].trim();
+    if (ass) sections.assessment = ass[1].trim();
+    if (plan) sections.plan = plan[1].trim();
+
+    return sections;
   }
 }
 
