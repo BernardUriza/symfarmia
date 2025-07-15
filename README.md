@@ -52,6 +52,9 @@ The app will start with a clean landing page. For full functionality, set up env
 # Run all tests
 npm test
 
+# Run core unit tests
+npm run test:unit
+
 # Run tests in watch mode
 npm run test:watch
 
