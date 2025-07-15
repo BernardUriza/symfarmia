@@ -10,7 +10,7 @@ export async function loadWhisperModel({ retryCount = 3, retryDelay = 1000, onPr
     for (let attempt = 1; attempt <= retryCount; attempt++) {
       try {
         const { pipeline } = await import('@xenova/transformers');
-        whisperModel = await pipeline('automatic-speech-recognition', 'Xenova/whisper-tiny', {
+        whisperModel = await pipeline('automatic-speech-recognition', 'Xenova/whisper-medium', {
           progress_callback: onProgress,
         });
         return whisperModel;
