@@ -6,6 +6,8 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { webSpeechEngine } from '../engines/WebSpeechEngine';
+import { SOAPNotes } from '../../types';
+import { medicalAIService } from '../services/medicalAIService';
 
 export interface TranscriptionResult {
   transcript: string;
@@ -24,6 +26,8 @@ export interface UseTranscriptionOptions {
   onTranscriptionUpdate?: (result: TranscriptionResult) => void;
   onError?: (error: TranscriptionError) => void;
   debug?: boolean;
+  autoGenerateSOAP?: boolean;
+  onSoapNotesGenerated?: (notes: SOAPNotes) => void;
 }
 
 export interface UseTranscriptionReturn {
@@ -33,11 +37,14 @@ export interface UseTranscriptionReturn {
   interimTranscript: string;
   error: TranscriptionError | null;
   engineState: any;
+  soapNotes: SOAPNotes | null;
+  isGeneratingSOAP: boolean;
   
   // Actions
   startTranscription: () => Promise<boolean>;
   stopTranscription: () => void;
   resetTranscription: () => void;
+  generateSOAPNotes: () => Promise<SOAPNotes | undefined>;
   
   // Manual mode
   isManualMode: boolean;
@@ -48,7 +55,14 @@ export interface UseTranscriptionReturn {
 }
 
 export const useTranscription = (options: UseTranscriptionOptions = {}): UseTranscriptionReturn => {
-  const { autoStart = false, onTranscriptionUpdate, onError, debug = false } = options;
+  const {
+    autoStart = false,
+    onTranscriptionUpdate,
+    onError,
+    debug = false,
+    autoGenerateSOAP = false,
+    onSoapNotesGenerated
+  } = options;
   
   // State
   const [isListening, setIsListening] = useState(false);
@@ -56,6 +70,8 @@ export const useTranscription = (options: UseTranscriptionOptions = {}): UseTran
   const [interimTranscript, setInterimTranscript] = useState('');
   const [error, setError] = useState<TranscriptionError | null>(null);
   const [engineState, setEngineState] = useState({});
+  const [soapNotes, setSoapNotes] = useState<SOAPNotes | null>(null);
+  const [isGeneratingSOAP, setIsGeneratingSOAP] = useState(false);
   
   // Manual mode state
   const [isManualMode, setIsManualMode] = useState(false);
@@ -90,6 +106,8 @@ export const useTranscription = (options: UseTranscriptionOptions = {}): UseTran
     setError(null);
     setTranscript('');
     setInterimTranscript('');
+    setSoapNotes(null);
+    setIsGeneratingSOAP(false);
     finalTranscriptRef.current = '';
     
     // Ensure complete engine reset before starting
@@ -206,6 +224,27 @@ export const useTranscription = (options: UseTranscriptionOptions = {}): UseTran
       finalTranscriptRef.current = manualTranscript;
     }
   }, [manualTranscript]);
+
+  /**
+   * Generate SOAP notes from the current transcript
+   */
+  const generateSOAPNotes = useCallback(async (): Promise<SOAPNotes | undefined> => {
+    const text = isManualMode ? manualTranscript : transcript;
+    if (!text.trim()) return;
+
+    setIsGeneratingSOAP(true);
+    const result = await medicalAIService.generateSOAPNotes(text);
+    setIsGeneratingSOAP(false);
+
+    if (result.success && result.data) {
+      setSoapNotes(result.data);
+      onSoapNotesGenerated?.(result.data);
+      return result.data;
+    } else {
+      console.error('[useTranscription] SOAP generation failed', result.error);
+      return undefined;
+    }
+  }, [isManualMode, manualTranscript, transcript, onSoapNotesGenerated]);
   
   // Auto-start if requested
   useEffect(() => {
@@ -213,6 +252,13 @@ export const useTranscription = (options: UseTranscriptionOptions = {}): UseTran
       startTranscription();
     }
   }, [autoStart, isListening, isManualMode, startTranscription]);
+
+  // Auto-generate SOAP when transcript available
+  useEffect(() => {
+    if (autoGenerateSOAP && transcript && !isGeneratingSOAP && !soapNotes) {
+      generateSOAPNotes();
+    }
+  }, [autoGenerateSOAP, transcript, isGeneratingSOAP, soapNotes, generateSOAPNotes]);
   
   // Cleanup on unmount
   useEffect(() => {
@@ -243,11 +289,14 @@ export const useTranscription = (options: UseTranscriptionOptions = {}): UseTran
     interimTranscript,
     error,
     engineState,
-    
+    soapNotes,
+    isGeneratingSOAP,
+
     // Actions
     startTranscription,
     stopTranscription,
     resetTranscription,
+    generateSOAPNotes,
     
     // Manual mode
     isManualMode,

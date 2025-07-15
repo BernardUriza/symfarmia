@@ -6,10 +6,9 @@ import { TranscriptionDebugPanel } from './TranscriptionDebugPanel';
 import { Card, CardContent } from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
-import { 
-  Mic, 
-  MicOff, 
-  Activity, 
+import {
+  Mic,
+  Activity,
   Square as Stop, 
   RotateCcw, 
   Copy, 
@@ -19,16 +18,20 @@ import {
 } from 'lucide-react';
 import { VoiceReactiveRings } from './VoiceReactiveRings';
 
+import type { SOAPNotes } from '../../domains/medical-ai/types';
+
 interface ConversationCaptureEnhancedProps {
   onNext?: () => void;
   onTranscriptionComplete?: (transcript: string) => void;
+  onSoapGenerated?: (notes: SOAPNotes) => void;
   className?: string;
   showDebug?: boolean;
 }
 
-export const ConversationCaptureEnhanced = ({ 
-  onNext, 
+export const ConversationCaptureEnhanced = ({
+  onNext,
   onTranscriptionComplete,
+  onSoapGenerated,
   className = '',
   showDebug = false
 }: ConversationCaptureEnhancedProps) => {
@@ -48,7 +51,10 @@ export const ConversationCaptureEnhanced = ({
     manualTranscript,
     setManualTranscript,
     enableManualMode,
-    disableManualMode
+    disableManualMode,
+    soapNotes,
+    isGeneratingSOAP,
+    generateSOAPNotes
   } = useTranscription({
     debug: showDebugPanel,
     onTranscriptionUpdate: (result) => {
@@ -63,6 +69,12 @@ export const ConversationCaptureEnhanced = ({
         const finalTranscript = isManualMode ? manualTranscript : transcript;
         if (finalTranscript && onTranscriptionComplete) {
           onTranscriptionComplete(finalTranscript);
+        }
+        if (finalTranscript) {
+          const notes = await generateSOAPNotes();
+          if (notes && onSoapGenerated) {
+            onSoapGenerated(notes);
+          }
         }
       } else {
         const started = await startTranscription();
@@ -121,8 +133,32 @@ export const ConversationCaptureEnhanced = ({
               </Button>
             )}
           </div>
-        </div>
-      )}
+          </div>
+        )}
+
+        {/* SOAP Notes Display */}
+        {isGeneratingSOAP && (
+          <p className="text-sm text-gray-500 mt-2">Generando notas...</p>
+        )}
+        {soapNotes && (
+          <Card className="mt-4">
+            <CardContent className="space-y-2">
+              <h3 className="font-semibold text-gray-900">Notas SOAP</h3>
+              <div className="text-sm">
+                <strong>S:</strong> {soapNotes.subjective}
+              </div>
+              <div className="text-sm">
+                <strong>O:</strong> {soapNotes.objective}
+              </div>
+              <div className="text-sm">
+                <strong>A:</strong> {soapNotes.assessment}
+              </div>
+              <div className="text-sm">
+                <strong>P:</strong> {soapNotes.plan}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
       {/* Main Card */}
       <Card className="shadow-lg">
@@ -274,6 +310,11 @@ export const ConversationCaptureEnhanced = ({
                     const finalTranscript = isManualMode ? manualTranscript : transcript;
                     if (finalTranscript && onTranscriptionComplete) {
                       onTranscriptionComplete(finalTranscript);
+                    }
+                    if (finalTranscript) {
+                      generateSOAPNotes().then(notes => {
+                        if (notes && onSoapGenerated) onSoapGenerated(notes);
+                      });
                     }
                     onNext();
                   }}
