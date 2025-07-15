@@ -29,7 +29,6 @@ export { useMicrophoneDiagnostics } from './hooks/legacy/useMicrophoneDiagnostic
 export { useRealAudioCapture } from './hooks/legacy/useRealAudioCapture';
 export { useModelDownload } from './hooks/legacy/useModelDownload';
 export { useDemoTranscription } from './hooks/legacy/useDemoTranscription';
-
 // Services
 export { medicalAIService } from './services/medicalAIService';
 export { audioProcessingService } from './services/audioProcessingService';

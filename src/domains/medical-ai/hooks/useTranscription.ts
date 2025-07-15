@@ -127,7 +127,7 @@ export const useTranscription = (options: UseTranscriptionOptions = {}): UseTran
         if (result.isFinal) {
           // Append to final transcript
           finalTranscriptRef.current += (finalTranscriptRef.current ? ' ' : '') + result.transcript;
-          setTranscript(finalTranscriptRef.current);
+          setTranscript(finalTranscriptRef.current || '');
           setInterimTranscript('');
         } else {
           // Update interim transcript

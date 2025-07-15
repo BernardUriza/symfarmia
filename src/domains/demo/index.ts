@@ -21,7 +21,6 @@ export { useDemoMode } from './hooks/useDemoMode';
 // but the public API still expects `useDemoTranscription` to be available
 // from this domain. Redirect to the maintained implementation to avoid
 // import errors during the build.
-export { useDemoTranscription } from '../medical-ai/hooks/legacy/useDemoTranscription';
 export { useDemoPatients } from './hooks/useDemoPatients';
 export { useDemoSettings } from './hooks/useDemoSettings';
 export { useDemoHighlight } from './hooks/useDemoHighlight';
