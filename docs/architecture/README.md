@@ -25,6 +25,9 @@ Database schema documentation:
 - Study type categorization
 - Data integrity constraints
 
+### 📑 [Medical Record Schema v2](./medical-record-schema-v2.md)
+Overview of the extended Prisma models for consultations and audit logs.
+
 ## 🔗 Related Documentation
 
 - [Development Notes](../development/dev-notes/) - Implementation details
