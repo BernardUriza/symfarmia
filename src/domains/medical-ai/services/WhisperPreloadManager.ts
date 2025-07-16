@@ -12,22 +12,52 @@ interface PreloadState {
 
 type StatusListener = (state: PreloadState) => void;
 
+// Global variable to persist model across HMR/Fast Refresh
+declare global {
+  var __WHISPER_MODEL_CACHE__: Pipeline | undefined;
+  var __WHISPER_PRELOAD_STATE__: PreloadState | undefined;
+  var __WHISPER_HAS_INITIALIZED__: boolean | undefined;
+}
+
 class WhisperPreloadManager {
   private static instance: WhisperPreloadManager;
-  private state: PreloadState = {
-    status: 'idle',
-    progress: 0,
-    error: null,
-    model: null,
-    hasShownSuccessToast: false,
-  };
+  private state: PreloadState;
   private listeners: Set<StatusListener> = new Set();
   private loadPromise: Promise<Pipeline> | null = null;
   private initializationPromise: Promise<void> | null = null;
   private idleCallbackId: number | null = null;
-  private hasInitialized = false;
+  private hasInitialized: boolean;
 
-  private constructor() {}
+  private constructor() {
+    // Restore state from global cache if available (survives HMR)
+    if (typeof window !== 'undefined' && global.__WHISPER_PRELOAD_STATE__) {
+      this.state = global.__WHISPER_PRELOAD_STATE__;
+      this.hasInitialized = global.__WHISPER_HAS_INITIALIZED__ || false;
+      
+      // If we have a cached model, restore it
+      if (global.__WHISPER_MODEL_CACHE__ && this.state.status !== 'loaded') {
+        this.state = {
+          ...this.state,
+          status: 'loaded',
+          model: global.__WHISPER_MODEL_CACHE__,
+          progress: 100,
+        };
+      }
+      
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[WhisperPreloadManager] Restored state from global cache:', this.state.status);
+      }
+    } else {
+      this.state = {
+        status: 'idle',
+        progress: 0,
+        error: null,
+        model: null,
+        hasShownSuccessToast: false,
+      };
+      this.hasInitialized = false;
+    }
+  }
 
   static getInstance(): WhisperPreloadManager {
     if (!WhisperPreloadManager.instance) {
@@ -54,6 +84,18 @@ class WhisperPreloadManager {
 
   private updateState(updates: Partial<PreloadState>): void {
     this.state = { ...this.state, ...updates };
+    
+    // Persist state to global cache
+    if (typeof window !== 'undefined') {
+      global.__WHISPER_PRELOAD_STATE__ = this.state;
+      global.__WHISPER_HAS_INITIALIZED__ = this.hasInitialized;
+      
+      // Cache the model separately for better persistence
+      if (this.state.model) {
+        global.__WHISPER_MODEL_CACHE__ = this.state.model;
+      }
+    }
+    
     this.notifyListeners();
   }
 
@@ -67,6 +109,21 @@ class WhisperPreloadManager {
     delay?: number; 
     priority?: 'high' | 'low' | 'auto';
   }): void {
+    // Check global cache first
+    if (typeof window !== 'undefined' && global.__WHISPER_MODEL_CACHE__) {
+      if (this.state.status !== 'loaded') {
+        this.updateState({
+          status: 'loaded',
+          model: global.__WHISPER_MODEL_CACHE__,
+          progress: 100,
+        });
+      }
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[WhisperPreloadManager] Model already cached globally');
+      }
+      return;
+    }
+    
     // Don't initialize if already loaded or currently loading
     if (this.state.status === 'loaded' || this.state.status === 'loading') {
       if (process.env.NODE_ENV === 'development') {
@@ -92,6 +149,11 @@ class WhisperPreloadManager {
     priority?: 'high' | 'low' | 'auto';
   }): Promise<void> {
     this.hasInitialized = true;
+    
+    // Persist initialization state
+    if (typeof window !== 'undefined') {
+      global.__WHISPER_HAS_INITIALIZED__ = true;
+    }
     const { delay = 2000, priority = 'auto' } = options || {};
 
     // If high priority, start immediately
