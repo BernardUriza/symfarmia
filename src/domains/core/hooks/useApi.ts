@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * API hook for data fetching and mutations
  * Provides a comprehensive interface for API operations with TypeScript support

@@ -16,7 +16,8 @@ import {
   VersionInfo,
   HeaderLanguageSwitcher,
   ThemeToggle,
-  BraveCacheBuster
+  BraveCacheBuster,
+  WhisperPreloadClient
 } from "@/src/components/layout";
 import { MedicalAssistantWrapper as MedicalAssistant } from "@/src/components/medical";
 import { ThemeProvider } from "@/src/providers/ThemeProviderBulletproof";
@@ -284,7 +285,12 @@ export default function RootLayout({ children }) {
                           {/* MAIN CONTENT AREA */}
                           <MedicalErrorBoundary context="Main Content" medicalWorkflow="Primary UI">
                             <RouteErrorBoundary>
-                              {children}
+                              {children}    
+                              <WhisperPreloadClient 
+                                  priority="auto"  // 'high' | 'low' | 'auto'
+                                  delay={3000}     // Wait 3 seconds after page load
+                                  showProgress={false} // Show loading indicator
+                                />
                             </RouteErrorBoundary>
                           </MedicalErrorBoundary>
                           

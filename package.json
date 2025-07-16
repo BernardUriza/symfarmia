@@ -6,7 +6,6 @@
     "lint": "next lint",
     "type-check": "tsc --noEmit",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
-
     "dev": "node scripts/dev-clean.js",
     "dev:next": "node scripts/kill-ports.js && next dev",
     "dev:netlify": "netlify dev",
@@ -17,7 +16,6 @@
     "dev:reset": "rm -rf .next && npm run kill:brave-cache && npm run dev",
     "kill:ports": "node scripts/kill-ports.js",
     "kill:brave-cache": "node scripts/kill-brave-cache.js",
-
     "build": "npm run version:generate && npx prisma generate && next build",
     "build:guardian": "node scripts/build-guardian.js --build && npm run build",
     "build:enhanced": "node scripts/enhanced-build.js",
@@ -25,14 +23,11 @@
     "build:fast": "NODE_OPTIONS='--max-old-space-size=1024' WEBPACK_MINIMIZE=false next build --no-lint",
     "fix:build": "node scripts/fix-build-errors.js",
     "start": "next start",
-
     "validate:translations": "node scripts/validate-translations.js",
     "validate:translations:revolutionary": "node scripts/revolutionary-translation-validator.js",
     "test:translations": "jest tests/medical-components/translations.test.js",
-
     "test": "jest",
     "test:unit": "jest __tests__ tests/ai-integration/useDemoTranscription.test.ts",
-
     "version:generate": "node scripts/generate-version.js"
   },
   "dependencies": {
@@ -77,6 +72,7 @@
     "resend": "2.1.0",
     "slick-carousel": "1.8.1",
     "sonner": "^2.0.6",
+    "sweetalert2": "^11.22.2",
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "^4",
     "zod": "3.25.67",
