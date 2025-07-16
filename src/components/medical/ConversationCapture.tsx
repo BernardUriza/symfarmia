@@ -3,7 +3,7 @@ import './conversation-capture/styles.css';
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useSimpleWhisper } from '@/src/domains/medical-ai/hooks/useSimpleWhisper';
-import { useRealAudioCapture } from '@/src/domains/medical-ai/hooks/useRealAudioCapture';
+import { useRealAudioCapture } from '@/src/domains/medical-ai/hooks/legacy/useRealAudioCapture';
 import { extractMedicalTermsFromText } from '@/src/domains/medical-ai/utils/medicalTerms';
 import { Button } from '@/src/components/ui/button';
 import { useI18n } from '@/src/domains/core/hooks/useI18n';
@@ -25,9 +25,7 @@ export const ConversationCapture = ({
   onNext, 
   onTranscriptionComplete,
   className = ''
-}: ConversationCaptureProps) => {
-  console.log('[ConversationCapture] Component mounting at', new Date().toISOString());
-  
+}: ConversationCaptureProps) => {  
   const { t } = useI18n();
   const [showPermissionDialog, setShowPermissionDialog] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
@@ -55,8 +53,6 @@ export const ConversationCapture = ({
       });
     }
   }, []);
-  
-  console.log('[ConversationCapture] About to call useSimpleWhisper...');
   
   const {
     transcription,
