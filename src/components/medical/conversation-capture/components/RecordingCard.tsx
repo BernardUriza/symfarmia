@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import '../styles.css';
 import { Card, CardContent } from '@/src/components/ui/card';
 import { Button } from '@/src/components/ui/button';
 import { Badge } from '@/src/components/ui/badge';
@@ -49,7 +50,7 @@ export const RecordingCard: React.FC<RecordingCardProps> = ({
   };
 
   return (
-    <Card className="border-2 border-dashed border-blue-200 dark:border-blue-700 bg-white dark:bg-gray-800 shadow-sm">
+    <Card className="border-2 border-dashed border-blue-200 dark:border-blue-700 bg-white dark:bg-gray-800 shadow-sm transition-all duration-300 ease-in-out slide-in">
       <CardContent className="p-8 text-center">
         <div className="flex flex-col items-center space-y-4">
           <div className="mb-4">

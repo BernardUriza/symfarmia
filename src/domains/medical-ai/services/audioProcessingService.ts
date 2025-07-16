@@ -1,4 +1,5 @@
 import type { Pipeline } from '@xenova/transformers';
+import { whisperPreloadManager } from './WhisperPreloadManager';
 
 let whisperModel: Pipeline | null = null;
 let loadPromise: Promise<Pipeline> | null = null;
@@ -19,7 +20,18 @@ export async function loadWhisperModel({
   retryDelay = 1000,
   ...pipelineOptions
 }: LoadWhisperModelOptions = {}): Promise<Pipeline> {
+  // First, check if we already have a loaded model
   if (whisperModel) return whisperModel;
+  
+  // Check if the preload manager has a model ready
+  const preloadedModel = whisperPreloadManager.getModel();
+  if (preloadedModel) {
+    console.log('✨ Using pre-loaded Whisper model');
+    whisperModel = preloadedModel;
+    return whisperModel;
+  }
+  
+  // Check if there's an ongoing load
   if (loadPromise) return loadPromise;
 
   loadPromise = (async () => {
@@ -51,6 +63,14 @@ export async function transcribeAudio(
   float32Audio: Float32Array,
   options?: Record<string, any>
 ): Promise<any> {
+  // Try to get model from preload manager if not already loaded
+  if (!whisperModel) {
+    const preloadedModel = whisperPreloadManager.getModel();
+    if (preloadedModel) {
+      whisperModel = preloadedModel;
+    }
+  }
+  
   if (!whisperModel) throw new Error('Whisper model not loaded');
   return whisperModel(float32Audio, options);
 }

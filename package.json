@@ -23,6 +23,7 @@
     "build:enhanced": "node scripts/enhanced-build.js",
     "build:emergency": "node scripts/build-recovery.js emergency",
     "build:fast": "NODE_OPTIONS='--max-old-space-size=1024' WEBPACK_MINIMIZE=false next build --no-lint",
+    "fix:build": "node scripts/fix-build-errors.js",
     "start": "next start",
 
     "validate:translations": "node scripts/validate-translations.js",

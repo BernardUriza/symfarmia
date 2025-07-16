@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import '../styles.css';
 import { Card, CardContent } from '@/src/components/ui/card';
 import { Badge } from '@/src/components/ui/badge';
 import { useI18n } from '@/src/domains/core/hooks/useI18n';
@@ -22,7 +23,7 @@ export const TranscriptionResult: React.FC<TranscriptionResultProps> = ({
   const { t } = useI18n();
 
   return (
-    <Card className="mt-4">
+    <Card className="mt-4 transition-all duration-300 ease-in-out slide-in">
       <CardContent className="p-4">
         <h3 className="font-medium mb-2">
           {t('conversation.capture.transcription_result')}:
