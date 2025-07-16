@@ -100,6 +100,46 @@ body {
   color: #F1F5F9;
 }
 
+/* Dark mode CSS variables - Critical for medical night shifts */
+.dark {
+  /* Medical color palette - optimized for night vision */
+  --color-medical-primary: #34D399; /* Softer green for dark mode */
+  --color-medical-primary-dark: #10B981;
+  --color-medical-primary-light: #6EE7B7;
+  
+  --color-medical-secondary: #60A5FA; /* Softer blue for dark mode */
+  --color-medical-secondary-dark: #3B82F6;
+  --color-medical-secondary-light: #93C5FD;
+  
+  --color-medical-accent: #A78BFA; /* Softer purple for dark mode */
+  --color-medical-success: #34D399;
+  --color-medical-warning: #FBBF24;
+  --color-medical-error: #F87171;
+  --color-medical-info: #60A5FA;
+  
+  /* Dark surface colors */
+  --color-medical-surface: #1E293B;
+  --color-medical-surface-secondary: #0F172A;
+  --color-medical-surface-tertiary: #334155;
+  
+  /* Dark text colors - high contrast for readability */
+  --color-medical-text-primary: #F1F5F9;
+  --color-medical-text-secondary: #CBD5E1;
+  --color-medical-text-tertiary: #94A3B8;
+  
+  /* Dark border colors */
+  --color-medical-border: #334155;
+  --color-medical-border-secondary: #475569;
+  
+  /* Dark mode shadows - subtle for night vision */
+  --shadow-medical-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --shadow-medical: 0 1px 3px 0 rgb(0 0 0 / 0.4), 0 1px 2px -1px rgb(0 0 0 / 0.4);
+  --shadow-medical-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.4);
+  --shadow-medical-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.4);
+  --shadow-medical-xl: 0 20px 25px -5px rgb(0 0 0 / 0.4), 0 8px 10px -6px rgb(0 0 0 / 0.4);
+  --shadow-medical-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.5);
+}
+
 /* Typography defaults - let Tailwind handle margins */
 @layer base {
   h1, h2, h3, h4, h5, h6 {
@@ -150,8 +190,8 @@ body {
   }
   
   .dark .medical-card {
-    background-color: #1E293B;
-    border-color: #334155;
+    background-color: var(--color-medical-surface);
+    border-color: var(--color-medical-border);
   }
   
   .dark .medical-card:hover {
@@ -171,8 +211,8 @@ body {
   }
   
   .dark .medical-header {
-    background-color: rgba(15, 23, 42, 0.8);
-    border-color: #1E293B;
+    background-color: rgba(15, 23, 42, 0.9);
+    border-color: var(--color-medical-border);
   }
   
   /* Medical Button Primary */
