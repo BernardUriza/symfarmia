@@ -1,7 +1,7 @@
 'use client';
 import './conversation-capture/styles.css';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useSimpleWhisper } from '@/src/domains/medical-ai/hooks/useSimpleWhisper';
 import { useRealAudioCapture } from '@/src/domains/medical-ai/hooks/useRealAudioCapture';
 import { extractMedicalTermsFromText } from '@/src/domains/medical-ai/utils/medicalTerms';
@@ -73,7 +73,7 @@ export const ConversationCapture = ({
     autoPreload: false,
     processingMode: 'streaming', // CAMBIADO A STREAMING para usar el pipeline arreglado
     showPreloadStatus: true,
-    onChunkProcessed: (text, chunkNumber) => {
+    onChunkProcessed: useCallback((text, chunkNumber) => {
       console.log(`[ConversationCapture] Chunk ${chunkNumber} recibido: "${text}"`);
       
       // Agregar el texto del chunk actual
@@ -105,10 +105,9 @@ export const ConversationCapture = ({
         
         return updatedChunks;
       });
-    }
+    }, [])
   });
   
-  console.log('[ConversationCapture] useSimpleWhisper called successfully');
 
   const {
     transcript: liveTranscriptData,

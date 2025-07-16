@@ -108,6 +108,21 @@ async function processAudioChunk(data) {
     
     console.log(`[Worker] Procesando chunk ${chunkId}: ${audioData.length} samples`);
     
+    // Debug: Check audio data
+    const audioStats = {
+      length: audioData.length,
+      min: Math.min(...audioData),
+      max: Math.max(...audioData),
+      avg: audioData.reduce((a, b) => a + Math.abs(b), 0) / audioData.length,
+      silent: audioData.every(sample => Math.abs(sample) < 0.001)
+    };
+    
+    console.log(`[Worker] Audio stats for ${chunkId}:`, audioStats);
+    
+    if (audioStats.silent) {
+      console.warn(`[Worker] AUDIO SILENCIOSO DETECTADO - chunk ${chunkId}`);
+    }
+    
     self.postMessage({ 
       type: 'PROCESSING_START', 
       chunkId 
@@ -136,7 +151,11 @@ async function processAudioChunk(data) {
     const result = await pipeline(audioData, {
       return_timestamps: false,
       chunk_length_s: 30,
-      stride_length_s: 5
+      stride_length_s: 5,
+      // Add language hint for better results
+      language: 'spanish',
+      // Lower the minimum speech probability threshold
+      no_speech_threshold: 0.3
     });
 
     // Clear progress interval

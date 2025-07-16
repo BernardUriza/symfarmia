@@ -512,9 +512,20 @@ export function useSimpleWhisper({
         logger.log(`[${processingMode}] Transcription completed: ${finalText}`);
         console.log('[useSimpleWhisper] Estado actualizado - La UI debería mostrar la transcripción ahora');
       } else {
-        console.error('[useSimpleWhisper] NO HAY TEXTO FINAL - Usuario estafado');
-        setError('No se pudo obtener transcripción - Habla más fuerte o por más tiempo');
-        setStatus('error');
+        // Check if we had chunks but no text
+        const totalChunks = Object.keys(transcriptPartsRef.current).length;
+        const emptyChunks = Object.values(transcriptPartsRef.current).filter(text => !text).length;
+        
+        console.warn(`[useSimpleWhisper] Sin transcripción final - Total chunks: ${totalChunks}, Vacíos: ${emptyChunks}`);
+        
+        if (totalChunks > 0 && emptyChunks === totalChunks) {
+          setError('No se detectó voz clara. Intenta hablar más cerca del micrófono o en un ambiente más silencioso.');
+        } else if (totalChunks === 0) {
+          setError('Grabación muy corta. Mantén presionado al menos 5 segundos.');
+        } else {
+          setError('No se pudo obtener transcripción completa.');
+        }
+        setStatus('completed'); // Still mark as completed to show any partial results
       }
       
       return true;
