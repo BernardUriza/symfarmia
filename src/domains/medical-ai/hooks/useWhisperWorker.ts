@@ -21,17 +21,18 @@ export function useWhisperWorker(options: UseWhisperWorkerOptions = {}) {
 
     const setupWorker = async () => {
       try {
-        // Check if model is already loaded
+        // Get or create worker from cache
+        const worker = await whisperModelCache.getWorker();
+        workerRef.current = worker;
+        
+        // Check if model is already loaded after getting worker
         if (whisperModelCache.isModelLoaded()) {
           if (mounted) {
+            console.log('[useWhisperWorker] Model already loaded, setting ready state');
             setIsReady(true);
             options.onModelReady?.();
           }
         }
-
-        // Get or create worker from cache
-        const worker = await whisperModelCache.getWorker();
-        workerRef.current = worker;
 
         // Add message listener
         const cleanup = whisperModelCache.addMessageListener((event) => {

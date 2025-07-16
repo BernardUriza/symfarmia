@@ -125,6 +125,7 @@ export function useSimpleWhisper({
   const checkIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const chunkCountRef = useRef<number>(0); // Contador de chunks procesados
+  const engineStatusRef = useRef<EngineStatus>('loading'); // Track engine status in ref
   
   // Enhanced preload integration
   const { 
@@ -178,11 +179,13 @@ export function useSimpleWhisper({
   } = useDirectAudioCapture({
     onChunkReady: async (audioData) => {
       logger.log(`[Direct] Chunk ready: ${audioData.length} samples`);
+      logger.log(`[Direct] Worker state - isWorkerReady: ${isWorkerReady}, processingMode: ${processingMode}, engineStatus: ${engineStatusRef.current}`);
+      
       if (isWorkerReady && processingMode === 'direct') {
         const chunkId = `chunk_${Date.now()}`; 
         try {
           processingTimeRef.current = Date.now();
-          logger.log(`[Direct] Processing chunk ${chunkId}`);
+          logger.log(`[Direct] Processing chunk ${chunkId} with ${audioData.length} samples`);
           await processWorkerChunk(audioData, chunkId);
         } catch (err) {
           logger.error(`[${processingMode}] Error processing chunk:`, err);
@@ -229,19 +232,23 @@ export function useSimpleWhisper({
   useEffect(() => {
     if (isPreloaded) {
       setEngineStatus('ready');
+      engineStatusRef.current = 'ready';
       setLoadProgress(100);
       logger.log(`[${processingMode}] Model ready from preload`);
     } else if (preloadStatus === 'loading') {
       setEngineStatus('loading');
+      engineStatusRef.current = 'loading';
       setLoadProgress(preloadProgress);
     } else if (preloadStatus === 'failed') {
       setEngineStatus('error');
+      engineStatusRef.current = 'error';
       setError('Error loading model from preload');
     } else {
       // Check worker readiness based on processing mode
       const modeReady = processingMode === 'streaming' ? isStreamingReady : isWorkerReady;
       if (modeReady && engineStatus === 'loading') {
         setEngineStatus('ready');
+        engineStatusRef.current = 'ready';
         setLoadProgress(100);
       }
     }
@@ -270,12 +277,13 @@ export function useSimpleWhisper({
       const dataArray = new Uint8Array(analyser.frequencyBinCount);
       
       const updateLevel = () => {
-        if (!isRecording) {
+        // Use ref instead of state to avoid closure issues
+        if (!audioContextRef.current || !analyserRef.current) {
           setAudioLevel(0);
           return;
         }
         
-        analyser.getByteFrequencyData(dataArray);
+        analyserRef.current.getByteFrequencyData(dataArray);
         const average = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
         const level = Math.round(average);
         setAudioLevel(level);
@@ -293,7 +301,7 @@ export function useSimpleWhisper({
     } catch (err) {
       logger.error(`[${processingMode}] Error setting up audio monitoring:`, err);
     }
-  }, [isRecording, processingMode, logger]);
+  }, [processingMode, logger]);
   
   // Recording time management
   useEffect(() => {
@@ -384,13 +392,22 @@ export function useSimpleWhisper({
       setStatus('recording');
       setTranscription(null);
       transcriptPartsRef.current = {};
+      chunkCountRef.current = 0; // Reset chunk counter
       
       const modeReady = processingMode === 'streaming' ? isStreamingReady : isWorkerReady;
+      
+      logger.log(`[startTranscription] Mode: ${processingMode}, Worker ready: ${isWorkerReady}, Preloaded: ${isPreloaded}`);
       
       if (!modeReady && !isPreloaded) {
         setError('El modelo aún se está cargando');
         setStatus('error');
         return false;
+      }
+      
+      // Give worker a moment to fully initialize if just became ready
+      if (modeReady && !isPreloaded) {
+        logger.log('[startTranscription] Waiting 100ms for worker to stabilize...');
+        await new Promise(resolve => setTimeout(resolve, 100));
       }
       
       let stream: MediaStream | null = null;

@@ -10,7 +10,6 @@ const AudioProcessingTest = () => {
   
   const {
     transcription,
-    status,
     isRecording,
     error,
     engineStatus,
