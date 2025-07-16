@@ -290,6 +290,7 @@ export default function RootLayout({ children }) {
                                   priority="auto"  // 'high' | 'low' | 'auto'
                                   delay={3000}     // Wait 3 seconds after page load
                                   showProgress={false} // Show loading indicator
+                                  showToasts={true}   // Show toast notifications
                                 />
                             </RouteErrorBoundary>
                           </MedicalErrorBoundary>

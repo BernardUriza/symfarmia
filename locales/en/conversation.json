@@ -37,7 +37,14 @@
       "review_dialog_flow": "Review Dialog Flow",
       "start": "Start Recording",
       "stop": "Stop Recording",
-      "medical_conversation_transcript": "Medical conversation transcript"
+      "medical_conversation_transcript": "Medical conversation transcript",
+      "loading_ai": "Loading medical AI",
+      "preparing_ai": "Preparing medical AI",
+      "whisper_ai": "Whisper AI",
+      "ai_ready": "Medical AI ready",
+      "ai_loaded_successfully": "Whisper AI loaded successfully",
+      "error_loading_ai": "Error loading AI",
+      "could_not_load_whisper": "Could not load Whisper model"
     },
     "permissions": {
       "microphone_denied": "Microphone access denied",

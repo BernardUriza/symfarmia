@@ -22,18 +22,21 @@ interface WhisperPreloadClientProps {
   priority?: 'high' | 'low' | 'auto';
   delay?: number;
   showProgress?: boolean;
+  showToasts?: boolean;
 }
 
 export function WhisperPreloadClient({
   priority = 'auto',
   delay = 3000,
-  showProgress = false
+  showProgress = false,
+  showToasts = true
 }: WhisperPreloadClientProps) {
   return (
     <WhisperPreloadInitializer
       priority={priority}
       delay={delay}
       showProgress={showProgress}
+      showToasts={showToasts}
     />
   );
 }

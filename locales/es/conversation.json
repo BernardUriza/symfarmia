@@ -37,7 +37,14 @@
       "review_dialog_flow": "Revisar Flujo de Diálogo",
       "start": "Iniciar Grabación",
       "stop": "Detener Grabación",
-      "medical_conversation_transcript": "Transcripción de conversación médica"
+      "medical_conversation_transcript": "Transcripción de conversación médica",
+      "loading_ai": "Cargando IA médica",
+      "preparing_ai": "Preparando IA médica",
+      "whisper_ai": "Whisper AI",
+      "ai_ready": "IA médica lista",
+      "ai_loaded_successfully": "Whisper AI cargado exitosamente",
+      "error_loading_ai": "Error cargando IA",
+      "could_not_load_whisper": "No se pudo cargar el modelo Whisper"
     },
     "permissions": {
       "access_required": "Acceso Requerido",

@@ -8,7 +8,6 @@ import { Button } from '@/src/components/ui/button';
 import { useI18n } from '@/src/domains/core/hooks/useI18n';
 import {
   PermissionDialog,
-  EngineStatus,
   RecordingCard,
   TranscriptionResult,
   ErrorDisplay,
@@ -99,11 +98,6 @@ export const ConversationCapture = ({
         onClose={() => setShowPermissionDialog(false)} 
       />
 
-      <div className="min-h-[60px] transition-all duration-300">
-        {engineStatus !== 'ready' && (
-          <EngineStatus status={engineStatus} loadProgress={loadProgress} />
-        )}
-      </div>
 
       <div className="text-center mb-6">
         <h1 className="text-2xl font-medium text-gray-900 dark:text-white mb-2">

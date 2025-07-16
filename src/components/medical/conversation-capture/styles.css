@@ -27,3 +27,44 @@
 .slide-in {
   animation: slideIn 0.4s ease-out;
 }
+
+/* SweetAlert2 Custom Styles for Whisper Preload */
+.swal2-toast {
+  border-radius: 0.75rem !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+}
+
+.swal2-toast.swal2-show {
+  animation: slideIn 0.3s ease-out !important;
+}
+
+.swal2-toast.swal2-hide {
+  animation: fadeOut 0.3s ease-in !important;
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+/* Dark mode support for toasts */
+@media (prefers-color-scheme: dark) {
+  .swal2-toast {
+    background-color: rgb(31 41 55) !important;
+    color: rgb(249 250 251) !important;
+  }
+  
+  .swal2-toast .swal2-title {
+    color: rgb(249 250 251) !important;
+  }
+  
+  .swal2-toast .swal2-html-container {
+    color: rgb(209 213 219) !important;
+  }
+}
