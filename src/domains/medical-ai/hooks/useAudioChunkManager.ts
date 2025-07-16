@@ -1,4 +1,5 @@
 import { useRef, useState, useCallback } from 'react';
+import { useAudioChunkAccumulator } from './useAudioChunkAccumulator';
 
 interface UseAudioChunkManagerOptions {
   onChunkReady?: (chunk: Blob) => void;
@@ -12,6 +13,15 @@ export function useAudioChunkManager({
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunkQueueRef = useRef<Blob[]>([]);
   const [isRecording, setIsRecording] = useState(false);
+  
+  const { addChunk, flush, reset: resetAccumulator } = useAudioChunkAccumulator({
+    onCompleteChunk: (chunk) => {
+      chunkQueueRef.current.push(chunk);
+      onChunkReady?.(chunk);
+    },
+    minChunkSize: 48000, // ~3 seconds at 16kHz
+    maxAccumulationTime: 5000 // 5 seconds max
+  });
 
   const start = useCallback(async (): Promise<MediaStream | null> => {
     if (isRecording) return null;
@@ -49,8 +59,8 @@ export function useAudioChunkManager({
       recorder.ondataavailable = (e: BlobEvent) => {
         if (e.data && e.data.size > 0) {
           console.log(`Chunk de audio recibido: ${e.data.size} bytes`);
-          chunkQueueRef.current.push(e.data);
-          onChunkReady?.(e.data);
+          // Acumular chunks en lugar de enviarlos directamente
+          addChunk(e.data, mimeType);
         }
       };
 
@@ -67,15 +77,18 @@ export function useAudioChunkManager({
       setIsRecording(false);
       return null;
     }
-  }, [chunkDurationMs, isRecording, onChunkReady]);
+  }, [chunkDurationMs, isRecording, addChunk]);
 
   const stop = useCallback(() => {
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
       mediaRecorderRef.current.stream.getTracks().forEach(t => t.stop());
+      // Procesar cualquier chunk restante
+      flush();
       setIsRecording(false);
+      resetAccumulator();
     }
-  }, [isRecording]);
+  }, [isRecording, flush, resetAccumulator]);
 
   const pushAudio = useCallback(
     (blob: Blob) => {

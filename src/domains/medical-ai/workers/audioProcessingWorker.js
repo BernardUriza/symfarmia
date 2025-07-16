@@ -1,4 +1,7 @@
+// Global cache for the pipeline model
 let pipeline = null;
+let modelInitialized = false;
+let initializationPromise = null;
 
 self.addEventListener('message', async (event) => {
   const { type, data } = event.data;
@@ -19,10 +22,38 @@ self.addEventListener('message', async (event) => {
 });
 
 async function initializeModel() {
+  // If already initialized, just notify ready
+  if (modelInitialized && pipeline) {
+    console.log('[Worker] Model already initialized, skipping download');
+    self.postMessage({ type: 'MODEL_READY' });
+    return;
+  }
+  
+  // If initialization is in progress, wait for it
+  if (initializationPromise) {
+    console.log('[Worker] Waiting for existing initialization');
+    await initializationPromise;
+    self.postMessage({ type: 'MODEL_READY' });
+    return;
+  }
+  
+  // Start new initialization
+  initializationPromise = performInitialization();
+  await initializationPromise;
+}
+
+async function performInitialization() {
   try {
+    console.log('[Worker] Starting model initialization');
     self.postMessage({ type: 'MODEL_LOADING', progress: 0 });
     
-    const { pipeline: pipelineConstructor } = await import('@xenova/transformers');
+    // Configure transformers to cache models
+    const { env, pipeline: pipelineConstructor } = await import('@xenova/transformers');
+    
+    // Enable caching
+    env.allowLocalModels = true;
+    env.localModelPath = 'models';
+    env.cacheDir = 'models';
     
     pipeline = await pipelineConstructor(
       'automatic-speech-recognition',
@@ -33,16 +64,23 @@ async function initializeModel() {
             type: 'MODEL_LOADING', 
             progress: progress.progress || 0 
           });
-        }
+        },
+        revision: 'main',
+        cache_dir: 'models'
       }
     );
     
+    modelInitialized = true;
+    console.log('[Worker] Model initialized successfully');
     self.postMessage({ type: 'MODEL_READY' });
   } catch (error) {
+    console.error('[Worker] Failed to initialize model:', error);
+    initializationPromise = null;
     self.postMessage({ 
       type: 'ERROR', 
       error: `Failed to initialize model: ${error.message}` 
     });
+    throw error;
   }
 }
 

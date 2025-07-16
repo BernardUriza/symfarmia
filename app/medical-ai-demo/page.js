@@ -9,6 +9,7 @@ import {
   OrderEntry, 
   SummaryExport 
 } from '@/src/components/medical';
+import { WhisperDebugPanel } from '@/src/components/medical/WhisperDebugPanel';
 import { Button, Progress } from '@/src/components/ui';
 import { Mic, MicOff, Clock, User, ArrowLeft, Stethoscope, FileText, Users, FolderOpen, MessageSquare, Activity, ClipboardList, Download } from 'lucide-react';
 import Link from 'next/link';
@@ -25,30 +26,29 @@ const MedicalWorkflowSteps = (t) => ([
 ]);
 
 export default function MedicalAIDemo() {
-  console.log('[MedicalAIDemo] Component rendering...');
+  console.log('[MedicalAIDemo] Component rendering at', new Date().toISOString());
   
   const { t } = useTranslation();
   const { patients, selectPatient, getSelectedPatient } = useDemoPatients();
   
   console.log('[MedicalAIDemo] Hooks called successfully');
   
-  // Initialize state based on localStorage
-  const [externalPatient, setExternalPatient] = useState(() => {
+  // Log Whisper status on mount
+  useEffect(() => {
+    console.log('[MedicalAIDemo] Checking Whisper model status...');
     if (typeof window !== 'undefined') {
-      const storedPatient = localStorage.getItem('medicalAIDemoPatient');
-      if (storedPatient) {
-        try {
-          return JSON.parse(storedPatient);
-        } catch (error) {
-          console.error('Error parsing stored patient data:', error);
-          localStorage.removeItem('medicalAIDemoPatient');
-        }
-      }
+      console.log('[MedicalAIDemo] Global Whisper variables:', {
+        workerInstance: !!global.__WHISPER_WORKER_INSTANCE__,
+        modelLoaded: !!global.__WHISPER_MODEL_LOADED__,
+        managerInitialized: !!global.__WHISPER_MANAGER_INITIALIZED__
+      });
     }
-    return null;
-  });
+  }, []);
   
-  const [showPatientSelector, setShowPatientSelector] = useState(!externalPatient);
+  // Initialize state (moved localStorage to useEffect to prevent hydration mismatch)
+  const [externalPatient, setExternalPatient] = useState(null);
+  
+  const [showPatientSelector, setShowPatientSelector] = useState(true);
   const steps = MedicalWorkflowSteps(t);
   const [currentStep, setCurrentStep] = useState('escuchar');
   const [isRecording, setIsRecording] = useState(false);
@@ -56,6 +56,21 @@ export default function MedicalAIDemo() {
   
   const currentStepIndex = steps.findIndex(step => step.id === currentStep);
   const patient = externalPatient || getSelectedPatient();
+
+  // Load patient from localStorage after hydration
+  useEffect(() => {
+    const storedPatient = localStorage.getItem('medicalAIDemoPatient');
+    if (storedPatient) {
+      try {
+        const parsed = JSON.parse(storedPatient);
+        setExternalPatient(parsed);
+        setShowPatientSelector(false);
+      } catch (error) {
+        console.error('Error parsing stored patient data:', error);
+        localStorage.removeItem('medicalAIDemoPatient');
+      }
+    }
+  }, []);
 
   // Clear localStorage after using it to prevent stale data
   useEffect(() => {
@@ -238,7 +253,7 @@ export default function MedicalAIDemo() {
                         ? 'bg-primary text-white' 
                         : isCompleted
                         ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-900/50'
-                        : 'bg-slate-100 dark:bg-gray-700 text-slate-500 dark:text-gray-400 hover:bg-slate-200 dark:hover:bg-gray-600'
+                        : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700'
                     }`}
                   >
                     <Icon className="h-4 w-4" />
@@ -371,6 +386,8 @@ export default function MedicalAIDemo() {
           </div>
         </main>
       </div>
+      {/* Whisper Debug Panel (development only) */}
+      <WhisperDebugPanel />
     </div>
   );
 }

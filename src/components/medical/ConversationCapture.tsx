@@ -2,7 +2,7 @@
 import './conversation-capture/styles.css';
 
 import React, { useState, useEffect } from 'react';
-import { useSimpleWhisper } from '@/src/domains/medical-ai/hooks/useSimpleWhisper';
+import { useSimpleWhisperDirect as useSimpleWhisper } from '@/src/domains/medical-ai/hooks/useSimpleWhisperDirect';
 import { useRealAudioCapture } from '@/src/domains/medical-ai/hooks/useRealAudioCapture';
 import { Button } from '@/src/components/ui/button';
 import { useI18n } from '@/src/domains/core/hooks/useI18n';
@@ -25,12 +25,24 @@ export const ConversationCapture = ({
   onTranscriptionComplete,
   className = ''
 }: ConversationCaptureProps) => {
-  console.log('[ConversationCapture] Component mounting...');
+  console.log('[ConversationCapture] Component mounting at', new Date().toISOString());
   
   const { t } = useI18n();
   const [showPermissionDialog, setShowPermissionDialog] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
   const [liveTranscript, setLiveTranscript] = useState('');
+  
+  // Log model status before using the hook
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      console.log('[ConversationCapture] Global cache status:', {
+        whisperWorker: !!global.__WHISPER_WORKER_INSTANCE__,
+        whisperModelLoaded: !!global.__WHISPER_MODEL_LOADED__,
+        whisperPreloadState: !!global.__WHISPER_PRELOAD_STATE__,
+        whisperModelCache: !!global.__WHISPER_MODEL_CACHE__
+      });
+    }
+  }, []);
   
   console.log('[ConversationCapture] About to call useSimpleWhisper...');
   

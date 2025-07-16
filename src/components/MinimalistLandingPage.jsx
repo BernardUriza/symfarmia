@@ -12,6 +12,7 @@ import {
 } from '@heroicons/react/24/outline';
 import dynamic from 'next/dynamic';
 const DemoLoginModal = dynamic(() => import('./layout/DemoLoginModal'));
+const AudioProcessingTest = dynamic(() => import('./medical/AudioProcessingTest'), { ssr: false });
 // Removed DashboardLanding import - redirecting to main dashboard
 import { useTranslation } from '../providers/I18nProvider';
 import { useAppMode } from '../providers/AppModeProvider';
@@ -329,6 +330,13 @@ const MinimalistLandingPage = ({ isDemo = false }) => {
         </section>
 
       </main>
+
+      {/* Audio Processing Test Section */}
+      <section className="py-16 bg-gray-50 dark:bg-gray-900">
+        <div className="max-w-4xl mx-auto px-6">
+          <AudioProcessingTest />
+        </div>
+      </section>
 
       {/* Simple Footer */}
       <footer className="border-t border-white/30 dark:border-slate-700/30 py-8">
