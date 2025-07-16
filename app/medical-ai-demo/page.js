@@ -124,7 +124,7 @@ export default function MedicalAIDemo() {
                     <div className="flex items-center justify-between">
                       <div>
                         <div className="font-medium text-foreground">{patient.name}</div>
-                        <div className="text-sm text-foreground/50">{patient.age} años</div>
+                        <div className="text-sm text-foreground/50">{patient.age} {t('common.years')}</div>
                       </div>
                       <div className="text-sm text-gray-500 dark:text-gray-400">{patient.gender}</div>
                     </div>
@@ -164,7 +164,7 @@ export default function MedicalAIDemo() {
       <header className="bg-background border-b border-border px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-4">
               <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
                 <Stethoscope className="h-5 w-5 text-white" />
               </div>
@@ -180,7 +180,7 @@ export default function MedicalAIDemo() {
             <div className="badge-modern glass dark:glass-dark border border-secondary/20">
               <User className="h-4 w-4 text-secondary" />
               <span className="font-medium text-foreground">
-                {patient ? `${patient.name}, ${patient.age} años` : ''}
+                {patient ? `${patient.name}, ${patient.age} ${t('common.years')}` : ''}
               </span>
             </div>
             <div className="badge-modern badge-success glass dark:glass-dark">
@@ -260,25 +260,55 @@ export default function MedicalAIDemo() {
           <div className="p-6">
             {/* Patient Information Panel */}
             <div className="mb-8">
-              <h3 className="text-sm font-semibold text-foreground mb-4">Información del Paciente</h3>
-              <div className="card-float glass dark:glass-dark">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-full flex items-center justify-center shadow-inner animate-float">
-                    <User className="h-6 w-6 text-primary" />
+              <h3 className="text-sm font-semibold text-foreground mb-4">{t('medical.patient.info')}</h3>
+              <div className="card-float glass dark:glass-dark p-6 space-y-4">
+                {/* Patient Header */}
+                <div className="flex items-center gap-4 pb-4 border-b border-border/50">
+                  <div className="w-14 h-14 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-full flex items-center justify-center shadow-lg backdrop-blur-sm animate-float">
+                    <User className="h-7 w-7 text-primary" />
                   </div>
-                  <div>
-                    <h4 className="font-semibold text-foreground">{patient?.name}</h4>
-                    <p className="text-sm text-foreground/60">{patient?.age} años</p>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-lg text-foreground">{patient?.name}</h4>
+                    <div className="flex items-center gap-3 mt-1">
+                      <span className="badge-modern badge-primary text-xs">
+                        {patient?.age} {t('common.years')}
+                      </span>
+                      {patient?.gender && (
+                        <span className="badge-modern glass dark:glass-dark text-xs">
+                          {patient.gender}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
-                {patient?.gender && (
-                  <div className="text-sm text-foreground/60 mb-2">{patient.gender}</div>
-                )}
+
+                {/* Medical Information */}
                 {patient?.medicalHistory && patient.medicalHistory.length > 0 && (
-                  <div className="text-sm text-foreground/60">
-                    <span className="font-medium">Historial:</span> {patient.medicalHistory.join(', ')}
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                      <FileText className="h-4 w-4 text-primary" />
+                      <span>{t('medical.patient.medical_history')}</span>
+                    </div>
+                    <div className="pl-6">
+                      {patient.medicalHistory.map((item, index) => (
+                        <div key={index} className="flex items-center gap-2 py-1">
+                          <div className="w-1.5 h-1.5 bg-primary/60 rounded-full"></div>
+                          <span className="text-sm text-foreground/70">{item}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
+
+                {/* Quick Actions */}
+                <div className="pt-3 flex gap-2">
+                  <button className="flex-1 px-3 py-2 text-xs font-medium glass dark:glass-dark border border-border text-foreground/70 rounded-lg hover:bg-primary/10 hover:border-primary/50 hover:text-primary transition-smooth">
+                    {t('medical.patient.view_full_history')}
+                  </button>
+                  <button className="px-3 py-2 text-xs font-medium glass dark:glass-dark border border-border text-foreground/70 rounded-lg hover:bg-primary/10 hover:border-primary/50 hover:text-primary transition-smooth">
+                    <FileText className="h-3.5 w-3.5" />
+                  </button>
+                </div>
               </div>
             </div>
 

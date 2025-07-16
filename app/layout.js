@@ -282,16 +282,20 @@ export default function RootLayout({ children }) {
                             </div>
                           </MedicalErrorBoundary>
                           
+                          {/* WHISPER PRELOAD - Outside route boundary to prevent remounting */}
+                          <MedicalErrorBoundary context="Whisper Preload" medicalWorkflow="AI Model Loading">
+                            <WhisperPreloadClient 
+                                priority="auto"  // 'high' | 'low' | 'auto'
+                                delay={3000}     // Wait 3 seconds after page load
+                                showProgress={false} // Show loading indicator
+                                showToasts={true}   // Show toast notifications
+                              />
+                          </MedicalErrorBoundary>
+                          
                           {/* MAIN CONTENT AREA */}
                           <MedicalErrorBoundary context="Main Content" medicalWorkflow="Primary UI">
                             <RouteErrorBoundary>
                               {children}    
-                              <WhisperPreloadClient 
-                                  priority="auto"  // 'high' | 'low' | 'auto'
-                                  delay={3000}     // Wait 3 seconds after page load
-                                  showProgress={false} // Show loading indicator
-                                  showToasts={true}   // Show toast notifications
-                                />
                             </RouteErrorBoundary>
                           </MedicalErrorBoundary>
                           
