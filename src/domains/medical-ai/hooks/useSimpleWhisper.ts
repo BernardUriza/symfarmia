@@ -160,7 +160,8 @@ export function useSimpleWhisper({
     log("🧪 [processAudio] Procesando audio...");
     setStatus("processing");
     try {
-      const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+      const chunks = audioChunksRef.current || [];
+      const audioBlob = new Blob(chunks, { type: "audio/webm" });
       setAudioBlob(audioBlob);
       const url = URL.createObjectURL(audioBlob);
       setAudioUrl(url);
@@ -221,7 +222,9 @@ export function useSimpleWhisper({
       mediaRecorderRef.current = mediaRecorder;
       setupAudioMonitoring(stream);
       mediaRecorder.ondataavailable = (e) => {
-        if (e.data.size > 0) audioChunksRef.current.push(e.data);
+        if (e.data.size > 0 && audioChunksRef.current) {
+          audioChunksRef.current.push(e.data);
+        }
       };
       mediaRecorder.onstop = async () => {
         await processAudio();

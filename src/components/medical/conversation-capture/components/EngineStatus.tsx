@@ -5,9 +5,10 @@ import { useI18n } from '@/src/domains/core/hooks/useI18n';
 
 interface EngineStatusProps {
   status: string;
+  loadProgress?: number;
 }
 
-export const EngineStatus: React.FC<EngineStatusProps> = ({ status }) => {
+export const EngineStatus: React.FC<EngineStatusProps> = ({ status, loadProgress = 0 }) => {
   const { t } = useI18n();
 
   const getStatusConfig = () => {
@@ -20,7 +21,7 @@ export const EngineStatus: React.FC<EngineStatusProps> = ({ status }) => {
       case 'loading':
         return {
           classes: 'bg-yellow-50 border border-yellow-200 text-yellow-700',
-          text: t('conversation.capture.engine_loading') + '...'
+          text: `${t('conversation.capture.engine_loading')}... ${Math.round(loadProgress * 100)}%`
         };
       case 'error':
         return {
@@ -43,10 +44,25 @@ export const EngineStatus: React.FC<EngineStatusProps> = ({ status }) => {
   const { classes, text } = getStatusConfig();
 
   return (
-    <div className={`px-4 py-3 rounded ${classes}`}>
+    <div 
+      className={`px-4 py-3 rounded transition-all duration-300 ease-in-out ${classes}`}
+      style={{
+        animation: 'fadeIn 0.3s ease-in-out'
+      }}
+    >
       <span className="text-sm">
         {t('conversation.capture.engine_status')}: {text}
       </span>
+      {status === 'loading' && loadProgress > 0 && (
+        <div className="mt-2">
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div 
+              className="bg-blue-600 h-2 rounded-full transition-all duration-300 ease-out"
+              style={{ width: `${Math.round(loadProgress * 100)}%` }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

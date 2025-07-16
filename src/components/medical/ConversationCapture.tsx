@@ -1,10 +1,10 @@
 'use client';
+import './conversation-capture/styles.css';
 
 import React, { useState, useEffect } from 'react';
 import { useSimpleWhisper } from '@/src/domains/medical-ai/hooks/useSimpleWhisper';
 import { useRealAudioCapture } from '@/src/domains/medical-ai/hooks/useRealAudioCapture';
 import { Button } from '@/src/components/ui/button';
-import WhisperPreloader from '@/src/domains/medical-ai/components/WhisperPreloader';
 import { useI18n } from '@/src/domains/core/hooks/useI18n';
 import {
   PermissionDialog,
@@ -40,6 +40,7 @@ export const ConversationCapture = ({
     audioLevel,
     recordingTime,
     audioUrl,
+    loadProgress,
     startTranscription,
     stopTranscription,
     resetTranscription
@@ -92,15 +93,17 @@ export const ConversationCapture = ({
   };
   
   return (
-    <div className={`max-w-4xl mx-auto space-y-6 ${className}`}>
+    <div className={`max-w-4xl mx-auto space-y-6 ${className} fade-in`}>
       <PermissionDialog 
         isOpen={showPermissionDialog} 
         onClose={() => setShowPermissionDialog(false)} 
       />
 
-      <WhisperPreloader retryCount={3} retryDelay={1000} />
-      
-      <EngineStatus status={engineStatus} />
+      <div className="min-h-[60px] transition-all duration-300">
+        {engineStatus !== 'ready' && (
+          <EngineStatus status={engineStatus} loadProgress={loadProgress} />
+        )}
+      </div>
 
       <div className="text-center mb-6">
         <h1 className="text-2xl font-medium text-gray-900 dark:text-white mb-2">
