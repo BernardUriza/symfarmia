@@ -249,7 +249,7 @@ export default function RootLayout({ children }) {
       </head>
       
       <body 
-        className="h-full font-sans bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-950 dark:to-gray-900 text-gray-900 dark:text-gray-100 antialiased"
+        className="h-full font-sans bg-gradient-to-br from-background to-gray-100 dark:from-gray-950 dark:to-background text-foreground antialiased"
         suppressHydrationWarning
       >
         {/* MEDICAL-GRADE ERROR BOUNDARY SYSTEM */}
