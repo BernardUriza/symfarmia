@@ -192,10 +192,13 @@ const PatientWorkflow = () => {
         name: selectedPatient.name,
         age: selectedPatient.age || 'N/A',
         gender: selectedPatient.gender || 'N/A',
-        medicalHistory: selectedPatient.medicalHistory || []
+        medicalHistory: selectedPatient.medicalHistory || [],
+        consultationType: 'general'
       };
       
-      router.push(`/medical-ai-demo?bypass=true&patientData=${encodeURIComponent(JSON.stringify(patientData))}&type=general`);
+      // Store patient data in localStorage instead of URL params
+      localStorage.setItem('medicalAIDemoPatient', JSON.stringify(patientData));
+      router.push('/medical-ai-demo');
     } else {
       router.push('/medical-ai-demo');
     }
@@ -208,10 +211,13 @@ const PatientWorkflow = () => {
         name: selectedPatient.name,
         age: selectedPatient.age || 'N/A',
         gender: selectedPatient.gender || 'N/A',
-        medicalHistory: selectedPatient.medicalHistory || []
+        medicalHistory: selectedPatient.medicalHistory || [],
+        consultationType: 'urgent'
       };
       
-      router.push(`/medical-ai-demo?bypass=true&patientData=${encodeURIComponent(JSON.stringify(patientData))}&type=urgent`);
+      // Store patient data in localStorage instead of URL params
+      localStorage.setItem('medicalAIDemoPatient', JSON.stringify(patientData));
+      router.push('/medical-ai-demo');
     } else {
       router.push('/medical-ai-demo');
     }

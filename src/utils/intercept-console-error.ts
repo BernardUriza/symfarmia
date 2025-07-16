@@ -109,6 +109,13 @@ class ConsoleErrorInterceptor {
       medicalRelevant: false
     },
     
+    // ONNX Runtime warnings - suppress (these are not errors, just optimization info)
+    {
+      pattern: /onnxruntime.*CleanUnusedInitializersAndNodeArgs|Removing initializer.*not used by any node/i,
+      action: 'suppress',
+      medicalRelevant: false
+    },
+    
     // Security errors - escalate immediately
     {
       pattern: /security|permission|cors|csp|xss/i,

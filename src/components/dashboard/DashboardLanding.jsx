@@ -9,6 +9,7 @@ import PatientWorkflow from '../patient/PatientWorkflow';
 import { useI18n } from '@/domains/core';
 import { Activity } from 'lucide-react';
 import HydrationSafeDateDisplay from '../../../src/components/HydrationSafeDateDisplay';
+import { LogoutButton } from '../layout';
 
 const DashboardLanding = () => {
   const { t } = useI18n();
@@ -44,6 +45,7 @@ const DashboardLanding = () => {
                   {t('system_active') || 'Sistema Activo'}
                 </span>
               </div>
+              <LogoutButton />
               <HydrationSafeDateDisplay 
                 locale="es-ES"
                 showTime={true}

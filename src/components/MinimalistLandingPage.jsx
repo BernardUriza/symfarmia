@@ -48,42 +48,55 @@ const MinimalistLandingPage = ({ isDemo = false }) => {
   const handleModalClose = () => setIsModalOpen(false);
   const handleDemoLogin = () => {
     setIsModalOpen(false);
-    console.log('handleDemoLogin: Redirecting to demo mode');
-    window.location.href = window.location.pathname + '?demo=true';
+    console.log('handleDemoLogin: Redirecting to dashboard');
+    // Set demo mode in localStorage if needed
+    localStorage.setItem('demoMode', 'true');
+    window.location.href = '/dashboard';
   };
 
-  // If in demo mode, redirect to main dashboard
-  if (isDemoMode) {
-    console.log('MinimalistLandingPage: Redirecting to main dashboard');
-    if (typeof window !== 'undefined') {
-      window.location.href = '/dashboard';
-    }
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p>Redirecting to dashboard...</p>
-        </div>
-      </div>
-    );
-  }
+  // Removed automatic redirect - let users see the landing page
   
   console.log('MinimalistLandingPage: Rendering normal landing page');
 
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-blue-900 text-gray-900 dark:text-gray-100 font-sans">
+      
+      {/* Navigation Header */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center">
+              <h1 className="text-xl font-bold text-gray-900 dark:text-white">SYMFARMIA</h1>
+            </div>
+            <div className="flex items-center space-x-4">
+              <a 
+                href="/dashboard" 
+                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
+              >
+                Dashboard
+              </a>
+              <button
+                onClick={handleDemoClick}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
+              >
+                {t('try_demo')}
+              </button>
+            </div>
+          </div>
+        </div>
+      </nav>
 
       {/* Demo Mode Banner */}
       {isDemoMode && (
-        <div className="demo-banner">
+        <div className="demo-banner" style={{ marginTop: '64px' }}>
           <span role="img" aria-label="demo">🧪</span>
           <span className="demo-text">{t('demo_mode_active')}</span>
         </div>
       )}
 
       {/* Main Content */}
-      <main className={`max-w-4xl mx-auto px-6 ${isDemoMode ? 'pt-32' : 'pt-20'}`}>
+      <main className={`max-w-4xl mx-auto px-6 ${isDemoMode ? 'pt-48' : 'pt-32'}`}>
         
         {/* Hero Section */}
         <section className="text-center mb-20 hero-section">

@@ -8,6 +8,7 @@
   "see_it_working": "See it working",
   "start_medical_demo": "Start Medical Demo",
   "continue_to_dashboard": "Continue to Dashboard",
-  "experience_ai_doctor": "Experience the AI Doctor"
+  "experience_ai_doctor": "Experience the AI Doctor",
+  "loading_patient_data": "Loading patient data..."
   }
 }

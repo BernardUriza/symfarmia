@@ -27,8 +27,24 @@ const MedicalWorkflowSteps = (t) => ([
 export default function MedicalAIDemo() {
   const { t } = useTranslation();
   const { patients, selectPatient, getSelectedPatient } = useDemoPatients();
-  const [showPatientSelector, setShowPatientSelector] = useState(true);
-  const [externalPatient, setExternalPatient] = useState(null);
+  
+  // Initialize state based on localStorage
+  const [externalPatient, setExternalPatient] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const storedPatient = localStorage.getItem('medicalAIDemoPatient');
+      if (storedPatient) {
+        try {
+          return JSON.parse(storedPatient);
+        } catch (error) {
+          console.error('Error parsing stored patient data:', error);
+          localStorage.removeItem('medicalAIDemoPatient');
+        }
+      }
+    }
+    return null;
+  });
+  
+  const [showPatientSelector, setShowPatientSelector] = useState(!externalPatient);
   const steps = MedicalWorkflowSteps(t);
   const [currentStep, setCurrentStep] = useState('escuchar');
   const [isRecording, setIsRecording] = useState(false);
@@ -37,25 +53,19 @@ export default function MedicalAIDemo() {
   const currentStepIndex = steps.findIndex(step => step.id === currentStep);
   const patient = externalPatient || getSelectedPatient();
 
-  // Handle bypass from PatientWorkflow
+  // Clear localStorage after using it to prevent stale data
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const urlParams = new URLSearchParams(window.location.search);
-      const bypass = urlParams.get('bypass');
-      const patientData = urlParams.get('patientData');
-      
-      if (bypass === 'true' && patientData) {
-        try {
-          const patient = JSON.parse(decodeURIComponent(patientData));
-          setExternalPatient(patient);
-          setShowPatientSelector(false);
-        } catch (error) {
-          console.error('Error parsing patient data:', error);
-        }
-      }
+    if (externalPatient && typeof window !== 'undefined') {
+      // Clear after a small delay to ensure component has fully initialized
+      const timer = setTimeout(() => {
+        localStorage.removeItem('medicalAIDemoPatient');
+      }, 100);
+      return () => clearTimeout(timer);
     }
-  }, []);
+  }, [externalPatient]);
 
+  // No need for loading state since localStorage is synchronous
+  
   if (showPatientSelector) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -73,7 +83,12 @@ export default function MedicalAIDemo() {
             <DemoResetButton
               onReset={() => {
                 selectPatient('');
+                setExternalPatient(null);
                 setShowPatientSelector(true);
+                // Clear localStorage when resetting
+                if (typeof window !== 'undefined') {
+                  localStorage.removeItem('medicalAIDemoPatient');
+                }
               }}
             />
           </div>
@@ -175,7 +190,12 @@ export default function MedicalAIDemo() {
             <DemoResetButton
               onReset={() => {
                 selectPatient('');
+                setExternalPatient(null);
                 setShowPatientSelector(true);
+                // Clear localStorage when resetting
+                if (typeof window !== 'undefined') {
+                  localStorage.removeItem('medicalAIDemoPatient');
+                }
               }}
               className="mr-4"
             />

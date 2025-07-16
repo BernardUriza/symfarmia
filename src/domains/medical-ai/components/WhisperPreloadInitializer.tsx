@@ -29,6 +29,8 @@ export function WhisperPreloadInitializer({
   const toastRef = useRef<any>(null);
   const hasInitialized = useRef(false);
   const wasAlreadyLoaded = useRef(false);
+  const hasShownLoadingToast = useRef(false);
+  const lastLoggedProgress = useRef(0);
 
   // Check if model is already loaded on mount
   useEffect(() => {
@@ -43,20 +45,42 @@ export function WhisperPreloadInitializer({
           console.log('[WhisperPreload] Model already loaded, skipping all notifications');
         }
       }
+      
+      // If already shown success toast, mark it
+      if (currentState.hasShownSuccessToast) {
+        wasAlreadyLoaded.current = true;
+      }
     }
   }, []);
 
+  // Log only significant status changes, not every progress update
   useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`[WhisperPreload] Status: ${status}, Progress: ${progress}%`);
+    if (process.env.NODE_ENV === 'development' && !wasAlreadyLoaded.current) {
+      // Log status changes
+      if (status === 'loading' && progress === 0) {
+        console.log('[WhisperPreload] Starting model load...');
+      } else if (status === 'loaded') {
+        console.log('[WhisperPreload] Model loaded successfully');
+        lastLoggedProgress.current = 0; // Reset for next time
+      } else if (status === 'failed') {
+        console.log('[WhisperPreload] Model failed to load');
+      } else if (status === 'loading' && progress > 0) {
+        // Log progress in 25% increments
+        const progressThreshold = Math.floor(progress / 25) * 25;
+        if (progressThreshold > lastLoggedProgress.current && progressThreshold > 0) {
+          console.log(`[WhisperPreload] Loading progress: ${progressThreshold}%`);
+          lastLoggedProgress.current = progressThreshold;
+        }
+      }
     }
   }, [status, progress]);
 
   // Show loading toast
   useEffect(() => {
-    if (!showToasts || wasAlreadyLoaded.current) return;
+    if (!showToasts || wasAlreadyLoaded.current || hasShownLoadingToast.current) return;
 
     if (isLoading && !toastRef.current) {
+      hasShownLoadingToast.current = true;
       toastRef.current = Swal.fire({
         toast: true,
         position: 'bottom-end',
@@ -112,6 +136,14 @@ export function WhisperPreloadInitializer({
     if (!showToasts || wasAlreadyLoaded.current) return;
 
     if (isLoaded && !whisperPreloadManager.hasShownSuccessToast()) {
+      // Only show if we actually showed a loading toast
+      if (!hasShownLoadingToast.current) {
+        if (process.env.NODE_ENV === 'development') {
+          console.log('[WhisperPreload] Skipping success toast - no loading toast shown');
+        }
+        return;
+      }
+      
       whisperPreloadManager.markSuccessToastShown();
       
       // Close loading toast

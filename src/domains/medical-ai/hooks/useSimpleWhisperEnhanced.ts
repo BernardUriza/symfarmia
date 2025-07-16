@@ -37,7 +37,7 @@ export function useSimpleWhisperEnhanced(options: any = {}): UseSimpleWhisperEnh
     isLoaded: isPreloaded,
     forcePreload 
   } = useWhisperPreload({
-    autoInit: true,
+    autoInit: false, // Changed to false to prevent duplicate initialization
     priority: 'auto',
     delay: 2000
   });

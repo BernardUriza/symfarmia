@@ -1,4 +1,5 @@
 import type { Pipeline } from '@xenova/transformers';
+import { configureTransformers } from '../config/transformersConfig';
 
 export type PreloadStatus = 'idle' | 'loading' | 'loaded' | 'failed';
 
@@ -12,21 +13,50 @@ interface PreloadState {
 
 type StatusListener = (state: PreloadState) => void;
 
+// Global variable to persist model across HMR/Fast Refresh
+declare global {
+  var __WHISPER_MODEL_CACHE__: Pipeline | undefined;
+  var __WHISPER_PRELOAD_STATE__: PreloadState | undefined;
+  var __WHISPER_HAS_INITIALIZED__: boolean | undefined;
+}
+
 class WhisperPreloadManager {
   private static instance: WhisperPreloadManager;
-  private state: PreloadState = {
-    status: 'idle',
-    progress: 0,
-    error: null,
-    model: null,
-    hasShownSuccessToast: false,
-  };
+  private state: PreloadState;
   private listeners: Set<StatusListener> = new Set();
   private loadPromise: Promise<Pipeline> | null = null;
+  private initializationPromise: Promise<void> | null = null;
   private idleCallbackId: number | null = null;
-  private hasInitialized = false;
+  private hasInitialized: boolean;
 
-  private constructor() {}
+  private constructor() {
+    // Restore state from global cache if available (survives HMR)
+    if (typeof window !== 'undefined' && global.__WHISPER_PRELOAD_STATE__) {
+      this.state = global.__WHISPER_PRELOAD_STATE__;
+      this.hasInitialized = global.__WHISPER_HAS_INITIALIZED__ || false;
+      
+      // If we have a cached model, restore it
+      if (global.__WHISPER_MODEL_CACHE__ && this.state.status !== 'loaded') {
+        this.state = {
+          ...this.state,
+          status: 'loaded',
+          model: global.__WHISPER_MODEL_CACHE__,
+          progress: 100,
+        };
+      }
+      
+      // Silently restore state
+    } else {
+      this.state = {
+        status: 'idle',
+        progress: 0,
+        error: null,
+        model: null,
+        hasShownSuccessToast: false,
+      };
+      this.hasInitialized = false;
+    }
+  }
 
   static getInstance(): WhisperPreloadManager {
     if (!WhisperPreloadManager.instance) {
@@ -53,6 +83,18 @@ class WhisperPreloadManager {
 
   private updateState(updates: Partial<PreloadState>): void {
     this.state = { ...this.state, ...updates };
+    
+    // Persist state to global cache
+    if (typeof window !== 'undefined') {
+      global.__WHISPER_PRELOAD_STATE__ = this.state;
+      global.__WHISPER_HAS_INITIALIZED__ = this.hasInitialized;
+      
+      // Cache the model separately for better persistence
+      if (this.state.model) {
+        global.__WHISPER_MODEL_CACHE__ = this.state.model;
+      }
+    }
+    
     this.notifyListeners();
   }
 
@@ -66,48 +108,80 @@ class WhisperPreloadManager {
     delay?: number; 
     priority?: 'high' | 'low' | 'auto';
   }): void {
-    // Don't initialize if already loaded or currently loading
-    if (this.state.status === 'loaded' || this.state.status === 'loading') {
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`[WhisperPreloadManager] Skipping initialization - status: ${this.state.status}`);
+    // Check global cache first
+    if (typeof window !== 'undefined' && global.__WHISPER_MODEL_CACHE__) {
+      if (this.state.status !== 'loaded') {
+        this.updateState({
+          status: 'loaded',
+          model: global.__WHISPER_MODEL_CACHE__,
+          progress: 100,
+        });
       }
+      // Model already cached globally
       return;
     }
     
-    if (this.hasInitialized) return;
-    this.hasInitialized = true;
+    // Don't initialize if already loaded or currently loading
+    if (this.state.status === 'loaded' || this.state.status === 'loading') {
+      // Already loaded or loading, skip
+      return;
+    }
+    
+    // Return if already initializing or initialized
+    if (this.initializationPromise || this.hasInitialized) {
+      // Already initializing or initialized
+      return;
+    }
+    
+    // Create initialization promise to prevent concurrent initializations
+    this.initializationPromise = this.performInitialization(options);
+  }
 
+  private async performInitialization(options?: { 
+    delay?: number; 
+    priority?: 'high' | 'low' | 'auto';
+  }): Promise<void> {
+    this.hasInitialized = true;
+    
+    // Persist initialization state
+    if (typeof window !== 'undefined') {
+      global.__WHISPER_HAS_INITIALIZED__ = true;
+    }
     const { delay = 2000, priority = 'auto' } = options || {};
 
     // If high priority, start immediately
     if (priority === 'high') {
-      this.startPreload();
+      await this.startPreload();
       return;
     }
 
     // Otherwise, wait for idle time
-    if ('requestIdleCallback' in window) {
-      this.idleCallbackId = window.requestIdleCallback(
-        () => {
-          // Additional delay to ensure page is fully loaded
-          setTimeout(() => {
-            if (priority === 'auto' && this.shouldPreload()) {
-              this.startPreload();
-            } else if (priority === 'low') {
-              this.startPreload();
-            }
-          }, delay);
-        },
-        { timeout: 10000 } // Max wait 10 seconds
-      );
-    } else {
-      // Fallback for browsers without requestIdleCallback
-      setTimeout(() => {
-        if (this.shouldPreload()) {
-          this.startPreload();
-        }
-      }, delay + 3000);
-    }
+    await new Promise<void>((resolve) => {
+      if ('requestIdleCallback' in window) {
+        this.idleCallbackId = window.requestIdleCallback(
+          () => {
+            // Additional delay to ensure page is fully loaded
+            setTimeout(async () => {
+              if (priority === 'auto' && this.shouldPreload()) {
+                await this.startPreload();
+              } else if (priority === 'low') {
+                await this.startPreload();
+              }
+              resolve();
+            }, delay);
+          },
+          { timeout: 10000 } // Max wait 10 seconds
+        );
+      } else {
+        // Fallback for browsers without requestIdleCallback
+        setTimeout(async () => {
+          if (this.shouldPreload()) {
+            await this.startPreload();
+          }
+          resolve();
+        }, delay + 3000);
+      }
+    });
   }
 
   // Check if we should preload based on device capabilities
@@ -175,6 +249,9 @@ class WhisperPreloadManager {
 
   // Load the model with progress tracking
   private async loadModel(): Promise<Pipeline> {
+    // Ensure transformers is configured before loading
+    await configureTransformers();
+    
     const { pipeline } = await import('@xenova/transformers');
     
     const model = await pipeline(
@@ -246,6 +323,7 @@ class WhisperPreloadManager {
       hasShownSuccessToast: false,
     };
     this.loadPromise = null;
+    this.initializationPromise = null;
     this.hasInitialized = false;
     this.notifyListeners();
   }

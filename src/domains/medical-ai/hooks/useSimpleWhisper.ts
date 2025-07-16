@@ -73,13 +73,22 @@ export function useSimpleWhisper({
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const animationFrameRef = useRef<number | null>(null);
 
-  // Logger strategy pattern
-  const log = (...args: unknown[]) => logger.log(...args);
-  const errorLog = (...args: unknown[]) => logger.error(...args);
+  // Logger strategy pattern - memoized to prevent recreating on every render
+  const log = useCallback((...args: unknown[]) => logger.log(...args), [logger]);
+  const errorLog = useCallback((...args: unknown[]) => logger.error(...args), [logger]);
 
+  // Track if preload is in progress to prevent multiple calls
+  const isPreloadingRef = useRef(false);
+  
   // PRELOAD MODEL
   const preloadModel = useCallback(async () => {
+    // Prevent multiple simultaneous preloads
+    if (isPreloadingRef.current) {
+      return;
+    }
+    
     try {
+      isPreloadingRef.current = true;
       setEngineStatus("loading");
       await loadWhisperModel({
         retryCount,
@@ -91,12 +100,50 @@ export function useSimpleWhisper({
       setEngineStatus("error");
       setError("Error cargando el modelo de transcripción");
       errorLog("🛑 [preloadModel] ERROR:", err);
+    } finally {
+      isPreloadingRef.current = false;
     }
   }, [retryCount, retryDelay, errorLog]);
 
+  // Initial preload effect
   useEffect(() => {
-    if (autoPreload) preloadModel();
-  }, [autoPreload, preloadModel]);
+    let isMounted = true;
+    
+    const doPreload = async () => {
+      if (!autoPreload || !isMounted || isPreloadingRef.current) {
+        return;
+      }
+      
+      try {
+        isPreloadingRef.current = true;
+        setEngineStatus("loading");
+        await loadWhisperModel({
+          retryCount,
+          retryDelay,
+          progress_callback: (p) => setLoadProgress(p?.progress || 0),
+        });
+        if (isMounted) {
+          setEngineStatus("ready");
+        }
+      } catch (err) {
+        if (isMounted) {
+          setEngineStatus("error");
+          setError("Error cargando el modelo de transcripción");
+          errorLog("🛑 [preloadModel] ERROR:", err);
+        }
+      } finally {
+        isPreloadingRef.current = false;
+      }
+    };
+    
+    // Small delay to ensure component is fully mounted
+    const timer = setTimeout(doPreload, 0);
+    
+    return () => {
+      isMounted = false;
+      clearTimeout(timer);
+    };
+  }, [autoPreload, retryCount, retryDelay, errorLog]); // Include actual dependencies
 
   useEffect(() => {
     return () => {
