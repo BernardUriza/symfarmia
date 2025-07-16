@@ -1,4 +1,5 @@
 import type { Pipeline } from '@xenova/transformers';
+import { configureTransformers } from '../config/transformersConfig';
 
 export type PreloadStatus = 'idle' | 'loading' | 'loaded' | 'failed';
 
@@ -44,9 +45,7 @@ class WhisperPreloadManager {
         };
       }
       
-      if (process.env.NODE_ENV === 'development') {
-        console.log('[WhisperPreloadManager] Restored state from global cache:', this.state.status);
-      }
+      // Silently restore state
     } else {
       this.state = {
         status: 'idle',
@@ -118,25 +117,19 @@ class WhisperPreloadManager {
           progress: 100,
         });
       }
-      if (process.env.NODE_ENV === 'development') {
-        console.log('[WhisperPreloadManager] Model already cached globally');
-      }
+      // Model already cached globally
       return;
     }
     
     // Don't initialize if already loaded or currently loading
     if (this.state.status === 'loaded' || this.state.status === 'loading') {
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`[WhisperPreloadManager] Skipping initialization - status: ${this.state.status}`);
-      }
+      // Already loaded or loading, skip
       return;
     }
     
     // Return if already initializing or initialized
     if (this.initializationPromise || this.hasInitialized) {
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`[WhisperPreloadManager] Already ${this.initializationPromise ? 'initializing' : 'initialized'}`);
-      }
+      // Already initializing or initialized
       return;
     }
     
@@ -256,6 +249,9 @@ class WhisperPreloadManager {
 
   // Load the model with progress tracking
   private async loadModel(): Promise<Pipeline> {
+    // Ensure transformers is configured before loading
+    await configureTransformers();
+    
     const { pipeline } = await import('@xenova/transformers');
     
     const model = await pipeline(

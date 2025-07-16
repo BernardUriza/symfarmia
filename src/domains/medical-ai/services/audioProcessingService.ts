@@ -1,5 +1,6 @@
 import type { Pipeline } from '@xenova/transformers';
 import { whisperPreloadManager } from './WhisperPreloadManager';
+import { configureTransformers } from '../config/transformersConfig';
 
 let whisperModel: Pipeline | null = null;
 let loadPromise: Promise<Pipeline> | null = null;
@@ -35,6 +36,9 @@ export async function loadWhisperModel({
   if (loadPromise) return loadPromise;
 
   loadPromise = (async () => {
+    // Ensure transformers is configured
+    await configureTransformers();
+    
     for (let attempt = 1; attempt <= retryCount; attempt++) {
       try {
         const { pipeline } = await import('@xenova/transformers');

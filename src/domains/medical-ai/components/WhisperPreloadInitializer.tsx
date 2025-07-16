@@ -30,6 +30,7 @@ export function WhisperPreloadInitializer({
   const hasInitialized = useRef(false);
   const wasAlreadyLoaded = useRef(false);
   const hasShownLoadingToast = useRef(false);
+  const lastLoggedProgress = useRef(0);
 
   // Check if model is already loaded on mount
   useEffect(() => {
@@ -52,9 +53,25 @@ export function WhisperPreloadInitializer({
     }
   }, []);
 
+  // Log only significant status changes, not every progress update
   useEffect(() => {
     if (process.env.NODE_ENV === 'development' && !wasAlreadyLoaded.current) {
-      console.log(`[WhisperPreload] Status: ${status}, Progress: ${progress}%`);
+      // Log status changes
+      if (status === 'loading' && progress === 0) {
+        console.log('[WhisperPreload] Starting model load...');
+      } else if (status === 'loaded') {
+        console.log('[WhisperPreload] Model loaded successfully');
+        lastLoggedProgress.current = 0; // Reset for next time
+      } else if (status === 'failed') {
+        console.log('[WhisperPreload] Model failed to load');
+      } else if (status === 'loading' && progress > 0) {
+        // Log progress in 25% increments
+        const progressThreshold = Math.floor(progress / 25) * 25;
+        if (progressThreshold > lastLoggedProgress.current && progressThreshold > 0) {
+          console.log(`[WhisperPreload] Loading progress: ${progressThreshold}%`);
+          lastLoggedProgress.current = progressThreshold;
+        }
+      }
     }
   }, [status, progress]);
 

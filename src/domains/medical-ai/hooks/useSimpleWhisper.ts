@@ -73,13 +73,22 @@ export function useSimpleWhisper({
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const animationFrameRef = useRef<number | null>(null);
 
-  // Logger strategy pattern
-  const log = (...args: unknown[]) => logger.log(...args);
-  const errorLog = (...args: unknown[]) => logger.error(...args);
+  // Logger strategy pattern - memoized to prevent recreating on every render
+  const log = useCallback((...args: unknown[]) => logger.log(...args), [logger]);
+  const errorLog = useCallback((...args: unknown[]) => logger.error(...args), [logger]);
 
+  // Track if preload is in progress to prevent multiple calls
+  const isPreloadingRef = useRef(false);
+  
   // PRELOAD MODEL
   const preloadModel = useCallback(async () => {
+    // Prevent multiple simultaneous preloads
+    if (isPreloadingRef.current) {
+      return;
+    }
+    
     try {
+      isPreloadingRef.current = true;
       setEngineStatus("loading");
       await loadWhisperModel({
         retryCount,
@@ -91,12 +100,16 @@ export function useSimpleWhisper({
       setEngineStatus("error");
       setError("Error cargando el modelo de transcripción");
       errorLog("🛑 [preloadModel] ERROR:", err);
+    } finally {
+      isPreloadingRef.current = false;
     }
   }, [retryCount, retryDelay, errorLog]);
 
   useEffect(() => {
-    if (autoPreload) preloadModel();
-  }, [autoPreload, preloadModel]);
+    if (autoPreload && engineStatus !== "ready" && engineStatus !== "loading") {
+      preloadModel();
+    }
+  }, [autoPreload, engineStatus, preloadModel]);
 
   useEffect(() => {
     return () => {
