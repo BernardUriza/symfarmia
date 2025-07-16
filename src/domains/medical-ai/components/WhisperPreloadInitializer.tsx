@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { useWhisperPreload } from '../hooks/useWhisperPreload';
+import { whisperPreloadManager } from '../services/WhisperPreloadManager';
 import Swal from 'sweetalert2';
 import { useI18n } from '@/src/domains/core/hooks/useI18n';
 
@@ -26,7 +27,24 @@ export function WhisperPreloadInitializer({
   });
   
   const toastRef = useRef<any>(null);
-  const hasShownSuccess = useRef(false);
+  const hasInitialized = useRef(false);
+  const wasAlreadyLoaded = useRef(false);
+
+  // Check if model is already loaded on mount
+  useEffect(() => {
+    if (!hasInitialized.current) {
+      hasInitialized.current = true;
+      const currentState = whisperPreloadManager.getState();
+      
+      // If already loaded, mark it and skip all notifications
+      if (currentState.status === 'loaded') {
+        wasAlreadyLoaded.current = true;
+        if (process.env.NODE_ENV === 'development') {
+          console.log('[WhisperPreload] Model already loaded, skipping all notifications');
+        }
+      }
+    }
+  }, []);
 
   useEffect(() => {
     if (process.env.NODE_ENV === 'development') {
@@ -36,7 +54,7 @@ export function WhisperPreloadInitializer({
 
   // Show loading toast
   useEffect(() => {
-    if (!showToasts) return;
+    if (!showToasts || wasAlreadyLoaded.current) return;
 
     if (isLoading && !toastRef.current) {
       toastRef.current = Swal.fire({
@@ -67,7 +85,6 @@ export function WhisperPreloadInitializer({
           popup: 'bg-white dark:bg-gray-800 shadow-lg',
           htmlContainer: 'text-gray-900 dark:text-gray-100'
         },
-        backdrop: false,
         showClass: {
           popup: 'animate__animated animate__fadeInUp animate__faster'
         },
@@ -79,19 +96,23 @@ export function WhisperPreloadInitializer({
 
     // Update progress in existing toast
     if (isLoading && toastRef.current && progress > 0) {
-      const progressElement = toastRef.current.popup.querySelector('.text-xs.font-semibold');
-      const progressText = toastRef.current.popup.querySelector('.text-xs.text-gray-500');
-      if (progressElement) progressElement.textContent = `${progress}%`;
-      if (progressText) progressText.textContent = `${t('conversation.capture.whisper_ai')} ${progress}%`;
+      // Check if the Swal popup exists and is accessible
+      const swalPopup = Swal.getPopup();
+      if (swalPopup) {
+        const progressElement = swalPopup.querySelector('.text-xs.font-semibold');
+        const progressText = swalPopup.querySelector('.text-xs.text-gray-500');
+        if (progressElement) progressElement.textContent = `${progress}%`;
+        if (progressText) progressText.textContent = `${t('conversation.capture.whisper_ai')} ${progress}%`;
+      }
     }
   }, [isLoading, progress, showToasts, t]);
 
   // Show success toast
   useEffect(() => {
-    if (!showToasts) return;
+    if (!showToasts || wasAlreadyLoaded.current) return;
 
-    if (isLoaded && !hasShownSuccess.current) {
-      hasShownSuccess.current = true;
+    if (isLoaded && !whisperPreloadManager.hasShownSuccessToast()) {
+      whisperPreloadManager.markSuccessToastShown();
       
       // Close loading toast
       if (toastRef.current) {
@@ -114,7 +135,6 @@ export function WhisperPreloadInitializer({
           title: 'text-gray-900 dark:text-gray-100',
           htmlContainer: 'text-gray-700 dark:text-gray-300'
         },
-        backdrop: false,
         showClass: {
           popup: 'animate__animated animate__fadeInUp animate__faster'
         },
@@ -127,7 +147,7 @@ export function WhisperPreloadInitializer({
 
   // Show error toast
   useEffect(() => {
-    if (!showToasts) return;
+    if (!showToasts || wasAlreadyLoaded.current) return;
 
     if (isFailed && error) {
       // Close loading toast
@@ -149,14 +169,13 @@ export function WhisperPreloadInitializer({
           popup: 'bg-white dark:bg-gray-800 shadow-lg',
           title: 'text-gray-900 dark:text-gray-100',
           htmlContainer: 'text-gray-700 dark:text-gray-300'
-        },
-        backdrop: false
+        }
       });
     }
   }, [isFailed, error, showToasts, t]);
 
   // Optional inline progress indicator (original style)
-  if (showProgress && !showToasts && isLoading) {
+  if (showProgress && !showToasts && isLoading && !wasAlreadyLoaded.current) {
     return (
       <div className="fixed bottom-4 right-4 z-50 pointer-events-none">
         <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-lg p-3 shadow-lg">

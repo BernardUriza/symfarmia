@@ -7,6 +7,7 @@ interface PreloadState {
   progress: number;
   error: Error | null;
   model: Pipeline | null;
+  hasShownSuccessToast?: boolean;
 }
 
 type StatusListener = (state: PreloadState) => void;
@@ -18,6 +19,7 @@ class WhisperPreloadManager {
     progress: 0,
     error: null,
     model: null,
+    hasShownSuccessToast: false,
   };
   private listeners: Set<StatusListener> = new Set();
   private loadPromise: Promise<Pipeline> | null = null;
@@ -64,6 +66,14 @@ class WhisperPreloadManager {
     delay?: number; 
     priority?: 'high' | 'low' | 'auto';
   }): void {
+    // Don't initialize if already loaded or currently loading
+    if (this.state.status === 'loaded' || this.state.status === 'loading') {
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`[WhisperPreloadManager] Skipping initialization - status: ${this.state.status}`);
+      }
+      return;
+    }
+    
     if (this.hasInitialized) return;
     this.hasInitialized = true;
 
@@ -201,6 +211,16 @@ class WhisperPreloadManager {
     return this.state.model;
   }
 
+  // Mark success toast as shown
+  markSuccessToastShown(): void {
+    this.updateState({ hasShownSuccessToast: true });
+  }
+
+  // Check if success toast was already shown
+  hasShownSuccessToast(): boolean {
+    return this.state.hasShownSuccessToast || false;
+  }
+
   // Cancel ongoing preload
   cancel(): void {
     if (this.idleCallbackId !== null) {
@@ -223,6 +243,7 @@ class WhisperPreloadManager {
       progress: 0,
       error: null,
       model: null,
+      hasShownSuccessToast: false,
     };
     this.loadPromise = null;
     this.hasInitialized = false;

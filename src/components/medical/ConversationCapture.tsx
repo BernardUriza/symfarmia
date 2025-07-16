@@ -39,7 +39,6 @@ export const ConversationCapture = ({
     audioLevel,
     recordingTime,
     audioUrl,
-    loadProgress,
     startTranscription,
     stopTranscription,
     resetTranscription
