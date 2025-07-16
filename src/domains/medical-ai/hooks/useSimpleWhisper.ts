@@ -7,6 +7,7 @@ import { useWhisperWorker } from './useWhisperWorker';
 import { useDirectAudioCapture } from './useDirectAudioCapture';
 import { useAudioChunkManager } from './useAudioChunkManager';
 import { useWhisperStreamingProcessorWorker } from './useWhisperStreamingProcessorWorker';
+import { whisperModelCache } from '../services/whisperModelCache';
 
 // Unified transcription interface
 interface Transcription {
@@ -91,7 +92,7 @@ interface UseSimpleWhisperReturn {
 export function useSimpleWhisper({
   autoPreload = false,
   processingMode = 'direct', // Default to direct for best performance
-  chunkSize = 16000,
+  chunkSize = 160000, // 10 seconds at 16kHz
   sampleRate = 16000,
   preloadPriority = 'auto',
   preloadDelay = 2000,
@@ -148,11 +149,13 @@ export function useSimpleWhisper({
     onChunkProcessed: (text, chunkId) => {
       transcriptPartsRef.current[chunkId] = text;
       logger.log(`[${processingMode}] Chunk ${chunkId} processed: ${text}`);
-      chunkCountRef.current++;
+      
+      // Extract chunk number from chunkId
+      const chunkNumber = parseInt(chunkId.split('_')[1]) || chunkCountRef.current;
       
       // Llamar al callback del usuario si existe en modo direct
       if (processingMode === 'direct' && onChunkProcessed && text) {
-        onChunkProcessed(text, chunkCountRef.current);
+        onChunkProcessed(text, chunkNumber);
       }
     },
     onError: (workerError) => {
@@ -181,17 +184,23 @@ export function useSimpleWhisper({
       logger.log(`[Direct] Chunk ready: ${audioData.length} samples`);
       logger.log(`[Direct] Worker state - isWorkerReady: ${isWorkerReady}, processingMode: ${processingMode}, engineStatus: ${engineStatusRef.current}`);
       
-      if (isWorkerReady && processingMode === 'direct') {
-        const chunkId = `chunk_${Date.now()}`; 
+      // Check if engine is ready instead of just worker ready
+      const isEngineReady = engineStatusRef.current === 'ready' || isWorkerReady;
+      
+      if (isEngineReady && processingMode === 'direct') {
+        // Increment chunk counter first
+        chunkCountRef.current++;
+        const chunkNumber = chunkCountRef.current;
+        const chunkId = `chunk_${chunkNumber}`; 
         try {
           processingTimeRef.current = Date.now();
-          logger.log(`[Direct] Processing chunk ${chunkId} with ${audioData.length} samples`);
+          logger.log(`[Direct] Processing chunk #${chunkNumber} with ${audioData.length} samples`);
           await processWorkerChunk(audioData, chunkId);
         } catch (err) {
           logger.error(`[${processingMode}] Error processing chunk:`, err);
         }
       } else {
-        logger.log(`[Direct] Skipping chunk - Worker ready: ${isWorkerReady}, Mode: ${processingMode}`);
+        logger.log(`[Direct] Skipping chunk - Engine ready: ${isEngineReady}, Worker ready: ${isWorkerReady}, Mode: ${processingMode}`);
       }
     },
     chunkSize,
@@ -343,6 +352,21 @@ export function useSimpleWhisper({
       if (showPreloadStatus) {
         await forcePreload();
       } else {
+        // For direct mode, we need to ensure the worker is initialized
+        if (processingMode === 'direct') {
+          // The worker should be ready from preload
+          const checkStatus = whisperModelCache.isModelLoaded();
+          logger.log(`[preloadModel] Checking model cache status: ${checkStatus}`);
+          
+          if (checkStatus || isPreloaded) {
+            setEngineStatus('ready');
+            engineStatusRef.current = 'ready';
+            setLoadProgress(100);
+            logger.log('[preloadModel] Model ready from cache/preload');
+            return;
+          }
+        }
+        
         // Fallback to worker readiness check
         const modeReady = processingMode === 'streaming' ? isStreamingReady : isWorkerReady;
         
@@ -373,8 +397,6 @@ export function useSimpleWhisper({
           }
         }, 60000);
       }
-      
-      setEngineStatus('ready');
     } catch (err) {
       setEngineStatus('error');
       setError('Error cargando el modelo de transcripción');
@@ -395,17 +417,18 @@ export function useSimpleWhisper({
       chunkCountRef.current = 0; // Reset chunk counter
       
       const modeReady = processingMode === 'streaming' ? isStreamingReady : isWorkerReady;
+      const isEngineReady = engineStatusRef.current === 'ready';
       
-      logger.log(`[startTranscription] Mode: ${processingMode}, Worker ready: ${isWorkerReady}, Preloaded: ${isPreloaded}`);
+      logger.log(`[startTranscription] Mode: ${processingMode}, Worker ready: ${isWorkerReady}, Engine ready: ${isEngineReady}, Preloaded: ${isPreloaded}`);
       
-      if (!modeReady && !isPreloaded) {
+      if (!isEngineReady && !modeReady && !isPreloaded) {
         setError('El modelo aún se está cargando');
         setStatus('error');
         return false;
       }
       
       // Give worker a moment to fully initialize if just became ready
-      if (modeReady && !isPreloaded) {
+      if ((modeReady || isEngineReady) && !isPreloaded) {
         logger.log('[startTranscription] Waiting 100ms for worker to stabilize...');
         await new Promise(resolve => setTimeout(resolve, 100));
       }
@@ -543,6 +566,14 @@ export function useSimpleWhisper({
     
     logger.log(`[${processingMode}] Transcription reset`);
   }, [processingMode, resetStreamingProcessor, resetWorker, logger]);
+  
+  // Auto-preload on mount if enabled
+  useEffect(() => {
+    if (autoPreload && !isPreloaded && engineStatus === 'loading') {
+      logger.log('[useSimpleWhisper] Auto-preloading model...');
+      preloadModel();
+    }
+  }, [autoPreload, isPreloaded, engineStatus, preloadModel, logger]);
   
   // Cleanup on unmount
   useEffect(() => {
