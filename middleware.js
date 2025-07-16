@@ -15,6 +15,7 @@ const protectedRoutes = [
 const publicRoutes = [
   '/',
   '/demo',
+  '/medical-ai-demo',
   '/about',
   '/features',
   '/contact',
@@ -33,6 +34,8 @@ const authRoutes = [
 export default async function middleware(request) {
   const { pathname, search } = request.nextUrl;
   const url = request.nextUrl.clone();
+  
+  console.log('[Middleware] Processing request for:', pathname);
 
   // Handle static assets and Next.js internals
   if (
@@ -49,8 +52,13 @@ export default async function middleware(request) {
     return auth0.middleware(request);
   }
 
+  // Check if the route is public first
+  const isPublicRoute = publicRoutes.some(route => pathname === route || pathname.startsWith(route + '/'));
+  console.log('[Middleware] Is public route?', isPublicRoute);
+  
   // Check if the route is protected
-  const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
+  const isProtectedRoute = !isPublicRoute && protectedRoutes.some(route => pathname.startsWith(route));
+  console.log('[Middleware] Is protected route?', isProtectedRoute);
 
   // For protected routes in production (Netlify), check authentication
   if (isProtectedRoute && process.env.NODE_ENV === 'production') {

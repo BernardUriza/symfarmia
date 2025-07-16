@@ -25,8 +25,12 @@ const MedicalWorkflowSteps = (t) => ([
 ]);
 
 export default function MedicalAIDemo() {
+  console.log('[MedicalAIDemo] Component rendering...');
+  
   const { t } = useTranslation();
   const { patients, selectPatient, getSelectedPatient } = useDemoPatients();
+  
+  console.log('[MedicalAIDemo] Hooks called successfully');
   
   // Initialize state based on localStorage
   const [externalPatient, setExternalPatient] = useState(() => {
@@ -124,7 +128,7 @@ export default function MedicalAIDemo() {
                     <div className="flex items-center justify-between">
                       <div>
                         <div className="font-medium text-foreground">{patient.name}</div>
-                        <div className="text-sm text-foreground/50">{patient.age} {t('common.years')}</div>
+                        <div className="text-sm text-foreground/50">{patient.age} {t('years')}</div>
                       </div>
                       <div className="text-sm text-gray-500 dark:text-gray-400">{patient.gender}</div>
                     </div>
@@ -180,7 +184,7 @@ export default function MedicalAIDemo() {
             <div className="badge-modern glass dark:glass-dark border border-secondary/20">
               <User className="h-4 w-4 text-secondary" />
               <span className="font-medium text-foreground">
-                {patient ? `${patient.name}, ${patient.age} ${t('common.years')}` : ''}
+                {patient ? `${patient.name}, ${patient.age} ${t('years')}` : ''}
               </span>
             </div>
             <div className="badge-modern badge-success glass dark:glass-dark">
@@ -260,7 +264,7 @@ export default function MedicalAIDemo() {
           <div className="p-6">
             {/* Patient Information Panel */}
             <div className="mb-8">
-              <h3 className="text-sm font-semibold text-foreground mb-4">{t('medical.patient.info')}</h3>
+              <h3 className="text-sm font-semibold text-foreground mb-4">{t('patient.info')}</h3>
               <div className="card-float glass dark:glass-dark p-6 space-y-4">
                 {/* Patient Header */}
                 <div className="flex items-center gap-4 pb-4 border-b border-border/50">
@@ -271,7 +275,7 @@ export default function MedicalAIDemo() {
                     <h4 className="font-semibold text-lg text-foreground">{patient?.name}</h4>
                     <div className="flex items-center gap-3 mt-1">
                       <span className="badge-modern badge-primary text-xs">
-                        {patient?.age} {t('common.years')}
+                        {patient?.age} {t('years')}
                       </span>
                       {patient?.gender && (
                         <span className="badge-modern glass dark:glass-dark text-xs">
@@ -287,7 +291,7 @@ export default function MedicalAIDemo() {
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 text-sm font-medium text-foreground">
                       <FileText className="h-4 w-4 text-primary" />
-                      <span>{t('medical.patient.medical_history')}</span>
+                      <span>{t('patient.medical_history')}</span>
                     </div>
                     <div className="pl-6">
                       {patient.medicalHistory.map((item, index) => (
@@ -303,7 +307,7 @@ export default function MedicalAIDemo() {
                 {/* Quick Actions */}
                 <div className="pt-3 flex gap-2">
                   <button className="flex-1 px-3 py-2 text-xs font-medium glass dark:glass-dark border border-border text-foreground/70 rounded-lg hover:bg-primary/10 hover:border-primary/50 hover:text-primary transition-smooth">
-                    {t('medical.patient.view_full_history')}
+                    {t('patient.view_full_history')}
                   </button>
                   <button className="px-3 py-2 text-xs font-medium glass dark:glass-dark border border-border text-foreground/70 rounded-lg hover:bg-primary/10 hover:border-primary/50 hover:text-primary transition-smooth">
                     <FileText className="h-3.5 w-3.5" />
