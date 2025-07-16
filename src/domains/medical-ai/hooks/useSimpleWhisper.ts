@@ -4,9 +4,7 @@ import { extractMedicalTermsFromText } from '../utils/medicalTerms';
 import { DefaultLogger } from '../utils/LoggerStrategy';
 import { useWhisperPreload } from './useWhisperPreload';
 import { useWhisperWorker } from './useWhisperWorker';
-import { useDirectAudioCapture } from './useDirectAudioCapture';
-import { useAudioChunkManager } from './useAudioChunkManager';
-import { useWhisperStreamingProcessorWorker } from './useWhisperStreamingProcessorWorker';
+import { useUnifiedAudioCapture } from './useUnifiedAudioCapture';
 import { whisperModelCache } from '../services/whisperModelCache';
 
 // Unified transcription interface
@@ -174,12 +172,15 @@ export function useSimpleWhisper({
     }
   });
   
-  // Direct audio capture (for direct mode)
+  // Unified audio capture for both modes
   const { 
-    start: startDirectCapture, 
-    stop: stopDirectCapture, 
-    isRecording: isDirectRecording 
-  } = useDirectAudioCapture({
+    start: startAudioCapture, 
+    stop: stopAudioCapture, 
+    isRecording: isAudioRecording 
+  } = useUnifiedAudioCapture({
+    mode: processingMode,
+    chunkSize: processingMode === 'streaming' ? 160000 : chunkSize, // 10s for streaming, custom for direct
+    sampleRate,
     onChunkReady: async (audioData) => {
       logger.log(`[Direct] Chunk ready: ${audioData.length} samples`);
       logger.log(`[Direct] Worker state - isWorkerReady: ${isWorkerReady}, processingMode: ${processingMode}, engineStatus: ${engineStatusRef.current}`);
@@ -187,55 +188,41 @@ export function useSimpleWhisper({
       // Check if engine is ready instead of just worker ready
       const isEngineReady = engineStatusRef.current === 'ready' || isWorkerReady;
       
-      if (isEngineReady && processingMode === 'direct') {
+      if (isEngineReady) {
         // Increment chunk counter first
         chunkCountRef.current++;
         const chunkNumber = chunkCountRef.current;
         const chunkId = `chunk_${chunkNumber}`; 
+        
         try {
           processingTimeRef.current = Date.now();
-          logger.log(`[Direct] Processing chunk #${chunkNumber} with ${audioData.length} samples`);
-          await processWorkerChunk(audioData, chunkId);
+          logger.log(`[${processingMode}] Processing chunk #${chunkNumber} with ${audioData.length} samples`);
+          
+          if (processingMode === 'direct') {
+            // Direct mode: process immediately
+            await processWorkerChunk(audioData, chunkId);
+          } else if (processingMode === 'streaming') {
+            // Streaming mode: process through streaming processor
+            await processStreamingChunk(audioData, chunkId);
+          }
         } catch (err) {
           logger.error(`[${processingMode}] Error processing chunk:`, err);
         }
       } else {
-        logger.log(`[Direct] Skipping chunk - Engine ready: ${isEngineReady}, Worker ready: ${isWorkerReady}, Mode: ${processingMode}`);
-      }
-    },
-    chunkSize,
-    sampleRate
-  });
-  
-  // Streaming processor (for streaming mode)
-  const { 
-    processChunk: processStreamingChunk, 
-    getTranscript: getStreamingTranscript, 
-    reset: resetStreamingProcessor, 
-    isReady: isStreamingReady 
-  } = useWhisperStreamingProcessorWorker({
-    onChunkProcessed: (text, chunkNumber) => {
-      logger.log(`[Streaming] Chunk ${chunkNumber} processed: ${text}`);
-      chunkCountRef.current = chunkNumber;
-      
-      // Llamar al callback del usuario si existe
-      if (onChunkProcessed && text) {
-        onChunkProcessed(text, chunkNumber);
+        logger.log(`[${processingMode}] Skipping chunk - Engine ready: ${isEngineReady}, Mode: ${processingMode}`);
       }
     }
   });
   
-  // Audio chunk manager (for streaming mode)
-  const {
-    start: startStreamingChunks,
-    stop: stopStreamingChunks,
-  } = useAudioChunkManager({
-    onChunkReady: (chunk) => {
-      if (processingMode === 'streaming') {
-        processStreamingChunk(chunk);
-      }
-    },
-  });
+  // For streaming mode, we'll use the same worker but with accumulated chunks
+  const processStreamingChunk = useCallback(async (audioData: Float32Array, chunkId: string) => {
+    if (processingMode === 'streaming' && isWorkerReady) {
+      // Process streaming chunks the same way as direct, just larger
+      await processWorkerChunk(audioData, chunkId);
+    }
+  }, [processingMode, isWorkerReady, processWorkerChunk]);
+  
+  // Remove the old audio chunk manager - we use unified capture now
   
   // Update engine status based on selected mode and preload state
   useEffect(() => {
@@ -253,8 +240,8 @@ export function useSimpleWhisper({
       engineStatusRef.current = 'error';
       setError('Error loading model from preload');
     } else {
-      // Check worker readiness based on processing mode
-      const modeReady = processingMode === 'streaming' ? isStreamingReady : isWorkerReady;
+      // Check worker readiness - same for both modes now
+      const modeReady = isWorkerReady;
       if (modeReady && engineStatus === 'loading') {
         setEngineStatus('ready');
         engineStatusRef.current = 'ready';
@@ -263,12 +250,10 @@ export function useSimpleWhisper({
     }
   }, [isPreloaded, preloadStatus, preloadProgress, isWorkerReady, isStreamingReady, processingMode, engineStatus, logger]);
   
-  // Update recording state based on mode
+  // Update recording state from unified capture
   useEffect(() => {
-    if (processingMode === 'direct') {
-      setIsRecording(isDirectRecording);
-    }
-  }, [isDirectRecording, processingMode]);
+    setIsRecording(isAudioRecording);
+  }, [isAudioRecording]);
   
   // Audio level monitoring setup
   const setupAudioMonitoring = useCallback((stream: MediaStream) => {
@@ -433,13 +418,8 @@ export function useSimpleWhisper({
         await new Promise(resolve => setTimeout(resolve, 100));
       }
       
-      let stream: MediaStream | null = null;
-      
-      if (processingMode === 'streaming') {
-        stream = await startStreamingChunks();
-      } else if (processingMode === 'direct') {
-        stream = await startDirectCapture();
-      }
+      // Use unified audio capture for both modes
+      const stream = await startAudioCapture();
       
       if (!stream) {
         throw new Error('No se pudo iniciar la captura de audio');
@@ -447,8 +427,8 @@ export function useSimpleWhisper({
       
       setupAudioMonitoring(stream);
       
-      // Set recording state for both modes
-      setIsRecording(true);
+      // Recording state is now managed by the unified capture hook
+      // setIsRecording is updated via useEffect
       
       logger.log(`[${processingMode}] Transcription started`);
       return true;
@@ -467,15 +447,10 @@ export function useSimpleWhisper({
       
       setStatus('processing');
       
-      // Stop recording based on mode
-      if (processingMode === 'streaming') {
-        stopStreamingChunks();
-      } else if (processingMode === 'direct') {
-        stopDirectCapture();
-      }
+      // Stop unified audio capture
+      stopAudioCapture();
       
-      // Set recording state to false for both modes
-      setIsRecording(false);
+      // Recording state is managed by the unified capture hook
       
       // Cleanup audio monitoring
       if (animationFrameRef.current) {
@@ -494,12 +469,8 @@ export function useSimpleWhisper({
       
       console.log(`[useSimpleWhisper] Obteniendo transcripción en modo: ${processingMode}`);
       
-      if (processingMode === 'streaming') {
-        console.log('[useSimpleWhisper] Llamando a getStreamingTranscript...');
-        finalText = await getStreamingTranscript();
-        console.log(`[useSimpleWhisper] Transcripción obtenida: "${finalText}" (${finalText.length} caracteres)`);
-        processingTime = processingTimeRef.current ? Date.now() - processingTimeRef.current : 0;
-      } else if (processingMode === 'direct') {
+      // Both modes now use the same transcript collection method
+      if (processingMode === 'streaming' || processingMode === 'direct') {
         // Combine all transcript parts
         const sortedChunks = Object.entries(transcriptPartsRef.current)
           .sort(([a], [b]) => a.localeCompare(b))
@@ -543,7 +514,7 @@ export function useSimpleWhisper({
       setStatus('error');
       return false;
     }
-  }, [isRecording, processingMode, stopStreamingChunks, stopDirectCapture, getStreamingTranscript, logger]);
+  }, [isRecording, processingMode, stopAudioCapture, logger]);
   
   // Reset transcription
   const resetTranscription = useCallback(() => {
@@ -557,15 +528,11 @@ export function useSimpleWhisper({
     transcriptPartsRef.current = {};
     chunkCountRef.current = 0;
     
-    // Reset based on mode
-    if (processingMode === 'streaming') {
-      resetStreamingProcessor();
-    } else if (processingMode === 'direct') {
-      resetWorker();
-    }
+    // Reset worker for both modes
+    resetWorker();
     
     logger.log(`[${processingMode}] Transcription reset`);
-  }, [processingMode, resetStreamingProcessor, resetWorker, logger]);
+  }, [processingMode, resetWorker, logger]);
   
   // Auto-preload on mount if enabled
   useEffect(() => {
