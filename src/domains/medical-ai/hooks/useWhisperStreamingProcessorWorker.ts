@@ -39,22 +39,44 @@ export function useWhisperStreamingProcessorWorker() {
     if (!nextItem) return;
 
     isProcessingRef.current = true;
+    const { chunk, chunkId } = nextItem;
+    
     try {
-      const { chunk, chunkId } = nextItem;
+      // Validar el chunk antes de procesarlo
+      if (!chunk || chunk.size === 0) {
+        console.warn(`Chunk ${chunkId} está vacío, omitiendo...`);
+        return;
+      }
+
       const arrayBuffer = await chunk.arrayBuffer();
-      const audioCtx = new AudioContext({ sampleRate: 16000 });
-      const audioData = await audioCtx.decodeAudioData(arrayBuffer);
-      const float32 = audioData.getChannelData(0);
       
-      if (float32 && float32.length > 0) {
-        const resampled = resampleTo16kHz(float32, audioData.sampleRate);
-        const normalized = normalizeFloat32(resampled);
-        await processWorkerChunk(normalized, chunkId);
+      // Crear AudioContext sin especificar sampleRate para evitar problemas de compatibilidad
+      const audioCtx = new AudioContext();
+      
+      try {
+        const audioData = await audioCtx.decodeAudioData(arrayBuffer);
+        const float32 = audioData.getChannelData(0);
+        
+        if (float32 && float32.length > 0) {
+          const resampled = resampleTo16kHz(float32, audioData.sampleRate);
+          const normalized = normalizeFloat32(resampled);
+          await processWorkerChunk(normalized, chunkId);
+        } else {
+          console.warn(`Chunk ${chunkId} no tiene datos de audio válidos`);
+        }
+      } catch (decodeError) {
+        console.error(`Error decodificando audio del chunk ${chunkId}:`, decodeError);
+        // Continuar con el siguiente chunk en lugar de detener todo
+      } finally {
+        // Cerrar el AudioContext para liberar recursos
+        audioCtx.close();
       }
     } catch (error) {
-      console.error('Error processing chunk:', error);
+      console.error(`Error procesando chunk ${chunkId}:`, error);
     } finally {
       isProcessingRef.current = false;
+      // Procesar el siguiente chunk en la cola
+      setTimeout(() => processNextInQueue(), 100);
     }
   }, [processWorkerChunk]);
 

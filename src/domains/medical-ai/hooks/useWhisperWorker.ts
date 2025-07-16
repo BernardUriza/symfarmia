@@ -1,4 +1,5 @@
 import { useRef, useCallback, useEffect, useState } from 'react';
+import { whisperModelCache } from '../services/whisperModelCache';
 
 interface UseWhisperWorkerOptions {
   onChunkProcessed?: (text: string, chunkId: string) => void;
@@ -8,60 +9,83 @@ interface UseWhisperWorkerOptions {
 }
 
 export function useWhisperWorker(options: UseWhisperWorkerOptions = {}) {
-  const workerRef = useRef<Worker | null>(null);
   const [isReady, setIsReady] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const resultsRef = useRef<Map<string, string>>(new Map());
   const pendingChunksRef = useRef<Set<string>>(new Set());
+  const cleanupRef = useRef<(() => void) | null>(null);
+  const workerRef = useRef<Worker | null>(null);
 
   useEffect(() => {
-    const worker = new Worker(
-      new URL('../workers/audioProcessingWorker.js', import.meta.url),
-      { type: 'module' }
-    );
+    let mounted = true;
 
-    worker.onmessage = (event) => {
-      const { type, ...data } = event.data;
-
-      switch (type) {
-        case 'MODEL_LOADING':
-          options.onModelLoading?.(data.progress);
-          break;
-
-        case 'MODEL_READY':
-          setIsReady(true);
-          options.onModelReady?.();
-          break;
-
-        case 'CHUNK_PROCESSED':
-          resultsRef.current.set(data.chunkId, data.text);
-          pendingChunksRef.current.delete(data.chunkId);
-          options.onChunkProcessed?.(data.text, data.chunkId);
-          if (pendingChunksRef.current.size === 0) {
-            setIsProcessing(false);
+    const setupWorker = async () => {
+      try {
+        // Check if model is already loaded
+        if (whisperModelCache.isModelLoaded()) {
+          if (mounted) {
+            setIsReady(true);
+            options.onModelReady?.();
           }
-          break;
+        }
 
-        case 'PROCESSING_ERROR':
-          pendingChunksRef.current.delete(data.chunkId);
-          options.onError?.(data.error);
-          if (pendingChunksRef.current.size === 0) {
-            setIsProcessing(false);
+        // Get or create worker from cache
+        const worker = await whisperModelCache.getWorker();
+        workerRef.current = worker;
+
+        // Add message listener
+        const cleanup = whisperModelCache.addMessageListener((event) => {
+          if (!mounted) return;
+          
+          const { type, ...data } = event.data;
+
+          switch (type) {
+            case 'MODEL_LOADING':
+              options.onModelLoading?.(data.progress);
+              break;
+
+            case 'MODEL_READY':
+              setIsReady(true);
+              options.onModelReady?.();
+              break;
+
+            case 'CHUNK_PROCESSED':
+              resultsRef.current.set(data.chunkId, data.text);
+              pendingChunksRef.current.delete(data.chunkId);
+              options.onChunkProcessed?.(data.text, data.chunkId);
+              if (pendingChunksRef.current.size === 0) {
+                setIsProcessing(false);
+              }
+              break;
+
+            case 'PROCESSING_ERROR':
+              pendingChunksRef.current.delete(data.chunkId);
+              options.onError?.(data.error);
+              if (pendingChunksRef.current.size === 0) {
+                setIsProcessing(false);
+              }
+              break;
+
+            case 'ERROR':
+              options.onError?.(data.error);
+              setIsReady(false);
+              break;
           }
-          break;
+        });
 
-        case 'ERROR':
-          options.onError?.(data.error);
-          setIsReady(false);
-          break;
+        cleanupRef.current = cleanup;
+      } catch (error) {
+        if (mounted) {
+          options.onError?.(`Failed to initialize worker: ${error}`);
+        }
       }
     };
 
-    workerRef.current = worker;
-    worker.postMessage({ type: 'INIT' });
+    setupWorker();
 
     return () => {
-      worker.terminate();
+      mounted = false;
+      cleanupRef.current?.();
     };
   }, []);
 

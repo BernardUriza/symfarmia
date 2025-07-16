@@ -46,7 +46,7 @@ export const ConversationCapture = ({
     startTranscription,
     stopTranscription,
     resetTranscription
-  } = useSimpleWhisper();
+  } = useSimpleWhisper({ autoPreload: false });
   
   console.log('[ConversationCapture] useSimpleWhisper called successfully');
 

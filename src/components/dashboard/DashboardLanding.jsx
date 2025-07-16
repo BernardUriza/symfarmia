@@ -10,6 +10,13 @@ import { useI18n } from '@/domains/core';
 import { Activity } from 'lucide-react';
 import HydrationSafeDateDisplay from '../../../src/components/HydrationSafeDateDisplay';
 import { LogoutButton } from '../layout';
+import dynamic from 'next/dynamic';
+
+// Lazy load the WhisperPreloader to avoid loading it on initial render
+const WhisperPreloaderGlobal = dynamic(
+  () => import('@/src/domains/medical-ai/components/WhisperPreloaderGlobal'),
+  { ssr: false }
+);
 
 const DashboardLanding = () => {
   const { t } = useI18n();
@@ -121,6 +128,9 @@ const DashboardLanding = () => {
           </>
         )}
       </main>
+      
+      {/* Preload Whisper model globally */}
+      <WhisperPreloaderGlobal />
     </div>
   );
 };

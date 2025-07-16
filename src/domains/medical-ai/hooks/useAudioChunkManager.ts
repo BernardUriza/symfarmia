@@ -15,21 +15,58 @@ export function useAudioChunkManager({
 
   const start = useCallback(async (): Promise<MediaStream | null> => {
     if (isRecording) return null;
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const recorder = new MediaRecorder(stream);
-    mediaRecorderRef.current = recorder;
-
-    recorder.ondataavailable = (e: BlobEvent) => {
-      if (e.data.size > 0) {
-        chunkQueueRef.current.push(e.data);
-        onChunkReady?.(e.data);
+    
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        } 
+      });
+      
+      // Determinar el mejor formato MIME soportado
+      let mimeType = 'audio/webm';
+      const possibleTypes = [
+        'audio/webm;codecs=opus',
+        'audio/webm',
+        'audio/ogg;codecs=opus',
+        'audio/ogg'
+      ];
+      
+      for (const type of possibleTypes) {
+        if (MediaRecorder.isTypeSupported(type)) {
+          mimeType = type;
+          break;
+        }
       }
-    };
+      
+      console.log(`Usando formato de audio: ${mimeType}`);
+      
+      const recorder = new MediaRecorder(stream, { mimeType });
+      mediaRecorderRef.current = recorder;
 
-    // Start recording with timeslice to get continuous chunks
-    recorder.start(chunkDurationMs);
-    setIsRecording(true);
-    return stream;
+      recorder.ondataavailable = (e: BlobEvent) => {
+        if (e.data && e.data.size > 0) {
+          console.log(`Chunk de audio recibido: ${e.data.size} bytes`);
+          chunkQueueRef.current.push(e.data);
+          onChunkReady?.(e.data);
+        }
+      };
+
+      recorder.onerror = (event: Event) => {
+        console.error('Error en MediaRecorder:', event);
+      };
+
+      // Start recording with timeslice to get continuous chunks
+      recorder.start(chunkDurationMs);
+      setIsRecording(true);
+      return stream;
+    } catch (error) {
+      console.error('Error iniciando grabación:', error);
+      setIsRecording(false);
+      return null;
+    }
   }, [chunkDurationMs, isRecording, onChunkReady]);
 
   const stop = useCallback(() => {

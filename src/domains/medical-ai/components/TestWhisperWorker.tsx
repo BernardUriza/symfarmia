@@ -14,7 +14,7 @@ export function TestWhisperWorker() {
     startTranscription,
     stopTranscription,
     resetTranscription
-  } = useSimpleWhisper();
+  } = useSimpleWhisper({ autoPreload: false });
 
   return (
     <div className="p-4 max-w-md mx-auto">

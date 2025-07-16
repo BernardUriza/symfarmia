@@ -48,9 +48,9 @@ interface UseSimpleWhisperReturn {
 }
 
 export function useSimpleWhisper({
-  autoPreload = true,
-  retryCount = 3,
-  retryDelay = 1000,
+  autoPreload = false,
+  retryCount = 3, // eslint-disable-line @typescript-eslint/no-unused-vars
+  retryDelay = 1000, // eslint-disable-line @typescript-eslint/no-unused-vars
   logger = DefaultLogger,
 }: UseSimpleWhisperOptions = {}): UseSimpleWhisperReturn {
   const [transcription, setTranscription] = useState<Transcription | null>(null);
@@ -81,31 +81,50 @@ export function useSimpleWhisper({
 
   const errorLog = useCallback((...args: unknown[]) => logger.error(...args), [logger]);
 
+  const checkIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   const preloadModel = useCallback(async () => {
     try {
+      // Si ya está listo, no hacer nada
+      if (isWorkerReady) {
+        setEngineStatus('ready');
+        setLoadProgress(100);
+        return;
+      }
+
       setEngineStatus('loading');
+      setError(null);
+      
+      // Limpiar timers anteriores si existen
+      if (checkIntervalRef.current) clearInterval(checkIntervalRef.current);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      
       // El modelo ahora se carga en el worker automáticamente
       // Solo necesitamos esperar a que esté listo
-      const checkReady = setInterval(() => {
+      checkIntervalRef.current = setInterval(() => {
         if (isWorkerReady) {
-          clearInterval(checkReady);
+          if (checkIntervalRef.current) clearInterval(checkIntervalRef.current);
+          if (timeoutRef.current) clearTimeout(timeoutRef.current);
           setEngineStatus('ready');
           setLoadProgress(100);
         }
       }, 100);
       
-      // Timeout después de 30 segundos
-      setTimeout(() => {
-        clearInterval(checkReady);
+      // Timeout después de 60 segundos (más tiempo para conexiones lentas)
+      timeoutRef.current = setTimeout(() => {
+        if (checkIntervalRef.current) clearInterval(checkIntervalRef.current);
         if (!isWorkerReady) {
           setEngineStatus('error');
-          setError('Timeout cargando el modelo de transcripción');
+          setError('Timeout cargando el modelo de transcripción. Por favor, recarga la página.');
         }
-      }, 30000);
+      }, 60000);
     } catch (err) {
       setEngineStatus('error');
       setError('Error cargando el modelo de transcripción');
       errorLog(err);
+      if (checkIntervalRef.current) clearInterval(checkIntervalRef.current);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
     }
   }, [isWorkerReady, errorLog]);
 
@@ -114,6 +133,15 @@ export function useSimpleWhisper({
       preloadModel();
     }
   }, [autoPreload, preloadModel]);
+
+  // Actualizar el estado cuando el worker esté listo
+  useEffect(() => {
+    if (isWorkerReady) {
+      setEngineStatus('ready');
+      setLoadProgress(100);
+      setError(null);
+    }
+  }, [isWorkerReady]);
 
   const setupAudioMonitoring = useCallback((stream: MediaStream) => {
     const audioContext = new AudioContext();
@@ -199,6 +227,14 @@ export function useSimpleWhisper({
       if (timerRef.current) clearInterval(timerRef.current);
     };
   }, [isRecording]);
+
+  // Cleanup de timers del modelo cuando se desmonta el componente
+  useEffect(() => {
+    return () => {
+      if (checkIntervalRef.current) clearInterval(checkIntervalRef.current);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
 
   return {
     transcription,
