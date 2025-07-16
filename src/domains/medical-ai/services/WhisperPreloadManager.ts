@@ -23,6 +23,7 @@ class WhisperPreloadManager {
   };
   private listeners: Set<StatusListener> = new Set();
   private loadPromise: Promise<Pipeline> | null = null;
+  private initializationPromise: Promise<void> | null = null;
   private idleCallbackId: number | null = null;
   private hasInitialized = false;
 
@@ -74,40 +75,58 @@ class WhisperPreloadManager {
       return;
     }
     
-    if (this.hasInitialized) return;
-    this.hasInitialized = true;
+    // Return if already initializing or initialized
+    if (this.initializationPromise || this.hasInitialized) {
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`[WhisperPreloadManager] Already ${this.initializationPromise ? 'initializing' : 'initialized'}`);
+      }
+      return;
+    }
+    
+    // Create initialization promise to prevent concurrent initializations
+    this.initializationPromise = this.performInitialization(options);
+  }
 
+  private async performInitialization(options?: { 
+    delay?: number; 
+    priority?: 'high' | 'low' | 'auto';
+  }): Promise<void> {
+    this.hasInitialized = true;
     const { delay = 2000, priority = 'auto' } = options || {};
 
     // If high priority, start immediately
     if (priority === 'high') {
-      this.startPreload();
+      await this.startPreload();
       return;
     }
 
     // Otherwise, wait for idle time
-    if ('requestIdleCallback' in window) {
-      this.idleCallbackId = window.requestIdleCallback(
-        () => {
-          // Additional delay to ensure page is fully loaded
-          setTimeout(() => {
-            if (priority === 'auto' && this.shouldPreload()) {
-              this.startPreload();
-            } else if (priority === 'low') {
-              this.startPreload();
-            }
-          }, delay);
-        },
-        { timeout: 10000 } // Max wait 10 seconds
-      );
-    } else {
-      // Fallback for browsers without requestIdleCallback
-      setTimeout(() => {
-        if (this.shouldPreload()) {
-          this.startPreload();
-        }
-      }, delay + 3000);
-    }
+    await new Promise<void>((resolve) => {
+      if ('requestIdleCallback' in window) {
+        this.idleCallbackId = window.requestIdleCallback(
+          () => {
+            // Additional delay to ensure page is fully loaded
+            setTimeout(async () => {
+              if (priority === 'auto' && this.shouldPreload()) {
+                await this.startPreload();
+              } else if (priority === 'low') {
+                await this.startPreload();
+              }
+              resolve();
+            }, delay);
+          },
+          { timeout: 10000 } // Max wait 10 seconds
+        );
+      } else {
+        // Fallback for browsers without requestIdleCallback
+        setTimeout(async () => {
+          if (this.shouldPreload()) {
+            await this.startPreload();
+          }
+          resolve();
+        }, delay + 3000);
+      }
+    });
   }
 
   // Check if we should preload based on device capabilities
@@ -246,6 +265,7 @@ class WhisperPreloadManager {
       hasShownSuccessToast: false,
     };
     this.loadPromise = null;
+    this.initializationPromise = null;
     this.hasInitialized = false;
     this.notifyListeners();
   }
