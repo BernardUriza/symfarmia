@@ -151,8 +151,8 @@ export function useSimpleWhisper({
       // Extract chunk number from chunkId
       const chunkNumber = parseInt(chunkId.split('_')[1]) || chunkCountRef.current;
       
-      // Llamar al callback del usuario si existe en modo direct
-      if (processingMode === 'direct' && onChunkProcessed && text) {
+      // Llamar al callback del usuario si existe
+      if (onChunkProcessed && text) {
         onChunkProcessed(text, chunkNumber);
       }
     },
@@ -248,7 +248,7 @@ export function useSimpleWhisper({
         setLoadProgress(100);
       }
     }
-  }, [isPreloaded, preloadStatus, preloadProgress, isWorkerReady, isStreamingReady, processingMode, engineStatus, logger]);
+  }, [isPreloaded, preloadStatus, preloadProgress, isWorkerReady, processingMode, engineStatus, logger]);
   
   // Update recording state from unified capture
   useEffect(() => {
@@ -353,7 +353,7 @@ export function useSimpleWhisper({
         }
         
         // Fallback to worker readiness check
-        const modeReady = processingMode === 'streaming' ? isStreamingReady : isWorkerReady;
+        const modeReady = isWorkerReady;
         
         if (modeReady) {
           setEngineStatus('ready');
@@ -363,7 +363,7 @@ export function useSimpleWhisper({
         
         // Poll for readiness
         checkIntervalRef.current = setInterval(() => {
-          const currentModeReady = processingMode === 'streaming' ? isStreamingReady : isWorkerReady;
+          const currentModeReady = isWorkerReady;
           if (currentModeReady) {
             if (checkIntervalRef.current) clearInterval(checkIntervalRef.current);
             if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -375,7 +375,7 @@ export function useSimpleWhisper({
         // Timeout after 60 seconds
         timeoutRef.current = setTimeout(() => {
           if (checkIntervalRef.current) clearInterval(checkIntervalRef.current);
-          const currentModeReady = processingMode === 'streaming' ? isStreamingReady : isWorkerReady;
+          const currentModeReady = isWorkerReady;
           if (!currentModeReady) {
             setEngineStatus('error');
             setError('Timeout cargando el modelo de transcripción. Por favor, recarga la página.');
@@ -390,7 +390,7 @@ export function useSimpleWhisper({
       if (checkIntervalRef.current) clearInterval(checkIntervalRef.current);
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     }
-  }, [isPreloaded, forcePreload, showPreloadStatus, processingMode, isStreamingReady, isWorkerReady, logger]);
+  }, [isPreloaded, forcePreload, showPreloadStatus, processingMode, isWorkerReady, logger]);
   
   // Start transcription
   const startTranscription = useCallback(async (): Promise<boolean> => {
@@ -438,7 +438,7 @@ export function useSimpleWhisper({
       setStatus('error');
       return false;
     }
-  }, [processingMode, isStreamingReady, isWorkerReady, isPreloaded, startStreamingChunks, startDirectCapture, setupAudioMonitoring, logger]);
+  }, [processingMode, isWorkerReady, isPreloaded, startAudioCapture, setupAudioMonitoring, logger]);
   
   // Stop transcription
   const stopTranscription = useCallback(async (): Promise<boolean> => {
