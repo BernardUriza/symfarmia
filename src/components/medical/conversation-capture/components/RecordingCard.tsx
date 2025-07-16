@@ -7,6 +7,7 @@ import { Button } from '@/src/components/ui/button';
 import { Badge } from '@/src/components/ui/badge';
 import { Activity, Play, Square as Stop, RotateCcw, Copy } from 'lucide-react';
 import { VoiceReactiveMicrophone } from '@/src/components/ui/VoiceReactiveMicrophone';
+import { LiveTranscriptionDisplay } from '@/src/components/ui/LiveTranscriptionDisplay';
 import { useI18n } from '@/src/domains/core/hooks/useI18n';
 
 interface RecordingCardProps {
@@ -76,12 +77,15 @@ export const RecordingCard: React.FC<RecordingCardProps> = ({
             </div>
           )}
           
-          {isRecording && liveTranscript && (
-            <div className="w-full max-w-md mt-4 p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
-              <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">
-                {t('conversation.capture.live_transcription_label')}
-              </p>
-              <p className="text-sm text-gray-800 dark:text-gray-200">{liveTranscript}</p>
+          {isRecording && (
+            <div className="w-full max-w-2xl mt-4">
+              <LiveTranscriptionDisplay
+                liveTranscript={liveTranscript}
+                isRecording={isRecording}
+                showFinalTranscript={false}
+                maxLines={3}
+                className="animate-fadeIn"
+              />
             </div>
           )}
           
