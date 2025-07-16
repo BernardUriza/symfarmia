@@ -1,3 +1,5 @@
+import { pipeline as createPipeline, env } from '@xenova/transformers';
+
 // Global cache for the pipeline model
 let pipeline = null;
 let modelInitialized = false;
@@ -48,14 +50,12 @@ async function performInitialization() {
     self.postMessage({ type: 'MODEL_LOADING', progress: 0 });
     
     // Configure transformers to cache models
-    const { env, pipeline: pipelineConstructor } = await import('@xenova/transformers');
-    
     // Enable caching
     env.allowLocalModels = true;
     env.localModelPath = 'models';
     env.cacheDir = 'models';
     
-    pipeline = await pipelineConstructor(
+    pipeline = await createPipeline(
       'automatic-speech-recognition',
       'Xenova/whisper-tiny',
       {
@@ -191,10 +191,11 @@ async function processAudioChunk(data) {
       });
     }
   } catch (error) {
+    console.error('[Worker] Processing error:', error);
     self.postMessage({ 
       type: 'PROCESSING_ERROR', 
-      error: error.message,
-      chunkId: data.chunkId 
+      error: error.message || 'Unknown processing error',
+      chunkId: data.chunkId || 'unknown'
     });
   }
 }

@@ -386,8 +386,7 @@ export default function MedicalAIDemo() {
           </div>
         </main>
       </div>
-      {/* Whisper Debug Panel (development only) */}
-      <WhisperDebugPanel />
+      {/* Whisper Debug Panel (development only) <WhisperDebugPanel /> */}
     </div>
   );
 }

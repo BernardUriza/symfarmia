@@ -93,8 +93,18 @@ class WhisperModelCache {
               resolve();
             }
             
-            // Forward to all listeners
-            this.listeners.forEach(listener => listener(event));
+            // Forward to all listeners - use a copy to prevent modification during iteration
+            const listenersCopy = Array.from(this.listeners);
+            // Use setTimeout to prevent stack overflow from recursive calls
+            setTimeout(() => {
+              listenersCopy.forEach(listener => {
+                try {
+                  listener(event);
+                } catch (error) {
+                  console.error('[WhisperCache] Error in listener:', error);
+                }
+              });
+            }, 0);
           };
           
           this.worker.onerror = (error) => {

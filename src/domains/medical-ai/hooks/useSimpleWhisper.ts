@@ -291,12 +291,7 @@ export function useSimpleWhisper({
         const average = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
         const level = Math.round(average);
         setAudioLevel(level);
-        
-        // Log periodically to avoid spamming
-        if (Math.random() < 0.1) {
-          logger.log(`[AudioMonitor] Level: ${level}`);
-        }
-        
+                
         animationFrameRef.current = requestAnimationFrame(updateLevel);
       };
       

@@ -112,10 +112,14 @@ export function useWhisperWorker(options: UseWhisperWorkerOptions = {}) {
     setIsProcessing(true);
     pendingChunksRef.current.add(chunkId);
     
+    // Create a copy of the audio data to transfer
+    const audioBuffer = audioData.buffer.slice(0);
+    const audioDataCopy = new Float32Array(audioBuffer);
+    
     workerRef.current.postMessage({
       type: 'PROCESS_CHUNK',
-      data: { audioData, chunkId }
-    });
+      data: { audioData: audioDataCopy, chunkId }
+    }, [audioBuffer]);
   }, [isReady]);
 
   const getTranscript = useCallback(() => {
