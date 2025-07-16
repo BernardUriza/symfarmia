@@ -3,7 +3,7 @@ import './conversation-capture/styles.css';
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useSimpleWhisper } from '@/src/domains/medical-ai/hooks/useSimpleWhisper';
-import { useRealAudioCapture } from '@/src/domains/medical-ai/hooks/legacy/useRealAudioCapture';
+import { useRealAudioCapture } from '@/src/domains/medical-ai/hooks/useRealAudioCapture';
 import { extractMedicalTermsFromText } from '@/src/domains/medical-ai/utils/medicalTerms';
 import { Button } from '@/src/components/ui/button';
 import { useI18n } from '@/src/domains/core/hooks/useI18n';
