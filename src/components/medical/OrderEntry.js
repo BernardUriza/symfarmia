@@ -10,69 +10,69 @@ import { ChevronLeft, ChevronRight, Pill, AlertCircle, Check } from 'lucide-reac
 
 const getSuggestedOrders = (t) => [
   {
-    category: t('orders.categories.medications'),
+    category: t('categories.medications'),
     items: [
       { 
-        name: t('orders.medications.ibuprofen.name'),
-        dosage: t('orders.medications.ibuprofen.dosage'),
-        duration: t('orders.medications.ibuprofen.duration'),
+        name: t('medications.ibuprofen.name'),
+        dosage: t('medications.ibuprofen.dosage'),
+        duration: t('medications.ibuprofen.duration'),
         priority: 'high'
       },
       { 
-        name: t('orders.medications.paracetamol.name'),
-        dosage: t('orders.medications.paracetamol.dosage'),
-        duration: t('orders.medications.paracetamol.duration'),
+        name: t('medications.paracetamol.name'),
+        dosage: t('medications.paracetamol.dosage'),
+        duration: t('medications.paracetamol.duration'),
         priority: 'medium'
       },
       { 
-        name: t('orders.medications.sumatriptan.name'),
-        dosage: t('orders.medications.sumatriptan.dosage'),
-        duration: t('orders.medications.sumatriptan.duration'),
+        name: t('medications.sumatriptan.name'),
+        dosage: t('medications.sumatriptan.dosage'),
+        duration: t('medications.sumatriptan.duration'),
         priority: 'low'
       }
     ]
   },
   {
-    category: t('orders.categories.lab_tests'),
+    category: t('categories.lab_tests'),
     items: [
       { 
-        name: t('orders.lab_tests.complete_blood_count.name'),
-        reason: t('orders.lab_tests.complete_blood_count.reason'),
+        name: t('lab_tests.complete_blood_count.name'),
+        reason: t('lab_tests.complete_blood_count.reason'),
         priority: 'medium'
       },
       { 
-        name: t('orders.lab_tests.inflammatory_markers.name'),
-        reason: t('orders.lab_tests.inflammatory_markers.reason'),
+        name: t('lab_tests.inflammatory_markers.name'),
+        reason: t('lab_tests.inflammatory_markers.reason'),
         priority: 'low'
       }
     ]
   },
   {
-    category: t('orders.categories.imaging'),
+    category: t('categories.imaging'),
     items: [
       { 
-        name: t('orders.imaging.head_ct.name'),
-        reason: t('orders.imaging.head_ct.reason'),
+        name: t('imaging.head_ct.name'),
+        reason: t('imaging.head_ct.reason'),
         priority: 'high'
       },
       { 
-        name: t('orders.imaging.brain_mri.name'),
-        reason: t('orders.imaging.brain_mri.reason'),
+        name: t('imaging.brain_mri.name'),
+        reason: t('imaging.brain_mri.reason'),
         priority: 'low'
       }
     ]
   },
   {
-    category: t('orders.categories.consultations'),
+    category: t('categories.consultations'),
     items: [
       { 
-        name: t('orders.consultations.neurology.name'),
-        reason: t('orders.consultations.neurology.reason'),
+        name: t('consultations.neurology.name'),
+        reason: t('consultations.neurology.reason'),
         priority: 'medium'
       },
       { 
-        name: t('orders.consultations.ophthalmology.name'),
-        reason: t('orders.consultations.ophthalmology.reason'),
+        name: t('consultations.ophthalmology.name'),
+        reason: t('consultations.ophthalmology.reason'),
         priority: 'low'
       }
     ]
@@ -106,8 +106,8 @@ export function OrderEntry({ onNext, onPrevious }) {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="text-center mb-6">
-        <h1 className="text-2xl text-slate-900 mb-2">{t('orders.entry.title')}</h1>
-        <p className="text-slate-600">{t('orders.entry.subtitle')}</p>
+        <h1 className="text-2xl text-slate-900 mb-2">{t('entry.title')}</h1>
+        <p className="text-slate-600">{t('entry.subtitle')}</p>
       </div>
 
       {/* Resumen de Órdenes Seleccionadas */}
@@ -115,12 +115,12 @@ export function OrderEntry({ onNext, onPrevious }) {
         <CardHeader>
           <CardTitle className="text-blue-900 flex items-center gap-2">
             <Check className="h-5 w-5" />
-            {t('orders.entry.selected_orders')} ({selectedOrders.length})
+            {t('entry.selected_orders')} ({selectedOrders.length})
           </CardTitle>
         </CardHeader>
         <CardContent>
           {selectedOrders.length === 0 ? (
-            <p className="text-blue-600 text-sm">{t('orders.entry.no_orders_selected')}</p>
+            <p className="text-blue-600 text-sm">{t('entry.no_orders_selected')}</p>
           ) : (
             <div className="space-y-2">
               {selectedOrders.map((orderId, index) => {
@@ -182,17 +182,17 @@ export function OrderEntry({ onNext, onPrevious }) {
                           <h4 className="font-medium text-slate-900">{item.name}</h4>
                           {item.dosage && (
                             <p className="text-sm text-slate-600 mt-1">
-                              <strong>{t('orders.details.dose')}:</strong> {item.dosage}
+                              <strong>{t('details.dose')}:</strong> {item.dosage}
                             </p>
                           )}
                           {item.duration && (
                             <p className="text-sm text-slate-600">
-                              <strong>{t('orders.details.duration')}:</strong> {item.duration}
+                              <strong>{t('details.duration')}:</strong> {item.duration}
                             </p>
                           )}
                           {item.reason && (
                             <p className="text-sm text-slate-600">
-                              <strong>{t('orders.details.indication')}:</strong> {item.reason}
+                              <strong>{t('details.indication')}:</strong> {item.reason}
                             </p>
                           )}
                         </div>
@@ -219,14 +219,14 @@ export function OrderEntry({ onNext, onPrevious }) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <AlertCircle className="h-5 w-5" />
-            {t('orders.entry.custom_order')}
+            {t('entry.custom_order')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <Textarea
             value={customOrder}
             onChange={(e) => setCustomOrder(e.target.value)}
-            placeholder={t('orders.entry.custom_order_placeholder')}
+            placeholder={t('entry.custom_order_placeholder')}
             className="min-h-24"
           />
         </CardContent>
@@ -234,12 +234,12 @@ export function OrderEntry({ onNext, onPrevious }) {
 
       {/* Navegación */}
       <div className="flex justify-between items-center pt-4">
-        <Button variant="outline" onClick={onPrevious} className="flex items-center gap-2" aria-label={t('orders.entry.back_to_notes')}>
+        <Button variant="outline" onClick={onPrevious} className="flex items-center gap-2" aria-label={t('entry.back_to_notes')}>
           <ChevronLeft className="h-4 w-4" />
-          {t('orders.entry.back_to_notes')}
+          {t('entry.back_to_notes')}
         </Button>
-        <Button onClick={onNext} className="flex items-center gap-2" aria-label={t('orders.entry.generate_summary')}>
-          {t('orders.entry.generate_summary')}
+        <Button onClick={onNext} className="flex items-center gap-2" aria-label={t('entry.generate_summary')}>
+          {t('entry.generate_summary')}
           <ChevronRight className="h-4 w-4" />
         </Button>
       </div>

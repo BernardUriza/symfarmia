@@ -25,10 +25,14 @@ export const ConversationCapture = ({
   onTranscriptionComplete,
   className = ''
 }: ConversationCaptureProps) => {
+  console.log('[ConversationCapture] Component mounting...');
+  
   const { t } = useI18n();
   const [showPermissionDialog, setShowPermissionDialog] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
   const [liveTranscript, setLiveTranscript] = useState('');
+  
+  console.log('[ConversationCapture] About to call useSimpleWhisper...');
   
   const {
     transcription,
@@ -43,6 +47,8 @@ export const ConversationCapture = ({
     stopTranscription,
     resetTranscription
   } = useSimpleWhisper();
+  
+  console.log('[ConversationCapture] useSimpleWhisper called successfully');
 
   const {
     transcript: liveTranscriptData,

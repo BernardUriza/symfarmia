@@ -25,6 +25,7 @@ async function loadTranslations(locale, retryCount = 0) {
       import(`../../locales/${locale}/language_switcher.json`),
       import(`../../locales/${locale}/ui.json`),
       import(`../../locales/${locale}/errors.json`),
+      import(`../../locales/${locale}/medical.json`),
     ]);
     
     // Validate that all modules loaded correctly

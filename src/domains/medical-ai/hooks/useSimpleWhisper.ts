@@ -53,6 +53,8 @@ export function useSimpleWhisper({
   retryDelay = 1000,
   logger = DefaultLogger,
 }: UseSimpleWhisperOptions = {}): UseSimpleWhisperReturn {
+  console.log('[useSimpleWhisper] Hook initializing...');
+  
   // Estados y refs
   const [transcription, setTranscription] = useState<Transcription | null>(null);
   const [status, setStatus] = useState<Status>("idle");
