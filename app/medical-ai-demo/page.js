@@ -96,9 +96,9 @@ export default function MedicalAIDemo() {
 
         <main className="p-6">
           <div className="max-w-2xl mx-auto">
-            <div className="bg-background rounded-lg shadow-sm border border-border p-6">
+            <div className="card-gradient glass dark:glass-dark rounded-xl shadow-lg border border-border p-6 animate-slide-up">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 bg-emerald-100 dark:bg-emerald-900 rounded-lg flex items-center justify-center">
+                <div className="w-10 h-10 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-lg flex items-center justify-center shadow-inner backdrop-blur-sm">
                   <User className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                 </div>
                 <div>
@@ -119,7 +119,7 @@ export default function MedicalAIDemo() {
                       selectPatient(patient.id);
                       setShowPatientSelector(false);
                     }}
-                    className="w-full text-left p-4 border border-border rounded-lg hover:border-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors"
+                    className="w-full text-left p-4 border border-border rounded-lg hover:border-primary hover:bg-primary/5 dark:hover:bg-primary/10 transition-smooth hover-scale"
                   >
                     <div className="flex items-center justify-between">
                       <div>
@@ -177,14 +177,14 @@ export default function MedicalAIDemo() {
 
           {/* Patient Context Header */}
           <div className="flex items-center gap-6">
-            <div className="flex items-center gap-3 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700">
-              <User className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+            <div className="badge-modern glass dark:glass-dark border border-secondary/20">
+              <User className="h-4 w-4 text-secondary" />
               <span className="font-medium text-foreground">
                 {patient ? `${patient.name}, ${patient.age} años` : ''}
               </span>
             </div>
-            <div className="flex items-center gap-3 px-4 py-2 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-700">
-              <Clock className="h-4 w-4 text-green-600 dark:text-green-400" />
+            <div className="badge-modern badge-success glass dark:glass-dark">
+              <Clock className="h-4 w-4" />
               <span className="font-medium text-foreground">{encounterTime}</span>
             </div>
             <DemoResetButton
@@ -261,10 +261,10 @@ export default function MedicalAIDemo() {
             {/* Patient Information Panel */}
             <div className="mb-8">
               <h3 className="text-sm font-semibold text-foreground mb-4">Información del Paciente</h3>
-              <div className="bg-background rounded-lg p-4 border border-border">
+              <div className="card-float glass dark:glass-dark">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
-                    <User className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                  <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-full flex items-center justify-center shadow-inner animate-float">
+                    <User className="h-6 w-6 text-primary" />
                   </div>
                   <div>
                     <h4 className="font-semibold text-foreground">{patient?.name}</h4>
@@ -286,19 +286,19 @@ export default function MedicalAIDemo() {
             <div className="mb-8">
               <h3 className="text-sm font-semibold text-foreground mb-4">{t('workflow.medical_navigation')}</h3>
               <nav className="space-y-2">
-                <button className="w-full flex items-center gap-3 px-4 py-3 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-lg border border-blue-200 dark:border-blue-700">
+                <button className="w-full flex items-center gap-3 px-4 py-3 glass dark:glass-dark text-secondary rounded-lg border border-secondary/20 hover:border-secondary/40 transition-smooth hover-scale">
                   <Users className="h-4 w-4" />
                   <span className="text-sm font-medium">{t('workflow.navigation.view_all_patients')}</span>
                 </button>
-                <button className="w-full flex items-center gap-3 px-4 py-3 text-foreground/70 rounded-lg hover:bg-background">
+                <button className="w-full flex items-center gap-3 px-4 py-3 text-foreground/70 rounded-lg hover:bg-muted/50 transition-smooth hover-scale">
                   <FolderOpen className="h-4 w-4" />
                   <span className="text-sm font-medium">{t('workflow.navigation.medical_reports')}</span>
                 </button>
-                <button className="w-full flex items-center gap-3 px-4 py-3 text-foreground/70 rounded-lg hover:bg-background">
+                <button className="w-full flex items-center gap-3 px-4 py-3 text-foreground/70 rounded-lg hover:bg-muted/50 transition-smooth hover-scale">
                   <FileText className="h-4 w-4" />
                   <span className="text-sm font-medium">{t('workflow.navigation.clinical_history')}</span>
                 </button>
-                <button className="w-full flex items-center gap-3 px-4 py-3 text-foreground/70 rounded-lg hover:bg-background">
+                <button className="w-full flex items-center gap-3 px-4 py-3 text-foreground/70 rounded-lg hover:bg-muted/50 transition-smooth hover-scale">
                   <Activity className="h-4 w-4" />
                   <span className="text-sm font-medium">{t('workflow.navigation.new_consultation')}</span>
                 </button>
@@ -306,11 +306,11 @@ export default function MedicalAIDemo() {
             </div>
 
             {/* Current Step Status */}
-            <div className="bg-background rounded-lg p-4 border border-border">
+            <div className="stat-card glass dark:glass-dark">
               <h3 className="text-sm font-semibold text-foreground mb-2">{t('workflow.current_step')}</h3>
               <div className="flex items-center gap-2 mb-2">
-                <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
-                  {React.createElement(steps[currentStepIndex].icon, { className: "h-4 w-4 text-blue-600 dark:text-blue-400" })}
+                <div className="w-8 h-8 bg-gradient-to-br from-accent/20 to-primary/20 rounded-full flex items-center justify-center shadow-inner">
+                  {React.createElement(steps[currentStepIndex].icon, { className: "h-4 w-4 text-accent" })}
                 </div>
                 <span className="font-medium text-foreground">{steps[currentStepIndex].label}</span>
               </div>
