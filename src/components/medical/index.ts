@@ -4,7 +4,7 @@
  * Components for medical workflows and AI assistance
  */
 
-export { ConversationCapture } from './ConversationCapture';
+export { ConversationCaptureWrapper as ConversationCapture } from './ConversationCaptureWrapper';
 export { DialogueFlow } from './DialogueFlow';
 export { ClinicalNotes } from './ClinicalNotes';
 export { OrderEntry } from './OrderEntry';
@@ -12,3 +12,4 @@ export { SummaryExport } from './SummaryExport';
 export { VoiceReactiveRings } from './VoiceReactiveRings';
 export { default as MedicalAssistantWrapper } from './MedicalAssistantWrapper';
 export { default as ModelManager } from './ModelManager';
+export { WhisperDebugPanel } from './WhisperDebugPanel';

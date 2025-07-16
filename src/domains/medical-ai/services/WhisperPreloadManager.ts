@@ -1,5 +1,6 @@
 import type { Pipeline } from '@xenova/transformers';
 import { configureTransformers } from '../config/transformersConfig';
+import { whisperModelCache } from './whisperModelCache';
 
 export type PreloadStatus = 'idle' | 'loading' | 'loaded' | 'failed';
 
@@ -227,6 +228,21 @@ class WhisperPreloadManager {
     this.updateState({ status: 'loading', progress: 0, error: null });
 
     try {
+      // First check if worker cache already has the model
+      if (whisperModelCache.isModelLoaded()) {
+        console.log('✅ Whisper model already loaded in worker cache');
+        this.updateState({
+          status: 'loaded',
+          progress: 100,
+          model: {} as Pipeline, // Placeholder since actual model is in worker
+        });
+        return;
+      }
+      
+      // Preload the worker and model
+      await whisperModelCache.getWorker();
+      
+      // Now load model for direct usage (non-worker)
       this.loadPromise = this.loadModel();
       const model = await this.loadPromise;
       

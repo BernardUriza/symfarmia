@@ -53,6 +53,23 @@ export const RecordingCard: React.FC<RecordingCardProps> = ({
   return (
     <Card className="border-2 border-dashed border-blue-200 dark:border-blue-700 bg-white dark:bg-gray-800 shadow-sm transition-all duration-300 ease-in-out slide-in">
       <CardContent className="p-8 text-center">
+        {/* Show transcription result when completed */}
+        {transcription && !isRecording && (
+          <div className="mb-6 p-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-3">
+              {t('conversation.capture.transcription_result')}:
+            </h3>
+            <div className="flex justify-center gap-4 text-sm">
+              <span className="inline-flex items-center px-3 py-1 rounded-full bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
+                {t('conversation.capture.confidence')}: {Math.round(transcription.confidence * 100)}%
+              </span>
+              <span className="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">
+                {t('conversation.capture.processing_time')}: {transcription.processingTime}ms
+              </span>
+            </div>
+          </div>
+        )}
+
         <div className="flex flex-col items-center space-y-4">
           <div className="mb-4">
             <VoiceReactiveMicrophone

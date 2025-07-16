@@ -132,8 +132,8 @@ export function WhisperPreloadInitializer({
               </div>
             </div>
             <div class="flex-1">
-              <p class="font-medium text-sm">${t('conversation.capture.loading_ai')}</p>
-              <p class="text-xs text-gray-500">${t('conversation.capture.whisper_ai')} ${progress}%</p>
+              <p class="font-medium text-sm">🏥 ${t('conversation.capture.loading_ai')}</p>
+              <p class="text-xs text-gray-500">📋 Preparando herramientas médicas... ${progress}%</p>
             </div>
           </div>
         `,
@@ -189,8 +189,8 @@ export function WhisperPreloadInitializer({
         toast: true,
         position: 'bottom-end',
         icon: 'success',
-        title: t('conversation.capture.ai_ready'),
-        text: t('conversation.capture.ai_loaded_successfully'),
+        title: '🏥 ' + t('conversation.capture.ai_ready'),
+        text: '📋 Sistema médico listo para transcripción',
         showConfirmButton: false,
         timer: 3000,
         timerProgressBar: true,

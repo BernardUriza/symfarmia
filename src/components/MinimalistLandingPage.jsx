@@ -12,6 +12,7 @@ import {
 } from '@heroicons/react/24/outline';
 import dynamic from 'next/dynamic';
 const DemoLoginModal = dynamic(() => import('./layout/DemoLoginModal'));
+const AudioProcessingTest = dynamic(() => import('./medical/AudioProcessingTest'), { ssr: false });
 // Removed DashboardLanding import - redirecting to main dashboard
 import { useTranslation } from '../providers/I18nProvider';
 import { useAppMode } from '../providers/AppModeProvider';
@@ -329,6 +330,23 @@ const MinimalistLandingPage = ({ isDemo = false }) => {
         </section>
 
       </main>
+
+      {/* Audio Processing Test Section */}
+      <section className="py-16 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-slate-800">
+        <div className="max-w-4xl mx-auto px-6">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">
+              🎙️ {t('demo_transcription_title', 'Prueba la Tecnología')}
+            </h2>
+            <p className="text-lg text-gray-600 dark:text-gray-300">
+              {t('demo_transcription_subtitle', 'Experimenta la transcripción médica en tiempo real con IA')}
+            </p>
+          </div>
+          <div className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-3xl shadow-xl border border-white/50 dark:border-slate-700/50 p-8">
+            <AudioProcessingTest />
+          </div>
+        </div>
+      </section>
 
       {/* Simple Footer */}
       <footer className="border-t border-white/30 dark:border-slate-700/30 py-8">

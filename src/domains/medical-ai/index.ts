@@ -22,11 +22,11 @@ export { useMedicalAI } from './hooks/useMedicalAI';
 export { useMedicalValidation } from './hooks/useMedicalValidation';
 export { useMedicalTranslation } from './hooks/useMedicalTranslation';
 export { useTranscription } from './hooks/useTranscription';
+export { useRealAudioCapture } from './hooks/useRealAudioCapture'; // Chrome-specific WebSpeech hook
 
 // Legacy Hooks (deprecated - will be removed in future versions)
 export { useAudioCapture } from './hooks/legacy/useAudioCapture';
 export { useMicrophoneDiagnostics } from './hooks/legacy/useMicrophoneDiagnostics';
-export { useRealAudioCapture } from './hooks/legacy/useRealAudioCapture';
 export { useModelDownload } from './hooks/legacy/useModelDownload';
 export { useDemoTranscription } from './hooks/legacy/useDemoTranscription';
 // Services

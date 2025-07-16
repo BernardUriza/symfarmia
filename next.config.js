@@ -12,6 +12,16 @@ const nextConfig = {
     position: 'bottom-right',
   },
 
+  // Allow cross-origin requests from 127.0.0.1
+  allowedDevOrigins: ['http://127.0.0.1:3000', 'http://localhost:3000'],
+
+  // Optimize Fast Refresh
+  reactStrictMode: false,
+  onDemandEntries: {
+    maxInactiveAge: 60 * 1000,
+    pagesBufferLength: 5,
+  },
+
   // Webpack configuration
   webpack: (config, { dev, isServer }) => {
     config.resolve.fallback = {
