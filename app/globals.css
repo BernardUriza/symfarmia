@@ -2,6 +2,13 @@
 
 /* Tailwind v4 Medical Theme Configuration */
 @theme {
+  /* Tailwind 4 semantic color mapping */
+  --color-background: #FFFFFF;
+  --color-foreground: #111827;
+  --color-border: #E5E7EB;
+  --color-primary: #12B76A;
+  --color-primary-foreground: #FFFFFF;
+  
   /* Professional Medical Color Palette */
   --color-medical-primary: #12B76A; /* Verde médico profesional */
   --color-medical-primary-dark: #0E9355;
@@ -87,8 +94,8 @@ html {
 body {
   font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-weight: 400;
-  color: var(--color-medical-text-primary);
-  background-color: var(--color-medical-surface-secondary);
+  color: var(--color-foreground);
+  background-color: var(--color-background);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
@@ -96,12 +103,19 @@ body {
 
 /* Dark mode base styles */
 .dark body {
-  background-color: #0F172A;
-  color: #F1F5F9;
+  background-color: var(--color-background);
+  color: var(--color-foreground);
 }
 
 /* Dark mode CSS variables - Critical for medical night shifts */
 .dark {
+  /* Tailwind 4 semantic color mapping for dark mode */
+  --color-background: #0F172A;
+  --color-foreground: #F1F5F9;
+  --color-border: #334155;
+  --color-primary: #34D399;
+  --color-primary-foreground: #FFFFFF;
+  
   /* Medical color palette - optimized for night vision */
   --color-medical-primary: #34D399; /* Softer green for dark mode */
   --color-medical-primary-dark: #10B981;

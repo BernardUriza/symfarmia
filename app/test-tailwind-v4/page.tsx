@@ -15,9 +15,9 @@ export default function TestTailwindV4() {
         </div>
 
         {/* Status Card */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 border border-gray-200 dark:border-gray-700">
+        <div className="bg-background rounded-2xl shadow-xl p-8 border border-border">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Estado del Sistema</h2>
+            <h2 className="text-3xl font-bold text-foreground">Estado del Sistema</h2>
             <div className="flex items-center space-x-2">
               <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
               <span className="text-green-600 dark:text-green-400 font-medium">Activo</span>
@@ -27,7 +27,7 @@ export default function TestTailwindV4() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
               <div className="text-sm text-gray-500 dark:text-gray-400">Configuración</div>
-              <div className="text-lg font-semibold text-gray-900 dark:text-white">@theme en CSS</div>
+              <div className="text-lg font-semibold text-foreground">@theme en CSS</div>
             </div>
             <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
               <div className="text-sm text-gray-500 dark:text-gray-400">Archivo JS</div>
@@ -35,21 +35,21 @@ export default function TestTailwindV4() {
             </div>
             <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
               <div className="text-sm text-gray-500 dark:text-gray-400">PostCSS</div>
-              <div className="text-lg font-semibold text-gray-900 dark:text-white">@tailwindcss/postcss</div>
+              <div className="text-lg font-semibold text-foreground">@tailwindcss/postcss</div>
             </div>
           </div>
         </div>
 
         {/* Medical Theme Test */}
         <div className="space-y-4">
-          <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Tema Médico Personalizado</h3>
+          <h3 className="text-2xl font-bold text-foreground">Tema Médico Personalizado</h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="medical-card p-6">
               <div className="w-12 h-12 bg-sky-100 dark:bg-sky-900 rounded-lg flex items-center justify-center mb-4">
                 <span className="text-2xl">🏥</span>
               </div>
-              <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Primary</h4>
+              <h4 className="font-semibold text-foreground mb-2">Primary</h4>
               <div className="h-20 bg-gradient-to-r from-sky-400 to-sky-600 rounded-lg"></div>
             </div>
             
@@ -57,7 +57,7 @@ export default function TestTailwindV4() {
               <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mb-4">
                 <span className="text-2xl">💉</span>
               </div>
-              <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Accent</h4>
+              <h4 className="font-semibold text-foreground mb-2">Accent</h4>
               <div className="h-20 bg-gradient-to-r from-blue-400 to-blue-600 rounded-lg"></div>
             </div>
             
@@ -65,7 +65,7 @@ export default function TestTailwindV4() {
               <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center mb-4">
                 <span className="text-2xl">✅</span>
               </div>
-              <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Success</h4>
+              <h4 className="font-semibold text-foreground mb-2">Success</h4>
               <div className="h-20 bg-gradient-to-r from-green-400 to-green-600 rounded-lg"></div>
             </div>
             
@@ -73,7 +73,7 @@ export default function TestTailwindV4() {
               <div className="w-12 h-12 bg-red-100 dark:bg-red-900 rounded-lg flex items-center justify-center mb-4">
                 <span className="text-2xl">🚨</span>
               </div>
-              <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Error</h4>
+              <h4 className="font-semibold text-foreground mb-2">Error</h4>
               <div className="h-20 bg-gradient-to-r from-red-400 to-red-600 rounded-lg"></div>
             </div>
           </div>
@@ -81,9 +81,9 @@ export default function TestTailwindV4() {
 
         {/* Components Test */}
         <div className="space-y-4">
-          <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Componentes Médicos</h3>
+          <h3 className="text-2xl font-bold text-foreground">Componentes Médicos</h3>
           
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
+          <div className="bg-background rounded-xl p-6 shadow-lg border border-border">
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -96,7 +96,7 @@ export default function TestTailwindV4() {
                 <button className="btn-medical-primary">
                   Guardar Registro
                 </button>
-                <button className="px-6 py-3 rounded-xl font-medium border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300">
+                <button className="px-6 py-3 rounded-xl font-medium border-2 border-border text-foreground/70 hover:bg-background transition-all duration-300">
                   Cancelar
                 </button>
               </div>
@@ -107,7 +107,7 @@ export default function TestTailwindV4() {
         {/* Features Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 p-6 rounded-xl border border-blue-200 dark:border-blue-800">
-            <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-4">✨ Características v4</h4>
+            <h4 className="text-xl font-bold text-foreground mb-4">✨ Características v4</h4>
             <ul className="space-y-2 text-gray-700 dark:text-gray-300">
               <li>✓ Configuración CSS-first con @theme</li>
               <li>✓ Colores OKLCH para P3 gamut</li>
@@ -118,7 +118,7 @@ export default function TestTailwindV4() {
           </div>
           
           <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 p-6 rounded-xl border border-green-200 dark:border-green-800">
-            <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-4">🏥 Sistema Médico</h4>
+            <h4 className="text-xl font-bold text-foreground mb-4">🏥 Sistema Médico</h4>
             <ul className="space-y-2 text-gray-700 dark:text-gray-300">
               <li>✓ Tema médico profesional</li>
               <li>✓ Componentes reutilizables</li>
