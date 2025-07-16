@@ -113,11 +113,40 @@ async function processAudioChunk(data) {
       chunkId 
     });
 
+    // Send initial progress
+    self.postMessage({ 
+      type: 'CHUNK_PROGRESS', 
+      chunkId,
+      progress: 5
+    });
+
     console.log(`[Worker] Llamando a pipeline para chunk ${chunkId}...`);
+    
+    // Simulate progress during processing
+    let currentProgress = 5;
+    const progressInterval = setInterval(() => {
+      currentProgress = Math.min(90, currentProgress + Math.random() * 15 + 5);
+      self.postMessage({ 
+        type: 'CHUNK_PROGRESS', 
+        chunkId,
+        progress: Math.round(currentProgress)
+      });
+    }, 500);
+
     const result = await pipeline(audioData, {
       return_timestamps: false,
       chunk_length_s: 30,
       stride_length_s: 5
+    });
+
+    // Clear progress interval
+    clearInterval(progressInterval);
+    
+    // Send final progress
+    self.postMessage({ 
+      type: 'CHUNK_PROGRESS', 
+      chunkId,
+      progress: 100
     });
 
     const transcribedText = result.text || '';

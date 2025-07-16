@@ -12,6 +12,7 @@ const AudioProcessingTest = () => {
   const { t } = useI18n();
   const [chunks, setChunks] = useState<ChunkData[]>([]);
   const [currentChunk, setCurrentChunk] = useState<{ text: string; number: number } | null>(null);
+  const [chunkProgress, setChunkProgress] = useState<{ [key: number]: number }>({});
   
   const {
     transcription,
@@ -25,13 +26,24 @@ const AudioProcessingTest = () => {
     resetTranscription,
   } = useSimpleWhisper({ 
     autoPreload: true,
-    processingMode: 'direct',
+    processingMode: 'streaming', // Cambiar a streaming para ver el progreso
     chunkSize: 160000, // 10 segundos a 16kHz
     onChunkProcessed: (text, chunkNumber) => {
       console.log(`[AudioTest] Chunk ${chunkNumber} procesado: "${text}"`);
       const newChunk: ChunkData = { text, chunkNumber };
       setChunks(prev => [...prev, newChunk]);
       setCurrentChunk({ text, number: chunkNumber });
+    },
+    onChunkProgress: (chunkNumber, progress) => {
+      console.log(`[AudioTest] Chunk ${chunkNumber} progreso: ${progress}%`);
+      setChunkProgress(prev => ({ ...prev, [chunkNumber]: progress }));
+      
+      // Update current chunk progress if it's the active one
+      setCurrentChunk(curr => 
+        curr && curr.number === chunkNumber 
+          ? { ...curr, progress } 
+          : curr
+      );
     }
   });
 
@@ -39,6 +51,7 @@ const AudioProcessingTest = () => {
     try {
       setChunks([]);
       setCurrentChunk(null);
+      setChunkProgress({});
       const success = await startTranscription();
       if (!success) {
         console.error('Failed to start transcription');
@@ -56,6 +69,7 @@ const AudioProcessingTest = () => {
     resetTranscription();
     setChunks([]);
     setCurrentChunk(null);
+    setChunkProgress({});
   };
 
   const formatTime = (seconds: number) => {
@@ -124,11 +138,32 @@ const AudioProcessingTest = () => {
             </div>
             {currentChunk ? (
               <div>
-                <div className="text-xs text-blue-600 dark:text-blue-400 mb-1">
-                  Chunk #{currentChunk.number}
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs text-blue-600 dark:text-blue-400">
+                    Chunk #{currentChunk.number}
+                  </span>
+                  {chunkProgress[currentChunk.number] !== undefined && (
+                    <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                      {chunkProgress[currentChunk.number]}%
+                    </span>
+                  )}
                 </div>
+                {chunkProgress[currentChunk.number] !== undefined && (
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 mb-2">
+                    <div 
+                      className="bg-blue-500 h-1.5 rounded-full transition-all duration-300"
+                      style={{ width: `${chunkProgress[currentChunk.number]}%` }}
+                    />
+                  </div>
+                )}
                 <div className="text-sm text-gray-700 dark:text-gray-300 line-clamp-3">
-                  {currentChunk.text || <em className="text-gray-400">procesando...</em>}
+                  {currentChunk.text || (
+                    <em className="text-gray-400">
+                      {chunkProgress[currentChunk.number] === 100 
+                        ? 'Procesando texto...' 
+                        : 'Analizando audio...'}
+                    </em>
+                  )}
                 </div>
               </div>
             ) : (
@@ -177,8 +212,20 @@ const AudioProcessingTest = () => {
             ) : (
               chunks.map((chunk, index) => (
                 <div key={index} className="border-l-4 border-blue-500 pl-3">
-                  <div className="text-xs text-blue-600 dark:text-blue-400 font-medium mb-1">
-                    Chunk #{chunk.chunkNumber}
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">
+                      Chunk #{chunk.chunkNumber}
+                    </span>
+                    {chunkProgress[chunk.chunkNumber] !== undefined && chunkProgress[chunk.chunkNumber] < 100 && (
+                      <span className="text-xs text-gray-500">
+                        {chunkProgress[chunk.chunkNumber]}%
+                      </span>
+                    )}
+                    {chunkProgress[chunk.chunkNumber] === 100 && (
+                      <span className="text-xs text-green-600 dark:text-green-400">
+                        ✓ Completado
+                      </span>
+                    )}
                   </div>
                   <div className="text-gray-700 dark:text-gray-300">
                     {chunk.text || <em className="text-gray-400">{'<vacío>'}</em>}

@@ -52,6 +52,7 @@ interface UseSimpleWhisperOptions {
   
   // Callbacks
   onChunkProcessed?: (text: string, chunkNumber: number) => void;
+  onChunkProgress?: (chunkNumber: number, progress: number) => void;
 }
 
 // Unified return interface
@@ -98,7 +99,8 @@ export function useSimpleWhisper({
   retryDelay = 1000,
   logger = DefaultLogger,
   showPreloadStatus = false,
-  onChunkProcessed
+  onChunkProcessed,
+  onChunkProgress
 }: UseSimpleWhisperOptions = {}): UseSimpleWhisperReturn {
   
   // Core state
@@ -154,6 +156,14 @@ export function useSimpleWhisper({
       // Llamar al callback del usuario si existe
       if (onChunkProcessed && text) {
         onChunkProcessed(text, chunkNumber);
+      }
+    },
+    onChunkProgress: (chunkId, progress) => {
+      const chunkNumber = parseInt(chunkId.split('_')[1]) || chunkCountRef.current;
+      logger.log(`[${processingMode}] Chunk ${chunkNumber} progress: ${progress}%`);
+      
+      if (onChunkProgress) {
+        onChunkProgress(chunkNumber, progress);
       }
     },
     onError: (workerError) => {

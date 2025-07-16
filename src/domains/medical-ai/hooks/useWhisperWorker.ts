@@ -3,6 +3,7 @@ import { whisperModelCache } from '../services/whisperModelCache';
 
 interface UseWhisperWorkerOptions {
   onChunkProcessed?: (text: string, chunkId: string) => void;
+  onChunkProgress?: (chunkId: string, progress: number) => void;
   onError?: (error: string) => void;
   onModelLoading?: (progress: number) => void;
   onModelReady?: () => void;
@@ -48,6 +49,10 @@ export function useWhisperWorker(options: UseWhisperWorkerOptions = {}) {
             case 'MODEL_READY':
               setIsReady(true);
               options.onModelReady?.();
+              break;
+
+            case 'CHUNK_PROGRESS':
+              options.onChunkProgress?.(data.chunkId, data.progress);
               break;
 
             case 'CHUNK_PROCESSED':
