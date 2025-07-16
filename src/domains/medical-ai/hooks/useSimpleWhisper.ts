@@ -149,8 +149,8 @@ export function useSimpleWhisper({
       logger.log(`[${processingMode}] Chunk ${chunkId} processed: ${text}`);
       chunkCountRef.current++;
       
-      // Llamar al callback del usuario si existe
-      if (onChunkProcessed && text) {
+      // Llamar al callback del usuario si existe en modo direct
+      if (processingMode === 'direct' && onChunkProcessed && text) {
         onChunkProcessed(text, chunkCountRef.current);
       }
     },
@@ -177,14 +177,18 @@ export function useSimpleWhisper({
     isRecording: isDirectRecording 
   } = useDirectAudioCapture({
     onChunkReady: async (audioData) => {
+      logger.log(`[Direct] Chunk ready: ${audioData.length} samples`);
       if (isWorkerReady && processingMode === 'direct') {
         const chunkId = `chunk_${Date.now()}`; 
         try {
           processingTimeRef.current = Date.now();
+          logger.log(`[Direct] Processing chunk ${chunkId}`);
           await processWorkerChunk(audioData, chunkId);
         } catch (err) {
           logger.error(`[${processingMode}] Error processing chunk:`, err);
         }
+      } else {
+        logger.log(`[Direct] Skipping chunk - Worker ready: ${isWorkerReady}, Mode: ${processingMode}`);
       }
     },
     chunkSize,
@@ -273,10 +277,18 @@ export function useSimpleWhisper({
         
         analyser.getByteFrequencyData(dataArray);
         const average = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
-        setAudioLevel(Math.round(average));
+        const level = Math.round(average);
+        setAudioLevel(level);
+        
+        // Log periodically to avoid spamming
+        if (Math.random() < 0.1) {
+          logger.log(`[AudioMonitor] Level: ${level}`);
+        }
+        
         animationFrameRef.current = requestAnimationFrame(updateLevel);
       };
       
+      logger.log('[AudioMonitor] Starting audio level monitoring');
       updateLevel();
     } catch (err) {
       logger.error(`[${processingMode}] Error setting up audio monitoring:`, err);
@@ -395,9 +407,8 @@ export function useSimpleWhisper({
       
       setupAudioMonitoring(stream);
       
-      if (processingMode === 'streaming') {
-        setIsRecording(true);
-      }
+      // Set recording state for both modes
+      setIsRecording(true);
       
       logger.log(`[${processingMode}] Transcription started`);
       return true;
@@ -419,10 +430,12 @@ export function useSimpleWhisper({
       // Stop recording based on mode
       if (processingMode === 'streaming') {
         stopStreamingChunks();
-        setIsRecording(false);
       } else if (processingMode === 'direct') {
         stopDirectCapture();
       }
+      
+      // Set recording state to false for both modes
+      setIsRecording(false);
       
       // Cleanup audio monitoring
       if (animationFrameRef.current) {

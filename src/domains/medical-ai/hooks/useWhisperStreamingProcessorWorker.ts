@@ -22,16 +22,18 @@ export function useWhisperStreamingProcessorWorker(options: UseWhisperStreamingP
   const { isReady, processChunk: processWorkerChunk, reset: resetWorker } = useWhisperWorker({
     onChunkProcessed: (text, chunkId) => {
       console.log(`[StreamingProcessor] TEXTO RECIBIDO del chunk ${chunkId}: "${text}" (${text.length} caracteres)`);
+      
+      // Agregar resultado incluso si está vacío para mantener el orden
       resultsRef.current.push({ 
         text, 
         chunkId, 
         timestamp: Date.now() 
       });
       pendingChunksRef.current--;
-      console.log(`[StreamingProcessor] Chunk ${chunkId} procesado. Pendientes: ${pendingChunksRef.current}`);
+      console.log(`[StreamingProcessor] Chunk ${chunkId} procesado. Pendientes: ${pendingChunksRef.current}, Total resultados: ${resultsRef.current.length}`);
       
-      // Llamar al callback externo si existe
-      if (options.onChunkProcessed && text) {
+      // Llamar al callback externo si existe (incluso con texto vacío)
+      if (options.onChunkProcessed) {
         const chunkNumber = parseInt(chunkId.split('_')[1]) + 1;
         options.onChunkProcessed(text, chunkNumber);
       }
@@ -129,19 +131,25 @@ export function useWhisperStreamingProcessorWorker(options: UseWhisperStreamingP
     
     const results = resultsRef.current;
     console.log(`[StreamingProcessor] getTranscript llamado - ${results.length} resultados disponibles`);
+    console.log(`[StreamingProcessor] Detalles de resultados:`, results.map(r => `${r.chunkId}: "${r.text}"`));
     
     if (results.length === 0) {
       console.warn('[StreamingProcessor] NO HAY RESULTADOS - El usuario no dijo nada o error en procesamiento');
       return '';
     }
     
-    const transcript = results
-      .sort((a, b) => a.chunkId.localeCompare(b.chunkId))
+    const sortedResults = results.sort((a, b) => a.chunkId.localeCompare(b.chunkId));
+    console.log(`[StreamingProcessor] Chunks ordenados:`, sortedResults.map(r => `${r.chunkId}: "${r.text}"`));
+    
+    const transcript = sortedResults
       .map(r => r.text)
+      .filter(text => text.trim().length > 0) // Filtrar textos vacíos
       .join(' ')
       .trim();
     
     console.log(`[StreamingProcessor] TRANSCRIPT FINAL: "${transcript}" (${transcript.length} caracteres)`);
+    console.log(`[StreamingProcessor] Chunks con texto: ${sortedResults.filter(r => r.text.trim().length > 0).length}/${sortedResults.length}`);
+    
     return transcript;
   }, [waitForAllChunks]);
 

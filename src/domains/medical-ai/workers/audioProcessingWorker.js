@@ -92,16 +92,16 @@ async function processAudioChunk(data) {
 
     const { audioData, chunkId } = data;
     
-    // Validar tamaño del chunk - MÍNIMO 10 SEGUNDOS PARA CHUNKS GORDOS
-    const minChunkSize = 160000; // 10 segundos a 16kHz
+    // Validar tamaño del chunk - MÍNIMO 1 SEGUNDO PARA STREAMING
+    const minChunkSize = 16000; // 1 segundo a 16kHz - permite streaming chunks pequeños
     if (!audioData || audioData.length < minChunkSize) {
-      console.error(`[Worker] Chunk demasiado pequeño: ${audioData?.length || 0} samples (mínimo: ${minChunkSize})`);
+      console.warn(`[Worker] Chunk muy pequeño: ${audioData?.length || 0} samples (mínimo: ${minChunkSize})`);
       self.postMessage({ 
         type: 'CHUNK_TOO_SMALL',
         chunkId,
         size: audioData?.length || 0,
         minSize: minChunkSize,
-        error: `Chunk de audio muy pequeño para procesar. Recibido: ${audioData?.length || 0} samples, mínimo requerido: ${minChunkSize} (10 segundos)`
+        error: `Chunk de audio muy pequeño para procesar. Recibido: ${audioData?.length || 0} samples, mínimo requerido: ${minChunkSize} (1 segundo)`
       });
       return;
     }
@@ -113,6 +113,7 @@ async function processAudioChunk(data) {
       chunkId 
     });
 
+    console.log(`[Worker] Llamando a pipeline para chunk ${chunkId}...`);
     const result = await pipeline(audioData, {
       return_timestamps: false,
       chunk_length_s: 30,
@@ -120,14 +121,27 @@ async function processAudioChunk(data) {
     });
 
     const transcribedText = result.text || '';
-    console.log(`[Worker] TRANSCRIPCIÓN OBTENIDA: "${transcribedText}" (${transcribedText.length} caracteres)`);
+    console.log(`[Worker] TRANSCRIPCIÓN OBTENIDA para chunk ${chunkId}: "${transcribedText}" (${transcribedText.length} caracteres)`);
 
-    self.postMessage({ 
-      type: 'CHUNK_PROCESSED', 
-      chunkId,
-      text: transcribedText,
-      timestamp: Date.now()
-    });
+    if (!transcribedText || transcribedText.length === 0) {
+      console.warn(`[Worker] CHUNK ${chunkId} NO GENERÓ TEXTO - posible audio silencioso`);
+      // Enviar resultado vacío para que el sistema sepa que fue procesado
+      self.postMessage({ 
+        type: 'CHUNK_PROCESSED', 
+        chunkId,
+        text: '',
+        timestamp: Date.now(),
+        warning: 'No text generated - possible silent audio'
+      });
+    } else {
+      console.log(`[Worker] ENVIANDO TRANSCRIPCIÓN: "${transcribedText}"`);
+      self.postMessage({ 
+        type: 'CHUNK_PROCESSED', 
+        chunkId,
+        text: transcribedText,
+        timestamp: Date.now()
+      });
+    }
   } catch (error) {
     self.postMessage({ 
       type: 'PROCESSING_ERROR', 

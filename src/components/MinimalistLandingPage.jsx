@@ -332,9 +332,19 @@ const MinimalistLandingPage = ({ isDemo = false }) => {
       </main>
 
       {/* Audio Processing Test Section */}
-      <section className="py-16 bg-gray-50 dark:bg-gray-900">
+      <section className="py-16 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-slate-800">
         <div className="max-w-4xl mx-auto px-6">
-          <AudioProcessingTest />
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">
+              🎙️ {t('demo_transcription_title', 'Prueba la Tecnología')}
+            </h2>
+            <p className="text-lg text-gray-600 dark:text-gray-300">
+              {t('demo_transcription_subtitle', 'Experimenta la transcripción médica en tiempo real con IA')}
+            </p>
+          </div>
+          <div className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-3xl shadow-xl border border-white/50 dark:border-slate-700/50 p-8">
+            <AudioProcessingTest />
+          </div>
         </div>
       </section>
 

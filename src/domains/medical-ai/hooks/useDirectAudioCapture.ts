@@ -1,6 +1,5 @@
 import { useRef, useCallback, useState } from 'react';
 import { useAudioProcessor } from './useAudioProcessor';
-import { useWhisperWorker } from './useWhisperWorker';
 
 interface UseDirectAudioCaptureOptions {
   onChunkReady?: (audioData: Float32Array) => void;
@@ -18,14 +17,7 @@ export function useDirectAudioCapture({
   const streamRef = useRef<MediaStream | null>(null);
   const chunkIdRef = useRef(0);
 
-  const { isReady: isWorkerReady, processChunk } = useWhisperWorker({
-    onChunkProcessed: (text, chunkId) => {
-      console.log(`Chunk ${chunkId} processed: ${text}`);
-    },
-    onError: (error) => {
-      console.error('Worker error:', error);
-    }
-  });
+  // Remove internal worker - processing will be handled by the caller
 
   const { start: startProcessor, stop: stopProcessor } = useAudioProcessor({
     onAudioData: (audioData) => {
@@ -55,11 +47,6 @@ export function useDirectAudioCapture({
         // Process chunk
         const chunkId = `chunk_${chunkIdRef.current++}`;
         onChunkReady?.(chunk);
-        
-        // Send to worker if ready
-        if (isWorkerReady) {
-          processChunk(chunk, chunkId).catch(console.error);
-        }
       }
     },
     bufferSize: 4096,
@@ -102,22 +89,17 @@ export function useDirectAudioCapture({
         
         const chunkId = `chunk_${chunkIdRef.current++}`;
         onChunkReady?.(finalBuffer);
-        
-        if (isWorkerReady) {
-          processChunk(finalBuffer, chunkId).catch(console.error);
-        }
       }
     }
     
     bufferRef.current = [];
     streamRef.current = null;
     setIsRecording(false);
-  }, [isRecording, stopProcessor, onChunkReady, isWorkerReady, processChunk]);
+  }, [isRecording, stopProcessor, onChunkReady]);
 
   return { 
     start, 
     stop, 
-    isRecording,
-    isWorkerReady 
+    isRecording
   };
 }
