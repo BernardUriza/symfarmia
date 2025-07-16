@@ -108,5 +108,10 @@
     "prescription": "Receta",
     "medical_history": "Historia clínica",
     "medical_record": "Expediente médico"
+  },
+  "patient": {
+    "info": "Información del Paciente",
+    "medical_history": "Historial Médico",
+    "view_full_history": "Ver historial completo"
   }
 }

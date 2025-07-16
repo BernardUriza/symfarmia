@@ -60,25 +60,28 @@ const MinimalistLandingPage = ({ isDemo = false }) => {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-blue-900 text-gray-900 dark:text-gray-100 font-sans">
+    <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-primary/5 dark:from-background dark:via-card dark:to-primary/10 text-foreground font-sans relative overflow-hidden">
+      {/* Modern mesh gradient background */}
+      <div className="absolute inset-0 mesh-gradient pointer-events-none" />
+      <div className="absolute inset-0 grid-pattern opacity-[0.03] dark:opacity-[0.02] pointer-events-none" />
       
-      {/* Navigation Header */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700">
+      {/* Modern Navigation Header with Glassmorphism */}
+      <nav className="fixed top-0 left-0 right-0 z-50 glass dark:glass-dark border-b border-border animate-slide-up">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <h1 className="text-xl font-bold text-gray-900 dark:text-white">SYMFARMIA</h1>
+              <h1 className="text-2xl font-bold text-gradient">SYMFARMIA</h1>
             </div>
             <div className="flex items-center space-x-4">
               <a 
                 href="/dashboard" 
-                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
+                className="px-4 py-2 text-sm font-medium text-foreground/70 hover:text-foreground transition-smooth hover-scale"
               >
                 Dashboard
               </a>
               <button
                 onClick={handleDemoClick}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
+                className="btn-medical btn-medical-primary text-sm"
               >
                 {t('try_demo')}
               </button>
@@ -98,13 +101,13 @@ const MinimalistLandingPage = ({ isDemo = false }) => {
       {/* Main Content */}
       <main className={`max-w-4xl mx-auto px-6 ${isDemoMode ? 'pt-48' : 'pt-32'}`}>
         
-        {/* Hero Section */}
-        <section className="text-center mb-20 hero-section">
-          <div className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-3xl p-8 shadow-lg border border-white/50 dark:border-slate-700/50">
-            <h1 className="text-5xl md:text-6xl font-bold mb-6 text-gray-900 dark:text-gray-100 leading-tight">
-              {t('hero_heading')}
+        {/* Modern Hero Section with Glassmorphism */}
+        <section className="text-center mb-20 hero-section animate-fade-in">
+          <div className="card-gradient glass dark:glass-dark rounded-3xl p-12 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-2xl">
+            <h1 className="text-5xl md:text-7xl font-bold mb-6 text-foreground leading-tight animate-slide-up">
+              <span className="text-gradient">{t('hero_heading')}</span>
             </h1>
-            <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-xl text-foreground/80 mb-8 max-w-2xl mx-auto leading-relaxed animate-slide-up" style={{ animationDelay: '100ms' }}>
               {t('hero_subheading')}
             </p>
 
@@ -137,12 +140,12 @@ const MinimalistLandingPage = ({ isDemo = false }) => {
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="tu-email@ejemplo.com"
                         required
-                        className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
+                        className="input-modern flex-1 text-base shadow-sm"
                       />
                       <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white font-semibold px-8 py-3 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap shadow-lg hover:shadow-xl transform hover:scale-105"
+                        className="btn-medical btn-medical-primary disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {isSubmitting ? t('cta_sending') : t('cta_save_time')}
                       </button>
@@ -155,31 +158,31 @@ const MinimalistLandingPage = ({ isDemo = false }) => {
                   <div className="flex justify-center">
                     <button
                       onClick={handleDemoClick}
-                      className="bg-white/80 dark:bg-slate-700/80 hover:bg-white dark:hover:bg-slate-600 border-2 border-blue-200 dark:border-blue-600 hover:border-blue-300 dark:hover:border-blue-500 text-blue-600 dark:text-blue-400 font-semibold px-8 py-3 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 backdrop-blur-sm"
+                      className="btn-medical btn-medical-secondary glass dark:glass-dark border-2 border-primary/30 text-primary hover:border-primary/50"
                     >
                       {t('demo_interactive')}
                     </button>
                   </div>
                 </div>
               ) : isDemoMode ? (
-                <div className="text-center py-8">
-                  <div className="bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-2xl p-6 shadow-lg">
-                    <HeartIcon className="w-12 h-12 mx-auto mb-4" />
-                    <h3 className="text-2xl font-semibold mb-2">
+                <div className="text-center py-8 animate-fade-in">
+                  <div className="card-gradient p-8 shadow-2xl rounded-2xl border border-success/20">
+                    <HeartIcon className="w-12 h-12 mx-auto mb-4 text-success animate-float" />
+                    <h3 className="text-2xl font-semibold mb-2 text-foreground">
                       {t('demo_welcome')}
                     </h3>
-                    <p className="text-green-100">
+                    <p className="text-foreground/80">
                       {t('demo_explore_features')}
                     </p>
                   </div>
                 </div>
               ) : (
-                <div className="text-center py-8">
-                  <CheckCircleIcon className="w-16 h-16 text-green-500 mx-auto mb-4" />
-                  <h3 className="text-2xl font-semibold text-gray-900 mb-2">
+                <div className="text-center py-8 animate-fade-in">
+                  <CheckCircleIcon className="w-16 h-16 text-success mx-auto mb-4 animate-bounce" />
+                  <h3 className="text-2xl font-semibold text-foreground mb-2">
                     {t('contact_soon')}
                   </h3>
-                  <p className="text-gray-600 dark:text-gray-300">
+                  <p className="text-foreground/70">
                     {t('check_email')}
                   </p>
                 </div>
@@ -188,14 +191,14 @@ const MinimalistLandingPage = ({ isDemo = false }) => {
           </div>
         </section>
 
-        {/* Three Key Benefits */}
+        {/* Modern Three Key Benefits with animations */}
         <section className="mb-20">
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/50 dark:border-slate-700/50 text-center hover:shadow-xl transition-all duration-200 transform hover:scale-105">
-              <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+            <div className="card-float glass dark:glass-dark p-8 text-center animate-slide-up" style={{ animationDelay: '200ms' }}>
+              <div className="w-16 h-16 bg-gradient-to-br from-primary to-secondary rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-glow animate-float">
                 <MicrophoneIcon className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-gray-100">
+              <h3 className="text-xl font-semibold mb-3 text-foreground">
                 {t('benefit_speak')}
               </h3>
               <p className="text-gray-600 dark:text-gray-300">
@@ -272,7 +275,7 @@ const MinimalistLandingPage = ({ isDemo = false }) => {
 
         {/* Simple Testimonial */}
         <section className="mb-20">
-          <div className="bg-white/70 backdrop-blur-sm border border-white/50 rounded-3xl p-8 max-w-2xl mx-auto shadow-lg">
+          <div className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border border-white/50 dark:border-slate-700/50 rounded-3xl p-8 max-w-2xl mx-auto shadow-lg">
             <div className="flex items-center mb-4">
               <div className="w-12 h-12 bg-gradient-to-r from-gray-400 to-gray-500 rounded-2xl flex items-center justify-center mr-4 shadow-lg">
                 <UserIcon className="w-6 h-6 text-white" />

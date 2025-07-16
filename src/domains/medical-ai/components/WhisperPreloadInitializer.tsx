@@ -13,6 +13,11 @@ interface WhisperPreloadInitializerProps {
   showToasts?: boolean;
 }
 
+// Global flag to ensure single initialization across entire app
+declare global {
+  var __WHISPER_COMPONENT_INITIALIZED__: boolean | undefined;
+}
+
 export function WhisperPreloadInitializer({ 
   priority = 'auto',
   delay = 3000,
@@ -20,8 +25,26 @@ export function WhisperPreloadInitializer({
   showToasts = true
 }: WhisperPreloadInitializerProps) {
   const { t } = useI18n();
+  
+  // Check global initialization flag before creating hook
+  const shouldAutoInit = useRef(!global.__WHISPER_COMPONENT_INITIALIZED__);
+  
+  // Debug logging for component lifecycle
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[WhisperPreload] Component mounted, shouldAutoInit:', shouldAutoInit.current, 
+        'Global flag:', global.__WHISPER_COMPONENT_INITIALIZED__);
+    }
+    
+    return () => {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[WhisperPreload] Component unmounting');
+      }
+    };
+  }, []);
+  
   const { status, progress, isLoading, isLoaded, isFailed, error } = useWhisperPreload({
-    autoInit: true,
+    autoInit: shouldAutoInit.current,
     priority,
     delay,
   });
@@ -36,6 +59,15 @@ export function WhisperPreloadInitializer({
   useEffect(() => {
     if (!hasInitialized.current) {
       hasInitialized.current = true;
+      
+      // Set global initialization flag
+      if (shouldAutoInit.current) {
+        global.__WHISPER_COMPONENT_INITIALIZED__ = true;
+        if (process.env.NODE_ENV === 'development') {
+          console.log('[WhisperPreload] Component initialization flag set globally');
+        }
+      }
+      
       const currentState = whisperPreloadManager.getState();
       
       // If already loaded, mark it and skip all notifications
@@ -51,7 +83,7 @@ export function WhisperPreloadInitializer({
         wasAlreadyLoaded.current = true;
       }
     }
-  }, []);
+  }, [shouldAutoInit]);
 
   // Log only significant status changes, not every progress update
   useEffect(() => {

@@ -249,7 +249,7 @@ export default function RootLayout({ children }) {
       </head>
       
       <body 
-        className="h-full font-sans bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-950 dark:to-gray-900 text-gray-900 dark:text-gray-100 antialiased"
+        className="h-full font-sans bg-gradient-to-br from-background to-gray-100 dark:from-gray-950 dark:to-background text-foreground antialiased"
         suppressHydrationWarning
       >
         {/* MEDICAL-GRADE ERROR BOUNDARY SYSTEM */}
@@ -282,16 +282,20 @@ export default function RootLayout({ children }) {
                             </div>
                           </MedicalErrorBoundary>
                           
+                          {/* WHISPER PRELOAD - Outside route boundary to prevent remounting */}
+                          <MedicalErrorBoundary context="Whisper Preload" medicalWorkflow="AI Model Loading">
+                            <WhisperPreloadClient 
+                                priority="auto"  // 'high' | 'low' | 'auto'
+                                delay={3000}     // Wait 3 seconds after page load
+                                showProgress={false} // Show loading indicator
+                                showToasts={true}   // Show toast notifications
+                              />
+                          </MedicalErrorBoundary>
+                          
                           {/* MAIN CONTENT AREA */}
                           <MedicalErrorBoundary context="Main Content" medicalWorkflow="Primary UI">
                             <RouteErrorBoundary>
                               {children}    
-                              <WhisperPreloadClient 
-                                  priority="auto"  // 'high' | 'low' | 'auto'
-                                  delay={3000}     // Wait 3 seconds after page load
-                                  showProgress={false} // Show loading indicator
-                                  showToasts={true}   // Show toast notifications
-                                />
                             </RouteErrorBoundary>
                           </MedicalErrorBoundary>
                           

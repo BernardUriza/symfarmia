@@ -151,24 +151,24 @@ const ConsultationPage = () => {
 
   if (showPatientSelector) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-background">
         {/* Header */}
-        <header className="bg-white border-b border-gray-200 px-6 py-4">
+        <header className="bg-background border-b border-border px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-          <Link href="/" className="flex items-center text-gray-600 hover:text-gray-900">
+          <Link href="/" className="flex items-center text-foreground/70 hover:text-foreground">
             <ArrowLeft className="h-5 w-5 mr-2" />
             {t('navigation.dashboard')}
           </Link>
-              <div className="w-px h-6 bg-gray-300"></div>
-              <h1 className="text-xl font-semibold text-gray-900">{t('consultation.page.title')}</h1>
+              <div className="w-px h-6 bg-border"></div>
+              <h1 className="text-xl font-semibold text-foreground">{t('consultation.page.title')}</h1>
             </div>
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 text-sm text-gray-600">
+              <div className="flex items-center gap-2 text-sm text-foreground/60">
                 <Mic className="h-4 w-4 text-emerald-600" />
                 {t('consultation.page.subtitle')}
               </div>
-              <div className="w-px h-6 bg-gray-300 dark:bg-gray-600"></div>
+              <div className="w-px h-6 bg-border"></div>
               <ThemeToggle className="ml-2" />
             </div>
           </div>
@@ -177,14 +177,14 @@ const ConsultationPage = () => {
         {/* Patient Selection */}
         <main className="p-6">
           <div className="max-w-2xl mx-auto">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="bg-background rounded-lg shadow-sm border border-border p-6">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
                   <User className="h-5 w-5 text-emerald-600" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold text-gray-900">{t('consultation.patient_selector.title')}</h2>
-                  <p className="text-sm text-gray-600">{t('consultation.patient_selector.subtitle')}</p>
+                  <h2 className="text-lg font-semibold text-foreground">{t('consultation.patient_selector.title')}</h2>
+                  <p className="text-sm text-foreground/60">{t('consultation.patient_selector.subtitle')}</p>
                 </div>
               </div>
 
@@ -193,14 +193,14 @@ const ConsultationPage = () => {
                   <button
                     key={patient.id}
                     onClick={() => handlePatientSelect(patient)}
-                    className="w-full text-left p-4 border border-gray-200 rounded-lg hover:border-emerald-300 hover:bg-emerald-50 transition-colors"
+                    className="w-full text-left p-4 border border-border rounded-lg hover:border-emerald-300 hover:bg-emerald-50 transition-colors"
                   >
                     <div className="flex items-center justify-between">
                       <div>
-                        <div className="font-medium text-gray-900">{patient.name}</div>
-                        <div className="text-sm text-gray-500">{patient.age} años</div>
+                        <div className="font-medium text-foreground">{patient.name}</div>
+                        <div className="text-sm text-foreground/50">{patient.age} años</div>
                       </div>
-                      <div className="text-sm text-gray-500">
+                      <div className="text-sm text-foreground/50">
                         Última visita: {patient.lastVisit}
                       </div>
                     </div>
@@ -208,7 +208,7 @@ const ConsultationPage = () => {
                 ))}
               </div>
 
-              <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+              <div className="mt-6 pt-4 border-t border-border">
                 <ActionButton
                   onClick={() => router.push('/dashboard/patients')}
                   text={t('consultation.patient_selector.add_new')}
@@ -228,14 +228,14 @@ const ConsultationPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-6 py-4">
+      <header className="bg-background border-b border-border px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
                 <button
                   onClick={() => setShowPatientSelector(true)}
-                  className="flex items-center text-gray-600 hover:text-gray-900"
+                  className="flex items-center text-foreground/70 hover:text-foreground"
                 >
                   <ArrowLeft className="h-5 w-5 mr-2" />
                   {t('consultation.buttons.change_patient')}
@@ -246,8 +246,8 @@ const ConsultationPage = () => {
                 <User className="h-4 w-4 text-emerald-600" />
               </div>
               <div>
-                <h1 className="text-lg font-semibold text-gray-900">{selectedPatient?.name}</h1>
-                <p className="text-sm text-gray-600">{selectedPatient?.age} años</p>
+                <h1 className="text-lg font-semibold text-foreground">{selectedPatient?.name}</h1>
+                <p className="text-sm text-foreground/60">{selectedPatient?.age} años</p>
               </div>
             </div>
           </div>
@@ -260,12 +260,12 @@ const ConsultationPage = () => {
             </div>
             
             {/* Theme Toggle */}
-            <div className="w-px h-6 bg-gray-300 dark:bg-gray-600"></div>
+            <div className="w-px h-6 bg-border"></div>
             <ThemeToggle className="ml-2" />
             
             {/* Auto-save status */}
             {consultationState.lastSaved && (
-              <div className="flex items-center gap-2 text-sm text-gray-600">
+              <div className="flex items-center gap-2 text-sm text-foreground/60">
                 <CheckCircle className="h-4 w-4 text-green-600" />
                 Auto-guardado
               </div>
@@ -291,13 +291,13 @@ const ConsultationPage = () => {
       <main className="p-6">
         <div className="max-w-4xl mx-auto">
           {/* Consultation Info */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
+          <div className="bg-background rounded-lg shadow-sm border border-border p-4 mb-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="text-sm text-gray-600">
+                <div className="text-sm text-foreground/60">
                   <span className="font-medium">Consulta:</span> {new Date().toLocaleDateString()}
                 </div>
-                <div className="text-sm text-gray-600">
+                <div className="text-sm text-foreground/60">
                   <span className="font-medium">Duración:</span> {formatDuration(consultationState.duration)}
                 </div>
               </div>
@@ -331,7 +331,7 @@ const ConsultationPage = () => {
 
           {/* Quick Actions */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <h3 className="text-sm font-medium text-gray-900 mb-3">{t('consultation.actions.quick_actions')}</h3>
+            <h3 className="text-sm font-medium text-foreground mb-3">{t('consultation.actions.quick_actions')}</h3>
             <div className="flex flex-wrap gap-2">
               <button className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm hover:bg-blue-200 transition-colors">
                 {t('consultation.actions.template_general')}

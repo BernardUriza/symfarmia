@@ -108,5 +108,10 @@
     "prescription": "Prescription",
     "medical_history": "Medical history",
     "medical_record": "Medical record"
+  },
+  "patient": {
+    "info": "Patient Information",
+    "medical_history": "Medical History",
+    "view_full_history": "View full history"
   }
 }

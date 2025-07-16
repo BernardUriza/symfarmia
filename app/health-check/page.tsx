@@ -13,7 +13,7 @@ export default function HealthCheckPage() {
         <li>✅ Routes: All medical routes present</li>
       </ul>
       <div className="mt-8 space-y-4">
-        <a href="/" className="block p-4 bg-blue-600 text-white rounded hover:bg-blue-700">
+        <a href="/" className="block p-4 bg-primary text-white rounded hover:bg-primary/90">
           Go to Landing Page
         </a>
         <a href="/dashboard" className="block p-4 bg-green-600 text-white rounded hover:bg-green-700">

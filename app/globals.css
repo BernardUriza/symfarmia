@@ -1,7 +1,36 @@
 @import "tailwindcss";
 
-/* Tailwind v4 Medical Theme Configuration */
+/* Tailwind v4 Medical Theme Configuration - Modern & Professional */
 @theme {
+  /* 🎨 Modern Medical Design System - Optimized for Healthcare UX */
+  
+  /* Core semantic colors with WCAG AAA compliance */
+  --color-background: #FFFFFF;
+  --color-foreground: #0F172A;
+  --color-card: #FFFFFF;
+  --color-card-foreground: #0F172A;
+  --color-border: #E2E8F0;
+  --color-input: #F8FAFC;
+  --color-primary: #10B981;
+  --color-primary-foreground: #FFFFFF;
+  --color-secondary: #0EA5E9;
+  --color-secondary-foreground: #FFFFFF;
+  --color-muted: #F1F5F9;
+  --color-muted-foreground: #64748B;
+  --color-accent: #8B5CF6;
+  --color-accent-foreground: #FFFFFF;
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-error: #EF4444;
+  --color-info: #3B82F6;
+  
+  /* Modern gradient stops for medical UI */
+  --gradient-primary: linear-gradient(135deg, #10B981 0%, #0EA5E9 100%);
+  --gradient-secondary: linear-gradient(135deg, #0EA5E9 0%, #3B82F6 100%);
+  --gradient-accent: linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%);
+  --gradient-surface: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
+  --gradient-dark: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+  
   /* Professional Medical Color Palette */
   --color-medical-primary: #12B76A; /* Verde médico profesional */
   --color-medical-primary-dark: #0E9355;
@@ -31,13 +60,31 @@
   --color-medical-border: #E5E7EB;
   --color-medical-border-secondary: #D1D5DB;
   
-  /* Shadow colors */
-  --shadow-medical-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-medical: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-  --shadow-medical-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-medical-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  --shadow-medical-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-  --shadow-medical-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  /* Modern shadow system with subtle depth */
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 25px 50px -12px rgb(0 0 0 / 0.15);
+  --shadow-xl: 0 35px 60px -15px rgb(0 0 0 / 0.2);
+  --shadow-2xl: 0 45px 80px -20px rgb(0 0 0 / 0.25);
+  --shadow-inner: inset 0 2px 4px 0 rgb(0 0 0 / 0.06);
+  --shadow-glow: 0 0 15px rgb(16 185 129 / 0.15);
+  --shadow-card: 0 2px 8px -1px rgb(0 0 0 / 0.08), 0 6px 20px -2px rgb(0 0 0 / 0.04);
+  
+  /* Legacy medical shadows for compatibility */
+  --shadow-medical-sm: var(--shadow-xs);
+  --shadow-medical: var(--shadow-sm);
+  --shadow-medical-md: var(--shadow);
+  --shadow-medical-lg: var(--shadow-md);
+  --shadow-medical-xl: var(--shadow-lg);
+  --shadow-medical-2xl: var(--shadow-xl);
+  
+  /* Glassmorphism effects */
+  --glass-blur: 12px;
+  --glass-opacity: 0.8;
+  --glass-saturation: 180%;
+  --glass-border: rgba(255, 255, 255, 0.18);
   
   /* Medical spacing system */
   --spacing-medical-xs: 0.5rem;
@@ -48,12 +95,37 @@
   --spacing-medical-2xl: 3rem;
   --spacing-medical-3xl: 4rem;
   
-  /* Border radius medical */
-  --radius-medical-sm: 0.375rem;
-  --radius-medical: 0.5rem;
-  --radius-medical-md: 0.75rem;
-  --radius-medical-lg: 1rem;
-  --radius-medical-xl: 1.5rem;
+  /* Modern border radius system */
+  --radius-none: 0;
+  --radius-sm: 0.25rem;
+  --radius: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+  --radius-3xl: 2rem;
+  --radius-full: 9999px;
+  
+  /* Legacy medical radius for compatibility */
+  --radius-medical-sm: var(--radius-sm);
+  --radius-medical: var(--radius);
+  --radius-medical-md: var(--radius-md);
+  --radius-medical-lg: var(--radius-lg);
+  --radius-medical-xl: var(--radius-xl);
+  
+  /* Modern animation timing functions */
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --ease-smooth: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --ease-elastic: cubic-bezier(0.68, -0.6, 0.32, 1.6);
+  
+  /* Transition durations */
+  --duration-fast: 150ms;
+  --duration-normal: 300ms;
+  --duration-slow: 500ms;
+  --duration-slower: 700ms;
   
   /* Font sizes medical */
   --font-medical-xs: 0.75rem;
@@ -78,6 +150,48 @@
   box-sizing: border-box;
 }
 
+/* Global cursor pointer for all interactive elements */
+button,
+[role="button"],
+[type="button"],
+[type="submit"],
+[type="reset"],
+.btn-medical,
+.btn-medical-primary,
+.btn-medical-secondary,
+.btn-gradient,
+.btn-glow,
+.badge-modern,
+.card-float,
+.hover-scale,
+.transition-smooth,
+a[href],
+input[type="checkbox"],
+input[type="radio"],
+select,
+summary,
+[tabindex]:not([tabindex="-1"]),
+[onclick],
+.clickable,
+.cursor-pointer {
+  cursor: pointer;
+}
+
+/* Ensure disabled elements don't have pointer cursor */
+button:disabled,
+[role="button"]:disabled,
+[type="button"]:disabled,
+[type="submit"]:disabled,
+[type="reset"]:disabled,
+.btn-medical:disabled,
+.btn-medical-primary:disabled,
+.btn-medical-secondary:disabled,
+input:disabled,
+select:disabled,
+.cursor-not-allowed {
+  cursor: not-allowed !important;
+}
+
 /* Base document styles */
 html {
   -webkit-text-size-adjust: 100%;
@@ -87,8 +201,8 @@ html {
 body {
   font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-weight: 400;
-  color: var(--color-medical-text-primary);
-  background-color: var(--color-medical-surface-secondary);
+  color: var(--color-foreground);
+  background-color: var(--color-background);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
@@ -96,8 +210,75 @@ body {
 
 /* Dark mode base styles */
 .dark body {
-  background-color: #0F172A;
-  color: #F1F5F9;
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+}
+
+/* Dark mode CSS variables - Optimized for medical night shifts */
+.dark {
+  /* Modern dark mode with blue-tinted grays for reduced eye strain */
+  --color-background: #0B1120;
+  --color-foreground: #F0F4F8;
+  --color-card: #131A2E;
+  --color-card-foreground: #F0F4F8;
+  --color-border: #1F2937;
+  --color-input: #1A2332;
+  --color-primary: #34D399;
+  --color-primary-foreground: #064E3B;
+  --color-secondary: #38BDF8;
+  --color-secondary-foreground: #0C4A6E;
+  --color-muted: #1E293B;
+  --color-muted-foreground: #94A3B8;
+  --color-accent: #A78BFA;
+  --color-accent-foreground: #4C1D95;
+  --color-success: #34D399;
+  --color-warning: #FBBF24;
+  --color-error: #F87171;
+  --color-info: #60A5FA;
+  
+  /* Dark mode gradients */
+  --gradient-primary: linear-gradient(135deg, #34D399 0%, #10B981 100%);
+  --gradient-secondary: linear-gradient(135deg, #38BDF8 0%, #0EA5E9 100%);
+  --gradient-accent: linear-gradient(135deg, #A78BFA 0%, #8B5CF6 100%);
+  --gradient-surface: linear-gradient(180deg, #131A2E 0%, #0B1120 100%);
+  --gradient-dark: linear-gradient(135deg, #0B1120 0%, #131A2E 100%);
+  
+  /* Medical color palette - optimized for night vision */
+  --color-medical-primary: #34D399; /* Softer green for dark mode */
+  --color-medical-primary-dark: #10B981;
+  --color-medical-primary-light: #6EE7B7;
+  
+  --color-medical-secondary: #60A5FA; /* Softer blue for dark mode */
+  --color-medical-secondary-dark: #3B82F6;
+  --color-medical-secondary-light: #93C5FD;
+  
+  --color-medical-accent: #A78BFA; /* Softer purple for dark mode */
+  --color-medical-success: #34D399;
+  --color-medical-warning: #FBBF24;
+  --color-medical-error: #F87171;
+  --color-medical-info: #60A5FA;
+  
+  /* Dark surface colors */
+  --color-medical-surface: #1E293B;
+  --color-medical-surface-secondary: #0F172A;
+  --color-medical-surface-tertiary: #334155;
+  
+  /* Dark text colors - high contrast for readability */
+  --color-medical-text-primary: #F1F5F9;
+  --color-medical-text-secondary: #CBD5E1;
+  --color-medical-text-tertiary: #94A3B8;
+  
+  /* Dark border colors */
+  --color-medical-border: #334155;
+  --color-medical-border-secondary: #475569;
+  
+  /* Dark mode shadows - subtle for night vision */
+  --shadow-medical-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --shadow-medical: 0 1px 3px 0 rgb(0 0 0 / 0.4), 0 1px 2px -1px rgb(0 0 0 / 0.4);
+  --shadow-medical-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.4);
+  --shadow-medical-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.4);
+  --shadow-medical-xl: 0 20px 25px -5px rgb(0 0 0 / 0.4), 0 8px 10px -6px rgb(0 0 0 / 0.4);
+  --shadow-medical-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.5);
 }
 
 /* Typography defaults - let Tailwind handle margins */
@@ -133,29 +314,51 @@ body {
     padding-bottom: var(--spacing-medical-xl);
   }
   
-  /* Medical Card Professional */
+  /* Modern Medical Card with glassmorphism effect */
   .medical-card {
-    background-color: var(--color-medical-surface);
-    border-radius: var(--radius-medical-lg);
-    box-shadow: var(--shadow-medical-md);
-    border: 1px solid var(--color-medical-border);
+    background: var(--color-card);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-card);
+    border: 1px solid var(--color-border);
     padding: var(--spacing-medical-lg);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all var(--duration-normal) var(--ease-smooth);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .medical-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--gradient-surface);
+    opacity: 0;
+    transition: opacity var(--duration-normal) var(--ease-smooth);
+    z-index: -1;
   }
   
   .medical-card:hover {
-    box-shadow: var(--shadow-medical-lg);
-    transform: translateY(-2px);
-    border-color: var(--color-medical-primary);
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-4px) scale(1.01);
+    border-color: var(--color-primary);
+  }
+  
+  .medical-card:hover::before {
+    opacity: 0.05;
   }
   
   .dark .medical-card {
-    background-color: #1E293B;
-    border-color: #334155;
+    background: var(--color-card);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-color: rgba(255, 255, 255, 0.1);
   }
   
   .dark .medical-card:hover {
-    border-color: var(--color-medical-primary);
+    border-color: var(--color-primary);
+    box-shadow: 0 20px 40px -10px rgba(52, 211, 153, 0.15);
   }
   
   /* Medical Header */
@@ -171,40 +374,62 @@ body {
   }
   
   .dark .medical-header {
-    background-color: rgba(15, 23, 42, 0.8);
-    border-color: #1E293B;
+    background-color: rgba(15, 23, 42, 0.9);
+    border-color: var(--color-medical-border);
   }
   
-  /* Medical Button Primary */
+  /* Modern Medical Button System */
   .btn-medical {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: var(--spacing-medical-sm) var(--spacing-medical-lg);
-    font-size: var(--font-medical-sm);
-    font-weight: 500;
-    border-radius: var(--radius-medical-md);
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    cursor: pointer;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-radius: var(--radius-lg);
+    transition: all var(--duration-fast) var(--ease-smooth);
     border: none;
     outline: none;
+    position: relative;
+    overflow: hidden;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+  }
+  
+  .btn-medical::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translate(-50%, -50%);
+    transition: width var(--duration-slow) var(--ease-out), 
+                height var(--duration-slow) var(--ease-out);
+  }
+  
+  .btn-medical:hover::before {
+    width: 300px;
+    height: 300px;
   }
   
   .btn-medical-primary {
-    background-color: var(--color-medical-primary);
+    background: var(--gradient-primary);
     color: white;
-    box-shadow: var(--shadow-medical);
+    box-shadow: 0 4px 14px 0 rgba(16, 185, 129, 0.3);
   }
   
   .btn-medical-primary:hover {
-    background-color: var(--color-medical-primary-dark);
-    box-shadow: var(--shadow-medical-md);
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px 0 rgba(16, 185, 129, 0.4);
   }
   
   .btn-medical-primary:active {
     transform: translateY(0);
-    box-shadow: var(--shadow-medical-sm);
+    box-shadow: 0 2px 8px 0 rgba(16, 185, 129, 0.3);
   }
   
   .btn-medical-secondary {
@@ -570,4 +795,412 @@ body {
 
 .medical-stat-change.negative {
   color: var(--color-medical-error);
+}
+
+  /* ========================================
+     MODERN MEDICAL UI COMPONENTS
+     Tailwind v4 Professional Design System
+     ======================================== */
+
+  /* Modern Glassmorphism Components */
+  .glass {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+  }
+  
+  .glass-dark {
+    background: rgba(13, 17, 32, 0.8);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  }
+  
+  /* Modern Card Variants with depth */
+  .card-float {
+    background: var(--color-card);
+    border-radius: var(--radius-xl);
+    box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--color-border);
+    transition: all var(--duration-normal) var(--ease-smooth);
+  }
+  
+  .card-float:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Neumorphism effect for medical UI */
+  .card-neu {
+    background: var(--color-background);
+    border-radius: var(--radius-xl);
+    box-shadow: 20px 20px 60px rgba(0, 0, 0, 0.1),
+                -20px -20px 60px rgba(255, 255, 255, 0.7);
+  }
+  
+  .dark .card-neu {
+    background: var(--color-card);
+    box-shadow: 20px 20px 60px rgba(0, 0, 0, 0.5),
+                -20px -20px 60px rgba(255, 255, 255, 0.03);
+  }
+  
+  /* Modern gradient cards */
+  .card-gradient {
+    background: var(--gradient-surface);
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--color-border);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .card-gradient::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: var(--gradient-primary);
+    border-radius: var(--radius-xl);
+    opacity: 0;
+    z-index: -1;
+    transition: opacity var(--duration-normal) var(--ease-smooth);
+  }
+  
+  .card-gradient:hover::before {
+    opacity: 1;
+  }
+  
+  /* Medical stat cards with animations */
+  .stat-card {
+    background: var(--color-card);
+    border-radius: var(--radius-xl);
+    padding: 1.5rem;
+    border: 1px solid var(--color-border);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .stat-card::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: var(--gradient-primary);
+    opacity: 0.05;
+    transform: rotate(30deg);
+    transition: all var(--duration-slow) var(--ease-smooth);
+  }
+  
+  .stat-card:hover::after {
+    transform: rotate(30deg) translateX(50px);
+  }
+  
+  /* Modern badge system */
+  .badge-modern {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: var(--radius-full);
+    letter-spacing: 0.025em;
+    transition: all var(--duration-fast) var(--ease-smooth);
+  }
+  
+  .badge-success {
+    background: rgba(16, 185, 129, 0.1);
+    color: #059669;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+  }
+  
+  .badge-success:hover {
+    background: rgba(16, 185, 129, 0.2);
+    transform: scale(1.05);
+  }
+  
+  /* Modern input styles */
+  .input-modern {
+    width: 100%;
+    padding: 0.875rem 1.25rem;
+    font-size: 0.875rem;
+    border: 2px solid transparent;
+    border-radius: var(--radius-lg);
+    background: var(--color-input);
+    color: var(--color-foreground);
+    transition: all var(--duration-fast) var(--ease-smooth);
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+  }
+  
+  .input-modern:hover {
+    border-color: var(--color-border);
+  }
+  
+  .input-modern:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1),
+                0 1px 3px 0 rgba(0, 0, 0, 0.05);
+    transform: translateY(-1px);
+  }
+  
+  /* Modern floating labels */
+  .field-modern {
+    position: relative;
+  }
+  
+  .field-modern label {
+    position: absolute;
+    top: 50%;
+    left: 1.25rem;
+    transform: translateY(-50%);
+    font-size: 0.875rem;
+    color: var(--color-muted-foreground);
+    pointer-events: none;
+    transition: all var(--duration-fast) var(--ease-smooth);
+  }
+  
+  .field-modern input:focus + label,
+  .field-modern input:not(:placeholder-shown) + label {
+    top: -0.5rem;
+    left: 0.875rem;
+    font-size: 0.75rem;
+    color: var(--color-primary);
+    background: var(--color-background);
+    padding: 0 0.375rem;
+  }
+  
+  .card-float:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+  }
+  
+  .card-gradient {
+    background: linear-gradient(135deg, var(--color-card) 0%, var(--color-muted) 100%);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-card);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .card-gradient::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--color-primary), transparent);
+    opacity: 0.5;
+  }
+  
+  /* Modern Button Styles */
+  .btn-glow {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s var(--ease-out);
+  }
+  
+  .btn-glow::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+  }
+  
+  .btn-glow:hover::before {
+    width: 300px;
+    height: 300px;
+  }
+  
+  .btn-gradient {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    color: white;
+    position: relative;
+    z-index: 1;
+    transition: all 0.3s var(--ease-out);
+  }
+  
+  .btn-gradient::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--color-secondary), var(--color-primary));
+    opacity: 0;
+    z-index: -1;
+    transition: opacity 0.3s var(--ease-out);
+    border-radius: inherit;
+  }
+  
+  .btn-gradient:hover::before {
+    opacity: 1;
+  }
+  
+  /* Input with Modern Focus */
+  .input-modern {
+    background: var(--color-input);
+    border: 2px solid transparent;
+    border-radius: var(--radius-lg);
+    transition: all 0.3s var(--ease-out);
+    outline: none;
+  }
+  
+  .input-modern:focus {
+    border-color: var(--color-primary);
+    background: var(--color-background);
+    box-shadow: 0 0 0 4px rgb(16 185 129 / 0.1);
+  }
+  
+  /* Modern Badge Styles */
+  .badge-modern {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 500;
+    transition: all 0.2s var(--ease-out);
+  }
+  
+  .badge-glow {
+    box-shadow: var(--shadow-glow);
+  }
+  
+  /* Text Effects */
+  .text-gradient {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .text-glow {
+    text-shadow: 0 0 20px rgb(16 185 129 / 0.5);
+  }
+
+/* Modern Utility Classes */
+@layer utilities {
+  /* Smooth scroll behavior */
+  .scroll-smooth {
+    scroll-behavior: smooth;
+  }
+  
+  /* Modern transitions */
+  .transition-smooth {
+    transition: all 0.3s var(--ease-out);
+  }
+  
+  .transition-bounce {
+    transition: all 0.5s var(--ease-bounce);
+  }
+  
+  /* Hover scale effects */
+  .hover-scale {
+    transition: transform 0.3s var(--ease-out);
+  }
+  
+  .hover-scale:hover {
+    transform: scale(1.05);
+  }
+  
+  /* Modern animations */
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+  
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 0.5s var(--ease-out) forwards;
+  }
+  
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .animate-fade-in {
+    animation: fadeIn 0.5s var(--ease-out) forwards;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  /* Skeleton loading effect */
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      var(--color-muted) 25%,
+      var(--color-border) 50%,
+      var(--color-muted) 75%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s ease-in-out infinite;
+  }
+  
+  @keyframes skeleton-loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+  
+  /* Modern focus states */
+  .focus-ring {
+    outline: none;
+    box-shadow: 0 0 0 3px rgb(16 185 129 / 0.15);
+  }
+  
+  /* Backdrop blur utilities */
+  .backdrop-blur-xs { backdrop-filter: blur(2px); }
+  .backdrop-blur-sm { backdrop-filter: blur(4px); }
+  .backdrop-blur { backdrop-filter: blur(8px); }
+  .backdrop-blur-md { backdrop-filter: blur(12px); }
+  .backdrop-blur-lg { backdrop-filter: blur(16px); }
+  .backdrop-blur-xl { backdrop-filter: blur(24px); }
+  
+  /* Modern grid patterns */
+  .grid-pattern {
+    background-image: 
+      linear-gradient(var(--color-border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--color-border) 1px, transparent 1px);
+    background-size: 50px 50px;
+  }
+  
+  /* Mesh gradient background */
+  .mesh-gradient {
+    background-image: 
+      radial-gradient(at 40% 20%, var(--color-primary) 0px, transparent 50%),
+      radial-gradient(at 80% 0%, var(--color-secondary) 0px, transparent 50%),
+      radial-gradient(at 0% 50%, var(--color-accent) 0px, transparent 50%),
+      radial-gradient(at 80% 50%, var(--color-muted) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, var(--color-primary) 0px, transparent 50%);
+    filter: blur(40px);
+    opacity: 0.4;
+  }
 }
