@@ -105,11 +105,45 @@ export function useSimpleWhisper({
     }
   }, [retryCount, retryDelay, errorLog]);
 
+  // Initial preload effect
   useEffect(() => {
-    if (autoPreload && engineStatus !== "ready" && engineStatus !== "loading") {
-      preloadModel();
-    }
-  }, [autoPreload, engineStatus, preloadModel]);
+    let isMounted = true;
+    
+    const doPreload = async () => {
+      if (!autoPreload || !isMounted || isPreloadingRef.current) {
+        return;
+      }
+      
+      try {
+        isPreloadingRef.current = true;
+        setEngineStatus("loading");
+        await loadWhisperModel({
+          retryCount,
+          retryDelay,
+          progress_callback: (p) => setLoadProgress(p?.progress || 0),
+        });
+        if (isMounted) {
+          setEngineStatus("ready");
+        }
+      } catch (err) {
+        if (isMounted) {
+          setEngineStatus("error");
+          setError("Error cargando el modelo de transcripción");
+          errorLog("🛑 [preloadModel] ERROR:", err);
+        }
+      } finally {
+        isPreloadingRef.current = false;
+      }
+    };
+    
+    // Small delay to ensure component is fully mounted
+    const timer = setTimeout(doPreload, 0);
+    
+    return () => {
+      isMounted = false;
+      clearTimeout(timer);
+    };
+  }, [autoPreload, retryCount, retryDelay, errorLog]); // Include actual dependencies
 
   useEffect(() => {
     return () => {

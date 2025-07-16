@@ -11,8 +11,10 @@ The hook was causing a "Maximum update depth exceeded" error due to an infinite 
 5. This would call `preloadModel()`, which sets state
 6. Setting state causes a re-render, creating an infinite loop
 
-## Solution
-Wrapped `log` and `errorLog` in `useCallback` to memoize them:
+## Solution Applied
+
+### 1. Memoized Logger Functions
+Wrapped `log` and `errorLog` in `useCallback` to prevent recreation:
 
 ```javascript
 // Before - recreated on every render
@@ -24,14 +26,45 @@ const log = useCallback((...args: unknown[]) => logger.log(...args), [logger]);
 const errorLog = useCallback((...args: unknown[]) => logger.error(...args), [logger]);
 ```
 
-## Why This Works
-1. `useCallback` memoizes the functions
-2. They only recreate if `logger` changes (which should be stable)
-3. This stabilizes `preloadModel` 
-4. The `useEffect` only runs when truly needed
-5. No more infinite loop
+### 2. Inline Preload Logic in useEffect
+To avoid circular dependencies, moved the preload logic directly into the useEffect:
 
-## Additional Considerations
-- `setupAudioMonitoring` already had `[log]` as dependency, so it's properly set up
-- The `logger` prop defaults to `DefaultLogger` which should be a stable reference
-- If the error persists, check if a custom logger is being passed that changes on every render
+```javascript
+// Added ref to track preload state
+const isPreloadingRef = useRef(false);
+
+// Inline preload in effect to avoid dependency issues
+useEffect(() => {
+  let isMounted = true;
+  
+  const doPreload = async () => {
+    if (!autoPreload || !isMounted || isPreloadingRef.current) {
+      return;
+    }
+    // ... preload logic ...
+  };
+  
+  const timer = setTimeout(doPreload, 0);
+  
+  return () => {
+    isMounted = false;
+    clearTimeout(timer);
+  };
+}, [autoPreload, retryCount, retryDelay, errorLog]);
+```
+
+### 3. Preload State Tracking
+Used a ref (`isPreloadingRef`) to prevent multiple simultaneous preloads without causing re-renders.
+
+## Why This Works
+1. Logger functions are stable (memoized)
+2. No circular dependency between state and callbacks
+3. Preload only happens once due to ref tracking
+4. Clean separation of concerns
+5. No infinite loops
+
+## Key Lessons
+- Avoid having callbacks that set state in their own dependency arrays
+- Use refs for tracking state that shouldn't trigger re-renders
+- Consider inlining logic when circular dependencies are unavoidable
+- Always memoize functions created inside components if they're used as dependencies
