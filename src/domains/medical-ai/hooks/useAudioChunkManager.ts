@@ -26,6 +26,7 @@ export function useAudioChunkManager({
       }
     };
 
+    // Start recording with timeslice to get continuous chunks
     recorder.start(chunkDurationMs);
     setIsRecording(true);
     return stream;

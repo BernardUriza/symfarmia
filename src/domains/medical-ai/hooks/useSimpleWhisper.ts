@@ -2,9 +2,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { extractMedicalTermsFromText } from '../utils/medicalTerms';
 import { DefaultLogger } from '../utils/LoggerStrategy';
-import { loadWhisperModel } from '../services/audioProcessingService';
 import { useAudioChunkManager } from './useAudioChunkManager';
-import { useWhisperStreamingProcessor } from './useWhisperStreamingProcessor';
+import { useWhisperStreamingProcessorWorker } from './useWhisperStreamingProcessorWorker';
 
 interface Transcription {
   text: string;
@@ -68,8 +67,8 @@ export function useSimpleWhisper({
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const animationFrameRef = useRef<number | null>(null);
 
-  const { processChunk, getTranscript, reset: resetProcessor } =
-    useWhisperStreamingProcessor();
+  const { processChunk, getTranscript, reset: resetProcessor, isReady: isWorkerReady } =
+    useWhisperStreamingProcessorWorker();
 
   const {
     start: startChunks,
@@ -80,24 +79,35 @@ export function useSimpleWhisper({
     },
   });
 
-  const log = useCallback((...args: unknown[]) => logger.log(...args), [logger]);
   const errorLog = useCallback((...args: unknown[]) => logger.error(...args), [logger]);
 
   const preloadModel = useCallback(async () => {
     try {
       setEngineStatus('loading');
-      await loadWhisperModel({
-        retryCount,
-        retryDelay,
-        progress_callback: (p) => setLoadProgress(p?.progress || 0),
-      });
-      setEngineStatus('ready');
+      // El modelo ahora se carga en el worker automáticamente
+      // Solo necesitamos esperar a que esté listo
+      const checkReady = setInterval(() => {
+        if (isWorkerReady) {
+          clearInterval(checkReady);
+          setEngineStatus('ready');
+          setLoadProgress(100);
+        }
+      }, 100);
+      
+      // Timeout después de 30 segundos
+      setTimeout(() => {
+        clearInterval(checkReady);
+        if (!isWorkerReady) {
+          setEngineStatus('error');
+          setError('Timeout cargando el modelo de transcripción');
+        }
+      }, 30000);
     } catch (err) {
       setEngineStatus('error');
       setError('Error cargando el modelo de transcripción');
       errorLog(err);
     }
-  }, [retryCount, retryDelay, errorLog]);
+  }, [isWorkerReady, errorLog]);
 
   useEffect(() => {
     if (autoPreload) {
