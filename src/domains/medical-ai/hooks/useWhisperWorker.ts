@@ -58,6 +58,15 @@ export function useWhisperWorker(options: UseWhisperWorkerOptions = {}) {
               }
               break;
 
+            case 'CHUNK_TOO_SMALL':
+              pendingChunksRef.current.delete(data.chunkId);
+              console.error(`[useWhisperWorker] ${data.error}`);
+              options.onError?.(data.error);
+              if (pendingChunksRef.current.size === 0) {
+                setIsProcessing(false);
+              }
+              break;
+
             case 'PROCESSING_ERROR':
               pendingChunksRef.current.delete(data.chunkId);
               options.onError?.(data.error);

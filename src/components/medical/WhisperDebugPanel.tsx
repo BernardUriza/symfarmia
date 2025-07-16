@@ -4,11 +4,25 @@ import { useEffect, useState } from 'react';
 import { whisperModelManager } from '@/src/domains/medical-ai/services/WhisperModelManager';
 import { whisperModelCache } from '@/src/domains/medical-ai/services/whisperModelCache';
 import { whisperPreloadManager } from '@/src/domains/medical-ai/services/WhisperPreloadManager';
+import { useSimpleWhisper } from '@/src/domains/medical-ai/hooks/useSimpleWhisper';
 
 export function WhisperDebugPanel() {
   const [status, setStatus] = useState(() => whisperModelManager.getStatus());
   const [preloadState, setPreloadState] = useState(() => whisperPreloadManager.getState());
   const [globalVars, setGlobalVars] = useState({});
+  
+  // Test the unified hook
+  const {
+    engineStatus,
+    preloadStatus,
+    preloadProgress, // eslint-disable-line @typescript-eslint/no-unused-vars
+    isPreloaded,
+    loadProgress
+  } = useSimpleWhisper({ 
+    autoPreload: false,
+    processingMode: 'direct',
+    showPreloadStatus: true
+  });
   
   useEffect(() => {
     // Update status every second
@@ -72,6 +86,16 @@ export function WhisperDebugPanel() {
                 {key}: {typeof value === 'boolean' ? (value ? '✅' : '❌') : value}
               </li>
             ))}
+          </ul>
+        </div>
+        
+        <div>
+          <strong>Unified Hook Status:</strong>
+          <ul className="ml-4">
+            <li>Engine Status: {engineStatus}</li>
+            <li>Preload Status: {preloadStatus}</li>
+            <li>Is Preloaded: {isPreloaded ? '✅' : '❌'}</li>
+            <li>Progress: {loadProgress}%</li>
           </ul>
         </div>
         

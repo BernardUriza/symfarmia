@@ -92,6 +92,22 @@ async function processAudioChunk(data) {
 
     const { audioData, chunkId } = data;
     
+    // Validar tamaño del chunk - MÍNIMO 10 SEGUNDOS PARA CHUNKS GORDOS
+    const minChunkSize = 160000; // 10 segundos a 16kHz
+    if (!audioData || audioData.length < minChunkSize) {
+      console.error(`[Worker] Chunk demasiado pequeño: ${audioData?.length || 0} samples (mínimo: ${minChunkSize})`);
+      self.postMessage({ 
+        type: 'CHUNK_TOO_SMALL',
+        chunkId,
+        size: audioData?.length || 0,
+        minSize: minChunkSize,
+        error: `Chunk de audio muy pequeño para procesar. Recibido: ${audioData?.length || 0} samples, mínimo requerido: ${minChunkSize} (10 segundos)`
+      });
+      return;
+    }
+    
+    console.log(`[Worker] Procesando chunk ${chunkId}: ${audioData.length} samples`);
+    
     self.postMessage({ 
       type: 'PROCESSING_START', 
       chunkId 
@@ -103,10 +119,13 @@ async function processAudioChunk(data) {
       stride_length_s: 5
     });
 
+    const transcribedText = result.text || '';
+    console.log(`[Worker] TRANSCRIPCIÓN OBTENIDA: "${transcribedText}" (${transcribedText.length} caracteres)`);
+
     self.postMessage({ 
       type: 'CHUNK_PROCESSED', 
       chunkId,
-      text: result.text || '',
+      text: transcribedText,
       timestamp: Date.now()
     });
   } catch (error) {

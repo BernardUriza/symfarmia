@@ -1,9 +1,10 @@
 'use client';
 import './conversation-capture/styles.css';
 
-import React, { useState, useEffect } from 'react';
-import { useSimpleWhisperDirect as useSimpleWhisper } from '@/src/domains/medical-ai/hooks/useSimpleWhisperDirect';
+import React, { useState, useEffect, useRef } from 'react';
+import { useSimpleWhisper } from '@/src/domains/medical-ai/hooks/useSimpleWhisper';
 import { useRealAudioCapture } from '@/src/domains/medical-ai/hooks/useRealAudioCapture';
+import { extractMedicalTermsFromText } from '@/src/domains/medical-ai/utils/medicalTerms';
 import { Button } from '@/src/components/ui/button';
 import { useI18n } from '@/src/domains/core/hooks/useI18n';
 import {
@@ -31,6 +32,17 @@ export const ConversationCapture = ({
   const [showPermissionDialog, setShowPermissionDialog] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
   const [liveTranscript, setLiveTranscript] = useState('');
+  const [minuteTranscriptions, setMinuteTranscriptions] = useState<Array<{
+    id: string;
+    text: string;
+    timestamp: number;
+    confidence: number;
+    medicalTerms: string[];
+    processingTime: number;
+    minuteNumber: number;
+  }>>([]); // Lista de transcripciones por minuto
+  const [currentChunkTexts, setCurrentChunkTexts] = useState<string[]>([]); // Chunks del minuto actual
+  const chunkCountRef = useRef(0);
   
   // Log model status before using the hook
   useEffect(() => {
@@ -57,8 +69,48 @@ export const ConversationCapture = ({
     audioUrl,
     startTranscription,
     stopTranscription,
-    resetTranscription
-  } = useSimpleWhisper({ autoPreload: false });
+    resetTranscription,
+    preloadStatus, // eslint-disable-line @typescript-eslint/no-unused-vars
+    preloadProgress, // eslint-disable-line @typescript-eslint/no-unused-vars
+    isPreloaded // eslint-disable-line @typescript-eslint/no-unused-vars
+  } = useSimpleWhisper({ 
+    autoPreload: false,
+    processingMode: 'streaming', // CAMBIADO A STREAMING para usar el pipeline arreglado
+    showPreloadStatus: true,
+    onChunkProcessed: (text, chunkNumber) => {
+      console.log(`[ConversationCapture] Chunk ${chunkNumber} recibido: "${text}"`);
+      
+      // Agregar el texto del chunk actual
+      setCurrentChunkTexts(prev => {
+        const updatedChunks = [...prev, text];
+        
+        // Cada 6 chunks (1 minuto), crear una nueva transcripción
+        if (updatedChunks.length === 6) {
+          const minuteNumber = Math.ceil(chunkNumber / 6);
+          const minuteText = updatedChunks.join(' ').trim();
+          const medicalTerms = extractMedicalTermsFromText(minuteText).map(t => t.term);
+          
+          const newMinuteTranscription = {
+            id: `minute_${minuteNumber}`,
+            text: minuteText,
+            timestamp: Date.now(),
+            confidence: 0.95,
+            medicalTerms,
+            processingTime: 0,
+            minuteNumber
+          };
+          
+          console.log(`[ConversationCapture] Minuto ${minuteNumber} completado con ${updatedChunks.length} chunks:`, newMinuteTranscription);
+          setMinuteTranscriptions(prev => [...prev, newMinuteTranscription]);
+          
+          // Resetear para el siguiente minuto
+          return [];
+        }
+        
+        return updatedChunks;
+      });
+    }
+  });
   
   console.log('[ConversationCapture] useSimpleWhisper called successfully');
 
@@ -80,9 +132,37 @@ export const ConversationCapture = ({
     try {
       if (isRecording) {
         stopLiveTranscription();
+        
+        // Si hay chunks pendientes, agregarlos como último minuto parcial
+        if (currentChunkTexts.length > 0) {
+          const minuteNumber = minuteTranscriptions.length + 1;
+          const minuteText = currentChunkTexts.join(' ').trim();
+          const medicalTerms = extractMedicalTermsFromText(minuteText).map(t => t.term);
+          
+          const partialMinute = {
+            id: `minute_${minuteNumber}_partial`,
+            text: minuteText,
+            timestamp: Date.now(),
+            confidence: 0.95,
+            medicalTerms,
+            processingTime: 0,
+            minuteNumber
+          };
+          
+          setMinuteTranscriptions(prev => [...prev, partialMinute]);
+          setCurrentChunkTexts([]); // Limpiar chunks actuales
+        }
+        
         await stopTranscription();
-        if (transcription?.text && onTranscriptionComplete) {
-          onTranscriptionComplete(transcription.text);
+        
+        // Combinar todas las transcripciones por minuto para el callback
+        const allMinutesText = minuteTranscriptions
+          .map(m => m.text)
+          .join(' ')
+          .trim();
+          
+        if (allMinutesText && onTranscriptionComplete) {
+          onTranscriptionComplete(allMinutesText);
         }
       } else {
         const started = await startTranscription();
@@ -116,6 +196,9 @@ export const ConversationCapture = ({
   const handleReset = () => {
     resetTranscription();
     setLiveTranscript('');
+    setMinuteTranscriptions([]);
+    setCurrentChunkTexts([]);
+    chunkCountRef.current = 0;
     // Clear any WebSpeech error
     if (webSpeechError) {
       console.clear();
@@ -170,18 +253,66 @@ export const ConversationCapture = ({
         onCopy={handleCopy}
       />
 
-      {transcription && (
-        <TranscriptionResult 
-          transcription={transcription} 
-          audioUrl={audioUrl} 
-        />
+      {/* Mostrar transcripciones por minuto mientras graba */}
+      {(minuteTranscriptions.length > 0 || (currentChunkTexts.length > 0 && isRecording)) && (
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+            Transcripciones por minuto
+          </h3>
+          
+          {/* Transcripciones completas por minuto */}
+          {minuteTranscriptions.map((minuteTranscription) => (
+            <div key={minuteTranscription.id} className="relative">
+              <div className="absolute -left-12 top-4 text-sm text-gray-500 dark:text-gray-400">
+                {minuteTranscription.minuteNumber}′
+              </div>
+              <TranscriptionResult 
+                transcription={minuteTranscription} 
+                audioUrl={null} // Por ahora sin audio individual por minuto
+              />
+            </div>
+          ))}
+          
+          {/* Chunks actuales (minuto en progreso) */}
+          {currentChunkTexts.length > 0 && isRecording && (
+            <div className="relative opacity-75">
+              <div className="absolute -left-12 top-4 text-sm text-gray-500 dark:text-gray-400">
+                {minuteTranscriptions.length + 1}′
+              </div>
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                  Minuto en progreso ({currentChunkTexts.length}/6 chunks)
+                </p>
+                <div className="text-sm text-gray-700 dark:text-gray-300">
+                  {currentChunkTexts.join(' ')}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+      
+      {/* Mostrar transcripción final cuando termine */}
+      {transcription && !isRecording && (
+        <>
+          {console.log('[ConversationCapture] MOSTRANDO TRANSCRIPCIÓN FINAL:', transcription)}
+          <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+              Transcripción completa
+            </h3>
+            <TranscriptionResult 
+              transcription={transcription} 
+              audioUrl={audioUrl} 
+            />
+          </div>
+        </>
       )}
 
       <ErrorDisplay error={error} />
 
       <ProcessingStatus isProcessing={status === 'processing'} />
 
-      {onNext && transcription && (
+      {onNext && (transcription || minuteTranscriptions.length > 0) && (
         <div className="mt-6 flex justify-center">
           <Button onClick={onNext} size="lg" variant="default" className="">
             {t('conversation.capture.next')}

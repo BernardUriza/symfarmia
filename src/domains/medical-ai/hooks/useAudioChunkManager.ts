@@ -8,7 +8,7 @@ interface UseAudioChunkManagerOptions {
 
 export function useAudioChunkManager({
   onChunkReady,
-  chunkDurationMs = 4000,
+  chunkDurationMs = 10000, // 10 segundos para chunks GORDOS con contexto real
 }: UseAudioChunkManagerOptions = {}) {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunkQueueRef = useRef<Blob[]>([]);
@@ -16,11 +16,12 @@ export function useAudioChunkManager({
   
   const { addChunk, flush, reset: resetAccumulator } = useAudioChunkAccumulator({
     onCompleteChunk: (chunk) => {
+      console.log(`[AudioChunkManager] CHUNK GORDO LISTO: ${chunk.size} bytes (${(chunk.size / 32000).toFixed(1)}s a 16kHz)`);
       chunkQueueRef.current.push(chunk);
       onChunkReady?.(chunk);
     },
-    minChunkSize: 48000, // ~3 seconds at 16kHz
-    maxAccumulationTime: 5000 // 5 seconds max
+    minChunkSize: 160000, // 10 segundos a 16kHz - CHUNK GORDO
+    maxAccumulationTime: 12000 // 12 segundos max para garantizar chunks completos
   });
 
   const start = useCallback(async (): Promise<MediaStream | null> => {

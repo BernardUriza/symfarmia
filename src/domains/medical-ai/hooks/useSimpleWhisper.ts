@@ -2,57 +2,107 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { extractMedicalTermsFromText } from '../utils/medicalTerms';
 import { DefaultLogger } from '../utils/LoggerStrategy';
+import { useWhisperPreload } from './useWhisperPreload';
+import { useWhisperWorker } from './useWhisperWorker';
+import { useDirectAudioCapture } from './useDirectAudioCapture';
 import { useAudioChunkManager } from './useAudioChunkManager';
 import { useWhisperStreamingProcessorWorker } from './useWhisperStreamingProcessorWorker';
 
+// Unified transcription interface
 interface Transcription {
   text: string;
   confidence: number;
   medicalTerms: string[];
   processingTime: number;
+  timestamp?: number;
+  chunks?: { id: string; text: string; timestamp: number }[];
 }
 
 type Status = 'idle' | 'recording' | 'processing' | 'completed' | 'error';
-
 type EngineStatus = 'loading' | 'ready' | 'error';
+type ProcessingMode = 'streaming' | 'direct' | 'enhanced';
 
+// Unified logger interface
 interface Logger {
   log: (...args: unknown[]) => void;
   error: (...args: unknown[]) => void;
   setEnabled?: (value: boolean) => void;
 }
 
+// Unified options interface
 interface UseSimpleWhisperOptions {
+  // Core options
   autoPreload?: boolean;
+  processingMode?: ProcessingMode;
+  
+  // Audio options
+  chunkSize?: number;
+  sampleRate?: number;
+  
+  // Preload options
+  preloadPriority?: 'high' | 'low' | 'auto';
+  preloadDelay?: number;
+  
+  // Error handling
   retryCount?: number;
   retryDelay?: number;
+  
+  // Debug
   logger?: Logger;
+  showPreloadStatus?: boolean;
+  
+  // Callbacks
+  onChunkProcessed?: (text: string, chunkNumber: number) => void;
 }
 
+// Unified return interface
 interface UseSimpleWhisperReturn {
+  // Core transcription
   transcription: Transcription | null;
   status: Status;
   isRecording: boolean;
   error: string | null;
+  
+  // Engine status
   engineStatus: EngineStatus;
   loadProgress: number;
+  
+  // Audio monitoring
   audioLevel: number;
   recordingTime: number;
   audioUrl: string | null;
   audioBlob: Blob | null;
+  
+  // Controls
   startTranscription: () => Promise<boolean>;
   stopTranscription: () => Promise<boolean>;
   resetTranscription: () => void;
   preloadModel: () => Promise<void>;
+  
+  // Enhanced preload info (from Enhanced version)
+  preloadStatus: 'idle' | 'loading' | 'loaded' | 'failed';
+  preloadProgress: number;
+  isPreloaded: boolean;
+  
+  // Debug
   setLogger?: (enabled: boolean) => void;
 }
 
 export function useSimpleWhisper({
   autoPreload = false,
-  retryCount = 3, // eslint-disable-line @typescript-eslint/no-unused-vars
-  retryDelay = 1000, // eslint-disable-line @typescript-eslint/no-unused-vars
+  processingMode = 'direct', // Default to direct for best performance
+  chunkSize = 16000,
+  sampleRate = 16000,
+  preloadPriority = 'auto',
+  preloadDelay = 2000,
+  retryCount = 3,
+  retryDelay = 1000,
   logger = DefaultLogger,
+  showPreloadStatus = false,
+  onChunkProcessed
 }: UseSimpleWhisperOptions = {}): UseSimpleWhisperReturn {
+  
+  // Core state
   const [transcription, setTranscription] = useState<Transcription | null>(null);
   const [status, setStatus] = useState<Status>('idle');
   const [isRecording, setIsRecording] = useState(false);
@@ -61,196 +111,449 @@ export function useSimpleWhisper({
   const [loadProgress, setLoadProgress] = useState(0);
   const [audioLevel, setAudioLevel] = useState(0);
   const [recordingTime, setRecordingTime] = useState(0);
-
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const analyserRef = useRef<AnalyserNode | null>(null);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  
+  // Refs for cleanup and state management
+  const transcriptPartsRef = useRef<{ [key: string]: string }>({});
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const animationFrameRef = useRef<number | null>(null);
-
-  const { processChunk, getTranscript, reset: resetProcessor, isReady: isWorkerReady } =
-    useWhisperStreamingProcessorWorker();
-
-  const {
-    start: startChunks,
-    stop: stopChunks,
-  } = useAudioChunkManager({
-    onChunkReady: (chunk) => {
-      processChunk(chunk);
-    },
-  });
-
-  const errorLog = useCallback((...args: unknown[]) => logger.error(...args), [logger]);
-
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const startTimeRef = useRef<number>(0);
+  const processingTimeRef = useRef<number>(0);
   const checkIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  const preloadModel = useCallback(async () => {
-    try {
-      // Si ya está listo, no hacer nada
-      if (isWorkerReady) {
+  const chunkCountRef = useRef<number>(0); // Contador de chunks procesados
+  
+  // Enhanced preload integration
+  const { 
+    status: preloadStatus, 
+    progress: preloadProgress,
+    isLoaded: isPreloaded,
+    forcePreload 
+  } = useWhisperPreload({
+    autoInit: autoPreload,
+    priority: preloadPriority,
+    delay: preloadDelay
+  });
+  
+  // Hooks for different processing modes
+  const { 
+    isReady: isWorkerReady, 
+    processChunk: processWorkerChunk, 
+    reset: resetWorker 
+  } = useWhisperWorker({
+    onChunkProcessed: (text, chunkId) => {
+      transcriptPartsRef.current[chunkId] = text;
+      logger.log(`[${processingMode}] Chunk ${chunkId} processed: ${text}`);
+      chunkCountRef.current++;
+      
+      // Llamar al callback del usuario si existe
+      if (onChunkProcessed && text) {
+        onChunkProcessed(text, chunkCountRef.current);
+      }
+    },
+    onError: (workerError) => {
+      logger.error(`[${processingMode}] Worker error:`, workerError);
+      setError(workerError);
+      setStatus('error');
+    },
+    onModelLoading: (progress) => {
+      setLoadProgress(progress);
+      logger.log(`[${processingMode}] Model loading: ${progress}%`);
+    },
+    onModelReady: () => {
+      setEngineStatus('ready');
+      setLoadProgress(100);
+      logger.log(`[${processingMode}] Model ready`);
+    }
+  });
+  
+  // Direct audio capture (for direct mode)
+  const { 
+    start: startDirectCapture, 
+    stop: stopDirectCapture, 
+    isRecording: isDirectRecording 
+  } = useDirectAudioCapture({
+    onChunkReady: async (audioData) => {
+      if (isWorkerReady && processingMode === 'direct') {
+        const chunkId = `chunk_${Date.now()}`; 
+        try {
+          processingTimeRef.current = Date.now();
+          await processWorkerChunk(audioData, chunkId);
+        } catch (err) {
+          logger.error(`[${processingMode}] Error processing chunk:`, err);
+        }
+      }
+    },
+    chunkSize,
+    sampleRate
+  });
+  
+  // Streaming processor (for streaming mode)
+  const { 
+    processChunk: processStreamingChunk, 
+    getTranscript: getStreamingTranscript, 
+    reset: resetStreamingProcessor, 
+    isReady: isStreamingReady 
+  } = useWhisperStreamingProcessorWorker({
+    onChunkProcessed: (text, chunkNumber) => {
+      logger.log(`[Streaming] Chunk ${chunkNumber} processed: ${text}`);
+      chunkCountRef.current = chunkNumber;
+      
+      // Llamar al callback del usuario si existe
+      if (onChunkProcessed && text) {
+        onChunkProcessed(text, chunkNumber);
+      }
+    }
+  });
+  
+  // Audio chunk manager (for streaming mode)
+  const {
+    start: startStreamingChunks,
+    stop: stopStreamingChunks,
+  } = useAudioChunkManager({
+    onChunkReady: (chunk) => {
+      if (processingMode === 'streaming') {
+        processStreamingChunk(chunk);
+      }
+    },
+  });
+  
+  // Update engine status based on selected mode and preload state
+  useEffect(() => {
+    if (isPreloaded) {
+      setEngineStatus('ready');
+      setLoadProgress(100);
+      logger.log(`[${processingMode}] Model ready from preload`);
+    } else if (preloadStatus === 'loading') {
+      setEngineStatus('loading');
+      setLoadProgress(preloadProgress);
+    } else if (preloadStatus === 'failed') {
+      setEngineStatus('error');
+      setError('Error loading model from preload');
+    } else {
+      // Check worker readiness based on processing mode
+      const modeReady = processingMode === 'streaming' ? isStreamingReady : isWorkerReady;
+      if (modeReady && engineStatus === 'loading') {
         setEngineStatus('ready');
         setLoadProgress(100);
-        return;
       }
-
+    }
+  }, [isPreloaded, preloadStatus, preloadProgress, isWorkerReady, isStreamingReady, processingMode, engineStatus, logger]);
+  
+  // Update recording state based on mode
+  useEffect(() => {
+    if (processingMode === 'direct') {
+      setIsRecording(isDirectRecording);
+    }
+  }, [isDirectRecording, processingMode]);
+  
+  // Audio level monitoring setup
+  const setupAudioMonitoring = useCallback((stream: MediaStream) => {
+    try {
+      const audioContext = new AudioContext();
+      const analyser = audioContext.createAnalyser();
+      const source = audioContext.createMediaStreamSource(stream);
+      
+      analyser.fftSize = 256;
+      source.connect(analyser);
+      
+      audioContextRef.current = audioContext;
+      analyserRef.current = analyser;
+      
+      const dataArray = new Uint8Array(analyser.frequencyBinCount);
+      
+      const updateLevel = () => {
+        if (!isRecording) {
+          setAudioLevel(0);
+          return;
+        }
+        
+        analyser.getByteFrequencyData(dataArray);
+        const average = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
+        setAudioLevel(Math.round(average));
+        animationFrameRef.current = requestAnimationFrame(updateLevel);
+      };
+      
+      updateLevel();
+    } catch (err) {
+      logger.error(`[${processingMode}] Error setting up audio monitoring:`, err);
+    }
+  }, [isRecording, processingMode, logger]);
+  
+  // Recording time management
+  useEffect(() => {
+    if (isRecording) {
+      startTimeRef.current = Date.now();
+      timerRef.current = setInterval(() => {
+        setRecordingTime(Math.floor((Date.now() - startTimeRef.current) / 1000));
+      }, 1000);
+    } else {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    }
+    
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, [isRecording]);
+  
+  // Preload model function
+  const preloadModel = useCallback(async () => {
+    if (isPreloaded) {
+      logger.log(`[${processingMode}] Model already preloaded`);
+      return;
+    }
+    
+    try {
       setEngineStatus('loading');
       setError(null);
       
-      // Limpiar timers anteriores si existen
+      // Clear previous timers
       if (checkIntervalRef.current) clearInterval(checkIntervalRef.current);
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       
-      // El modelo ahora se carga en el worker automáticamente
-      // Solo necesitamos esperar a que esté listo
-      checkIntervalRef.current = setInterval(() => {
-        if (isWorkerReady) {
-          if (checkIntervalRef.current) clearInterval(checkIntervalRef.current);
-          if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      // Use enhanced preload if available
+      if (showPreloadStatus) {
+        await forcePreload();
+      } else {
+        // Fallback to worker readiness check
+        const modeReady = processingMode === 'streaming' ? isStreamingReady : isWorkerReady;
+        
+        if (modeReady) {
           setEngineStatus('ready');
           setLoadProgress(100);
+          return;
         }
-      }, 100);
+        
+        // Poll for readiness
+        checkIntervalRef.current = setInterval(() => {
+          const currentModeReady = processingMode === 'streaming' ? isStreamingReady : isWorkerReady;
+          if (currentModeReady) {
+            if (checkIntervalRef.current) clearInterval(checkIntervalRef.current);
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
+            setEngineStatus('ready');
+            setLoadProgress(100);
+          }
+        }, 100);
+        
+        // Timeout after 60 seconds
+        timeoutRef.current = setTimeout(() => {
+          if (checkIntervalRef.current) clearInterval(checkIntervalRef.current);
+          const currentModeReady = processingMode === 'streaming' ? isStreamingReady : isWorkerReady;
+          if (!currentModeReady) {
+            setEngineStatus('error');
+            setError('Timeout cargando el modelo de transcripción. Por favor, recarga la página.');
+          }
+        }, 60000);
+      }
       
-      // Timeout después de 60 segundos (más tiempo para conexiones lentas)
-      timeoutRef.current = setTimeout(() => {
-        if (checkIntervalRef.current) clearInterval(checkIntervalRef.current);
-        if (!isWorkerReady) {
-          setEngineStatus('error');
-          setError('Timeout cargando el modelo de transcripción. Por favor, recarga la página.');
-        }
-      }, 60000);
+      setEngineStatus('ready');
     } catch (err) {
       setEngineStatus('error');
       setError('Error cargando el modelo de transcripción');
-      errorLog(err);
+      logger.error(`[${processingMode}] Error preloading model:`, err);
+      
       if (checkIntervalRef.current) clearInterval(checkIntervalRef.current);
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     }
-  }, [isWorkerReady, errorLog]);
-
-  useEffect(() => {
-    if (autoPreload) {
-      preloadModel();
-    }
-  }, [autoPreload, preloadModel]);
-
-  // Actualizar el estado cuando el worker esté listo
-  useEffect(() => {
-    if (isWorkerReady) {
-      setEngineStatus('ready');
-      setLoadProgress(100);
-      setError(null);
-    }
-  }, [isWorkerReady]);
-
-  const setupAudioMonitoring = useCallback((stream: MediaStream) => {
-    const audioContext = new AudioContext();
-    const analyser = audioContext.createAnalyser();
-    const source = audioContext.createMediaStreamSource(stream);
-    analyser.fftSize = 256;
-    source.connect(analyser);
-    audioContextRef.current = audioContext;
-    analyserRef.current = analyser;
-    const dataArray = new Uint8Array(analyser.frequencyBinCount);
-
-    const updateLevel = () => {
-      if (!isRecording) {
-        setAudioLevel(0);
-        return;
-      }
-      analyser.getByteFrequencyData(dataArray);
-      const average = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
-      setAudioLevel(Math.round(average));
-      animationFrameRef.current = requestAnimationFrame(updateLevel);
-    };
-    updateLevel();
-  }, [isRecording]);
-
-  const startTranscription = async (): Promise<boolean> => {
+  }, [isPreloaded, forcePreload, showPreloadStatus, processingMode, isStreamingReady, isWorkerReady, logger]);
+  
+  // Start transcription
+  const startTranscription = useCallback(async (): Promise<boolean> => {
     try {
       setError(null);
       setStatus('recording');
-      const stream = await startChunks();
-      if (!stream) return false;
+      setTranscription(null);
+      transcriptPartsRef.current = {};
+      
+      const modeReady = processingMode === 'streaming' ? isStreamingReady : isWorkerReady;
+      
+      if (!modeReady && !isPreloaded) {
+        setError('El modelo aún se está cargando');
+        setStatus('error');
+        return false;
+      }
+      
+      let stream: MediaStream | null = null;
+      
+      if (processingMode === 'streaming') {
+        stream = await startStreamingChunks();
+      } else if (processingMode === 'direct') {
+        stream = await startDirectCapture();
+      }
+      
+      if (!stream) {
+        throw new Error('No se pudo iniciar la captura de audio');
+      }
+      
       setupAudioMonitoring(stream);
-      setIsRecording(true);
+      
+      if (processingMode === 'streaming') {
+        setIsRecording(true);
+      }
+      
+      logger.log(`[${processingMode}] Transcription started`);
       return true;
     } catch (err) {
-      errorLog(err);
-      setError('Error al iniciar la grabación');
+      logger.error(`[${processingMode}] Error starting transcription:`, err);
+      setError(err instanceof Error ? err.message : 'Error al iniciar la grabación');
       setStatus('error');
-      setEngineStatus('error');
       return false;
     }
-  };
-
-  const stopTranscription = async (): Promise<boolean> => {
+  }, [processingMode, isStreamingReady, isWorkerReady, isPreloaded, startStreamingChunks, startDirectCapture, setupAudioMonitoring, logger]);
+  
+  // Stop transcription
+  const stopTranscription = useCallback(async (): Promise<boolean> => {
     try {
-      stopChunks();
-      setIsRecording(false);
-      if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
-      if (audioContextRef.current) audioContextRef.current.close();
+      if (!isRecording) return false;
+      
       setStatus('processing');
-      const text = await getTranscript();
-      const medicalTerms = extractMedicalTermsFromText(text).map((t) => t.term);
-      setTranscription({ text, confidence: 0.95, medicalTerms, processingTime: 0 });
-      setStatus('completed');
+      
+      // Stop recording based on mode
+      if (processingMode === 'streaming') {
+        stopStreamingChunks();
+        setIsRecording(false);
+      } else if (processingMode === 'direct') {
+        stopDirectCapture();
+      }
+      
+      // Cleanup audio monitoring
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+      }
+      
+      // Wait for final processing
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Get transcript based on mode
+      let finalText = '';
+      let processingTime = 0;
+      
+      console.log(`[useSimpleWhisper] Obteniendo transcripción en modo: ${processingMode}`);
+      
+      if (processingMode === 'streaming') {
+        console.log('[useSimpleWhisper] Llamando a getStreamingTranscript...');
+        finalText = await getStreamingTranscript();
+        console.log(`[useSimpleWhisper] Transcripción obtenida: "${finalText}" (${finalText.length} caracteres)`);
+        processingTime = processingTimeRef.current ? Date.now() - processingTimeRef.current : 0;
+      } else if (processingMode === 'direct') {
+        // Combine all transcript parts
+        const sortedChunks = Object.entries(transcriptPartsRef.current)
+          .sort(([a], [b]) => a.localeCompare(b))
+          .map(([, text]) => text);
+        
+        finalText = sortedChunks.join(' ').trim();
+        processingTime = processingTimeRef.current ? Date.now() - processingTimeRef.current : 0;
+      }
+      
+      if (finalText) {
+        const medicalTerms = extractMedicalTermsFromText(finalText).map(t => t.term);
+        
+        console.log(`[useSimpleWhisper] ACTUALIZANDO ESTADO CON TRANSCRIPCIÓN: "${finalText}"`);
+        
+        setTranscription({
+          text: finalText,
+          confidence: 0.95,
+          medicalTerms,
+          processingTime,
+          timestamp: Date.now(),
+          chunks: Object.entries(transcriptPartsRef.current).map(([id, text]) => ({
+            id,
+            text,
+            timestamp: Date.now()
+          }))
+        });
+        
+        setStatus('completed');
+        logger.log(`[${processingMode}] Transcription completed: ${finalText}`);
+        console.log('[useSimpleWhisper] Estado actualizado - La UI debería mostrar la transcripción ahora');
+      } else {
+        console.error('[useSimpleWhisper] NO HAY TEXTO FINAL - Usuario estafado');
+        setError('No se pudo obtener transcripción - Habla más fuerte o por más tiempo');
+        setStatus('error');
+      }
+      
       return true;
     } catch (err) {
-      errorLog(err);
+      logger.error(`[${processingMode}] Error stopping transcription:`, err);
       setError('Error al detener la grabación');
       setStatus('error');
       return false;
     }
-  };
-
-  const resetTranscription = () => {
+  }, [isRecording, processingMode, stopStreamingChunks, stopDirectCapture, getStreamingTranscript, logger]);
+  
+  // Reset transcription
+  const resetTranscription = useCallback(() => {
     setTranscription(null);
     setStatus('idle');
     setError(null);
     setRecordingTime(0);
     setAudioLevel(0);
-    resetProcessor();
-  };
-
-  useEffect(() => {
-    if (isRecording) {
-      const startTime = Date.now();
-      timerRef.current = setInterval(() => {
-        setRecordingTime(Math.floor((Date.now() - startTime) / 1000));
-      }, 1000);
-    } else if (timerRef.current) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
+    setAudioUrl(null);
+    setAudioBlob(null);
+    transcriptPartsRef.current = {};
+    chunkCountRef.current = 0;
+    
+    // Reset based on mode
+    if (processingMode === 'streaming') {
+      resetStreamingProcessor();
+    } else if (processingMode === 'direct') {
+      resetWorker();
     }
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [isRecording]);
-
-  // Cleanup de timers del modelo cuando se desmonta el componente
+    
+    logger.log(`[${processingMode}] Transcription reset`);
+  }, [processingMode, resetStreamingProcessor, resetWorker, logger]);
+  
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (checkIntervalRef.current) clearInterval(checkIntervalRef.current);
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      if (timerRef.current) clearInterval(timerRef.current);
+      if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+      if (audioContextRef.current) audioContextRef.current.close();
     };
   }, []);
-
+  
   return {
+    // Core transcription
     transcription,
     status,
     isRecording,
     error,
+    
+    // Engine status
     engineStatus,
-    loadProgress,
+    loadProgress: isPreloaded ? 100 : loadProgress,
+    
+    // Audio monitoring
     audioLevel,
     recordingTime,
-    audioUrl: null,
-    audioBlob: null,
+    audioUrl,
+    audioBlob,
+    
+    // Controls
     startTranscription,
     stopTranscription,
     resetTranscription,
     preloadModel,
-    setLogger: logger.setEnabled ? logger.setEnabled.bind(logger) : undefined,
+    
+    // Enhanced preload info
+    preloadStatus,
+    preloadProgress,
+    isPreloaded,
+    
+    // Debug
+    setLogger: logger.setEnabled?.bind(logger)
   };
 }

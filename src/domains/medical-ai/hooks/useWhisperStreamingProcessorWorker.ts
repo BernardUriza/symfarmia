@@ -8,24 +8,40 @@ interface PartialResult {
   timestamp: number;
 }
 
-export function useWhisperStreamingProcessorWorker() {
+interface UseWhisperStreamingProcessorWorkerOptions {
+  onChunkProcessed?: (text: string, chunkNumber: number) => void;
+}
+
+export function useWhisperStreamingProcessorWorker(options: UseWhisperStreamingProcessorWorkerOptions = {}) {
   const resultsRef = useRef<PartialResult[]>([]);
   const chunkCountRef = useRef(0);
   const processingQueueRef = useRef<Array<{ chunk: Blob; chunkId: string }>>([]);
   const isProcessingRef = useRef(false);
+  const pendingChunksRef = useRef(0);
 
   const { isReady, processChunk: processWorkerChunk, reset: resetWorker } = useWhisperWorker({
     onChunkProcessed: (text, chunkId) => {
+      console.log(`[StreamingProcessor] TEXTO RECIBIDO del chunk ${chunkId}: "${text}" (${text.length} caracteres)`);
       resultsRef.current.push({ 
         text, 
         chunkId, 
         timestamp: Date.now() 
       });
+      pendingChunksRef.current--;
+      console.log(`[StreamingProcessor] Chunk ${chunkId} procesado. Pendientes: ${pendingChunksRef.current}`);
+      
+      // Llamar al callback externo si existe
+      if (options.onChunkProcessed && text) {
+        const chunkNumber = parseInt(chunkId.split('_')[1]) + 1;
+        options.onChunkProcessed(text, chunkNumber);
+      }
+      
       processNextInQueue();
     },
     onError: (error) => {
-      console.error('Worker error:', error);
+      console.error('[StreamingProcessor] Worker error:', error);
       isProcessingRef.current = false;
+      pendingChunksRef.current--;
       processNextInQueue();
     }
   });
@@ -83,25 +99,58 @@ export function useWhisperStreamingProcessorWorker() {
   const processChunk = useCallback(async (chunk: Blob) => {
     const chunkId = `chunk_${chunkCountRef.current++}`;
     processingQueueRef.current.push({ chunk, chunkId });
+    pendingChunksRef.current++;
+    console.log(`[StreamingProcessor] Chunk ${chunkId} agregado a la cola. Total pendientes: ${pendingChunksRef.current}`);
     
     if (isReady && !isProcessingRef.current) {
       processNextInQueue();
     }
   }, [isReady, processNextInQueue]);
 
-  const getTranscript = useCallback(() => {
-    return resultsRef.current
+  const waitForAllChunks = useCallback(async (maxWaitTime = 15000): Promise<void> => {
+    const startTime = Date.now();
+    
+    while (pendingChunksRef.current > 0 || processingQueueRef.current.length > 0 || isProcessingRef.current) {
+      if (Date.now() - startTime > maxWaitTime) {
+        console.warn(`[StreamingProcessor] Timeout esperando chunks después de ${maxWaitTime}ms`);
+        break;
+      }
+      
+      console.log(`[StreamingProcessor] Esperando... Pendientes: ${pendingChunksRef.current}, En cola: ${processingQueueRef.current.length}`);
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+    
+    console.log('[StreamingProcessor] Todos los chunks procesados o timeout alcanzado');
+  }, []);
+
+  const getTranscript = useCallback(async () => {
+    // Esperar a que todos los chunks terminen
+    await waitForAllChunks();
+    
+    const results = resultsRef.current;
+    console.log(`[StreamingProcessor] getTranscript llamado - ${results.length} resultados disponibles`);
+    
+    if (results.length === 0) {
+      console.warn('[StreamingProcessor] NO HAY RESULTADOS - El usuario no dijo nada o error en procesamiento');
+      return '';
+    }
+    
+    const transcript = results
       .sort((a, b) => a.chunkId.localeCompare(b.chunkId))
       .map(r => r.text)
       .join(' ')
       .trim();
-  }, []);
+    
+    console.log(`[StreamingProcessor] TRANSCRIPT FINAL: "${transcript}" (${transcript.length} caracteres)`);
+    return transcript;
+  }, [waitForAllChunks]);
 
   const reset = useCallback(() => {
     resultsRef.current = [];
     chunkCountRef.current = 0;
     processingQueueRef.current = [];
     isProcessingRef.current = false;
+    pendingChunksRef.current = 0;
     resetWorker();
   }, [resetWorker]);
 

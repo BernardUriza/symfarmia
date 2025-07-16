@@ -23,5 +23,15 @@
     "clinical_language": "Clinical language",
     "english_abbr": "EN",
     "spanish_abbr": "ES"
-  }
+  },
+  "status": {
+    "loading": "Loading",
+    "ready": "Ready",
+    "running": "Running",
+    "f32": "F32 Format"
+  },
+  "loading": "Loading",
+  "ready": "Ready",
+  "running": "Running",
+  "f32": "F32 Format"
 }
