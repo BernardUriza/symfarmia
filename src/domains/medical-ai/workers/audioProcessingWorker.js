@@ -108,13 +108,26 @@ async function processAudioChunk(data) {
     
     console.log(`[Worker] Procesando chunk ${chunkId}: ${audioData.length} samples`);
     
-    // Debug: Check audio data
+    // Debug: Check audio data - avoid spread operator for large arrays
+    let min = Infinity;
+    let max = -Infinity;
+    let sum = 0;
+    let silentSamples = 0;
+    
+    for (let i = 0; i < audioData.length; i++) {
+      const sample = audioData[i];
+      if (sample < min) min = sample;
+      if (sample > max) max = sample;
+      sum += Math.abs(sample);
+      if (Math.abs(sample) < 0.001) silentSamples++;
+    }
+    
     const audioStats = {
       length: audioData.length,
-      min: Math.min(...audioData),
-      max: Math.max(...audioData),
-      avg: audioData.reduce((a, b) => a + Math.abs(b), 0) / audioData.length,
-      silent: audioData.every(sample => Math.abs(sample) < 0.001)
+      min: min,
+      max: max,
+      avg: sum / audioData.length,
+      silent: silentSamples === audioData.length
     };
     
     console.log(`[Worker] Audio stats for ${chunkId}:`, audioStats);
