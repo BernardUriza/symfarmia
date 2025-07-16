@@ -401,7 +401,7 @@ export function useSimpleWhisper({
       transcriptPartsRef.current = {};
       chunkCountRef.current = 0; // Reset chunk counter
       
-      const modeReady = processingMode === 'streaming' ? isStreamingReady : isWorkerReady;
+      const modeReady = isWorkerReady; // Both streaming and direct use the same worker now
       const isEngineReady = engineStatusRef.current === 'ready';
       
       logger.log(`[startTranscription] Mode: ${processingMode}, Worker ready: ${isWorkerReady}, Engine ready: ${isEngineReady}, Preloaded: ${isPreloaded}`);
