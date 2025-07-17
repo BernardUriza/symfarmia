@@ -12,9 +12,9 @@ function DemoBannerContent() {
   }
 
   return (
-    <div className="demo-banner">
+    <div className="demo-banner glass dark:glass-dark" role="status" aria-live="polite">
       <span className="demo-emoji" role="img" aria-label="demo">🧪</span>
-      <span className="demo-text">{t('demo.mode_active')}</span>
+      <span className="demo-text text-sm font-medium">{t('demo.mode_active')}</span>
       <button onClick={toggleMode} title={t('demo.switch_live_mode')}>×</button>
     </div>
   );
