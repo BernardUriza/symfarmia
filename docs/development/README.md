@@ -46,6 +46,9 @@ AI-generated design prompts:
 - Visual style guides
 - Design system elements
 
+### 🎤 [Audio Flow Overview](./audio-flow-overview.md)
+Summary of the unified audio capture and worker pipeline.
+
 ## 📁 Development Logs
 
 ### 📚 [Dev Notes](./dev-notes/)

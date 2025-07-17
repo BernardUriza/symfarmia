@@ -1,5 +1,6 @@
 import { useRef, useCallback, useState } from 'react';
 import { useAudioProcessor } from './useAudioProcessor';
+import { AudioChunkManager } from '../audio/AudioChunkManager';
 
 interface UseUnifiedAudioCaptureOptions {
   onChunkReady?: (audioData: Float32Array) => void;
@@ -21,7 +22,7 @@ export function useUnifiedAudioCapture({
   mode = 'direct'
 }: UseUnifiedAudioCaptureOptions = {}) {
   const [isRecording, setIsRecording] = useState(false);
-  const bufferRef = useRef<Float32Array[]>([]);
+  const chunkManagerRef = useRef<AudioChunkManager | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const chunkCountRef = useRef(0);
   const startTimeRef = useRef<number>(0);
@@ -31,40 +32,8 @@ export function useUnifiedAudioCapture({
 
   const { start: startProcessor, stop: stopProcessor } = useAudioProcessor({
     onAudioData: (audioData) => {
-      // Accumulate audio data
-      bufferRef.current.push(audioData);
-      
-      // Calculate total length
-      const totalLength = bufferRef.current.reduce((sum, arr) => sum + arr.length, 0);
-      
-      // Log progress for debugging
-      if (mode === 'streaming' && totalLength % 16000 === 0) {
-        const seconds = totalLength / 16000;
-        console.log(`[UnifiedCapture] Streaming mode: ${seconds}s accumulated`);
-      }
-      
-      // If we have enough data for a chunk
-      if (totalLength >= targetChunkSize) {
-        // Combine buffers
-        const combinedBuffer = new Float32Array(totalLength);
-        let offset = 0;
-        for (const buffer of bufferRef.current) {
-          combinedBuffer.set(buffer, offset);
-          offset += buffer.length;
-        }
-        
-        // Extract chunk
-        const chunk = combinedBuffer.slice(0, targetChunkSize);
-        const remaining = combinedBuffer.slice(targetChunkSize);
-        
-        // Reset buffer with remaining data
-        bufferRef.current = remaining.length > 0 ? [remaining] : [];
-        
-        // Increment chunk counter and notify
-        chunkCountRef.current++;
-        console.log(`[UnifiedCapture] ${mode} mode: Chunk #${chunkCountRef.current} ready (${targetChunkSize} samples)`);
-        onChunkReady?.(chunk);
-      }
+      if (!chunkManagerRef.current) return;
+      chunkManagerRef.current.addData(audioData);
     },
     bufferSize: 4096,
     sampleRate
@@ -75,7 +44,14 @@ export function useUnifiedAudioCapture({
     
     try {
       console.log(`[UnifiedCapture] Starting ${mode} mode capture`);
-      bufferRef.current = [];
+      chunkManagerRef.current = new AudioChunkManager({
+        chunkSize: targetChunkSize,
+        onChunk: (chunk, id) => {
+          chunkCountRef.current = id;
+          console.log(`[UnifiedCapture] ${mode} mode: Chunk #${id} ready (${chunk.length} samples)`);
+          onChunkReady?.(chunk);
+        }
+      });
       chunkCountRef.current = 0;
       startTimeRef.current = Date.now();
       
@@ -98,30 +74,12 @@ export function useUnifiedAudioCapture({
     stopProcessor();
     
     // Process any remaining audio
-    if (bufferRef.current.length > 0) {
-      const totalLength = bufferRef.current.reduce((sum, arr) => sum + arr.length, 0);
-      
-      // For streaming mode, only process if we have significant data
-      const minLength = mode === 'streaming' ? 16000 : 0; // 1 second minimum for streaming
-      
-      if (totalLength > minLength) {
-        const finalBuffer = new Float32Array(totalLength);
-        let offset = 0;
-        for (const buffer of bufferRef.current) {
-          finalBuffer.set(buffer, offset);
-          offset += buffer.length;
-        }
-        
-        chunkCountRef.current++;
-        console.log(`[UnifiedCapture] Final chunk #${chunkCountRef.current} (${totalLength} samples)`);
-        onChunkReady?.(finalBuffer);
-      }
-    }
+    chunkManagerRef.current?.flush();
     
     const duration = (Date.now() - startTimeRef.current) / 1000;
     console.log(`[UnifiedCapture] Recording stopped. Duration: ${duration}s, Chunks: ${chunkCountRef.current}`);
     
-    bufferRef.current = [];
+    chunkManagerRef.current = null;
     streamRef.current = null;
     setIsRecording(false);
   }, [isRecording, stopProcessor, onChunkReady, mode]);

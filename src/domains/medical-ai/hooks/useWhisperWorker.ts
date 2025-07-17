@@ -105,21 +105,20 @@ export function useWhisperWorker(options: UseWhisperWorkerOptions = {}) {
   }, []);
 
   const processChunk = useCallback(async (audioData: Float32Array, chunkId: string) => {
-    if (!workerRef.current || !isReady) {
+    if (!isReady) {
       throw new Error('Worker not ready');
     }
 
     setIsProcessing(true);
     pendingChunksRef.current.add(chunkId);
-    
-    // Create a copy of the audio data to transfer
+
     const audioBuffer = audioData.buffer.slice(0);
     const audioDataCopy = new Float32Array(audioBuffer);
-    
-    workerRef.current.postMessage({
-      type: 'PROCESS_CHUNK',
-      data: { audioData: audioDataCopy, chunkId }
-    }, [audioBuffer]);
+
+    whisperModelCache.sendMessage(
+      { type: 'PROCESS_CHUNK', data: { audioData: audioDataCopy, chunkId } },
+      [audioBuffer]
+    );
   }, [isReady]);
 
   const getTranscript = useCallback(() => {
@@ -134,7 +133,7 @@ export function useWhisperWorker(options: UseWhisperWorkerOptions = {}) {
     resultsRef.current.clear();
     pendingChunksRef.current.clear();
     setIsProcessing(false);
-    workerRef.current?.postMessage({ type: 'RESET' });
+    whisperModelCache.sendMessage({ type: 'RESET' });
   }, []);
 
   return {

@@ -154,6 +154,11 @@ class WhisperModelCache {
       this.listeners.delete(listener);
     };
   }
+
+  sendMessage(message: any, transfer?: Transferable[]) {
+    if (!this.worker) throw new Error('Worker not initialized');
+    this.worker.postMessage(message, transfer || []);
+  }
   
   isModelLoaded(): boolean {
     return this.modelLoaded;
