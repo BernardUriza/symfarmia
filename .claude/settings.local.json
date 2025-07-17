@@ -99,7 +99,8 @@
       "mcp__ide__executeCode",
       "Bash(npx postcss:*)",
       "Bash(netlify dev:*)",
-      "Bash(tail:*)"
+      "Bash(tail:*)",
+      "Bash(git fetch:*)"
     ],
     "deny": []
   }
