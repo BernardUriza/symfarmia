@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 
-interface UseRealAudioCaptureReturn {
+interface UseWebSpeechCaptureReturn {
   isRecording: boolean;
   transcript: string;
   isAvailable: boolean;
@@ -10,7 +10,7 @@ interface UseRealAudioCaptureReturn {
   clearTranscript: () => void;
 }
 
-export const useRealAudioCapture = (): UseRealAudioCaptureReturn => {
+export const useWebSpeechCapture = (): UseWebSpeechCaptureReturn => {
   const [isRecording, setIsRecording] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [isAvailable, setIsAvailable] = useState(false);

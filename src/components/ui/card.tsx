@@ -8,14 +8,14 @@ const cardVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-white dark:bg-card border-gray-200 dark:border-border text-gray-900 dark:text-card-foreground shadow-sm",
-        elevated: "bg-white dark:bg-card border-gray-200 dark:border-border text-gray-900 dark:text-card-foreground shadow-md hover:shadow-lg",
-        medical: "bg-white dark:bg-card border-gray-200 dark:border-border text-gray-900 dark:text-card-foreground shadow-sm border-l-4 border-l-emerald-500 dark:border-l-medical-primary",
-        critical: "bg-white dark:bg-card border-gray-200 dark:border-border text-gray-900 dark:text-card-foreground shadow-sm border-l-4 border-l-red-500 dark:border-l-destructive",
-        success: "bg-white dark:bg-card border-gray-200 dark:border-border text-gray-900 dark:text-card-foreground shadow-sm border-l-4 border-l-green-500 dark:border-l-green-500",
-        warning: "bg-white dark:bg-card border-gray-200 dark:border-border text-gray-900 dark:text-card-foreground shadow-sm border-l-4 border-l-yellow-500 dark:border-l-yellow-500",
-        ghost: "bg-transparent border-dashed border-gray-300 dark:border-muted-foreground/25",
-        outline: "bg-transparent border-2 border-gray-300 dark:border-border hover:bg-gray-50 dark:hover:bg-accent/50"
+        default: "bg-white border-gray-200 text-gray-900 shadow-sm",
+        elevated: "bg-white border-gray-200 text-gray-900 shadow-md hover:shadow-lg",
+        medical: "bg-white border-gray-200 text-gray-900 shadow-sm border-l-4 border-l-emerald-500",
+        critical: "bg-white border-gray-200 text-gray-900 shadow-sm border-l-4 border-l-red-500",
+        success: "bg-white border-gray-200 text-gray-900 shadow-sm border-l-4 border-l-green-500",
+        warning: "bg-white border-gray-200 text-gray-900 shadow-sm border-l-4 border-l-yellow-500",
+        ghost: "bg-transparent border-dashed border-gray-300",
+        outline: "bg-transparent border-2 border-gray-300 hover:bg-gray-50"
       },
       size: {
         default: "gap-6",
@@ -25,8 +25,8 @@ const cardVariants = cva(
       },
       interactive: {
         none: "",
-        hover: "hover:bg-gray-50 dark:hover:bg-accent/50 cursor-pointer",
-        press: "hover:bg-gray-50 dark:hover:bg-accent/50 active:bg-gray-100 dark:active:bg-accent/75 cursor-pointer transform hover:-translate-y-0.5"
+        hover: "hover:bg-gray-50 cursor-pointer",
+        press: "hover:bg-gray-50 active:bg-gray-100 cursor-pointer transform hover:-translate-y-0.5"
       }
     },
     defaultVariants: {
@@ -95,7 +95,7 @@ const CardHeader = React.forwardRef<HTMLDivElement, CardHeaderProps>(
         data-slot="card-header"
         className={cn(
           "@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 pt-6 has-data-[slot=card-action]:grid-cols-[1fr_auto]",
-          bordered && "border-b border-gray-200 dark:border-border pb-6",
+          bordered && "border-b border-gray-200 pb-6",
           className
         )}
         {...props}
@@ -115,7 +115,7 @@ const CardTitle = React.forwardRef<HTMLHeadingElement, CardTitleProps>(
         ref={ref}
         data-slot="card-title"
         className={cn(
-          "leading-none font-semibold text-gray-900 dark:text-foreground",
+          "leading-none font-semibold text-gray-900",
           truncate && "truncate",
           {
             "text-2xl": as === "h1",
@@ -142,7 +142,7 @@ const CardDescription = React.forwardRef<HTMLParagraphElement, CardDescriptionPr
         ref={ref}
         data-slot="card-description"
         className={cn(
-          "text-gray-600 dark:text-muted-foreground text-sm leading-relaxed",
+          "text-gray-600 text-sm leading-relaxed",
           truncate && "truncate",
           className
         )}
@@ -215,7 +215,7 @@ const CardFooter = React.forwardRef<HTMLDivElement, CardFooterProps>(
         data-slot="card-footer"
         className={cn(
           "flex items-center px-6 pb-6 gap-2",
-          bordered && "border-t border-gray-200 dark:border-border pt-6",
+          bordered && "border-t border-gray-200 pt-6",
           justifyClasses[justify],
           className
         )}

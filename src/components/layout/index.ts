@@ -11,5 +11,4 @@ export { default as DemoModeBanner } from './DemoModeBanner';
 export { default as RouteErrorBoundary } from './RouteErrorBoundary';
 export { default as VersionInfo } from './VersionInfo';
 export { default as DemoLoginModal } from './DemoLoginModal';
-export { default as WhisperPreloadClient } from './WhisperPreloadClient';
 export { default as LogoutButton } from './LogoutButton';

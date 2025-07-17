@@ -9,7 +9,7 @@ import {
   OrderEntry, 
   SummaryExport 
 } from '@/src/components/medical';
-import { WhisperDebugPanel } from '@/src/components/medical/WhisperDebugPanel';
+// import { WhisperDebugPanel } from '@/src/components/medical/WhisperDebugPanel';
 import { Button, Progress } from '@/src/components/ui';
 import { Mic, MicOff, Clock, User, ArrowLeft, Stethoscope, FileText, Users, FolderOpen, MessageSquare, Activity, ClipboardList, Download } from 'lucide-react';
 import Link from 'next/link';
@@ -196,13 +196,13 @@ export default function MedicalAIDemo() {
 
           {/* Patient Context Header */}
           <div className="flex items-center gap-6">
-            <div className="badge-modern glass dark:glass-dark border border-secondary/20">
+            <div className="badge-modern border border-secondary/20">
               <User className="h-4 w-4 text-secondary" />
               <span className="font-medium text-foreground">
                 {patient ? `${patient.name}, ${patient.age} ${t('years')}` : ''}
               </span>
             </div>
-            <div className="badge-modern badge-success glass dark:glass-dark">
+            <div className="badge-modern badge-success border border-green-300/30">
               <Clock className="h-4 w-4" />
               <span className="font-medium text-foreground">{encounterTime}</span>
             </div>
@@ -252,8 +252,8 @@ export default function MedicalAIDemo() {
                       isActive 
                         ? 'bg-primary text-white' 
                         : isCompleted
-                        ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-900/50'
-                        : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700'
+                        ? 'text-green-700 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-900/50'
+                        : 'text-gray-600  hover:bg-gray-200  border border-gray-200'
                     }`}
                   >
                     <Icon className="h-4 w-4" />
@@ -293,7 +293,7 @@ export default function MedicalAIDemo() {
                         {patient?.age} {t('years')}
                       </span>
                       {patient?.gender && (
-                        <span className="badge-modern glass dark:glass-dark text-xs">
+                        <span className="badge-modern text-xs">
                           {patient.gender}
                         </span>
                       )}
@@ -321,10 +321,10 @@ export default function MedicalAIDemo() {
 
                 {/* Quick Actions */}
                 <div className="pt-3 flex gap-2">
-                  <button className="flex-1 px-3 py-2 text-xs font-medium glass dark:glass-dark border border-border text-foreground/70 rounded-lg hover:bg-primary/10 hover:border-primary/50 hover:text-primary transition-smooth">
+                  <button className="flex-1 px-3 py-2 text-xs font-medium border rounded-lg hover:bg-primary/10 hover:border-primary/50 hover:text-primary transition-smooth">
                     {t('patient.view_full_history')}
                   </button>
-                  <button className="px-3 py-2 text-xs font-medium glass dark:glass-dark border border-border text-foreground/70 rounded-lg hover:bg-primary/10 hover:border-primary/50 hover:text-primary transition-smooth">
+                  <button className="px-3 py-2 text-xs font-medium border border-border text-foreground/70 rounded-lg hover:bg-primary/10 hover:border-primary/50 hover:text-primary transition-smooth">
                     <FileText className="h-3.5 w-3.5" />
                   </button>
                 </div>

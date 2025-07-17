@@ -63,14 +63,14 @@ export default function WhisperPreloaderGlobal() {
   // Show UI during loading or error
   if (loadingState === 'loading') {
     return (
-      <div className="fixed bottom-4 right-4 p-3 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
+      <div className="fixed bottom-4 right-4 p-3 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
         <div className="flex items-center gap-3">
           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-          <span className="text-sm text-gray-600 dark:text-gray-300">
+          <span className="text-sm text-gray-600">
             Cargando modelo Whisper... {Math.round(progress)}%
           </span>
         </div>
-        <div className="mt-2 w-48 bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+        <div className="mt-2 w-48 bg-gray-200 rounded-full h-1.5">
           <div 
             className="bg-primary h-1.5 rounded-full transition-all duration-300"
             style={{ width: `${progress}%` }}
@@ -82,10 +82,10 @@ export default function WhisperPreloaderGlobal() {
 
   if (loadingState === 'error') {
     return (
-      <div className="fixed bottom-4 right-4 p-3 bg-red-50 dark:bg-red-900/20 rounded-lg shadow-lg border border-red-200 dark:border-red-800 z-50">
+      <div className="fixed bottom-4 right-4 p-3 bg-red-50 rounded-lg shadow-lg border border-red-200 z-50">
         <div className="flex items-center gap-3">
           <div className="text-red-500">⚠️</div>
-          <span className="text-sm text-red-600 dark:text-red-400">
+          <span className="text-sm text-red-600">
             Error cargando modelo. Recarga la página.
           </span>
         </div>

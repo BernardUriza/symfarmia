@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useTransition } from 'react';
+import React, { useState, useTransition, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   Search, 
@@ -26,10 +26,10 @@ const WorkflowStep = ({
   isActive = false 
 }) => {
   const statusStyles = {
-    pending: 'bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 text-gray-600 dark:text-gray-400',
-    active: 'bg-gradient-to-br from-medical-primary/10 to-medical-accent/10 dark:from-medical-primary/20 dark:to-medical-accent/20 text-medical-primary dark:text-medical-accent ring-2 ring-medical-primary/50',
-    completed: 'bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 text-green-600 dark:text-green-400',
-    in_progress: 'bg-gradient-to-br from-yellow-100 to-amber-100 dark:from-yellow-900/30 dark:to-amber-900/30 text-yellow-600 dark:text-yellow-400'
+    pending: 'bg-gradient-to-br from-gray-100 to-gray-200 text-gray-600',
+    active: 'bg-gradient-to-br from-medical-primary/10 to-medical-accent/10 text-medical-primary ring-2 ring-medical-primary/50',
+    completed: 'bg-gradient-to-br from-green-100 to-emerald-100 text-green-600',
+    in_progress: 'bg-gradient-to-br from-yellow-100 to-amber-100 text-yellow-600'
   };
 
   return (
@@ -47,15 +47,13 @@ const WorkflowStep = ({
                         transition-transform duration-1000 ease-out"></div>
         <div className="flex items-center justify-between mb-2 relative z-10">
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-white/30 to-white/10 
-                            dark:from-white/20 dark:to-white/5 
-                            backdrop-blur-sm shadow-inner
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-white/30 to-white/10 backdrop-blur-sm shadow-inner
                             flex items-center justify-center
                             transform group-hover:rotate-12 transition-transform duration-300">
               <Icon className="h-5 w-5" />
             </div>
             <div>
-              <h4 className="font-semibold text-sm group-hover:text-medical-primary dark:group-hover:text-medical-accent transition-colors duration-300">{title}</h4>
+              <h4 className="font-semibold text-sm group-hover:text-medical-primary transition-colors duration-300">{title}</h4>
               <p className="text-xs opacity-80">{description}</p>
             </div>
         </div>
@@ -92,6 +90,12 @@ const PatientWorkflow = () => {
     documentation: null,
     followUp: null
   });
+  
+  // Prefetch medical-ai-demo page to avoid compilation delay
+  useEffect(() => {
+    // Prefetch the medical-ai-demo page when component mounts
+    router.prefetch('/medical-ai-demo');
+  }, [router]);
 
   const steps = [
     {
@@ -206,7 +210,7 @@ const PatientWorkflow = () => {
     setIsNewPatientModalOpen(false);
   };
 
-  const handleConsultaGeneral = () => {
+  const navigateToMedicalDemo = useCallback((consultationType) => {
     if (selectedPatient) {
       const patientData = {
         id: selectedPatient.id,
@@ -214,40 +218,31 @@ const PatientWorkflow = () => {
         age: selectedPatient.age || 'N/A',
         gender: selectedPatient.gender || 'N/A',
         medicalHistory: selectedPatient.medicalHistory || [],
-        consultationType: 'general'
+        consultationType
       };
       
-      // Store patient data in localStorage instead of URL params
+      // Store patient data in localStorage
       localStorage.setItem('medicalAIDemoPatient', JSON.stringify(patientData));
-      router.push('/medical-ai-demo');
-    } else {
-      router.push('/medical-ai-demo');
     }
-  };
-
-  const handleConsultaUrgente = () => {
-    if (selectedPatient) {
-      const patientData = {
-        id: selectedPatient.id,
-        name: selectedPatient.name,
-        age: selectedPatient.age || 'N/A',
-        gender: selectedPatient.gender || 'N/A',
-        medicalHistory: selectedPatient.medicalHistory || [],
-        consultationType: 'urgent'
-      };
-      
-      // Store patient data in localStorage instead of URL params
-      localStorage.setItem('medicalAIDemoPatient', JSON.stringify(patientData));
-      router.push('/medical-ai-demo');
-    } else {
-      router.push('/medical-ai-demo');
-    }
-  };
+    
+    // Use router.push with a proper transition
+    setIsTransitioning(true);
+    
+    // Use startTransition to make navigation non-blocking
+    startTransition(() => {
+      // Double requestAnimationFrame to ensure DOM is ready
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          router.push('/medical-ai-demo');
+        });
+      });
+    });
+  }, [selectedPatient, router, startTransition]);
 
   const PatientSearchStep = () => (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+        <h3 className="text-lg font-semibold text-gray-900">
           Paso 1: Buscar Paciente
         </h3>
         <button 
@@ -262,13 +257,13 @@ const PatientWorkflow = () => {
       <PatientQuickSearch onPatientSelect={handlePatientSelect} />
       
       {selectedPatient && (
-        <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border border-green-200 dark:border-green-800">
+        <div className="bg-green-50 p-4 rounded-lg border border-green-200">
           <div className="flex items-center justify-between">
             <div>
-              <h4 className="font-medium text-green-800 dark:text-green-200">
+              <h4 className="font-medium text-green-800">
                 Paciente Seleccionado
               </h4>
-              <p className="text-sm text-green-600 dark:text-green-300">
+              <p className="text-sm text-green-600">
                 {selectedPatient.name} - {selectedPatient.id}
               </p>
             </div>
@@ -286,36 +281,44 @@ const PatientWorkflow = () => {
 
   const ConsultationStep = () => (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+      <h3 className="text-lg font-semibold text-gray-900">
         Paso 2: Iniciar Consulta
       </h3>
       
       {selectedPatient && (
-        <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+        <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h4 className="font-medium text-blue-800 dark:text-blue-200">
+              <h4 className="font-medium text-blue-800">
                 Consulta para: {selectedPatient.name}
               </h4>
-              <p className="text-sm text-blue-600 dark:text-blue-300">
+              <p className="text-sm text-blue-600">
                 Historial médico disponible
               </p>
             </div>
             <div className="flex items-center space-x-2">
-              <BookOpen className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-              <span className="text-sm text-blue-600 dark:text-blue-400">Ver Historial</span>
+              <BookOpen className="h-4 w-4 text-blue-600" />
+              <span className="text-sm text-blue-600">Ver Historial</span>
             </div>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <button onClick={handleConsultaGeneral} className="p-3 bg-white dark:bg-gray-800 rounded-lg border border-blue-200 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-900/40 transition-colors">
-              <div className="text-sm font-medium text-gray-900 dark:text-white">Consulta General</div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">Revisión rutinaria</div>
+            <button 
+              onClick={() => navigateToMedicalDemo('general')}
+              disabled={isTransitioning}
+              className="p-3 bg-white rounded-lg border border-blue-200 hover:bg-blue-50 transition-colors text-left w-full disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <div className="text-sm font-medium text-gray-900">Consulta General</div>
+              <div className="text-xs text-gray-500">Revisión rutinaria</div>
             </button>
             
-            <button onClick={handleConsultaUrgente} className="p-3 bg-white dark:bg-gray-800 rounded-lg border border-yellow-200 dark:border-yellow-800 hover:bg-yellow-50 dark:hover:bg-yellow-900/40 transition-colors">
-              <div className="text-sm font-medium text-gray-900 dark:text-white">Consulta Urgente</div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">Atención prioritaria</div>
+            <button 
+              onClick={() => navigateToMedicalDemo('urgent')}
+              disabled={isTransitioning}
+              className="p-3 bg-white rounded-lg border border-yellow-200 hover:bg-yellow-50 transition-colors text-left w-full disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <div className="text-sm font-medium text-gray-900">Consulta Urgente</div>
+              <div className="text-xs text-gray-500">Atención prioritaria</div>
             </button>
             
             <button 
@@ -333,40 +336,40 @@ const PatientWorkflow = () => {
 
   const DocumentationStep = () => (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+      <h3 className="text-lg font-semibold text-gray-900">
         Paso 3: Generar Nota Médica
       </h3>
       
-      <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+      <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Motivo de Consulta
             </label>
             <textarea 
-              className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+              className="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-900"
               rows="3"
               placeholder="Describe el motivo de la consulta..."
             />
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Diagnóstico
             </label>
             <textarea 
-              className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+              className="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-900"
               rows="3"
               placeholder="Diagnóstico médico..."
             />
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Tratamiento Prescrito
             </label>
             <textarea 
-              className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+              className="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-900"
               rows="3"
               placeholder="Tratamiento y medicación..."
             />
@@ -387,27 +390,27 @@ const PatientWorkflow = () => {
 
   const ScheduleStep = () => (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+      <h3 className="text-lg font-semibold text-gray-900">
         Paso 4: Programar Seguimiento
       </h3>
       
-      <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border border-purple-200 dark:border-purple-800">
+      <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Fecha de Seguimiento
             </label>
             <input 
               type="date" 
-              className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+              className="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-900"
             />
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Tipo de Cita
             </label>
-            <select className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
+            <select className="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-900">
               <option>Consulta de Seguimiento</option>
               <option>Revisión de Resultados</option>
               <option>Control de Tratamiento</option>
@@ -416,7 +419,7 @@ const PatientWorkflow = () => {
         </div>
         
         <div className="mt-4 flex justify-between">
-          <button className="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
+          <button className="text-gray-600 hover:text-gray-800">
             Sin Seguimiento
           </button>
           <button className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-medium transition-colors">
@@ -425,9 +428,9 @@ const PatientWorkflow = () => {
         </div>
       </div>
       
-      <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border border-green-200 dark:border-green-800">
+      <div className="bg-green-50 p-4 rounded-lg border border-green-200">
         <div className="flex items-center space-x-3">
-          <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
+          <CheckCircle className="h-6 w-6 text-green-600" />
           <div>
             <h4 className="font-medium text-green-800 dark:text-green-200">
               Flujo de Trabajo Completo
@@ -459,12 +462,12 @@ const PatientWorkflow = () => {
   return (
     <div className={`max-w-4xl mx-auto space-y-6 ${isTransitioning ? 'pointer-events-none' : ''}`}>
       {/* Workflow Progress */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+          <h2 className="text-xl font-semibold text-gray-900">
             Flujo de Trabajo del Paciente
           </h2>
-          <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+          <div className="flex items-center space-x-2 text-sm text-gray-600">
             <span>Paso {currentStep} de {steps.length}</span>
             <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
           </div>
@@ -491,10 +494,10 @@ const PatientWorkflow = () => {
         </div>
         
         {/* Current Step Content */}
-        <div className="border-t border-gray-200 dark:border-gray-700 pt-6 relative min-h-[400px]">
+        <div className="border-t border-gray-200 pt-6 relative min-h-[400px]">
           {/* Loading overlay during transitions */}
           {(isTransitioning || isPending) && (
-            <div className="absolute inset-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm z-10 flex items-center justify-center rounded-lg">
+            <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-10 flex items-center justify-center rounded-lg">
               <div className="flex items-center space-x-3">
                 <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
                 <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>

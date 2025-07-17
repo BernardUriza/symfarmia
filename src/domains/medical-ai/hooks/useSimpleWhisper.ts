@@ -4,7 +4,7 @@ import { extractMedicalTermsFromText } from '../utils/medicalTerms';
 import { DefaultLogger } from '../utils/LoggerStrategy';
 import { useWhisperPreload } from './useWhisperPreload';
 import { useWhisperWorker } from './useWhisperWorker';
-import { useUnifiedAudioCapture } from './useUnifiedAudioCapture';
+import { useAudioDenoising } from './useAudioDenoising';
 import { whisperModelCache } from '../services/whisperModelCache';
 
 // Helper function to create WAV blob from Float32Array
@@ -220,32 +220,32 @@ export function useSimpleWhisper({
     }
   });
   
-  // Unified audio capture for both modes
+  // BRUTAL BAZAR: Audio denoising as exclusive gateway
   const { 
     start: startAudioCapture, 
     stop: stopAudioCapture, 
     isRecording: isAudioRecording,
-    getCombinedAudio 
-  } = useUnifiedAudioCapture({
+    getCompleteAudio: getCombinedAudio,
+    audioChunks // BAZAR: Chunks expuestos para cualquier consumidor
+  } = useAudioDenoising({
     mode: processingMode,
     chunkSize: processingMode === 'streaming' ? 160000 : chunkSize, // 10s for streaming, custom for direct
     sampleRate,
-    onChunkReady: async (audioData) => {
-      logger.log(`[Direct] Chunk ready: ${audioData.length} samples`);
+    onChunkReady: async (audioData, metadata) => {
+      logger.log(`[Direct] Denoised chunk ready: ${audioData.length} samples, denoisingUsed: ${metadata.denoisingUsed}`);
       logger.log(`[Direct] Worker state - isWorkerReady: ${isWorkerReady}, processingMode: ${processingMode}, engineStatus: ${engineStatusRef.current}`);
       
       // Check if engine is ready instead of just worker ready
       const isEngineReady = engineStatusRef.current === 'ready' || isWorkerReady;
       
       if (isEngineReady) {
-        // Increment chunk counter first
-        chunkCountRef.current++;
-        const chunkNumber = chunkCountRef.current;
+        // Use metadata.chunkId from denoising pipeline
+        const chunkNumber = metadata.chunkId;
         const chunkId = `chunk_${chunkNumber}`; 
         
         try {
           processingTimeRef.current = Date.now();
-          logger.log(`[${processingMode}] Processing chunk #${chunkNumber} with ${audioData.length} samples`);
+          logger.log(`[${processingMode}] Processing denoised chunk #${chunkNumber} with ${audioData.length} samples`);
           
           if (processingMode === 'direct') {
             // Direct mode: process immediately
@@ -255,12 +255,14 @@ export function useSimpleWhisper({
             await processStreamingChunk(audioData, chunkId);
           }
         } catch (err) {
-          logger.error(`[${processingMode}] Error processing chunk:`, err);
+          logger.error(`[${processingMode}] Error processing denoised chunk:`, err);
         }
       } else {
         logger.log(`[${processingMode}] Skipping chunk - Engine ready: ${isEngineReady}, Mode: ${processingMode}`);
       }
-    }
+    },
+    denoisingEnabled: true, // BRUTAL: Denoising always enabled in Whisper
+    environment: 'consultorio' // Default environment
   });
   
   // For streaming mode, we'll use the same worker but with accumulated chunks
@@ -271,7 +273,7 @@ export function useSimpleWhisper({
     }
   }, [processingMode, isWorkerReady, processWorkerChunk]);
   
-  // Remove the old audio chunk manager - we use unified capture now
+  // BRUTAL BAZAR: Audio chunks now come from denoising pipeline
   
   // Update engine status based on selected mode and preload state
   useEffect(() => {
@@ -299,7 +301,7 @@ export function useSimpleWhisper({
     }
   }, [isPreloaded, preloadStatus, preloadProgress, isWorkerReady, processingMode, engineStatus, logger]);
   
-  // Update recording state from unified capture
+  // Update recording state from denoising gateway
   useEffect(() => {
     setIsRecording(isAudioRecording);
   }, [isAudioRecording]);
@@ -462,7 +464,7 @@ export function useSimpleWhisper({
         await new Promise(resolve => setTimeout(resolve, 100));
       }
       
-      // Use unified audio capture for both modes
+      // Use denoising gateway for both modes
       const stream = await startAudioCapture();
       
       if (!stream) {
@@ -471,7 +473,7 @@ export function useSimpleWhisper({
       
       setupAudioMonitoring(stream);
       
-      // Recording state is now managed by the unified capture hook
+      // Recording state is now managed by the denoising hook
       // setIsRecording is updated via useEffect
       
       logger.log(`[${processingMode}] Transcription started`);
@@ -491,10 +493,10 @@ export function useSimpleWhisper({
       
       setStatus('processing');
       
-      // Stop unified audio capture
+      // Stop denoising gateway
       stopAudioCapture();
       
-      // Recording state is managed by the unified capture hook
+      // Recording state is managed by the denoising hook
       
       // Cleanup audio monitoring
       if (animationFrameRef.current) {
