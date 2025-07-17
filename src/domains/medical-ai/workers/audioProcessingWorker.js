@@ -89,8 +89,8 @@ async function processAudioChunk(data) {
 
     const { audioData, chunkId } = data;
     
-    // Validar tamaño del chunk - MÍNIMO 1 SEGUNDO PARA STREAMING
-    const minChunkSize = 16000; // 1 segundo a 16kHz - permite streaming chunks pequeños
+    // Validar tamaño del chunk - MÍNIMO 2 SEGUNDOS PARA MEJOR CALIDAD HQ
+    const minChunkSize = 32000; // 2 segundos a 16kHz - mejor contexto para HQ
     if (!audioData || audioData.length < minChunkSize) {
       console.warn(`[Worker] Chunk muy pequeño: ${audioData?.length || 0} samples (mínimo: ${minChunkSize})`);
       self.postMessage({ 
@@ -98,7 +98,7 @@ async function processAudioChunk(data) {
         chunkId,
         size: audioData?.length || 0,
         minSize: minChunkSize,
-        error: `Chunk de audio muy pequeño para procesar. Recibido: ${audioData?.length || 0} samples, mínimo requerido: ${minChunkSize} (1 segundo)`
+        error: `Chunk de audio muy pequeño para procesar. Recibido: ${audioData?.length || 0} samples, mínimo requerido: ${minChunkSize} (2 segundos)`
       });
       return;
     }
@@ -166,13 +166,15 @@ async function processAudioChunk(data) {
 
     const result = await pipeline(audioData, {
       return_timestamps: false,
-      chunk_length_s: 30,
-      stride_length_s: 5,
+      chunk_length_s: 60, // chunks más largos para mejor contexto HQ
+      stride_length_s: 10, // mayor solapamiento
       // Use ISO 639-1 language code for Spanish ('es' not 'spanish')
       // This ensures Whisper transcribes in Spanish instead of defaulting to English
       language: 'es',
       // Lower the minimum speech probability threshold
-      no_speech_threshold: 0.3
+      no_speech_threshold: 0.3,
+      // Asegurar que NO traduzca - solo transcriba en español
+      task: 'transcribe'
     });
 
     // Clear progress interval
@@ -189,12 +191,30 @@ async function processAudioChunk(data) {
       console.log('[Worker] Error posting final progress, worker might be terminating');
     }
 
-    const transcribedText = result.text || '';
+    let transcribedText = result.text || '';
     console.log(`[Worker] TRANSCRIPCIÓN OBTENIDA para chunk ${chunkId}: "${transcribedText}" (${transcribedText.length} caracteres)`);
     
     // Log language detection info if available
     if (result.language) {
       console.log(`[Worker] Idioma detectado: ${result.language}`);
+    }
+    
+    // Filtro adicional para palabras en español - solo mantener caracteres españoles
+    if (transcribedText) {
+      const spanishWordFilter = /^[a-záéíóúñü\s.,;:!¡?¿\-()]+$/i;
+      const words = transcribedText.split(' ');
+      const filteredWords = words.filter(word => {
+        // Permitir palabras vacías y puntuación
+        if (!word.trim()) return true;
+        // Filtrar solo palabras con caracteres españoles
+        return spanishWordFilter.test(word.trim());
+      });
+      
+      if (filteredWords.length !== words.length) {
+        console.log(`[Worker] Filtro español aplicado: ${words.length} -> ${filteredWords.length} palabras`);
+      }
+      
+      transcribedText = filteredWords.join(' ').trim();
     }
 
     if (!transcribedText || transcribedText.length === 0) {
