@@ -51,7 +51,7 @@ export const RecordingCard: React.FC<RecordingCardProps> = ({
   };
 
   return (
-    <Card className="border-2 border-dashed border-blue-200 dark:border-blue-700 bg-white dark:bg-gray-800 shadow-sm transition-all duration-300 ease-in-out slide-in">
+    <Card className="border-2 border-dashed border-blue-200 dark:border-blue-700 shadow-sm transition-all duration-300 ease-in-out slide-in">
       <CardContent className="p-8 text-center">
         {/* Show transcription result when completed */}
         {transcription && !isRecording && (

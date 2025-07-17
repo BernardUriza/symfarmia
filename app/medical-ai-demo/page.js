@@ -9,7 +9,7 @@ import {
   OrderEntry, 
   SummaryExport 
 } from '@/src/components/medical';
-import { WhisperDebugPanel } from '@/src/components/medical/WhisperDebugPanel';
+// import { WhisperDebugPanel } from '@/src/components/medical/WhisperDebugPanel';
 import { Button, Progress } from '@/src/components/ui';
 import { Mic, MicOff, Clock, User, ArrowLeft, Stethoscope, FileText, Users, FolderOpen, MessageSquare, Activity, ClipboardList, Download } from 'lucide-react';
 import Link from 'next/link';

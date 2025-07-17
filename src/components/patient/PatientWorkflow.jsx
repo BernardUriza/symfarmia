@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useTransition } from 'react';
+import React, { useState, useTransition, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   Search, 
@@ -92,6 +92,12 @@ const PatientWorkflow = () => {
     documentation: null,
     followUp: null
   });
+  
+  // Prefetch medical-ai-demo page to avoid compilation delay
+  useEffect(() => {
+    // Prefetch the medical-ai-demo page when component mounts
+    router.prefetch('/medical-ai-demo');
+  }, [router]);
 
   const steps = [
     {
@@ -206,7 +212,7 @@ const PatientWorkflow = () => {
     setIsNewPatientModalOpen(false);
   };
 
-  const handleConsultaGeneral = () => {
+  const navigateToMedicalDemo = useCallback((consultationType) => {
     if (selectedPatient) {
       const patientData = {
         id: selectedPatient.id,
@@ -214,35 +220,26 @@ const PatientWorkflow = () => {
         age: selectedPatient.age || 'N/A',
         gender: selectedPatient.gender || 'N/A',
         medicalHistory: selectedPatient.medicalHistory || [],
-        consultationType: 'general'
+        consultationType
       };
       
-      // Store patient data in localStorage instead of URL params
+      // Store patient data in localStorage
       localStorage.setItem('medicalAIDemoPatient', JSON.stringify(patientData));
-      router.push('/medical-ai-demo');
-    } else {
-      router.push('/medical-ai-demo');
     }
-  };
-
-  const handleConsultaUrgente = () => {
-    if (selectedPatient) {
-      const patientData = {
-        id: selectedPatient.id,
-        name: selectedPatient.name,
-        age: selectedPatient.age || 'N/A',
-        gender: selectedPatient.gender || 'N/A',
-        medicalHistory: selectedPatient.medicalHistory || [],
-        consultationType: 'urgent'
-      };
-      
-      // Store patient data in localStorage instead of URL params
-      localStorage.setItem('medicalAIDemoPatient', JSON.stringify(patientData));
-      router.push('/medical-ai-demo');
-    } else {
-      router.push('/medical-ai-demo');
-    }
-  };
+    
+    // Use router.push with a proper transition
+    setIsTransitioning(true);
+    
+    // Use startTransition to make navigation non-blocking
+    startTransition(() => {
+      // Double requestAnimationFrame to ensure DOM is ready
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          router.push('/medical-ai-demo');
+        });
+      });
+    });
+  }, [selectedPatient, router, startTransition]);
 
   const PatientSearchStep = () => (
     <div className="space-y-4">
@@ -308,12 +305,20 @@ const PatientWorkflow = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <button onClick={handleConsultaGeneral} className="p-3 bg-white dark:bg-gray-800 rounded-lg border border-blue-200 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-900/40 transition-colors">
+            <button 
+              onClick={() => navigateToMedicalDemo('general')}
+              disabled={isTransitioning}
+              className="p-3 bg-white dark:bg-gray-800 rounded-lg border border-blue-200 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-900/40 transition-colors text-left w-full disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               <div className="text-sm font-medium text-gray-900 dark:text-white">Consulta General</div>
               <div className="text-xs text-gray-500 dark:text-gray-400">Revisión rutinaria</div>
             </button>
             
-            <button onClick={handleConsultaUrgente} className="p-3 bg-white dark:bg-gray-800 rounded-lg border border-yellow-200 dark:border-yellow-800 hover:bg-yellow-50 dark:hover:bg-yellow-900/40 transition-colors">
+            <button 
+              onClick={() => navigateToMedicalDemo('urgent')}
+              disabled={isTransitioning}
+              className="p-3 bg-white dark:bg-gray-800 rounded-lg border border-yellow-200 dark:border-yellow-800 hover:bg-yellow-50 dark:hover:bg-yellow-900/40 transition-colors text-left w-full disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               <div className="text-sm font-medium text-gray-900 dark:text-white">Consulta Urgente</div>
               <div className="text-xs text-gray-500 dark:text-gray-400">Atención prioritaria</div>
             </button>

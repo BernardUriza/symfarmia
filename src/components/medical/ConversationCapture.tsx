@@ -7,6 +7,10 @@ import { useRealAudioCapture } from '@/src/domains/medical-ai/hooks/useRealAudio
 import { extractMedicalTermsFromText } from '@/src/domains/medical-ai/utils/medicalTerms';
 import { Button } from '@/src/components/ui/button';
 import { useI18n } from '@/src/domains/core/hooks/useI18n';
+import { Badge } from '@/src/components/ui/badge';
+import { Card, CardContent } from '@/src/components/ui/card';
+import { medicalAIService } from '@/src/domains/medical-ai/services/medicalAIService';
+import { PenTool, Keyboard, Mic } from 'lucide-react';
 import {
   PermissionDialog,
   RecordingCard,
@@ -14,22 +18,29 @@ import {
   ErrorDisplay,
   ProcessingStatus
 } from '@/src/components/medical/conversation-capture/components';
+import type { SOAPNotes } from '@/src/domains/medical-ai/types';
 
 interface ConversationCaptureProps {
   onNext?: () => void;
   onTranscriptionComplete?: (transcript: string) => void;
+  onSoapGenerated?: (notes: SOAPNotes) => void;
   className?: string;
 }
 
 export const ConversationCapture = ({ 
   onNext, 
   onTranscriptionComplete,
+  onSoapGenerated,
   className = ''
 }: ConversationCaptureProps) => {  
   const { t } = useI18n();
   const [showPermissionDialog, setShowPermissionDialog] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
   const [liveTranscript, setLiveTranscript] = useState('');
+  const [isManualMode, setIsManualMode] = useState(false);
+  const [manualTranscript, setManualTranscript] = useState('');
+  const [soapNotes, setSoapNotes] = useState<SOAPNotes | null>(null);
+  const [isGeneratingSOAP, setIsGeneratingSOAP] = useState(false);
   const [minuteTranscriptions, setMinuteTranscriptions] = useState<Array<{
     id: string;
     text: string;
@@ -180,9 +191,32 @@ export const ConversationCapture = ({
     }
   };
   
+  const generateSOAPNotes = async () => {
+    const textToProcess = isManualMode ? manualTranscript : 
+      (transcription?.text || minuteTranscriptions.map(m => m.text).join(' ').trim());
+    
+    if (!textToProcess) return;
+    
+    setIsGeneratingSOAP(true);
+    try {
+      const notes = await medicalAIService.generateSOAPNotes(textToProcess);
+      setSoapNotes(notes);
+      if (onSoapGenerated) {
+        onSoapGenerated(notes);
+      }
+      return notes;
+    } catch (error) {
+      console.error('Error generating SOAP notes:', error);
+    } finally {
+      setIsGeneratingSOAP(false);
+    }
+  };
+
   const handleCopy = async () => {
-    if (transcription?.text) {
-      await navigator.clipboard.writeText(transcription.text);
+    const textToCopy = isManualMode ? manualTranscript : 
+      (transcription?.text || minuteTranscriptions.map(m => m.text).join(' ').trim());
+    if (textToCopy) {
+      await navigator.clipboard.writeText(textToCopy);
       setCopySuccess(true);
       setTimeout(() => setCopySuccess(false), 2000);
     }
@@ -194,9 +228,18 @@ export const ConversationCapture = ({
     setMinuteTranscriptions([]);
     setCurrentChunkTexts([]);
     chunkCountRef.current = 0;
+    setManualTranscript('');
+    setSoapNotes(null);
     // Clear any WebSpeech error
     if (webSpeechError) {
       console.clear();
+    }
+  };
+
+  const toggleMode = () => {
+    setIsManualMode(!isManualMode);
+    if (isRecording) {
+      toggleRecording();
     }
   };
   
@@ -208,25 +251,54 @@ export const ConversationCapture = ({
       />
 
 
-      <div className="text-center mb-6">
-        <h1 className="text-2xl font-medium text-gray-900 dark:text-white mb-2">
-          {t('conversation.capture.title')}
-        </h1>
-        <p className="text-gray-700 dark:text-gray-300">
-          {t('conversation.capture.subtitle')}
-        </p>
+      <div className="mb-6">
+        <div className="flex justify-between items-center">
+          <div className="text-center flex-1">
+            <h1 className="text-2xl font-medium mb-2">
+              {t('conversation.capture.title')}
+            </h1>
+            <p className="text-gray">
+              {t('conversation.capture.subtitle')}
+            </p>
+          </div>
+          <Button
+            onClick={toggleMode}
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2"
+          >
+            {isManualMode ? (
+              <>
+                <Mic className="w-4 h-4" />
+                Cambiar a voz
+              </>
+            ) : (
+              <>
+                <PenTool className="w-4 h-4" />
+                Modo manual
+              </>
+            )}
+          </Button>
+        </div>
+        
+        {/* Mode Indicator */}
+        <div className="flex items-center justify-center gap-2 mt-4">
+          <Badge variant={isManualMode ? 'secondary' : 'default'}>
+            {isManualMode ? 'Modo Manual' : 'Modo Voz'}
+          </Badge>
+        </div>
       </div>
 
       {/* Info message when WebSpeech is not available */}
-      {!isWebSpeechAvailable && (
+      {!isWebSpeechAvailable && !isManualMode && (
         <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-4">
           <div className="flex items-start">
-            <svg className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
+            <svg className="w-5 h-5 text-blue-600  mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
             </svg>
-            <div className="text-sm text-blue-800 dark:text-blue-200">
+            <div className="text-sm text-blue-800 ">
               <p className="font-medium mb-1">Transcripción en tiempo real no disponible</p>
-              <p className="text-blue-700 dark:text-blue-300">
+              <p className="text-blue-700 ">
                 La transcripción final con Whisper estará disponible al detener la grabación.
               </p>
             </div>
@@ -234,24 +306,65 @@ export const ConversationCapture = ({
         </div>
       )}
 
-      <RecordingCard
-        isRecording={isRecording}
-        audioLevel={audioLevel}
-        recordingTime={recordingTime}
-        liveTranscript={liveTranscript}
-        status={status}
-        engineStatus={engineStatus}
-        transcription={transcription}
-        copySuccess={copySuccess}
-        onToggleRecording={toggleRecording}
-        onReset={handleReset}
-        onCopy={handleCopy}
-      />
+      {/* Manual Input Interface */}
+      {isManualMode ? (
+        <Card>
+          <CardContent className="p-6 space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Escribe la conversación manualmente:
+              </label>
+              <textarea
+                value={manualTranscript}
+                onChange={(e) => setManualTranscript(e.target.value)}
+                className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                rows={8}
+                placeholder="Escribe o pega la transcripción de la conversación médica aquí..."
+                autoFocus
+              />
+            </div>
+            <p className="text-sm">
+              Puedes escribir directamente o pegar texto desde otra fuente.
+            </p>
+            <div className="flex justify-end space-x-2">
+              <Button
+                onClick={handleReset}
+                variant="outline"
+                size="sm"
+              >
+                Limpiar
+              </Button>
+              <Button
+                onClick={handleCopy}
+                variant="outline"
+                size="sm"
+                disabled={!manualTranscript}
+              >
+                {copySuccess ? 'Copiado!' : 'Copiar'}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <RecordingCard
+          isRecording={isRecording}
+          audioLevel={audioLevel}
+          recordingTime={recordingTime}
+          liveTranscript={liveTranscript}
+          status={status}
+          engineStatus={engineStatus}
+          transcription={transcription}
+          copySuccess={copySuccess}
+          onToggleRecording={toggleRecording}
+          onReset={handleReset}
+          onCopy={handleCopy}
+        />
+      )}
 
       {/* Mostrar transcripciones por minuto mientras graba */}
       {(minuteTranscriptions.length > 0 || (currentChunkTexts.length > 0 && isRecording)) && (
         <div className="space-y-4">
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+          <h3 className="text-lg font-medium text-gray-900 :text-whitedark">
             Transcripciones por minuto
           </h3>
           
@@ -288,30 +401,90 @@ export const ConversationCapture = ({
       )}
       
       {/* Mostrar transcripción final cuando termine */}
-      {transcription && !isRecording && (
+      {(transcription || (isManualMode && manualTranscript)) && !isRecording && (
         <>
           {console.log('[ConversationCapture] MOSTRANDO TRANSCRIPCIÓN FINAL:', transcription)}
           <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
               Transcripción completa
             </h3>
-            <TranscriptionResult 
-              transcription={transcription} 
-              audioUrl={audioUrl} 
-            />
+            {isManualMode ? (
+              <Card>
+                <CardContent className="p-4">
+                  <p className="text-gray-800 dark:text-gray-200 whitespace-pre-wrap">
+                    {manualTranscript}
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <TranscriptionResult 
+                transcription={transcription} 
+                audioUrl={audioUrl} 
+              />
+            )}
           </div>
         </>
+      )}
+
+      {/* SOAP Notes Display */}
+      {soapNotes && (
+        <Card className="mt-4">
+          <CardContent className="space-y-3 p-6">
+            <h3 className="font-semibold text-gray-900 dark:text-white text-lg mb-4">Notas SOAP</h3>
+            <div className="space-y-3">
+              <div>
+                <span className="font-medium text-gray-700 dark:text-gray-300">Subjetivo:</span>
+                <p className="text-gray-600 dark:text-gray-400 mt-1">{soapNotes.subjective}</p>
+              </div>
+              <div>
+                <span className="font-medium text-gray-700 dark:text-gray-300">Objetivo:</span>
+                <p className="text-gray-600 dark:text-gray-400 mt-1">{soapNotes.objective}</p>
+              </div>
+              <div>
+                <span className="font-medium text-gray-700 dark:text-gray-300">Evaluación:</span>
+                <p className="text-gray-600 dark:text-gray-400 mt-1">{soapNotes.assessment}</p>
+              </div>
+              <div>
+                <span className="font-medium text-gray-700 dark:text-gray-300">Plan:</span>
+                <p className="text-gray-600 dark:text-gray-400 mt-1">{soapNotes.plan}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       <ErrorDisplay error={error} />
 
       <ProcessingStatus isProcessing={status === 'processing'} />
 
-      {onNext && (transcription || minuteTranscriptions.length > 0) && (
-        <div className="mt-6 flex justify-center">
-          <Button onClick={onNext} size="lg" variant="default" className="">
-            {t('conversation.capture.next')}
-          </Button>
+      {/* Action buttons */}
+      {((transcription || minuteTranscriptions.length > 0 || (isManualMode && manualTranscript)) && !isRecording) && (
+        <div className="mt-6 flex justify-center gap-3">
+          {!soapNotes && (
+            <Button 
+              onClick={generateSOAPNotes} 
+              variant="outline"
+              disabled={isGeneratingSOAP}
+            >
+              {isGeneratingSOAP ? 'Generando...' : 'Generar Notas SOAP'}
+            </Button>
+          )}
+          {onNext && (
+            <Button 
+              onClick={() => {
+                const finalTranscript = isManualMode ? manualTranscript : 
+                  (transcription?.text || minuteTranscriptions.map(m => m.text).join(' ').trim());
+                if (finalTranscript && onTranscriptionComplete) {
+                  onTranscriptionComplete(finalTranscript);
+                }
+                onNext();
+              }} 
+              size="lg" 
+              variant="default"
+            >
+              {t('conversation.capture.next')}
+            </Button>
+          )}
         </div>
       )}
     </div>

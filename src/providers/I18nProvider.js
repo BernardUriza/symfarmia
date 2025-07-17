@@ -1,7 +1,69 @@
 "use client";
-import { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback, useRef, useMemo } from 'react';
 
 export const I18nContext = createContext();
+
+// Translation Monitor for tracking usage and performance
+class TranslationMonitor {
+  constructor() {
+    this.usageStats = new Map();
+    this.missingKeys = new Set();
+    this.performanceMetrics = new Map();
+  }
+  
+  track(key, locale, rendered, loadTime = 0) {
+    const usageKey = `${key}:${locale}`;
+    const current = this.usageStats.get(usageKey) || { count: 0, lastUsed: null };
+    
+    this.usageStats.set(usageKey, {
+      count: current.count + 1,
+      lastUsed: new Date().toISOString(),
+      rendered,
+      loadTime
+    });
+    
+    if (rendered.includes('MISSING:') || rendered.includes('🚨')) {
+      this.missingKeys.add(key);
+    }
+    
+    if (loadTime > 0) {
+      const perfKey = `${key}:load_time`;
+      const perfStats = this.performanceMetrics.get(perfKey) || { times: [], average: 0 };
+      
+      perfStats.times.push(loadTime);
+      perfStats.average = perfStats.times.reduce((a, b) => a + b, 0) / perfStats.times.length;
+      
+      this.performanceMetrics.set(perfKey, perfStats);
+    }
+  }
+  
+  generateReport() {
+    return {
+      totalTranslations: this.usageStats.size,
+      missingTranslations: Array.from(this.missingKeys),
+      mostUsedTranslations: Array.from(this.usageStats.entries())
+        .sort((a, b) => b[1].count - a[1].count)
+        .slice(0, 10),
+      averageLoadTime: Array.from(this.performanceMetrics.values())
+        .reduce((acc, curr) => acc + curr.average, 0) / this.performanceMetrics.size || 0
+    };
+  }
+}
+
+// Intelligent fallback generation
+const getIntelligentFallback = (key, locale) => {
+  const parts = key.split('.');
+  const lastPart = parts[parts.length - 1];
+  
+  // Convert camelCase/snake_case to human readable
+  const humanReadable = lastPart
+    .replace(/([A-Z])/g, ' $1')
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, l => l.toUpperCase())
+    .trim();
+  
+  return humanReadable || key;
+};
 
 // Professional JSON-only translations loader with retry mechanism
 async function loadTranslations(locale, retryCount = 0) {
@@ -10,6 +72,7 @@ async function loadTranslations(locale, retryCount = 0) {
   
   try {
     const modules = await Promise.all([
+      import(`../../locales/${locale}/auto_generated.json`).catch(() => ({})),
       import(`../../locales/${locale}/common.json`),
       import(`../../locales/${locale}/clinical.json`),
       import(`../../locales/${locale}/orders.json`),
@@ -18,6 +81,7 @@ async function loadTranslations(locale, retryCount = 0) {
       import(`../../locales/${locale}/status.json`),
       import(`../../locales/${locale}/landing.json`),
       import(`../../locales/${locale}/dashboard.json`),
+      import(`../../locales/${locale}/consultation.json`).catch(() => ({})),
       import(`../../locales/${locale}/workflow.json`),
       import(`../../locales/${locale}/demo.json`),
       import(`../../locales/${locale}/dialogue.json`),
@@ -25,6 +89,7 @@ async function loadTranslations(locale, retryCount = 0) {
       import(`../../locales/${locale}/language_switcher.json`),
       import(`../../locales/${locale}/ui.json`),
       import(`../../locales/${locale}/errors.json`),
+      import(`../../locales/${locale}/patient.json`),
       import(`../../locales/${locale}/medical.json`),
     ]);
     
@@ -106,6 +171,7 @@ export function I18nProvider({ children, initialLocale = 'es', initialTranslatio
   const [isLoadingTranslations, setIsLoadingTranslations] = useState(Object.keys(initialTranslations).length === 0);
   const [loadError, setLoadError] = useState(null);
   const [retryCount, setRetryCount] = useState(0);
+  const [monitor] = useState(() => new TranslationMonitor());
   const loadingRef = useRef(false);
 
   // Robust translation loading with error recovery
@@ -183,20 +249,48 @@ export function I18nProvider({ children, initialLocale = 'es', initialTranslatio
     }
   }, [locale]);
 
-  const t = (key) => {
-    if (isLoadingTranslations) return key; // Show key while loading
-    if (loadError) return `[ERROR:${key}]`; // Clear error indication
+  const t = useCallback((key, params = {}) => {
+    const startTime = performance.now();
     
-    const translation = translations[key];
-    if (!translation) {
-      if (process.env.NODE_ENV === 'development') {
-        console.warn(`Missing translation key: ${key}`);
+    if (isLoadingTranslations) return key;
+    if (loadError) return `[ERROR:${key}]`;
+    
+    try {
+      let translation = translations[key];
+      
+      if (!translation) {
+        const isDevelopment = process.env.NODE_ENV === 'development';
+        
+        if (isDevelopment) {
+          console.error(`🚨 MISSING TRANSLATION: ${key} (${locale})`);
+          if (Object.keys(params).length > 0) {
+            console.error(`🔍 Context:`, params);
+          }
+          translation = `🚨MISSING:${key}🚨`;
+        } else {
+          // Production: use intelligent fallback
+          translation = getIntelligentFallback(key, locale);
+        }
       }
-      return `[MISSING:${key}]`; // Clear missing key indication
+      
+      // Handle parameter substitution
+      if (params && typeof translation === 'string') {
+        translation = translation.replace(/\{(\w+)\}/g, (match, param) => {
+          return params[param] !== undefined ? params[param] : match;
+        });
+      }
+      
+      // Track usage
+      const loadTime = performance.now() - startTime;
+      monitor.track(key, locale, translation, loadTime);
+      
+      return translation;
+      
+    } catch (error) {
+      console.error(`💥 TRANSLATION ERROR for key "${key}":`, error);
+      return process.env.NODE_ENV === 'development' ? `🚨ERROR:${key}🚨` : key;
     }
-    
-    return translation;
-  };
+  }, [translations, locale, monitor, isLoadingTranslations, loadError]);
 
   // Enhanced error boundary with retry functionality
   const handleRetry = useCallback(() => {
@@ -210,6 +304,20 @@ export function I18nProvider({ children, initialLocale = 'es', initialTranslatio
     setRetryCount(0);
     setLocale('es');
   }, []);
+
+  // Performance monitoring in development
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      const interval = setInterval(() => {
+        const report = monitor.generateReport();
+        if (report.missingTranslations.length > 0) {
+          console.log('📊 TRANSLATION REPORT:', report);
+        }
+      }, 30000); // Every 30 seconds
+      
+      return () => clearInterval(interval);
+    }
+  }, [monitor]);
 
   if (loadError) {
     // Show comprehensive error UI with recovery options
@@ -264,17 +372,21 @@ export function I18nProvider({ children, initialLocale = 'es', initialTranslatio
     );
   }
 
+  // Memoize context value for performance
+  const contextValue = useMemo(() => ({
+    locale,
+    setLocale,
+    t,
+    isLoadingTranslations,
+    translations,
+    loadError,
+    retryCount,
+    handleRetry,
+    monitor
+  }), [locale, setLocale, t, isLoadingTranslations, translations, loadError, retryCount, handleRetry, monitor]);
+
   return (
-    <I18nContext.Provider value={{ 
-      locale, 
-      setLocale, 
-      t, 
-      isLoadingTranslations,
-      translations,
-      loadError,
-      retryCount,
-      handleRetry
-    }}>
+    <I18nContext.Provider value={contextValue}>
       {children}
     </I18nContext.Provider>
   );
@@ -297,7 +409,8 @@ export function useTranslation() {
       translations: {},
       loadError: null,
       retryCount: 0,
-      handleRetry: () => {}
+      handleRetry: () => {},
+      monitor: null
     };
   }
   
@@ -309,6 +422,53 @@ export function useTranslation() {
     translations: context.translations,
     loadError: context.loadError,
     retryCount: context.retryCount,
-    handleRetry: context.handleRetry
+    handleRetry: context.handleRetry,
+    monitor: context.monitor
   };
+}
+
+// Development helper component
+export const TranslationDebugger = () => {
+  const { monitor } = useTranslation();
+  
+  if (process.env.NODE_ENV !== 'development' || !monitor) {
+    return null;
+  }
+  
+  return (
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      right: 0,
+      width: '300px',
+      height: '200px',
+      background: 'rgba(0,0,0,0.8)',
+      color: 'white',
+      padding: '10px',
+      fontSize: '12px',
+      zIndex: 9999,
+      overflow: 'auto'
+    }}>
+      <h3>🚨 Translation Debug</h3>
+      <div>Missing: {monitor.missingKeys.size}</div>
+      <div>Total: {monitor.usageStats.size}</div>
+      <button 
+        onClick={() => {
+          const report = monitor.generateReport();
+          console.log('📊 FULL REPORT:', report);
+        }}
+        style={{
+          background: '#3b82f6',
+          color: 'white',
+          padding: '4px 8px',
+          border: 'none',
+          borderRadius: '4px',
+          cursor: 'pointer',
+          marginTop: '8px'
+        }}
+      >
+        Generate Report
+      </button>
+    </div>
+  );
 }
