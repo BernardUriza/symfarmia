@@ -8,7 +8,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { ConsultationProvider, useConsultation } from '../contexts/ConsultationContext';
 import { useTranslation } from '../providers/I18nProvider';
-import TranscriptionPanel from './consultation/TranscriptionPanel';
+import { ConversationCapture } from './medical/ConversationCapture';
 import AIAssistantPanel from './consultation/AIAssistantPanel';
 import DocumentationOutput from './consultation/DocumentationOutput';
 import ConsultationSettings from './consultation/ConsultationSettings';
@@ -99,7 +99,7 @@ function ConsultationWorkspaceInner({ onExit }) {
               layout
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
             >
-              <TranscriptionPanel />
+              <ConversationCapture />
             </motion.div>
             <AnimatePresence>
               {aiMode === 'advanced' && (
@@ -128,7 +128,7 @@ function ConsultationWorkspaceInner({ onExit }) {
               layout
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
             >
-              <TranscriptionPanel />
+              <ConversationCapture />
             </motion.div>
             
             {/* AI Assistant Panel */}

@@ -4,13 +4,15 @@ import './conversation-capture/styles.css';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useSimpleWhisper } from '@/src/domains/medical-ai/hooks/useSimpleWhisper';
 import { useRealAudioCapture } from '@/src/domains/medical-ai/hooks/useRealAudioCapture';
+import { useUnifiedAudioCaptureWithDenoising } from '@/src/domains/medical-ai/hooks/useUnifiedAudioCaptureWithDenoising';
+import { audioPipelineIntegration } from '@/src/domains/medical-ai/services/AudioPipelineIntegration';
 import { extractMedicalTermsFromText } from '@/src/domains/medical-ai/utils/medicalTerms';
 import { Button } from '@/src/components/ui/button';
 import { useI18n } from '@/src/domains/core/hooks/useI18n';
 import { Badge } from '@/src/components/ui/badge';
 import { Card, CardContent } from '@/src/components/ui/card';
 import { medicalAIService } from '@/src/domains/medical-ai/services/medicalAIService';
-import { PenTool, Keyboard, Mic } from 'lucide-react';
+import { PenTool, Keyboard, Mic, Shield, Settings, Activity } from 'lucide-react';
 import {
   PermissionDialog,
   RecordingCard,
@@ -58,6 +60,17 @@ export const ConversationCapture = ({
   const [diarizationError, setDiarizationError] = useState<string | null>(null); // Errores de diarización
   const chunkCountRef = useRef(0);
   const audioDataRef = useRef<Float32Array | null>(null); // Referencia al audio para diarización
+  
+  // ESTADOS DENOISING - BAZAR MODE
+  const [denoisingEnabled, setDenoisingEnabled] = useState(true);
+  const [denoisingEnvironment, setDenoisingEnvironment] = useState('consultorio');
+  const [showDenoisingDashboard, setShowDenoisingDashboard] = useState(false);
+  const [denoisingStats, setDenoisingStats] = useState({
+    totalProcessed: 0,
+    denoisingUsed: 0,
+    averageQuality: 0,
+    processingTime: 0
+  });
   
   // Log model status before using the hook
   useEffect(() => {
@@ -139,6 +152,39 @@ export const ConversationCapture = ({
     stopRecording: stopLiveTranscription
   } = useRealAudioCapture();
 
+  // HOOK DE DENOISING - BRUTAL BAZAR MODE
+  const {
+    isRecording: isDenoisingRecording,
+    isProcessing: isDenoisingProcessing,
+    error: denoisingError,
+    processingStats,
+    configureDenoisingMode
+  } = useUnifiedAudioCaptureWithDenoising({
+    onChunkReady: useCallback((processedAudio, metadata) => {
+      console.log(`[ConversationCapture] DENOISING: Chunk ${metadata.chunkId} processed:`, {
+        denoisingUsed: metadata.denoisingUsed,
+        qualityMetrics: metadata.qualityMetrics,
+        activeFilters: metadata.activeFilters
+      });
+      
+      // Actualizar estadísticas
+      setDenoisingStats(prev => ({
+        totalProcessed: prev.totalProcessed + 1,
+        denoisingUsed: metadata.denoisingUsed ? prev.denoisingUsed + 1 : prev.denoisingUsed,
+        averageQuality: metadata.qualityMetrics ? 
+          ((prev.averageQuality * prev.totalProcessed) + metadata.qualityMetrics.overallQuality) / (prev.totalProcessed + 1) :
+          prev.averageQuality,
+        processingTime: metadata.processingTime
+      }));
+      
+      // TODO: Enviar audio procesado a Whisper
+      // Por ahora, esto reemplazará el flujo directo
+    }, []),
+    chunkSize: 32000, // 2 segundos
+    denoisingEnabled: denoisingEnabled,
+    environment: denoisingEnvironment
+  });
+
   useEffect(() => {
     if (liveTranscriptData) {
       setLiveTranscript(liveTranscriptData);
@@ -146,6 +192,17 @@ export const ConversationCapture = ({
       setWebSpeechText(liveTranscriptData);
     }
   }, [liveTranscriptData]);
+
+  // EFECTO DENOISING - Sincronizar configuración
+  useEffect(() => {
+    if (configureDenoisingMode) {
+      configureDenoisingMode(denoisingEnabled, denoisingEnvironment);
+      console.log(`[ConversationCapture] Denoising configuration updated:`, {
+        enabled: denoisingEnabled,
+        environment: denoisingEnvironment
+      });
+    }
+  }, [denoisingEnabled, denoisingEnvironment, configureDenoisingMode]);
 
   const toggleRecording = async () => {
     try {
@@ -343,12 +400,127 @@ export const ConversationCapture = ({
           </Button>
         </div>
         
-        {/* Mode Indicator */}
-        <div className="flex items-center justify-center gap-2 mt-4">
+        {/* Mode Indicator & Denoising Controls - BAZAR MODE */}
+        <div className="flex items-center justify-center gap-4 mt-4">
           <Badge variant={isManualMode ? 'secondary' : 'default'}>
             {isManualMode ? 'Modo Manual' : 'Modo Voz'}
           </Badge>
+          
+          {/* DENOISING CONTROLS - SIEMPRE VISIBLE */}
+          {!isManualMode && (
+            <>
+              <div className="flex items-center gap-2">
+                <Shield className={`w-4 h-4 ${denoisingEnabled ? 'text-green-600' : 'text-gray-400'}`} />
+                <span className="text-sm font-medium">
+                  Denoising: {denoisingEnabled ? 'ON' : 'OFF'}
+                </span>
+                <button
+                  onClick={() => setDenoisingEnabled(!denoisingEnabled)}
+                  className={`w-8 h-4 rounded-full transition-colors ${
+                    denoisingEnabled ? 'bg-green-500' : 'bg-gray-300'
+                  }`}
+                >
+                  <div className={`w-3 h-3 bg-white rounded-full transition-transform ${
+                    denoisingEnabled ? 'translate-x-4' : 'translate-x-0.5'
+                  }`} />
+                </button>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <Activity className="w-4 h-4 text-blue-600" />
+                <select
+                  value={denoisingEnvironment}
+                  onChange={(e) => setDenoisingEnvironment(e.target.value)}
+                  className="text-sm border rounded px-2 py-1"
+                >
+                  <option value="consultorio">Consultorio</option>
+                  <option value="urgencias">Urgencias</option>
+                  <option value="uci">UCI</option>
+                  <option value="cirugia">Cirugía</option>
+                </select>
+              </div>
+              
+              <button
+                onClick={() => setShowDenoisingDashboard(!showDenoisingDashboard)}
+                className={`flex items-center gap-2 px-3 py-1 rounded-md text-sm transition-colors ${
+                  showDenoisingDashboard 
+                    ? 'bg-blue-100 text-blue-700' 
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                <Settings className="w-4 h-4" />
+                Dashboard
+              </button>
+            </>
+          )}
         </div>
+        
+        {/* DENOISING DASHBOARD - EN CONTEXTO */}
+        {showDenoisingDashboard && !isManualMode && (
+          <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-blue-900">
+                🛡️ Audio Denoising Dashboard
+              </h3>
+              <button
+                onClick={() => setShowDenoisingDashboard(false)}
+                className="text-blue-600 hover:text-blue-800"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+              <div className="bg-white p-3 rounded-lg">
+                <div className="text-sm text-gray-600">Procesados</div>
+                <div className="text-xl font-bold text-blue-600">
+                  {denoisingStats.totalProcessed}
+                </div>
+              </div>
+              <div className="bg-white p-3 rounded-lg">
+                <div className="text-sm text-gray-600">Denoisados</div>
+                <div className="text-xl font-bold text-green-600">
+                  {denoisingStats.denoisingUsed}
+                </div>
+              </div>
+              <div className="bg-white p-3 rounded-lg">
+                <div className="text-sm text-gray-600">Calidad</div>
+                <div className="text-xl font-bold text-purple-600">
+                  {denoisingStats.averageQuality.toFixed(1)}%
+                </div>
+              </div>
+              <div className="bg-white p-3 rounded-lg">
+                <div className="text-sm text-gray-600">Tiempo</div>
+                <div className="text-xl font-bold text-orange-600">
+                  {denoisingStats.processingTime}ms
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-white p-3 rounded-lg">
+              <div className="text-sm text-gray-600 mb-2">Estado del Sistema</div>
+              <div className="flex items-center gap-4 text-sm">
+                <span className={`flex items-center gap-1 ${denoisingEnabled ? 'text-green-600' : 'text-gray-400'}`}>
+                  <Shield className="w-4 h-4" />
+                  {denoisingEnabled ? 'Activo' : 'Inactivo'}
+                </span>
+                <span className="text-blue-600">
+                  🏥 {denoisingEnvironment.charAt(0).toUpperCase() + denoisingEnvironment.slice(1)}
+                </span>
+                {isDenoisingProcessing && (
+                  <span className="text-yellow-600">
+                    🔄 Procesando...
+                  </span>
+                )}
+                {denoisingError && (
+                  <span className="text-red-600">
+                    ❌ Error: {denoisingError}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Info message when WebSpeech is not available */}
