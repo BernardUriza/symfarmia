@@ -13,6 +13,7 @@ import {
 import dynamic from 'next/dynamic';
 const DemoLoginModal = dynamic(() => import('./layout/DemoLoginModal'));
 const AudioProcessingTest = dynamic(() => import('./medical/AudioProcessingTest'), { ssr: false });
+const DemoModeBanner = dynamic(() => import('./layout/DemoModeBanner'), { ssr: false });
 // Removed DashboardLanding import - redirecting to main dashboard
 import { useTranslation } from '../providers/I18nProvider';
 import { useAppMode } from '../providers/AppModeProvider';
@@ -92,12 +93,7 @@ const MinimalistLandingPage = ({ isDemo = false }) => {
       </nav>
 
       {/* Demo Mode Banner */}
-      {isDemoMode && (
-        <div className="demo-banner" style={{ marginTop: '64px' }}>
-          <span role="img" aria-label="demo">🧪</span>
-          <span className="demo-text">{t('demo_mode_active')}</span>
-        </div>
-      )}
+      {isDemoMode && <DemoModeBanner />}
 
       {/* Main Content */}
       <main className={`max-w-4xl mx-auto px-6 ${isDemoMode ? 'pt-48' : 'pt-32'}`}>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   Search, 
@@ -80,10 +80,12 @@ const WorkflowStep = ({
 
 const PatientWorkflow = () => {
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [isNewPatientModalOpen, setIsNewPatientModalOpen] = useState(false);
   const [isSavingPatient, setIsSavingPatient] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const [, setWorkflowData] = useState({
     patient: null,
     consultation: null,
@@ -130,7 +132,14 @@ const PatientWorkflow = () => {
 
   const handleStepClick = (stepId) => {
     if (stepId <= currentStep) {
-      setCurrentStep(stepId);
+      setIsTransitioning(true);
+      
+      startTransition(() => {
+        setTimeout(() => {
+          setCurrentStep(stepId);
+          setIsTransitioning(false);
+        }, 150);
+      });
     }
   };
 
@@ -141,9 +150,21 @@ const PatientWorkflow = () => {
   };
 
   const handlePatientSelect = (patient) => {
-    setSelectedPatient(patient);
-    setWorkflowData(prev => ({ ...prev, patient }));
-    nextStep();
+    // Add smooth transition effect
+    setIsTransitioning(true);
+    
+    startTransition(() => {
+      setSelectedPatient(patient);
+      setWorkflowData(prev => ({ ...prev, patient }));
+      
+      // Delay the step change to allow for smooth visual transition
+      setTimeout(() => {
+        nextStep();
+        setIsTransitioning(false);
+        // Smooth scroll to top of workflow
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 300);
+    });
   };
 
   const handleNewPatientClick = () => {
@@ -436,7 +457,7 @@ const PatientWorkflow = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className={`max-w-4xl mx-auto space-y-6 ${isTransitioning ? 'pointer-events-none' : ''}`}>
       {/* Workflow Progress */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
         <div className="flex items-center justify-between mb-6">
@@ -470,8 +491,22 @@ const PatientWorkflow = () => {
         </div>
         
         {/* Current Step Content */}
-        <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
-          {renderCurrentStep()}
+        <div className="border-t border-gray-200 dark:border-gray-700 pt-6 relative min-h-[400px]">
+          {/* Loading overlay during transitions */}
+          {(isTransitioning || isPending) && (
+            <div className="absolute inset-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm z-10 flex items-center justify-center rounded-lg">
+              <div className="flex items-center space-x-3">
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+              </div>
+            </div>
+          )}
+          
+          {/* Fade transition wrapper */}
+          <div className={`transition-all duration-300 ${isTransitioning ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}>
+            {renderCurrentStep()}
+          </div>
         </div>
       </div>
       

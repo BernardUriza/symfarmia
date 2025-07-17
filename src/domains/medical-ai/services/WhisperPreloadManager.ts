@@ -242,14 +242,11 @@ class WhisperPreloadManager {
       // Preload the worker and model
       await whisperModelCache.getWorker();
       
-      // Now load model for direct usage (non-worker)
-      this.loadPromise = this.loadModel();
-      const model = await this.loadPromise;
-      
+      // Model is loaded in the worker, no need to load again
       this.updateState({
         status: 'loaded',
         progress: 100,
-        model,
+        model: {} as Pipeline, // Placeholder - actual model is in worker
       });
       
       console.log('✅ Whisper model preloaded successfully');
@@ -263,40 +260,15 @@ class WhisperPreloadManager {
     }
   }
 
-  // Load the model with progress tracking
-  private async loadModel(): Promise<Pipeline> {
-    // Ensure transformers is configured before loading
-    await configureTransformers();
-    
-    const { pipeline } = await import('@xenova/transformers');
-    
-    const model = await pipeline(
-      'automatic-speech-recognition',
-      'Xenova/whisper-base',
-      {
-        progress_callback: (progress: { progress: number }) => {
-          if (progress?.progress) {
-            this.updateState({ progress: Math.round(progress.progress) });
-          }
-        },
-      }
-    );
-
-    return model;
-  }
+  // Removed loadModel() - model is now loaded only in the worker
 
   // Force preload (for manual trigger)
-  async forcePreload(): Promise<Pipeline | null> {
-    if (this.state.status === 'loaded' && this.state.model) {
-      return this.state.model;
-    }
-
-    if (this.loadPromise) {
-      return this.loadPromise;
+  async forcePreload(): Promise<void> {
+    if (this.state.status === 'loaded') {
+      return;
     }
 
     await this.startPreload();
-    return this.state.model;
   }
 
   // Get preloaded model if available

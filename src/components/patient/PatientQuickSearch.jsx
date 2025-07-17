@@ -164,9 +164,16 @@ const PatientQuickSearch = ({ onPatientSelect }) => {
 
 
   const handlePatientSelect = (patient) => {
+    // Prevent double-clicks
+    if (searchResults.length === 0) return;
+    
+    // Clear results immediately to prevent re-selection
+    setSearchResults([]);
+    setShowResults(false);
+    
+    // Call parent handler
     onPatientSelect(patient);
     setSearchTerm(patient.name);
-    setShowResults(false);
   };
 
   const clearSearch = () => {

@@ -1,5 +1,4 @@
 import type { Pipeline } from '@xenova/transformers';
-import { whisperPreloadManager } from './WhisperPreloadManager';
 import { configureTransformers } from '../config/transformersConfig';
 
 let whisperModel: Pipeline | null = null;
@@ -23,14 +22,6 @@ export async function loadWhisperModel({
 }: LoadWhisperModelOptions = {}): Promise<Pipeline> {
   // First, check if we already have a loaded model
   if (whisperModel) return whisperModel;
-  
-  // Check if the preload manager has a model ready
-  const preloadedModel = whisperPreloadManager.getModel();
-  if (preloadedModel) {
-    console.log('✨ Using pre-loaded Whisper model');
-    whisperModel = preloadedModel;
-    return whisperModel;
-  }
   
   // Check if there's an ongoing load
   if (loadPromise) return loadPromise;
@@ -67,12 +58,9 @@ export async function transcribeAudio(
   float32Audio: Float32Array,
   options?: Record<string, any>
 ): Promise<any> {
-  // Try to get model from preload manager if not already loaded
+  // Load model if not already loaded
   if (!whisperModel) {
-    const preloadedModel = whisperPreloadManager.getModel();
-    if (preloadedModel) {
-      whisperModel = preloadedModel;
-    }
+    await loadWhisperModel();
   }
   
   if (!whisperModel) throw new Error('Whisper model not loaded');
@@ -83,3 +71,7 @@ export function resetWhisperModel() {
   whisperModel = null;
   loadPromise = null;
 }
+
+// Note: This service provides direct (non-worker) model usage
+// For most use cases, use the worker-based approach via whisperModelCache
+// This is kept for compatibility but should be avoided to prevent duplicate model loading
