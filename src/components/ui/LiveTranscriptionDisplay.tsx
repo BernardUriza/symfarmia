@@ -57,9 +57,9 @@ export const LiveTranscriptionDisplay = ({
   );
 
   return (
-    <div className={`bg-gray-50 dark:bg-gray-800 rounded-lg p-4 min-h-[120px] border-2 border-dashed border-gray-300 dark:border-gray-600 ${className}`}>
+    <div className={`bg-gray-50 rounded-lg p-4 min-h-[120px] border-2 border-dashed border-gray-300 ${className}`}>
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+        <h3 className="text-sm font-medium text-gray-700">
           Transcripción en Tiempo Real
         </h3>
         <div className="flex items-center space-x-2">
@@ -75,7 +75,7 @@ export const LiveTranscriptionDisplay = ({
       <div className="space-y-2">
         {/* Final transcript - only show if requested */}
         {showFinalTranscript && finalTranscript && (
-          <div className="text-gray-900 dark:text-white leading-relaxed">
+          <div className="text-gray-900 leading-relaxed">
             {finalTranscript}
           </div>
         )}
@@ -89,7 +89,7 @@ export const LiveTranscriptionDisplay = ({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className="text-blue-600 dark:text-blue-400 leading-relaxed min-h-[60px]"
+              className="text-blue-600 leading-relaxed min-h-[60px]"
             >
               {displayedLiveTranscript}
               {isRecording && (

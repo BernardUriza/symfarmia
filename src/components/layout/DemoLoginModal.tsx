@@ -79,10 +79,10 @@ const DemoLoginModal = ({ isOpen, onClose, onLogin }: DemoLoginModalProps) => {
         isOpen ? 'opacity-100' : 'opacity-0'
       }`}
     >
-      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl max-w-md w-full p-6 relative animate-scale-in">
+      <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 relative animate-scale-in">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
           aria-label="Close modal"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -91,15 +91,15 @@ const DemoLoginModal = ({ isOpen, onClose, onLogin }: DemoLoginModalProps) => {
         </button>
 
         <div className="text-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">{t('demo_login')}</h2>
-          <p className="text-gray-600 dark:text-gray-300 text-sm">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('demo_login')}</h2>
+          <p className="text-gray-600 text-sm">
             {t('auto_fill_demo')}
           </p>
         </div>
 
         <div className="space-y-4">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
               {t('email')}
             </label>
             <input
@@ -107,12 +107,12 @@ const DemoLoginModal = ({ isOpen, onClose, onLogin }: DemoLoginModalProps) => {
               id="email"
               value={email}
               readOnly
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
               {t('password')}
             </label>
             <input
@@ -120,20 +120,20 @@ const DemoLoginModal = ({ isOpen, onClose, onLogin }: DemoLoginModalProps) => {
               id="password"
               value={password}
               readOnly
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
 
           <button
             onClick={onLogin}
-            className="w-full py-3 px-4 rounded-md font-semibold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 transition-all duration-200"
+            className="w-full py-3 px-4 rounded-md font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-all duration-200"
           >
             {t('login_demo')}
           </button>
         </div>
 
         <div className="mt-4 text-center">
-          <p className="text-xs text-gray-500 dark:text-gray-400">
+          <p className="text-xs text-gray-500">
             {t('demo_mode_full_access')}
           </p>
         </div>

@@ -77,33 +77,33 @@ const ActionButton = ({
   const colorConfig = {
     blue: {
       filled: "bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white border-blue-600 focus:ring-blue-500",
-      outline: "border-blue-600 text-blue-600 hover:bg-blue-50 active:bg-blue-100 dark:text-blue-400 dark:border-blue-400 dark:hover:bg-blue-900 dark:active:bg-blue-800",
-      ghost: "text-blue-600 hover:bg-blue-50 active:bg-blue-100 dark:text-blue-400 dark:hover:bg-blue-900 dark:active:bg-blue-800"
+      outline: "border-blue-600 text-blue-600 hover:bg-blue-50 active:bg-blue-100",
+      ghost: "text-blue-600 hover:bg-blue-50 active:bg-blue-100"
     },
     emerald: {
       filled: "bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white border-emerald-600 focus:ring-emerald-500",
-      outline: "border-emerald-600 text-emerald-600 hover:bg-emerald-50 active:bg-emerald-100 dark:text-emerald-400 dark:border-emerald-400 dark:hover:bg-emerald-900 dark:active:bg-emerald-800",
-      ghost: "text-emerald-600 hover:bg-emerald-50 active:bg-emerald-100 dark:text-emerald-400 dark:hover:bg-emerald-900 dark:active:bg-emerald-800"
+      outline: "border-emerald-600 text-emerald-600 hover:bg-emerald-50 active:bg-emerald-100",
+      ghost: "text-emerald-600 hover:bg-emerald-50 active:bg-emerald-100"
     },
     purple: {
       filled: "bg-purple-600 hover:bg-purple-700 active:bg-purple-800 text-white border-purple-600 focus:ring-purple-500",
-      outline: "border-purple-600 text-purple-600 hover:bg-purple-50 active:bg-purple-100 dark:text-purple-400 dark:border-purple-400 dark:hover:bg-purple-900 dark:active:bg-purple-800",
-      ghost: "text-purple-600 hover:bg-purple-50 active:bg-purple-100 dark:text-purple-400 dark:hover:bg-purple-900 dark:active:bg-purple-800"
+      outline: "border-purple-600 text-purple-600 hover:bg-purple-50 active:bg-purple-100",
+      ghost: "text-purple-600 hover:bg-purple-50 active:bg-purple-100"
     },
     orange: {
       filled: "bg-orange-600 hover:bg-orange-700 active:bg-orange-800 text-white border-orange-600 focus:ring-orange-500",
-      outline: "border-orange-600 text-orange-600 hover:bg-orange-50 active:bg-orange-100 dark:text-orange-400 dark:border-orange-400 dark:hover:bg-orange-900 dark:active:bg-orange-800",
-      ghost: "text-orange-600 hover:bg-orange-50 active:bg-orange-100 dark:text-orange-400 dark:hover:bg-orange-900 dark:active:bg-orange-800"
+      outline: "border-orange-600 text-orange-600 hover:bg-orange-50 active:bg-orange-100",
+      ghost: "text-orange-600 hover:bg-orange-50 active:bg-orange-100"
     },
     red: {
       filled: "bg-red-600 hover:bg-red-700 active:bg-red-800 text-white border-red-600 focus:ring-red-500",
-      outline: "border-red-600 text-red-600 hover:bg-red-50 active:bg-red-100 dark:text-red-400 dark:border-red-400 dark:hover:bg-red-900 dark:active:bg-red-800",
-      ghost: "text-red-600 hover:bg-red-50 active:bg-red-100 dark:text-red-400 dark:hover:bg-red-900 dark:active:bg-red-800"
+      outline: "border-red-600 text-red-600 hover:bg-red-50 active:bg-red-100",
+      ghost: "text-red-600 hover:bg-red-50 active:bg-red-100"
     },
     gray: {
       filled: "bg-gray-600 hover:bg-gray-700 active:bg-gray-800 text-white border-gray-600 focus:ring-gray-500",
-      outline: "border-gray-600 text-gray-600 hover:bg-gray-50 active:bg-gray-100 dark:text-gray-400 dark:border-gray-400 dark:hover:bg-gray-800 dark:active:bg-gray-700",
-      ghost: "text-gray-600 hover:bg-gray-50 active:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 dark:active:bg-gray-700"
+      outline: "border-gray-600 text-gray-600 hover:bg-gray-50 active:bg-gray-100",
+      ghost: "text-gray-600 hover:bg-gray-50 active:bg-gray-100"
     }
   };
 

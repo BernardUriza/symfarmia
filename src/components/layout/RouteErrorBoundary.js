@@ -43,14 +43,14 @@ class RouteErrorBoundary extends React.Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
           <div className="max-w-md w-full space-y-8 text-center">
             <div className="space-y-4">
               <div className="text-6xl">🏥</div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+              <h1 className="text-3xl font-bold text-gray-900">
                 Error de Navegación
               </h1>
-              <p className="text-lg text-gray-600 dark:text-gray-300">
+              <p className="text-lg text-gray-600">
                 Ocurrió un error al cargar esta página. 
                 {process.env.NODE_ENV === 'production' 
                   ? ' Por favor, intente nuevamente.'
@@ -68,7 +68,7 @@ class RouteErrorBoundary extends React.Component {
               
               <Link
                 href="/"
-                className="block w-full px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                className="block w-full px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
               >
                 Ir al Inicio
               </Link>
@@ -76,10 +76,10 @@ class RouteErrorBoundary extends React.Component {
 
             {process.env.NODE_ENV !== 'production' && this.state.errorInfo && (
               <details className="mt-8 text-left">
-                <summary className="cursor-pointer text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                <summary className="cursor-pointer text-sm text-gray-500 hover:text-gray-700">
                   Detalles del Error (Solo Desarrollo)
                 </summary>
-                <pre className="mt-2 text-xs bg-gray-100 dark:bg-gray-800 p-4 rounded overflow-auto max-h-64">
+                <pre className="mt-2 text-xs bg-gray-100 p-4 rounded overflow-auto max-h-64">
                   {this.state.error && this.state.error.toString()}
                   {'\n\n'}
                   {this.state.errorInfo.componentStack}

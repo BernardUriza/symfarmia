@@ -211,17 +211,17 @@ const PatientQuickSearch = ({ onPatientSelect }) => {
 
   const PatientCard = ({ patient }) => (
     <div 
-      className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors"
+      className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
       onClick={() => handlePatientSelect(patient)}
     >
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
-            <User className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+          <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+            <User className="h-5 w-5 text-blue-600" />
           </div>
           <div>
-            <h4 className="font-medium text-gray-900 dark:text-white">{patient.name}</h4>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <h4 className="font-medium text-gray-900">{patient.name}</h4>
+            <p className="text-sm text-gray-500">
               {patient.age} años • ID: {patient.id}
             </p>
           </div>
@@ -237,27 +237,27 @@ const PatientQuickSearch = ({ onPatientSelect }) => {
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-        <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-400">
+        <div className="flex items-center space-x-2 text-gray-600">
           <Phone className="h-4 w-4" />
           <span>{patient.phone}</span>
         </div>
-        <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-400">
+        <div className="flex items-center space-x-2 text-gray-600">
           <Calendar className="h-4 w-4" />
           <span>Última visita: {new Date(patient.lastVisit).toLocaleDateString()}</span>
         </div>
-        <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-400">
+        <div className="flex items-center space-x-2 text-gray-600">
           <Mail className="h-4 w-4" />
           <span>{patient.email}</span>
         </div>
-        <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-400">
+        <div className="flex items-center space-x-2 text-gray-600">
           <AlertTriangle className="h-4 w-4" />
           <span>{patient.condition}</span>
         </div>
       </div>
       
       {patient.nextAppointment && (
-        <div className="mt-3 p-2 bg-blue-50 dark:bg-blue-900/20 rounded border border-blue-200 dark:border-blue-800">
-          <div className="flex items-center space-x-2 text-sm text-blue-700 dark:text-blue-300">
+        <div className="mt-3 p-2 bg-blue-50 rounded border border-blue-200">
+          <div className="flex items-center space-x-2 text-sm text-blue-700">
             <Calendar className="h-4 w-4" />
             <span>
               Próxima cita: {patient.nextAppointment === 'Urgente' ? 'Urgente' : new Date(patient.nextAppointment).toLocaleDateString()}
@@ -281,20 +281,20 @@ const PatientQuickSearch = ({ onPatientSelect }) => {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder="Buscar por nombre, ID, teléfono o condición..."
-          className="w-full pl-10 pr-20 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full pl-10 pr-20 py-3 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         />
         <div className="absolute inset-y-0 right-0 flex items-center space-x-2 pr-3">
           {searchTerm && (
             <button
               onClick={clearSearch}
-              className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              className="p-1 text-gray-400 hover:text-gray-600"
             >
               <X className="h-4 w-4" />
             </button>
           )}
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className={`p-1 rounded ${showFilters ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'}`}
+            className={`p-1 rounded ${showFilters ? 'text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
           >
             <Filter className="h-4 w-4" />
           </button>
@@ -303,8 +303,8 @@ const PatientQuickSearch = ({ onPatientSelect }) => {
 
       {/* Search Progress */}
       {isSearching && (
-        <div className="absolute top-full left-0 right-0 mt-1 p-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
-          <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+        <div className="absolute top-full left-0 right-0 mt-1 p-2 bg-white border border-gray-200 rounded-lg shadow-lg">
+          <div className="flex items-center space-x-2 text-sm text-gray-600">
             <div className="w-4 h-4 bg-blue-500 rounded-full animate-pulse"></div>
             <span>Buscando...</span>
           </div>
@@ -313,18 +313,18 @@ const PatientQuickSearch = ({ onPatientSelect }) => {
 
       {/* Filters */}
       {showFilters && (
-        <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-          <h4 className="font-medium text-gray-900 dark:text-white mb-3">Filtros de Búsqueda</h4>
+        <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+          <h4 className="font-medium text-gray-900 mb-3">Filtros de Búsqueda</h4>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 Urgencia
               </label>
               <select
                 value={selectedFilters.urgency}
                 onChange={(e) => setSelectedFilters(prev => ({ ...prev, urgency: e.target.value }))}
-                className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm"
+                className="w-full p-2 border border-gray-300 rounded bg-white text-gray-900 text-sm"
               >
                 {Object.entries(urgencyLabels).map(([key, label]) => (
                   <option key={key} value={key}>{label}</option>
@@ -333,13 +333,13 @@ const PatientQuickSearch = ({ onPatientSelect }) => {
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 Estado
               </label>
               <select
                 value={selectedFilters.status}
                 onChange={(e) => setSelectedFilters(prev => ({ ...prev, status: e.target.value }))}
-                className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm"
+                className="w-full p-2 border border-gray-300 rounded bg-white text-gray-900 text-sm"
               >
                 {Object.entries(statusLabels).map(([key, label]) => (
                   <option key={key} value={key}>{label}</option>
@@ -348,13 +348,13 @@ const PatientQuickSearch = ({ onPatientSelect }) => {
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 Última Visita
               </label>
               <select
                 value={selectedFilters.lastVisit}
                 onChange={(e) => setSelectedFilters(prev => ({ ...prev, lastVisit: e.target.value }))}
-                className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm"
+                className="w-full p-2 border border-gray-300 rounded bg-white text-gray-900 text-sm"
               >
                 {Object.entries(lastVisitLabels).map(([key, label]) => (
                   <option key={key} value={key}>{label}</option>
@@ -368,7 +368,7 @@ const PatientQuickSearch = ({ onPatientSelect }) => {
       {/* Search Results */}
       {showResults && (
         <div className="mt-4 max-h-96 overflow-y-auto">
-          <div className="mb-2 text-sm text-gray-600 dark:text-gray-400">
+          <div className="mb-2 text-sm text-gray-600">
             {searchResults.length} resultado{searchResults.length !== 1 ? 's' : ''} encontrado{searchResults.length !== 1 ? 's' : ''}
           </div>
           
@@ -382,7 +382,7 @@ const PatientQuickSearch = ({ onPatientSelect }) => {
 
       {/* No Results */}
       {searchTerm && !isSearching && searchResults.length === 0 && (
-        <div className="mt-4 p-4 text-center text-gray-500 dark:text-gray-400">
+        <div className="mt-4 p-4 text-center text-gray-500">
           <Search className="h-12 w-12 mx-auto mb-2 opacity-50" />
           <p>No se encontraron pacientes con "{searchTerm}"</p>
           <p className="text-sm mt-1">Intenta ajustar los filtros o crear un nuevo paciente</p>

@@ -11,14 +11,14 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ error }) => {
 
   const isChunkError = error.includes('Chunk de audio muy pequeño') || error.includes('chunk');
   const bgClass = isChunkError 
-    ? "bg-amber-50 dark:bg-amber-900" 
-    : "bg-red-50 dark:bg-red-900";
+    ? "bg-amber-50" 
+    : "bg-red-50";
   const borderClass = isChunkError 
-    ? "border-amber-200 dark:border-amber-800" 
-    : "border-red-200 dark:border-red-800";
+    ? "border-amber-200" 
+    : "border-red-200";
   const textClass = isChunkError 
-    ? "text-amber-700 dark:text-amber-300" 
-    : "text-red-700 dark:text-red-300";
+    ? "text-amber-700" 
+    : "text-red-700";
   const icon = isChunkError ? "🎤" : "⚠️";
 
   return (
@@ -28,7 +28,7 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ error }) => {
         <span className={`text-sm ${textClass}`}>{error}</span>
       </div>
       {isChunkError && (
-        <div className="mt-2 text-xs text-amber-600 dark:text-amber-400">
+        <div className="mt-2 text-xs text-amber-600">
           💡 Habla durante al menos 10 segundos para que el audio pueda ser procesado correctamente. ¡Dale contexto al sistema!
         </div>
       )}

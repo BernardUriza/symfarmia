@@ -28,7 +28,7 @@ export const TranscriptionResult: React.FC<TranscriptionResultProps> = ({
         <h3 className="font-medium mb-2">
           {t('conversation.capture.transcription_result')}:
         </h3>
-        <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded text-sm mb-3">
+        <div className="bg-gray-50 p-3 rounded text-sm mb-3">
           {transcription.text}
         </div>
         

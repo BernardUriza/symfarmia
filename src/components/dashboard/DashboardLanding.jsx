@@ -23,13 +23,13 @@ const DashboardLanding = () => {
   const [activeView, setActiveView] = useState('workflow');
 
   return (
-    <div className="min-h-screen bg-gradient-surface dark:bg-gradient-dark relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-surface relative overflow-hidden">
       {/* Modern mesh gradient background */}
       <div className="absolute inset-0 mesh-gradient pointer-events-none opacity-30" />
-      <div className="absolute inset-0 grid-pattern opacity-[0.02] dark:opacity-[0.01] pointer-events-none" />
+      <div className="absolute inset-0 grid-pattern opacity-[0.02] pointer-events-none" />
       
       {/* Medical-Grade Header with Modern Glassmorphism */}
-      <header className="sticky top-0 z-50 glass dark:glass-dark border-b border-border 
+      <header className="sticky top-0 z-50 glass border-b border-border 
                          backdrop-blur-xl shadow-sm animate-slide-down">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 @container">
           <div className="flex justify-between items-center py-4 @lg:py-6">
@@ -45,7 +45,7 @@ const DashboardLanding = () => {
             </div>
             
             <div className="flex items-center space-x-4">
-              <div className="badge-modern badge-success glass dark:glass-dark">
+              <div className="badge-modern badge-success glass">
                 <div className="w-2 h-2 bg-success rounded-full animate-pulse"></div>
                 <span className="text-sm font-medium">
                   {t('system_active') || 'Sistema Activo'}
@@ -58,7 +58,7 @@ const DashboardLanding = () => {
                 className="text-right"
                 fallback={
                   <div className="text-right">
-                    <div className="text-sm text-gray-500 dark:text-gray-400">
+                    <div className="text-sm text-gray-500">
                       Cargando fecha...
                     </div>
                   </div>
@@ -84,7 +84,7 @@ const DashboardLanding = () => {
 
                 {/* Dashboard Metrics - Modern Card with Glassmorphism */}
                 <div className="group animate-slide-up" style={{ animationDelay: '100ms' }}>
-                  <div className="stat-card glass dark:glass-dark hover:shadow-glow 
+                  <div className="stat-card glass hover:shadow-glow 
                                   transition-smooth transform hover:scale-[1.02]">
                     {/* Shimmer Effect */}
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent

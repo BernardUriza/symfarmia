@@ -106,33 +106,32 @@ const NewPatientModal = ({ isOpen, onClose, onSave, isLoading = false }) => {
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4
                     opacity-100 @starting-style:opacity-0
                     transition-opacity duration-300 ease-out">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden
                       scale-100 translate-y-0 @starting-style:scale-95 @starting-style:translate-y-4
                       transition-all duration-300 ease-out
-                      border border-gray-200/50 dark:border-gray-700/50
+                      border border-gray-200/50
                       relative">
         {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-medical-primary/5 to-medical-accent/5 dark:from-medical-primary/10 dark:to-medical-accent/10 pointer-events-none rounded-2xl"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-medical-primary/5 to-medical-accent/5 pointer-events-none rounded-2xl"></div>
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200/50 dark:border-gray-700/50 relative z-10">
+        <div className="flex items-center justify-between p-6 border-b border-gray-200/50 relative z-10">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-medical-primary/20 to-medical-accent/20 dark:from-medical-primary/30 dark:to-medical-accent/30 
+            <div className="w-10 h-10 bg-gradient-to-br from-medical-primary/20 to-medical-accent/20 
                             rounded-xl flex items-center justify-center shadow-inner">
-              <User className="h-5 w-5 text-medical-primary dark:text-medical-accent" />
+              <User className="h-5 w-5 text-medical-primary" />
             </div>
             <div>
               <h2 className="text-xl font-semibold bg-gradient-to-r from-medical-primary to-medical-accent bg-clip-text text-transparent">
                 Nuevo Paciente
               </h2>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-sm text-gray-600">
                 Registrar un nuevo paciente en el sistema
               </p>
             </div>
           </div>
           <button
             onClick={handleClose}
-            className="group p-2 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 
-                       hover:bg-gray-100 dark:hover:bg-gray-800 
+            className="group p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 
                        transition-all duration-300"
             disabled={isLoading}
           >
@@ -145,16 +144,14 @@ const NewPatientModal = ({ isOpen, onClose, onSave, isLoading = false }) => {
           {/* Status and Basic Info Row */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 <UserCheck className="inline h-4 w-4 mr-1" />
                 Estado
               </label>
               <select
                 value={formData.status}
                 onChange={(e) => handleChange('status', e.target.value)}
-                className="w-full p-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white 
-                           focus:border-medical-primary dark:focus:border-medical-accent focus:ring-4 focus:ring-medical-primary/20 dark:focus:ring-medical-accent/20
-                           transition-all duration-300 hover:border-gray-300 dark:hover:border-gray-500"
+                className="w-full p-3 border-2 border-gray-200 rounded-xl bg-white text-gray-900 focus:border-medical-primary focus:ring-4 focus:ring-medical-primary/20 transition-all duration-300 hover:border-gray-300"
                 disabled={isLoading}
               >
                 <option value="Activo">Activo</option>
@@ -163,7 +160,7 @@ const NewPatientModal = ({ isOpen, onClose, onSave, isLoading = false }) => {
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 <User className="inline h-4 w-4 mr-1" />
                 Nombre Completo *
               </label>
@@ -172,13 +169,13 @@ const NewPatientModal = ({ isOpen, onClose, onSave, isLoading = false }) => {
                 value={formData.name}
                 onChange={(e) => handleChange('name', e.target.value)}
                 className={`input-medical ${
-                  errors.name ? 'border-red-500 dark:border-red-500 focus:border-red-500 dark:focus:border-red-500 focus:ring-red-500/20 dark:focus:ring-red-500/20' : ''
+                  errors.name ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : ''
                 }`}
                 placeholder="Ingresa el nombre completo"
                 disabled={isLoading}
               />
               {errors.name && (
-                <p className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center">
+                <p className="mt-1 text-sm text-red-600 flex items-center">
                   <AlertCircle className="h-4 w-4 mr-1" />
                   {errors.name}
                 </p>
@@ -189,7 +186,7 @@ const NewPatientModal = ({ isOpen, onClose, onSave, isLoading = false }) => {
           {/* Contact Info */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 <Mail className="inline h-4 w-4 mr-1" />
                 Correo Electrónico *
               </label>
@@ -197,14 +194,14 @@ const NewPatientModal = ({ isOpen, onClose, onSave, isLoading = false }) => {
                 type="email"
                 value={formData.email}
                 onChange={(e) => handleChange('email', e.target.value)}
-                className={`w-full p-3 border rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                  errors.email ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                className={`w-full p-3 border rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                  errors.email ? 'border-red-500' : 'border-gray-300'
                 }`}
                 placeholder="ejemplo@correo.com"
                 disabled={isLoading}
               />
               {errors.email && (
-                <p className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center">
+                <p className="mt-1 text-sm text-red-600 flex items-center">
                   <AlertCircle className="h-4 w-4 mr-1" />
                   {errors.email}
                 </p>
@@ -212,7 +209,7 @@ const NewPatientModal = ({ isOpen, onClose, onSave, isLoading = false }) => {
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 <Phone className="inline h-4 w-4 mr-1" />
                 Teléfono *
               </label>
@@ -220,14 +217,14 @@ const NewPatientModal = ({ isOpen, onClose, onSave, isLoading = false }) => {
                 type="tel"
                 value={formData.phone}
                 onChange={(e) => handleChange('phone', e.target.value)}
-                className={`w-full p-3 border rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                  errors.phone ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                className={`w-full p-3 border rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                  errors.phone ? 'border-red-500' : 'border-gray-300'
                 }`}
                 placeholder="123-456-7890"
                 disabled={isLoading}
               />
               {errors.phone && (
-                <p className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center">
+                <p className="mt-1 text-sm text-red-600 flex items-center">
                   <AlertCircle className="h-4 w-4 mr-1" />
                   {errors.phone}
                 </p>
@@ -238,7 +235,7 @@ const NewPatientModal = ({ isOpen, onClose, onSave, isLoading = false }) => {
           {/* Birth Date and Gender */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 <Calendar className="inline h-4 w-4 mr-1" />
                 Fecha de Nacimiento *
               </label>
@@ -246,13 +243,13 @@ const NewPatientModal = ({ isOpen, onClose, onSave, isLoading = false }) => {
                 type="date"
                 value={formData.dateOfBirth}
                 onChange={(e) => handleChange('dateOfBirth', e.target.value)}
-                className={`w-full p-3 border rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                  errors.dateOfBirth ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                className={`w-full p-3 border rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                  errors.dateOfBirth ? 'border-red-500' : 'border-gray-300'
                 }`}
                 disabled={isLoading}
               />
               {errors.dateOfBirth && (
-                <p className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center">
+                <p className="mt-1 text-sm text-red-600 flex items-center">
                   <AlertCircle className="h-4 w-4 mr-1" />
                   {errors.dateOfBirth}
                 </p>
@@ -260,15 +257,15 @@ const NewPatientModal = ({ isOpen, onClose, onSave, isLoading = false }) => {
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 <User className="inline h-4 w-4 mr-1" />
                 Género *
               </label>
               <select
                 value={formData.gender}
                 onChange={(e) => handleChange('gender', e.target.value)}
-                className={`w-full p-3 border rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                  errors.gender ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                className={`w-full p-3 border rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                  errors.gender ? 'border-red-500' : 'border-gray-300'
                 }`}
                 disabled={isLoading}
               >
@@ -278,7 +275,7 @@ const NewPatientModal = ({ isOpen, onClose, onSave, isLoading = false }) => {
                 <option value="Other">Otro</option>
               </select>
               {errors.gender && (
-                <p className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center">
+                <p className="mt-1 text-sm text-red-600 flex items-center">
                   <AlertCircle className="h-4 w-4 mr-1" />
                   {errors.gender}
                 </p>
@@ -296,7 +293,7 @@ const NewPatientModal = ({ isOpen, onClose, onSave, isLoading = false }) => {
               value={formData.information}
               onChange={(e) => handleChange('information', e.target.value)}
               rows="3"
-              className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               placeholder="Información médica relevante, alergias, condiciones especiales, etc."
               disabled={isLoading}
             />
@@ -304,11 +301,11 @@ const NewPatientModal = ({ isOpen, onClose, onSave, isLoading = false }) => {
         </form>
 
         {/* Footer */}
-        <div className="flex items-center justify-end space-x-3 p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+        <div className="flex items-center justify-end space-x-3 p-6 border-t border-gray-200 bg-gray-50">
           <button
             type="button"
             onClick={handleClose}
-            className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
+            className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
             disabled={isLoading}
           >
             Cancelar
