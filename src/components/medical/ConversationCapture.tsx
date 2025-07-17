@@ -19,6 +19,7 @@ import {
   ProcessingStatus
 } from '@/src/components/medical/conversation-capture/components';
 import type { SOAPNotes } from '@/src/domains/medical-ai/types';
+import { diarizationService, DiarizationUtils, DiarizationResult } from '@/src/domains/medical-ai/services/DiarizationService';
 
 interface ConversationCaptureProps {
   onNext?: () => void;
@@ -52,7 +53,11 @@ export const ConversationCapture = ({
   }>>([]); // Lista de transcripciones por minuto
   const [currentChunkTexts, setCurrentChunkTexts] = useState<string[]>([]); // Chunks del minuto actual
   const [webSpeechText, setWebSpeechText] = useState(''); // Texto de Web Speech completo
+  const [diarizationResult, setDiarizationResult] = useState<DiarizationResult | null>(null); // Resultado de diarización BAZAR
+  const [isDiarizationProcessing, setIsDiarizationProcessing] = useState(false); // Estado de procesamiento
+  const [diarizationError, setDiarizationError] = useState<string | null>(null); // Errores de diarización
   const chunkCountRef = useRef(0);
+  const audioDataRef = useRef<Float32Array | null>(null); // Referencia al audio para diarización
   
   // Log model status before using the hook
   useEffect(() => {
@@ -85,6 +90,11 @@ export const ConversationCapture = ({
     autoPreload: false,
     processingMode: 'streaming', // CAMBIADO A STREAMING para usar el pipeline arreglado
     showPreloadStatus: true,
+    onAudioProcessed: useCallback((audioData: Float32Array) => {
+      // BAZAR: Guardar audio para diarización
+      audioDataRef.current = audioData;
+      console.log(`[ConversationCapture] Audio guardado para diarización: ${audioData.length} samples`);
+    }, []),
     onChunkProcessed: useCallback((text, chunkNumber) => {
       console.log(`[ConversationCapture] Chunk ${chunkNumber} recibido: "${text}"`);
       
@@ -173,6 +183,9 @@ export const ConversationCapture = ({
         if (allMinutesText && onTranscriptionComplete) {
           onTranscriptionComplete(allMinutesText);
         }
+        
+        // BAZAR: Procesar diarización después de detener grabación
+        await processDiarization();
       } else {
         const started = await startTranscription();
         if (!started && error?.includes('permiso')) {
@@ -191,6 +204,48 @@ export const ConversationCapture = ({
       }
     } catch (error) {
       console.error(t('conversation.capture.error_toggling_recording'), error);
+    }
+  };
+  
+  // BAZAR: Función de diarización completamente auditable
+  const processDiarization = async () => {
+    console.log('[ConversationCapture] Iniciando diarización BAZAR...');
+    
+    if (!transcription?.text && !webSpeechText) {
+      console.warn('[ConversationCapture] No hay texto para diarizar');
+      return;
+    }
+    
+    setIsDiarizationProcessing(true);
+    setDiarizationError(null);
+    
+    try {
+      // 1. FUSIÓN DE TRANSCRIPCIONES - Algoritmo público
+      const whisperText = transcription?.text || '';
+      const mergedText = DiarizationUtils.mergeTranscriptions(whisperText, webSpeechText);
+      
+      console.log('[ConversationCapture] Texto fusionado:', {
+        whisperLength: whisperText.length,
+        webSpeechLength: webSpeechText.length,
+        mergedLength: mergedText.length
+      });
+      
+      // 2. OBTENER AUDIO DATA - Transparente
+      if (!audioDataRef.current) {
+        throw new Error('No hay datos de audio disponibles para diarización');
+      }
+      
+      // 3. PROCESAR DIARIZACIÓN - Servicio modular
+      const result = await diarizationService.diarizeAudio(audioDataRef.current);
+      
+      console.log('[ConversationCapture] Diarización completada:', result);
+      setDiarizationResult(result);
+      
+    } catch (error) {
+      console.error('[ConversationCapture] Error en diarización:', error);
+      setDiarizationError(error instanceof Error ? error.message : 'Error desconocido');
+    } finally {
+      setIsDiarizationProcessing(false);
     }
   };
   
@@ -231,6 +286,9 @@ export const ConversationCapture = ({
     setMinuteTranscriptions([]);
     setCurrentChunkTexts([]);
     setWebSpeechText(''); // Limpiar texto de Web Speech
+    setDiarizationResult(null); // Limpiar resultado de diarización
+    setDiarizationError(null); // Limpiar errores de diarización
+    audioDataRef.current = null; // Limpiar referencia de audio
     chunkCountRef.current = 0;
     setManualTranscript('');
     setSoapNotes(null);
@@ -425,6 +483,9 @@ export const ConversationCapture = ({
                 transcription={transcription} 
                 audioUrl={audioUrl}
                 webSpeechText={webSpeechText}
+                diarizationResult={diarizationResult}
+                isDiarizationProcessing={isDiarizationProcessing}
+                diarizationError={diarizationError}
               />
             )}
           </div>
