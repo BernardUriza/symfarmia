@@ -98,7 +98,8 @@
       "Bash(NODE_ENV=development npm run dev)",
       "mcp__ide__executeCode",
       "Bash(npx postcss:*)",
-      "Bash(netlify dev:*)"
+      "Bash(netlify dev:*)",
+      "Bash(tail:*)"
     ],
     "deny": []
   }

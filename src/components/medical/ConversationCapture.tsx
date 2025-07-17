@@ -9,7 +9,6 @@ import { Button } from '@/src/components/ui/button';
 import { useI18n } from '@/src/domains/core/hooks/useI18n';
 import { Badge } from '@/src/components/ui/badge';
 import { Card, CardContent } from '@/src/components/ui/card';
-import { medicalAIService } from '@/src/domains/medical-ai/services/medicalAIService';
 import { PenTool, Keyboard, Settings, Mic } from 'lucide-react';
 import {
   PermissionDialog,
@@ -21,6 +20,7 @@ import {
 import type { SOAPNotes } from '@/src/domains/medical-ai/types';
 import { diarizationService, DiarizationUtils, DiarizationResult } from '@/src/domains/medical-ai/services/DiarizationService';
 import AudioDenoisingDashboard from '@/src/components/medical/AudioDenoisingDashboard';
+import { SOAPNotesManager } from '@/src/components/medical/SOAPNotesManager';
 
 interface ConversationCaptureProps {
   onNext?: () => void;
@@ -58,9 +58,6 @@ export const ConversationCapture = ({
   }>>([]);
   const [currentChunkTexts, setCurrentChunkTexts] = useState<string[]>([]);
   
-  // SOAP Notes States
-  const [soapNotes, setSoapNotes] = useState<SOAPNotes | null>(null);
-  const [isGeneratingSOAP, setIsGeneratingSOAP] = useState(false);
   
   // Diarization States
   const [diarizationResult, setDiarizationResult] = useState<DiarizationResult | null>(null);
@@ -260,25 +257,6 @@ export const ConversationCapture = ({
     }
   }, [minuteTranscriptions, webSpeechText]);
   
-  const generateSOAPNotes = useCallback(async () => {
-    const textToProcess = isManualMode ? manualTranscript : transcription?.text;
-    
-    if (!textToProcess) return;
-    
-    setIsGeneratingSOAP(true);
-    try {
-      const notes = await medicalAIService.generateSOAPNotes(textToProcess);
-      setSoapNotes(notes);
-      if (onSoapGenerated) {
-        onSoapGenerated(notes);
-      }
-      return notes;
-    } catch (error) {
-      console.error('Error generating SOAP notes:', error);
-    } finally {
-      setIsGeneratingSOAP(false);
-    }
-  }, [isManualMode, manualTranscript, transcription, onSoapGenerated]);
 
   const handleCopy = useCallback(async () => {
     const textToCopy = isManualMode ? manualTranscript : transcription?.text;
@@ -300,7 +278,6 @@ export const ConversationCapture = ({
     audioDataRef.current = null;
     chunkCountRef.current = 0;
     setManualTranscript('');
-    setSoapNotes(null);
     // Clear any WebSpeech error
     if (webSpeechError) {
       console.clear();
@@ -415,44 +392,12 @@ export const ConversationCapture = ({
     </Card>
   );
 
-  const renderSOAPNotes = () => (
-    <Card className="mt-4">
-      <CardContent className="space-y-3 p-6">
-        <h3 className="font-semibold text-gray-900 dark:text-white text-lg mb-4">Notas SOAP</h3>
-        <div className="space-y-3">
-          <div>
-            <span className="font-medium text-gray-700 dark:text-gray-300">Subjetivo:</span>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">{soapNotes?.subjective}</p>
-          </div>
-          <div>
-            <span className="font-medium text-gray-700 dark:text-gray-300">Objetivo:</span>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">{soapNotes?.objective}</p>
-          </div>
-          <div>
-            <span className="font-medium text-gray-700 dark:text-gray-300">Evaluación:</span>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">{soapNotes?.assessment}</p>
-          </div>
-          <div>
-            <span className="font-medium text-gray-700 dark:text-gray-300">Plan:</span>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">{soapNotes?.plan}</p>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
 
-  const renderActionButtons = () => (
-    <div className="mt-6 flex justify-center gap-3">
-      {!soapNotes && (
-        <Button 
-          onClick={generateSOAPNotes} 
-          variant="outline"
-          disabled={isGeneratingSOAP}
-        >
-          {isGeneratingSOAP ? 'Generando...' : 'Generar Notas SOAP'}
-        </Button>
-      )}
-      {onNext && (
+  const renderActionButtons = () => {
+    if (!onNext) return null;
+    
+    return (
+      <div className="mt-6 flex justify-center">
         <Button 
           onClick={() => {
             const finalTranscript = isManualMode ? manualTranscript : transcription?.text;
@@ -466,9 +411,9 @@ export const ConversationCapture = ({
         >
           {t('conversation.capture.next')}
         </Button>
-      )}
-    </div>
-  );
+      </div>
+    );
+  };
   
   return (
     <div className={`max-w-4xl mx-auto space-y-6 ${className} fade-in`}>
@@ -563,8 +508,23 @@ export const ConversationCapture = ({
         </>
       )}
 
-      {/* SOAP Notes Display */}
-      {soapNotes && renderSOAPNotes()}
+      {/* SOAP Notes Manager */}
+      {(transcription || (isManualMode && manualTranscript)) && !isRecording && (
+        <SOAPNotesManager
+          transcription={isManualMode ? manualTranscript : transcription?.text}
+          onNotesGenerated={onSoapGenerated}
+          config={{
+            autoGenerate: false,
+            style: 'detailed',
+            includeTimestamps: true,
+            includeConfidence: true,
+            medicalTerminology: 'mixed'
+          }}
+          showActions={true}
+          editable={true}
+          className="mt-6"
+        />
+      )}
 
       <ErrorDisplay error={error} />
 

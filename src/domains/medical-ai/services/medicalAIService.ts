@@ -393,12 +393,27 @@ export class MedicalAIService {
   /**
    * Generate SOAP notes from transcript text using existing OpenAI endpoint
    */
-  async generateSOAPNotes(text: string): Promise<ServiceResponse<SOAPNotes>> {
+  async generateSOAPNotes(
+    text: string,
+    config?: {
+      style?: 'concise' | 'detailed' | 'comprehensive';
+      includeTimestamps?: boolean;
+      medicalTerminology?: 'simple' | 'technical' | 'mixed';
+    }
+  ): Promise<ServiceResponse<SOAPNotes>> {
     try {
       const response = await fetch('/api/medical-openai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: text, type: 'soap' })
+        body: JSON.stringify({ 
+          query: text, 
+          type: 'soap',
+          config: {
+            style: config?.style || 'detailed',
+            includeTimestamps: config?.includeTimestamps ?? true,
+            medicalTerminology: config?.medicalTerminology || 'mixed'
+          }
+        })
       });
 
       if (!response.ok) {
@@ -407,7 +422,16 @@ export class MedicalAIService {
 
       const data = await response.json();
       const notes = this.parseSOAP(data.response);
-      return { success: true, data: notes, timestamp: new Date() };
+      
+      // Add metadata
+      const soapNotes: SOAPNotes = {
+        ...notes,
+        timestamp: new Date(),
+        generatedBy: 'ai',
+        confidence: data.confidence || 0.85
+      };
+      
+      return { success: true, data: soapNotes, timestamp: new Date() };
     } catch (error) {
       return {
         success: false,
