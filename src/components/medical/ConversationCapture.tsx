@@ -4,15 +4,13 @@ import './conversation-capture/styles.css';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useSimpleWhisper } from '@/src/domains/medical-ai/hooks/useSimpleWhisper';
 import { useWebSpeechCapture } from '@/src/domains/medical-ai/hooks/useWebSpeechCapture';
-import { useAudioDenoising } from '@/src/domains/medical-ai/hooks/useAudioDenoising';
-import { audioPipelineIntegration } from '@/src/domains/medical-ai/services/AudioPipelineIntegration';
 import { extractMedicalTermsFromText } from '@/src/domains/medical-ai/utils/medicalTerms';
 import { Button } from '@/src/components/ui/button';
 import { useI18n } from '@/src/domains/core/hooks/useI18n';
 import { Badge } from '@/src/components/ui/badge';
 import { Card, CardContent } from '@/src/components/ui/card';
 import { medicalAIService } from '@/src/domains/medical-ai/services/medicalAIService';
-import { PenTool, Keyboard, Mic, Shield, Settings, Activity } from 'lucide-react';
+import { PenTool, Keyboard, Settings } from 'lucide-react';
 import {
   PermissionDialog,
   RecordingCard,
@@ -38,13 +36,17 @@ export const ConversationCapture = ({
   className = ''
 }: ConversationCaptureProps) => {  
   const { t } = useI18n();
+  
+  // UI States
   const [showPermissionDialog, setShowPermissionDialog] = useState(false);
+  const [showDenoisingDashboard, setShowDenoisingDashboard] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
-  const [liveTranscript, setLiveTranscript] = useState('');
   const [isManualMode, setIsManualMode] = useState(false);
+  
+  // Transcription States
+  const [liveTranscript, setLiveTranscript] = useState('');
   const [manualTranscript, setManualTranscript] = useState('');
-  const [soapNotes, setSoapNotes] = useState<SOAPNotes | null>(null);
-  const [isGeneratingSOAP, setIsGeneratingSOAP] = useState(false);
+  const [webSpeechText, setWebSpeechText] = useState('');
   const [minuteTranscriptions, setMinuteTranscriptions] = useState<Array<{
     id: string;
     text: string;
@@ -53,34 +55,30 @@ export const ConversationCapture = ({
     medicalTerms: string[];
     processingTime: number;
     minuteNumber: number;
-  }>>([]); // Lista de transcripciones por minuto
-  const [currentChunkTexts, setCurrentChunkTexts] = useState<string[]>([]); // Chunks del minuto actual
-  const [webSpeechText, setWebSpeechText] = useState(''); // Texto de Web Speech completo
-  const [diarizationResult, setDiarizationResult] = useState<DiarizationResult | null>(null); // Resultado de diarización BAZAR
-  const [isDiarizationProcessing, setIsDiarizationProcessing] = useState(false); // Estado de procesamiento
-  const [diarizationError, setDiarizationError] = useState<string | null>(null); // Errores de diarización
-  const chunkCountRef = useRef(0);
-  const audioDataRef = useRef<Float32Array | null>(null); // Referencia al audio para diarización
+  }>>([]);
+  const [currentChunkTexts, setCurrentChunkTexts] = useState<string[]>([]);
   
-  // ESTADOS DENOISING - BAZAR MODE
-  const [denoisingEnabled, setDenoisingEnabled] = useState(true);
-  const [denoisingEnvironment, setDenoisingEnvironment] = useState('consultorio');
-  const [showDenoisingDashboard, setShowDenoisingDashboard] = useState(false);
-  const [denoisingStats, setDenoisingStats] = useState({
-    totalProcessed: 0,
-    denoisingUsed: 0,
-    averageQuality: 0,
-    processingTime: 0
-  });
+  // SOAP Notes States
+  const [soapNotes, setSoapNotes] = useState<SOAPNotes | null>(null);
+  const [isGeneratingSOAP, setIsGeneratingSOAP] = useState(false);
+  
+  // Diarization States
+  const [diarizationResult, setDiarizationResult] = useState<DiarizationResult | null>(null);
+  const [isDiarizationProcessing, setIsDiarizationProcessing] = useState(false);
+  const [diarizationError, setDiarizationError] = useState<string | null>(null);
+  
+  // Refs
+  const chunkCountRef = useRef(0);
+  const audioDataRef = useRef<Float32Array | null>(null);
   
   // Log model status before using the hook
   useEffect(() => {
     if (typeof window !== 'undefined') {
       console.log('[ConversationCapture] Global cache status:', {
-        whisperWorker: !!global.__WHISPER_WORKER_INSTANCE__,
-        whisperModelLoaded: !!global.__WHISPER_MODEL_LOADED__,
-        whisperPreloadState: !!global.__WHISPER_PRELOAD_STATE__,
-        whisperModelCache: !!global.__WHISPER_MODEL_CACHE__
+        whisperWorker: !!(window as any).__WHISPER_WORKER_INSTANCE__,
+        whisperModelLoaded: !!(window as any).__WHISPER_MODEL_LOADED__,
+        whisperPreloadState: !!(window as any).__WHISPER_PRELOAD_STATE__,
+        whisperModelCache: !!(window as any).__WHISPER_MODEL_CACHE__
       });
     }
   }, []);
@@ -124,22 +122,7 @@ export const ConversationCapture = ({
   // Variables derivadas
   const isRecording = status === 'recording';
 
-  // DENOISING STATS - Direct from useSimpleWhisper (already integrated)
-  const [isDenoisingProcessing] = useState(false);
-  const [denoisingError] = useState<string | null>(null);
-  const [processingStats] = useState({
-    totalChunks: 0,
-    denoisedChunks: 0,
-    fallbackChunks: 0,
-    averageProcessingTime: 0,
-    averageQuality: 0
-  });
   
-  // DENOISING MODE CONTROL - Pass to useSimpleWhisper internally
-  const configureDenoisingMode = useCallback((enabled: boolean, env: string) => {
-    console.log(`[ConversationCapture] Denoising configuration: ${enabled ? 'ENABLED' : 'DISABLED'}, environment: ${env}`);
-    // useSimpleWhisper handles this internally now
-  }, []);
 
   useEffect(() => {
     if (liveTranscriptData) {
@@ -149,14 +132,6 @@ export const ConversationCapture = ({
     }
   }, [liveTranscriptData]);
 
-  // EFECTO DENOISING - Sincronizar configuración
-  useEffect(() => {
-    configureDenoisingMode(denoisingEnabled, denoisingEnvironment);
-    console.log(`[ConversationCapture] Denoising configuration updated:`, {
-      enabled: denoisingEnabled,
-      environment: denoisingEnvironment
-    });
-  }, [denoisingEnabled, denoisingEnvironment, configureDenoisingMode]);
 
   const toggleRecording = async () => {
     try {
@@ -365,52 +340,19 @@ export const ConversationCapture = ({
             {isManualMode ? 'Modo Manual' : 'Modo Voz'}
           </Badge>
           
-          {/* DENOISING CONTROLS - SIEMPRE VISIBLE */}
+          {/* DENOISING DASHBOARD TOGGLE */}
           {!isManualMode && (
-            <>
-              <div className="flex items-center gap-2">
-                <Shield className={`w-4 h-4 ${denoisingEnabled ? 'text-green-600' : 'text-gray-400'}`} />
-                <span className="text-sm font-medium">
-                  Denoising: {denoisingEnabled ? 'ON' : 'OFF'}
-                </span>
-                <button
-                  onClick={() => setDenoisingEnabled(!denoisingEnabled)}
-                  className={`w-8 h-4 rounded-full transition-colors ${
-                    denoisingEnabled ? 'bg-green-500' : 'bg-gray-300'
-                  }`}
-                >
-                  <div className={`w-3 h-3 bg-white rounded-full transition-transform ${
-                    denoisingEnabled ? 'translate-x-4' : 'translate-x-0.5'
-                  }`} />
-                </button>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <Activity className="w-4 h-4 text-blue-600" />
-                <select
-                  value={denoisingEnvironment}
-                  onChange={(e) => setDenoisingEnvironment(e.target.value)}
-                  className="text-sm border rounded px-2 py-1"
-                >
-                  <option value="consultorio">Consultorio</option>
-                  <option value="urgencias">Urgencias</option>
-                  <option value="uci">UCI</option>
-                  <option value="cirugia">Cirugía</option>
-                </select>
-              </div>
-              
-              <button
-                onClick={() => setShowDenoisingDashboard(!showDenoisingDashboard)}
-                className={`flex items-center gap-2 px-3 py-1 rounded-md text-sm transition-colors ${
-                  showDenoisingDashboard 
-                    ? 'bg-blue-100 text-blue-700' 
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                <Settings className="w-4 h-4" />
-                Dashboard
-              </button>
-            </>
+            <button
+              onClick={() => setShowDenoisingDashboard(!showDenoisingDashboard)}
+              className={`flex items-center gap-2 px-3 py-1 rounded-md text-sm transition-colors ${
+                showDenoisingDashboard 
+                  ? 'bg-blue-100 text-blue-700' 
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              <Settings className="w-4 h-4" />
+              Dashboard
+            </button>
           )}
         </div>
         
