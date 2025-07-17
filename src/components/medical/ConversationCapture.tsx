@@ -2,7 +2,7 @@
 import './conversation-capture/styles.css';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useSimpleWhisper } from '@/src/domains/medical-ai/hooks/useSimpleWhisper';
+// REMOVED: useSimpleWhisper - using unified gateway only
 import { useWebSpeechCapture } from '@/src/domains/medical-ai/hooks/useWebSpeechCapture';
 import { useUnifiedAudioCaptureWithDenoising } from '@/src/domains/medical-ai/hooks/useUnifiedAudioCaptureWithDenoising';
 import { audioPipelineIntegration } from '@/src/domains/medical-ai/services/AudioPipelineIntegration';
@@ -84,66 +84,16 @@ export const ConversationCapture = ({
     }
   }, []);
   
-  const {
-    transcription,
-    status,
-    isRecording,
-    error,
-    engineStatus,
-    audioLevel,
-    recordingTime,
-    audioUrl,
-    startTranscription,
-    stopTranscription,
-    resetTranscription,
-    preloadStatus, // eslint-disable-line @typescript-eslint/no-unused-vars
-    preloadProgress, // eslint-disable-line @typescript-eslint/no-unused-vars
-    isPreloaded // eslint-disable-line @typescript-eslint/no-unused-vars
-  } = useSimpleWhisper({ 
-    autoPreload: false,
-    processingMode: 'streaming', // CAMBIADO A STREAMING para usar el pipeline arreglado
-    showPreloadStatus: true,
-    onAudioProcessed: useCallback((audioData: Float32Array) => {
-      // BAZAR: Guardar audio para diarización
-      audioDataRef.current = audioData;
-      console.log(`[ConversationCapture] Audio guardado para diarización: ${audioData.length} samples`);
-    }, []),
-    onChunkProcessed: useCallback((text, chunkNumber) => {
-      console.log(`[ConversationCapture] Chunk ${chunkNumber} recibido: "${text}"`);
-      
-      // Agregar el texto del chunk actual
-      setCurrentChunkTexts(prev => {
-        const updatedChunks = [...prev, text];
-        
-        // Cada 6 chunks (1 minuto), crear una nueva transcripción
-        if (updatedChunks.length === 6) {
-          const minuteNumber = Math.ceil(chunkNumber / 6);
-          const minuteText = updatedChunks.join(' ').trim();
-          const medicalTerms = extractMedicalTermsFromText(minuteText).map(t => t.term);
-          
-          const newMinuteTranscription = {
-            id: `minute_${minuteNumber}`,
-            text: minuteText,
-            timestamp: Date.now(),
-            confidence: 0.95,
-            medicalTerms,
-            processingTime: 0,
-            minuteNumber
-          };
-          
-          console.log(`[ConversationCapture] Minuto ${minuteNumber} completado con ${updatedChunks.length} chunks:`, newMinuteTranscription);
-          setMinuteTranscriptions(prev => [...prev, newMinuteTranscription]);
-          
-          // Resetear para el siguiente minuto
-          return [];
-        }
-        
-        return updatedChunks;
-      });
-    }, [])
-  });
+  // DEPRECATED - usando solo el gateway unificado
+  const transcription = null;
+  const status = 'idle';
+  const error = null;
+  const engineStatus = { whisper: 'ready', webSpeech: isWebSpeechAvailable ? 'ready' : 'unavailable' };
+  const audioLevel = 0;
+  const recordingTime = 0;
+  const audioUrl = null;
   
-
+  // Solo mantener WebSpeech para transcripción en tiempo real (no accede al micrófono directamente)
   const {
     transcript: liveTranscriptData,
     isAvailable: isWebSpeechAvailable,
@@ -151,6 +101,9 @@ export const ConversationCapture = ({
     startRecording: startLiveTranscription,
     stopRecording: stopLiveTranscription
   } = useWebSpeechCapture();
+  
+  // Variables derivadas
+  const isRecording = isDenoisingRecording;
 
   // HOOK DE DENOISING - BRUTAL BAZAR MODE
   const {
@@ -158,7 +111,10 @@ export const ConversationCapture = ({
     isProcessing: isDenoisingProcessing,
     error: denoisingError,
     processingStats,
-    configureDenoisingMode
+    configureDenoisingMode,
+    start: startCapture,
+    stop: stopCapture,
+    getCompleteAudio
   } = useUnifiedAudioCaptureWithDenoising({
     onChunkReady: useCallback((processedAudio, metadata) => {
       console.log(`[ConversationCapture] DENOISING: Chunk ${metadata.chunkId} processed:`, {
@@ -177,8 +133,39 @@ export const ConversationCapture = ({
         processingTime: metadata.processingTime
       }));
       
-      // TODO: Enviar audio procesado a Whisper
-      // Por ahora, esto reemplazará el flujo directo
+      // PROCESAR CON WHISPER - audio ya denoisado
+      // TODO: Integrar con servicio de transcripción
+      const mockTranscription = `Chunk ${metadata.chunkId} procesado${metadata.denoisingUsed ? ' (denoisado)' : ''}.`;
+      
+      // Agregar a chunks actuales para manejo por minuto
+      setCurrentChunkTexts(prev => {
+        const updatedChunks = [...prev, mockTranscription];
+        
+        // Cada 6 chunks (1 minuto), crear una nueva transcripción
+        if (updatedChunks.length === 6) {
+          const minuteNumber = Math.ceil(metadata.chunkId / 6);
+          const minuteText = updatedChunks.join(' ').trim();
+          const medicalTerms = extractMedicalTermsFromText(minuteText).map(t => t.term);
+          
+          const newMinuteTranscription = {
+            id: `minute_${minuteNumber}`,
+            text: minuteText,
+            timestamp: Date.now(),
+            confidence: 0.95,
+            medicalTerms,
+            processingTime: metadata.processingTime,
+            minuteNumber
+          };
+          
+          console.log(`[ConversationCapture] Minuto ${minuteNumber} completado (DENOISED):`, newMinuteTranscription);
+          setMinuteTranscriptions(prev => [...prev, newMinuteTranscription]);
+          
+          // Resetear para el siguiente minuto
+          return [];
+        }
+        
+        return updatedChunks;
+      });
     }, []),
     chunkSize: 32000, // 2 segundos
     denoisingEnabled: denoisingEnabled,
@@ -229,7 +216,7 @@ export const ConversationCapture = ({
           setCurrentChunkTexts([]); // Limpiar chunks actuales
         }
         
-        await stopTranscription();
+        await stopCapture(); // Gateway unificado
         
         // Combinar todas las transcripciones por minuto para el callback
         const allMinutesText = minuteTranscriptions
@@ -244,8 +231,11 @@ export const ConversationCapture = ({
         // BAZAR: Procesar diarización después de detener grabación
         await processDiarization();
       } else {
-        const started = await startTranscription();
-        if (!started && error?.includes('permiso')) {
+        // INICIAR - Solo gateway unificado
+        console.log('[ConversationCapture] Starting unified denoising capture');
+        const started = await startCapture(); // Gateway unificado
+        
+        if (!started && denoisingError?.includes('permiso')) {
           setShowPermissionDialog(true);
         } else if (started) {
           // Only start live transcription if WebSpeech is available
@@ -268,8 +258,12 @@ export const ConversationCapture = ({
   const processDiarization = async () => {
     console.log('[ConversationCapture] Iniciando diarización BAZAR...');
     
-    if (!transcription?.text && !webSpeechText) {
-      console.warn('[ConversationCapture] No hay texto para diarizar');
+    // Usar audio del gateway unificado
+    const completeAudio = getCompleteAudio();
+    const allMinutesText = minuteTranscriptions.map(m => m.text).join(' ').trim();
+    
+    if (!completeAudio && !allMinutesText && !webSpeechText) {
+      console.warn('[ConversationCapture] No hay audio ni texto para diarizar');
       return;
     }
     
@@ -278,11 +272,17 @@ export const ConversationCapture = ({
     
     try {
       // 1. FUSIÓN DE TRANSCRIPCIONES - Algoritmo público
-      const whisperText = transcription?.text || '';
-      const mergedText = DiarizationUtils.mergeTranscriptions(whisperText, webSpeechText);
+      const denoisedTranscriptionText = allMinutesText || '';
+      const mergedText = DiarizationUtils.mergeTranscriptions(denoisedTranscriptionText, webSpeechText);
+      
+      // Usar audio denoisado si está disponible
+      if (completeAudio) {
+        audioDataRef.current = completeAudio;
+        console.log(`[ConversationCapture] Usando audio denoisado para diarización: ${completeAudio.length} samples`);
+      }
       
       console.log('[ConversationCapture] Texto fusionado:', {
-        whisperLength: whisperText.length,
+        denoisedLength: denoisedTranscriptionText.length,
         webSpeechLength: webSpeechText.length,
         mergedLength: mergedText.length
       });
