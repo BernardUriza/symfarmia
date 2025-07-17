@@ -26,6 +26,8 @@ export function useUnifiedAudioCapture({
   const streamRef = useRef<MediaStream | null>(null);
   const chunkCountRef = useRef(0);
   const startTimeRef = useRef<number>(0);
+  const allChunksRef = useRef<Float32Array[]>([]); // Store all chunks for final audio
+  const MAX_RECORDING_SECONDS = 40 * 60; // 40 minutes maximum
 
   // For streaming mode, we want larger chunks (10 seconds)
   const targetChunkSize = mode === 'streaming' ? 160000 : chunkSize; // 10s vs custom
@@ -49,11 +51,26 @@ export function useUnifiedAudioCapture({
         onChunk: (chunk, id) => {
           chunkCountRef.current = id;
           console.log(`[UnifiedCapture] ${mode} mode: Chunk #${id} ready (${chunk.length} samples)`);
+          
+          // Store chunk for final audio
+          allChunksRef.current.push(chunk);
+          
+          // Check if we've reached max recording time
+          const totalSamples = allChunksRef.current.reduce((sum, c) => sum + c.length, 0);
+          const totalSeconds = totalSamples / sampleRate;
+          
+          if (totalSeconds >= MAX_RECORDING_SECONDS) {
+            console.warn('[UnifiedCapture] Maximum recording time reached (40 minutes)');
+            stop();
+            return;
+          }
+          
           onChunkReady?.(chunk);
         }
       });
       chunkCountRef.current = 0;
       startTimeRef.current = Date.now();
+      allChunksRef.current = []; // Reset chunks array
       
       const stream = await startProcessor();
       if (stream) {
@@ -82,18 +99,43 @@ export function useUnifiedAudioCapture({
     chunkManagerRef.current = null;
     streamRef.current = null;
     setIsRecording(false);
-  }, [isRecording, stopProcessor, onChunkReady, mode]);
+  }, [isRecording, stopProcessor, mode]);
 
   const getRecordingTime = useCallback(() => {
     if (!isRecording) return 0;
     return Math.floor((Date.now() - startTimeRef.current) / 1000);
   }, [isRecording]);
 
+  const getAllChunks = useCallback(() => {
+    return allChunksRef.current;
+  }, []);
+
+  const getCombinedAudio = useCallback(() => {
+    const chunks = allChunksRef.current;
+    if (chunks.length === 0) return null;
+    
+    // Calculate total length
+    const totalLength = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
+    
+    // Create combined array
+    const combined = new Float32Array(totalLength);
+    let offset = 0;
+    
+    for (const chunk of chunks) {
+      combined.set(chunk, offset);
+      offset += chunk.length;
+    }
+    
+    return combined;
+  }, []);
+
   return { 
     start, 
     stop, 
     isRecording,
     chunkCount: chunkCountRef.current,
-    getRecordingTime
+    getRecordingTime,
+    getAllChunks,
+    getCombinedAudio
   };
 }

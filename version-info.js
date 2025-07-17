@@ -1,10 +1,10 @@
 // Auto-generated version information
-// Generated at: 2025-07-16T21:37:43.163Z
+// Generated at: 2025-07-17T03:39:44.116Z
 export const VERSION_INFO = {
   "version": "0.1.0",
-  "gitHash": "e977619",
+  "gitHash": "192a6a8",
   "gitBranch": "dev",
-  "gitDate": "2025-07-16 21:35:01 +0000",
-  "buildDate": "2025-07-16T21:37:43.163Z",
-  "buildTimestamp": 1752701863163
+  "gitDate": "2025-07-16 21:14:54 -0600",
+  "buildDate": "2025-07-17T03:39:44.116Z",
+  "buildTimestamp": 1752723584116
 };

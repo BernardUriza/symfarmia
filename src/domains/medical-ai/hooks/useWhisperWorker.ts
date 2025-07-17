@@ -56,6 +56,11 @@ export function useWhisperWorker(options: UseWhisperWorkerOptions = {}) {
               break;
 
             case 'CHUNK_PROCESSED':
+              // Skip if this chunk is no longer pending (component might have unmounted)
+              if (!pendingChunksRef.current.has(data.chunkId)) {
+                console.log(`[useWhisperWorker] Ignoring processed chunk ${data.chunkId} - no longer pending`);
+                break;
+              }
               resultsRef.current.set(data.chunkId, data.text);
               pendingChunksRef.current.delete(data.chunkId);
               options.onChunkProcessed?.(data.text, data.chunkId);
@@ -99,7 +104,22 @@ export function useWhisperWorker(options: UseWhisperWorkerOptions = {}) {
     setupWorker();
 
     return () => {
+      console.log('[useWhisperWorker] Component unmounting, cleaning up...');
       mounted = false;
+      
+      // Clean up pending chunks to prevent orphaned processing
+      if (pendingChunksRef.current.size > 0) {
+        console.warn(`[useWhisperWorker] Unmounting with ${pendingChunksRef.current.size} pending chunks`);
+        pendingChunksRef.current.clear();
+      }
+      
+      // Clear results to prevent memory leaks
+      resultsRef.current.clear();
+      
+      // Reset processing state
+      setIsProcessing(false);
+      
+      // Remove message listener
       cleanupRef.current?.();
     };
   }, []);

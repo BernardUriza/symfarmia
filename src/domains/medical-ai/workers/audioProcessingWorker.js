@@ -1,4 +1,5 @@
-import { pipeline as createPipeline, env } from '@xenova/transformers';
+import { pipeline as createPipeline } from '@xenova/transformers';
+import { configureTransformers } from '../config/transformersConfig';
 
 // Global cache for the pipeline model
 let pipeline = null;
@@ -49,15 +50,12 @@ async function performInitialization() {
     console.log('[Worker] Starting model initialization');
     self.postMessage({ type: 'MODEL_LOADING', progress: 0 });
     
-    // Configure transformers to cache models
-    // Enable caching
-    env.allowLocalModels = true;
-    env.localModelPath = 'models';
-    env.cacheDir = 'models';
+    // Use global transformers configuration
+    await configureTransformers();
     
     pipeline = await createPipeline(
       'automatic-speech-recognition',
-      'Xenova/whisper-tiny',
+      'Xenova/whisper-base',
       {
         progress_callback: (progress) => {
           self.postMessage({ 
@@ -65,8 +63,7 @@ async function performInitialization() {
             progress: progress.progress || 0 
           });
         },
-        revision: 'main',
-        cache_dir: 'models'
+        revision: 'main'
       }
     );
     
@@ -148,25 +145,32 @@ async function processAudioChunk(data) {
       progress: 5
     });
 
-    console.log(`[Worker] Llamando a pipeline para chunk ${chunkId}...`);
+    console.log(`[Worker] Llamando a pipeline para chunk ${chunkId} en español (es)...`);
     
     // Simulate progress during processing
     let currentProgress = 5;
     const progressInterval = setInterval(() => {
       currentProgress = Math.min(90, currentProgress + Math.random() * 15 + 5);
-      self.postMessage({ 
-        type: 'CHUNK_PROGRESS', 
-        chunkId,
-        progress: Math.round(currentProgress)
-      });
+      try {
+        self.postMessage({ 
+          type: 'CHUNK_PROGRESS', 
+          chunkId,
+          progress: Math.round(currentProgress)
+        });
+      } catch (error) {
+        // Worker might be terminating, clear interval
+        console.log('[Worker] Error posting progress, likely terminating');
+        clearInterval(progressInterval);
+      }
     }, 500);
 
     const result = await pipeline(audioData, {
       return_timestamps: false,
       chunk_length_s: 30,
       stride_length_s: 5,
-      // Add language hint for better results
-      language: 'spanish',
+      // Use ISO 639-1 language code for Spanish ('es' not 'spanish')
+      // This ensures Whisper transcribes in Spanish instead of defaulting to English
+      language: 'es',
       // Lower the minimum speech probability threshold
       no_speech_threshold: 0.3
     });
@@ -175,41 +179,62 @@ async function processAudioChunk(data) {
     clearInterval(progressInterval);
     
     // Send final progress
-    self.postMessage({ 
-      type: 'CHUNK_PROGRESS', 
-      chunkId,
-      progress: 100
-    });
+    try {
+      self.postMessage({ 
+        type: 'CHUNK_PROGRESS', 
+        chunkId,
+        progress: 100
+      });
+    } catch (error) {
+      console.log('[Worker] Error posting final progress, worker might be terminating');
+    }
 
     const transcribedText = result.text || '';
     console.log(`[Worker] TRANSCRIPCIÓN OBTENIDA para chunk ${chunkId}: "${transcribedText}" (${transcribedText.length} caracteres)`);
+    
+    // Log language detection info if available
+    if (result.language) {
+      console.log(`[Worker] Idioma detectado: ${result.language}`);
+    }
 
     if (!transcribedText || transcribedText.length === 0) {
       console.warn(`[Worker] CHUNK ${chunkId} NO GENERÓ TEXTO - posible audio silencioso`);
       // Enviar resultado vacío para que el sistema sepa que fue procesado
-      self.postMessage({ 
-        type: 'CHUNK_PROCESSED', 
-        chunkId,
-        text: '',
-        timestamp: Date.now(),
-        warning: 'No text generated - possible silent audio'
-      });
+      try {
+        self.postMessage({ 
+          type: 'CHUNK_PROCESSED', 
+          chunkId,
+          text: '',
+          timestamp: Date.now(),
+          warning: 'No text generated - possible silent audio'
+        });
+      } catch (error) {
+        console.log('[Worker] Error posting empty chunk result, worker might be terminating');
+      }
     } else {
       console.log(`[Worker] ENVIANDO TRANSCRIPCIÓN: "${transcribedText}"`);
-      self.postMessage({ 
-        type: 'CHUNK_PROCESSED', 
-        chunkId,
-        text: transcribedText,
-        timestamp: Date.now()
-      });
+      try {
+        self.postMessage({ 
+          type: 'CHUNK_PROCESSED', 
+          chunkId,
+          text: transcribedText,
+          timestamp: Date.now()
+        });
+      } catch (error) {
+        console.log('[Worker] Error posting chunk result, worker might be terminating');
+      }
     }
   } catch (error) {
     console.error('[Worker] Processing error:', error);
-    self.postMessage({ 
-      type: 'PROCESSING_ERROR', 
-      error: error.message || 'Unknown processing error',
-      chunkId: data.chunkId || 'unknown'
-    });
+    try {
+      self.postMessage({ 
+        type: 'PROCESSING_ERROR', 
+        error: error.message || 'Unknown processing error',
+        chunkId: data.chunkId || 'unknown'
+      });
+    } catch (postError) {
+      console.log('[Worker] Error posting error message, worker might be terminating');
+    }
   }
 }
 

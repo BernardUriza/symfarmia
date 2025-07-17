@@ -7,6 +7,44 @@ import { useWhisperWorker } from './useWhisperWorker';
 import { useUnifiedAudioCapture } from './useUnifiedAudioCapture';
 import { whisperModelCache } from '../services/whisperModelCache';
 
+// Helper function to create WAV blob from Float32Array
+function createWavBlob(audioData: Float32Array, sampleRate: number): Blob {
+  const length = audioData.length;
+  const arrayBuffer = new ArrayBuffer(44 + length * 2);
+  const view = new DataView(arrayBuffer);
+  
+  // WAV header
+  const writeString = (offset: number, string: string) => {
+    for (let i = 0; i < string.length; i++) {
+      view.setUint8(offset + i, string.charCodeAt(i));
+    }
+  };
+  
+  writeString(0, 'RIFF');
+  view.setUint32(4, 36 + length * 2, true);
+  writeString(8, 'WAVE');
+  writeString(12, 'fmt ');
+  view.setUint32(16, 16, true); // fmt chunk size
+  view.setUint16(20, 1, true); // PCM format
+  view.setUint16(22, 1, true); // mono
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * 2, true); // byte rate
+  view.setUint16(32, 2, true); // block align
+  view.setUint16(34, 16, true); // bits per sample
+  writeString(36, 'data');
+  view.setUint32(40, length * 2, true);
+  
+  // Convert float32 to int16
+  let offset = 44;
+  for (let i = 0; i < length; i++) {
+    const sample = Math.max(-1, Math.min(1, audioData[i]));
+    view.setInt16(offset, sample * 0x7FFF, true);
+    offset += 2;
+  }
+  
+  return new Blob([arrayBuffer], { type: 'audio/wav' });
+}
+
 // Unified transcription interface
 interface Transcription {
   text: string;
@@ -186,7 +224,8 @@ export function useSimpleWhisper({
   const { 
     start: startAudioCapture, 
     stop: stopAudioCapture, 
-    isRecording: isAudioRecording 
+    isRecording: isAudioRecording,
+    getCombinedAudio 
   } = useUnifiedAudioCapture({
     mode: processingMode,
     chunkSize: processingMode === 'streaming' ? 160000 : chunkSize, // 10s for streaming, custom for direct
@@ -468,6 +507,23 @@ export function useSimpleWhisper({
       // Wait for final processing
       await new Promise(resolve => setTimeout(resolve, 500));
       
+      // Generate combined audio from all chunks
+      const combinedAudioData = getCombinedAudio();
+      if (combinedAudioData) {
+        console.log(`[useSimpleWhisper] Generando audio completo: ${combinedAudioData.length} muestras`);
+        
+        // Convert Float32Array to WAV format
+        const wavBlob = createWavBlob(combinedAudioData, sampleRate);
+        setAudioBlob(wavBlob);
+        
+        // Create URL for the audio
+        const url = URL.createObjectURL(wavBlob);
+        setAudioUrl(url);
+        
+        const durationSeconds = combinedAudioData.length / sampleRate;
+        console.log(`[useSimpleWhisper] Audio generado: ${durationSeconds.toFixed(2)} segundos`);
+      }
+      
       // Get transcript based on mode
       let finalText = '';
       let processingTime = 0;
@@ -530,7 +586,7 @@ export function useSimpleWhisper({
       setStatus('error');
       return false;
     }
-  }, [isRecording, processingMode, stopAudioCapture, logger]);
+  }, [isRecording, processingMode, stopAudioCapture, logger, getCombinedAudio, sampleRate]);
   
   // Reset transcription
   const resetTranscription = useCallback(() => {
@@ -539,6 +595,12 @@ export function useSimpleWhisper({
     setError(null);
     setRecordingTime(0);
     setAudioLevel(0);
+    
+    // Clean up audio URL to prevent memory leak
+    if (audioUrl) {
+      URL.revokeObjectURL(audioUrl);
+    }
+    
     setAudioUrl(null);
     setAudioBlob(null);
     transcriptPartsRef.current = {};
@@ -548,7 +610,7 @@ export function useSimpleWhisper({
     resetWorker();
     
     logger.log(`[${processingMode}] Transcription reset`);
-  }, [processingMode, resetWorker, logger]);
+  }, [processingMode, resetWorker, logger, audioUrl]);
   
   // Auto-preload on mount if enabled
   useEffect(() => {
@@ -566,8 +628,13 @@ export function useSimpleWhisper({
       if (timerRef.current) clearInterval(timerRef.current);
       if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
       if (audioContextRef.current) audioContextRef.current.close();
+      
+      // Clean up audio URL on unmount
+      if (audioUrl) {
+        URL.revokeObjectURL(audioUrl);
+      }
     };
-  }, []);
+  }, [audioUrl]);
   
   return {
     // Core transcription

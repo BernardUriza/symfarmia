@@ -99,15 +99,15 @@ export function OrderEntry({ onNext, onPrevious }) {
       case 'high': return 'bg-red-100 text-red-700 border-red-200';
       case 'medium': return 'bg-yellow-100 text-yellow-700 border-yellow-200';
       case 'low': return 'bg-green-100 text-green-700 border-green-200';
-      default: return 'bg-gray-100 text-gray-700 border-gray-200';
+      default: return 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600';
     }
   };
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="text-center mb-6">
-        <h1 className="text-2xl text-slate-900 mb-2">{t('entry.title')}</h1>
-        <p className="text-slate-600">{t('entry.subtitle')}</p>
+        <h1 className="text-2xl text-slate-900 dark:text-slate-100 mb-2">{t('entry.title')}</h1>
+        <p className="text-slate-600 dark:text-slate-400">{t('entry.subtitle')}</p>
       </div>
 
       {/* Resumen de Órdenes Seleccionadas */}
@@ -128,10 +128,10 @@ export function OrderEntry({ onNext, onPrevious }) {
                 const category = suggestedOrders[categoryIndex];
                 const item = category.items[itemIndex];
                 return (
-                  <div key={index} className="flex items-center justify-between bg-white p-3 rounded-lg">
+                  <div key={index} className="flex items-center justify-between bg-white dark:bg-gray-800 p-3 rounded-lg">
                     <div>
-                      <span className="font-medium text-slate-900">{item.name}</span>
-                      <span className="text-sm text-slate-500 ml-2">({category.category})</span>
+                      <span className="font-medium text-slate-900 dark:text-slate-100">{item.name}</span>
+                      <span className="text-sm text-slate-500 dark:text-slate-400 ml-2">({category.category})</span>
                     </div>
                     <Badge className={getPriorityColor(item.priority)}>
                       {t(`orders.priority.${item.priority}`)}
@@ -164,7 +164,7 @@ export function OrderEntry({ onNext, onPrevious }) {
                     <div
                       key={itemIndex}
                       className={`p-4 rounded-lg border cursor-pointer transition-all ${
-                        isSelected ? 'border-blue-500 bg-blue-50' : 'border-slate-200 hover:border-slate-300'
+                        isSelected ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-400' : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
                       }`}
                       onClick={() => toggleOrder(categoryIndex, itemIndex)}
                       role="button"
@@ -179,19 +179,19 @@ export function OrderEntry({ onNext, onPrevious }) {
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
-                          <h4 className="font-medium text-slate-900">{item.name}</h4>
+                          <h4 className="font-medium text-slate-900 dark:text-slate-100">{item.name}</h4>
                           {item.dosage && (
-                            <p className="text-sm text-slate-600 mt-1">
+                            <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
                               <strong>{t('details.dose')}:</strong> {item.dosage}
                             </p>
                           )}
                           {item.duration && (
-                            <p className="text-sm text-slate-600">
+                            <p className="text-sm text-slate-600 dark:text-slate-400">
                               <strong>{t('details.duration')}:</strong> {item.duration}
                             </p>
                           )}
                           {item.reason && (
-                            <p className="text-sm text-slate-600">
+                            <p className="text-sm text-slate-600 dark:text-slate-400">
                               <strong>{t('details.indication')}:</strong> {item.reason}
                             </p>
                           )}

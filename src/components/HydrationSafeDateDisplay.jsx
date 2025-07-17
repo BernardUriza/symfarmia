@@ -18,7 +18,7 @@ const HydrationSafeDateDisplay = ({
   const { renderWhenSafe } = useMedicalHydrationSafe('DateDisplay');
 
   const dateDisplayFallback = (
-    <div className={`text-sm text-gray-500 ${className}`}>
+    <div className={`text-sm text-gray-500 dark:text-gray-400 ${className}`}>
       {fallback}
     </div>
   );
