@@ -1,6 +1,7 @@
 {
   "patient": {
-    "medical_history": "Historial médico",
+    "info": "Información del Paciente",
+    "medical_history": "Historial Médico",
     "view_full_history": "Ver historial completo"
-    }
+  }
 }
