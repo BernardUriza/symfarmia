@@ -51,6 +51,7 @@ export const ConversationCapture = ({
     minuteNumber: number;
   }>>([]); // Lista de transcripciones por minuto
   const [currentChunkTexts, setCurrentChunkTexts] = useState<string[]>([]); // Chunks del minuto actual
+  const [webSpeechText, setWebSpeechText] = useState(''); // Texto de Web Speech completo
   const chunkCountRef = useRef(0);
   
   // Log model status before using the hook
@@ -131,6 +132,8 @@ export const ConversationCapture = ({
   useEffect(() => {
     if (liveTranscriptData) {
       setLiveTranscript(liveTranscriptData);
+      // Almacenar el texto de Web Speech completo
+      setWebSpeechText(liveTranscriptData);
     }
   }, [liveTranscriptData]);
 
@@ -227,6 +230,7 @@ export const ConversationCapture = ({
     setLiveTranscript('');
     setMinuteTranscriptions([]);
     setCurrentChunkTexts([]);
+    setWebSpeechText(''); // Limpiar texto de Web Speech
     chunkCountRef.current = 0;
     setManualTranscript('');
     setSoapNotes(null);
@@ -419,7 +423,8 @@ export const ConversationCapture = ({
             ) : (
               <TranscriptionResult 
                 transcription={transcription} 
-                audioUrl={audioUrl} 
+                audioUrl={audioUrl}
+                webSpeechText={webSpeechText}
               />
             )}
           </div>
