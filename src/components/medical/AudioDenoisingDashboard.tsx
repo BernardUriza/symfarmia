@@ -296,10 +296,10 @@ export default function AudioDenoisingDashboard() {
 
   if (isLoading) {
     return (
-      <div className=\"flex items-center justify-center p-8\">
-        <div className=\"text-center\">
-          <div className=\"animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4\"></div>
-          <Typography variant=\"h6\" color=\"gray\">
+      <div className="flex items-center justify-center p-8">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <Typography variant="h6" color="gray">
             Loading Denoising Dashboard...
           </Typography>
         </div>
@@ -308,33 +308,33 @@ export default function AudioDenoisingDashboard() {
   }
 
   return (
-    <div className=\"space-y-6 p-6\">
+    <div className="space-y-6 p-6">
       {/* Header */}
-      <div className=\"flex items-center justify-between\">
+      <div className="flex items-center justify-between">
         <div>
-          <Typography variant=\"h4\" color=\"blue-gray\">
+          <Typography variant="h4" color="blue-gray">
             Audio Denoising Dashboard
           </Typography>
-          <Typography variant=\"paragraph\" color=\"gray\">
+          <Typography variant="paragraph" color="gray">
             Bazaar Mode - Transparent & Auditable
           </Typography>
         </div>
-        <div className=\"flex items-center space-x-4\">
-          <div className=\"flex items-center space-x-2\">
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
             <Switch
               checked={autoRefresh}
               onChange={(e) => setAutoRefresh(e.target.checked)}
-              label=\"Auto Refresh\"
+              label="Auto Refresh"
               crossOrigin={undefined}
             />
           </div>
           <Button 
             onClick={loadData}
-            variant=\"outlined\"
-            size=\"sm\"
-            className=\"flex items-center gap-2\"
+            variant="outlined"
+            size="sm"
+            className="flex items-center gap-2"
           >
-            <ClockIcon className=\"h-4 w-4\" />
+            <ClockIcon className="h-4 w-4" />
             Refresh
           </Button>
         </div>
@@ -343,13 +343,13 @@ export default function AudioDenoisingDashboard() {
       {/* Error Alert */}
       {error && (
         <Alert
-          color=\"red\"
-          icon={<ExclamationTriangleIcon className=\"h-6 w-6\" />}
+          color="red"
+          icon={<ExclamationTriangleIcon className="h-6 w-6" />}
           action={
             <Button
-              variant=\"text\"
-              color=\"red\"
-              size=\"sm\"
+              variant="text"
+              color="red"
+              size="sm"
               onClick={() => setError(null)}
             >
               Dismiss
@@ -362,48 +362,48 @@ export default function AudioDenoisingDashboard() {
 
       {/* System Status */}
       <Card>
-        <CardHeader floated={false} shadow={false} className=\"rounded-none\">
-          <div className=\"flex items-center justify-between\">
-            <Typography variant=\"h6\" color=\"blue-gray\">
+        <CardHeader floated={false} shadow={false} className="rounded-none">
+          <div className="flex items-center justify-between">
+            <Typography variant="h6" color="blue-gray">
               System Status
             </Typography>
-            <div className=\"flex items-center space-x-2\">
+            <div className="flex items-center space-x-2">
               {status?.isInitialized ? (
-                <CheckCircleIcon className=\"h-5 w-5 text-green-500\" />
+                <CheckCircleIcon className="h-5 w-5 text-green-500" />
               ) : (
-                <ExclamationTriangleIcon className=\"h-5 w-5 text-yellow-500\" />
+                <ExclamationTriangleIcon className="h-5 w-5 text-yellow-500" />
               )}
-              <Typography variant=\"small\" color={status?.isInitialized ? 'green' : 'yellow'}>
+              <Typography variant="small" color={status?.isInitialized ? 'green' : 'yellow'}>
                 {status?.isInitialized ? 'Initialized' : 'Not Initialized'}
               </Typography>
             </div>
           </div>
         </CardHeader>
         <CardBody>
-          <div className=\"grid grid-cols-2 md:grid-cols-4 gap-4\">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div>
-              <Typography variant=\"small\" color=\"gray\">Model</Typography>
-              <Typography variant=\"paragraph\">{status?.modelName || 'Unknown'}</Typography>
+              <Typography variant="small" color="gray">Model</Typography>
+              <Typography variant="paragraph">{status?.modelName || 'Unknown'}</Typography>
             </div>
             <div>
-              <Typography variant=\"small\" color=\"gray\">Environment</Typography>
-              <Typography variant=\"paragraph\">{status?.currentEnvironment || 'Unknown'}</Typography>
+              <Typography variant="small" color="gray">Environment</Typography>
+              <Typography variant="paragraph">{status?.currentEnvironment || 'Unknown'}</Typography>
             </div>
             <div>
-              <Typography variant=\"small\" color=\"gray\">Processing</Typography>
-              <Typography variant=\"paragraph\" color={status?.isProcessing ? 'orange' : 'green'}>
+              <Typography variant="small" color="gray">Processing</Typography>
+              <Typography variant="paragraph" color={status?.isProcessing ? 'orange' : 'green'}>
                 {status?.isProcessing ? 'Active' : 'Idle'}
               </Typography>
             </div>
             <div>
-              <Typography variant=\"small\" color=\"gray\">Config Version</Typography>
-              <Typography variant=\"paragraph\">{status?.configVersion || 'Unknown'}</Typography>
+              <Typography variant="small" color="gray">Config Version</Typography>
+              <Typography variant="paragraph">{status?.configVersion || 'Unknown'}</Typography>
             </div>
           </div>
           
           {status?.lastError && (
-            <Alert color=\"red\" className=\"mt-4\">
-              <Typography variant=\"small\">
+            <Alert color="red" className="mt-4">
+              <Typography variant="small">
                 <strong>Last Error:</strong> {status.lastError}
               </Typography>
             </Alert>
@@ -412,47 +412,47 @@ export default function AudioDenoisingDashboard() {
       </Card>
 
       {/* Metrics */}
-      <div className=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4\">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
-          <CardBody className=\"text-center\">
-            <ChartBarIcon className=\"h-8 w-8 text-blue-500 mx-auto mb-2\" />
-            <Typography variant=\"h4\" color=\"blue-gray\">
+          <CardBody className="text-center">
+            <ChartBarIcon className="h-8 w-8 text-blue-500 mx-auto mb-2" />
+            <Typography variant="h4" color="blue-gray">
               {metrics?.processing.totalProcessed || 0}
             </Typography>
-            <Typography variant=\"small\" color=\"gray\">
+            <Typography variant="small" color="gray">
               Total Processed
             </Typography>
           </CardBody>
         </Card>
         
         <Card>
-          <CardBody className=\"text-center\">
-            <Typography variant=\"h4\" color=\"green\">
+          <CardBody className="text-center">
+            <Typography variant="h4" color="green">
               {((metrics?.processing.successRate || 0) * 100).toFixed(1)}%
             </Typography>
-            <Typography variant=\"small\" color=\"gray\">
+            <Typography variant="small" color="gray">
               Success Rate
             </Typography>
           </CardBody>
         </Card>
         
         <Card>
-          <CardBody className=\"text-center\">
-            <Typography variant=\"h4\" color=\"blue-gray\">
+          <CardBody className="text-center">
+            <Typography variant="h4" color="blue-gray">
               {metrics?.processing.averageProcessingTime?.toFixed(0) || 0}ms
             </Typography>
-            <Typography variant=\"small\" color=\"gray\">
+            <Typography variant="small" color="gray">
               Avg Processing Time
             </Typography>
           </CardBody>
         </Card>
         
         <Card>
-          <CardBody className=\"text-center\">
-            <Typography variant=\"h4\" color={metrics?.processing.errorCount ? 'red' : 'green'}>
+          <CardBody className="text-center">
+            <Typography variant="h4" color={metrics?.processing.errorCount ? 'red' : 'green'}>
               {metrics?.processing.errorCount || 0}
             </Typography>
-            <Typography variant=\"small\" color=\"gray\">
+            <Typography variant="small" color="gray">
               Error Count
             </Typography>
           </CardBody>
@@ -461,14 +461,14 @@ export default function AudioDenoisingDashboard() {
 
       {/* Environment Configuration */}
       <Card>
-        <CardHeader floated={false} shadow={false} className=\"rounded-none\">
-          <Typography variant=\"h6\" color=\"blue-gray\">
+        <CardHeader floated={false} shadow={false} className="rounded-none">
+          <Typography variant="h6" color="blue-gray">
             Environment Configuration
           </Typography>
         </CardHeader>
         <CardBody>
-          <div className=\"mb-4\">
-            <Typography variant=\"small\" color=\"gray\" className=\"mb-2\">
+          <div className="mb-4">
+            <Typography variant="small" color="gray" className="mb-2">
               Current Environment
             </Typography>
             <Select
@@ -477,7 +477,7 @@ export default function AudioDenoisingDashboard() {
                 setSelectedEnvironment(value || 'consultorio');
                 changeEnvironment(value || 'consultorio');
               }}
-              label=\"Select Environment\"
+              label="Select Environment"
             >
               {config && Object.entries(config.environments).map(([key, env]) => (
                 <Option key={key} value={key}>
@@ -488,28 +488,28 @@ export default function AudioDenoisingDashboard() {
           </div>
           
           {config && config.environments[selectedEnvironment] && (
-            <div className=\"grid grid-cols-2 md:grid-cols-4 gap-4 mt-4\">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
               <div>
-                <Typography variant=\"small\" color=\"gray\">Global Threshold</Typography>
-                <Typography variant=\"paragraph\">
+                <Typography variant="small" color="gray">Global Threshold</Typography>
+                <Typography variant="paragraph">
                   {config.environments[selectedEnvironment].globalThreshold}
                 </Typography>
               </div>
               <div>
-                <Typography variant=\"small\" color=\"gray\">Preserve Alarms</Typography>
-                <Typography variant=\"paragraph\" color={config.environments[selectedEnvironment].preserveAlarms ? 'green' : 'red'}>
+                <Typography variant="small" color="gray">Preserve Alarms</Typography>
+                <Typography variant="paragraph" color={config.environments[selectedEnvironment].preserveAlarms ? 'green' : 'red'}>
                   {config.environments[selectedEnvironment].preserveAlarms ? 'Enabled' : 'Disabled'}
                 </Typography>
               </div>
               <div>
-                <Typography variant=\"small\" color=\"gray\">Aggressiveness</Typography>
-                <Typography variant=\"paragraph\">
+                <Typography variant="small" color="gray">Aggressiveness</Typography>
+                <Typography variant="paragraph">
                   {config.environments[selectedEnvironment].aggressiveness}
                 </Typography>
               </div>
               <div>
-                <Typography variant=\"small\" color=\"gray\">Enabled Noises</Typography>
-                <Typography variant=\"paragraph\">
+                <Typography variant="small" color="gray">Enabled Noises</Typography>
+                <Typography variant="paragraph">
                   {config.environments[selectedEnvironment].enabledNoises.length}
                 </Typography>
               </div>
@@ -520,16 +520,16 @@ export default function AudioDenoisingDashboard() {
 
       {/* Noise Types Configuration */}
       <Card>
-        <CardHeader floated={false} shadow={false} className=\"rounded-none\">
-          <Typography variant=\"h6\" color=\"blue-gray\">
+        <CardHeader floated={false} shadow={false} className="rounded-none">
+          <Typography variant="h6" color="blue-gray">
             Noise Types Configuration
           </Typography>
         </CardHeader>
         <CardBody>
-          <div className=\"space-y-4\">
+          <div className="space-y-4">
             {config && Object.entries(config.noiseTypes).map(([noiseType, noiseConfig]) => (
-              <div key={noiseType} className=\"flex items-center justify-between p-4 border rounded-lg\">
-                <div className=\"flex items-center space-x-4\">
+              <div key={noiseType} className="flex items-center justify-between p-4 border rounded-lg">
+                <div className="flex items-center space-x-4">
                   <Switch
                     checked={noiseConfig.enabled}
                     onChange={() => toggleNoiseType(noiseType)}
@@ -537,19 +537,19 @@ export default function AudioDenoisingDashboard() {
                     crossOrigin={undefined}
                   />
                   <div>
-                    <Typography variant=\"small\" color=\"gray\">
+                    <Typography variant="small" color="gray">
                       Threshold: {noiseConfig.threshold}
                     </Typography>
-                    <Typography variant=\"small\" color=\"gray\">
+                    <Typography variant="small" color="gray">
                       Strength: {noiseConfig.filterStrength}
                     </Typography>
                   </div>
                 </div>
-                <div className=\"w-32\">
+                <div className="w-32">
                   <Progress
                     value={noiseConfig.threshold * 100}
                     color={noiseConfig.enabled ? 'blue' : 'gray'}
-                    size=\"sm\"
+                    size="sm"
                   />
                 </div>
               </div>
@@ -560,44 +560,44 @@ export default function AudioDenoisingDashboard() {
 
       {/* Audit Log */}
       <Card>
-        <CardHeader floated={false} shadow={false} className=\"rounded-none\">
-          <div className=\"flex items-center justify-between\">
-            <Typography variant=\"h6\" color=\"blue-gray\">
+        <CardHeader floated={false} shadow={false} className="rounded-none">
+          <div className="flex items-center justify-between">
+            <Typography variant="h6" color="blue-gray">
               Audit Log
             </Typography>
             <Button
               onClick={exportConfiguration}
-              variant=\"outlined\"
-              size=\"sm\"
-              className=\"flex items-center gap-2\"
+              variant="outlined"
+              size="sm"
+              className="flex items-center gap-2"
             >
-              <CogIcon className=\"h-4 w-4\" />
+              <CogIcon className="h-4 w-4" />
               Export Config
             </Button>
           </div>
         </CardHeader>
         <CardBody>
-          <div className=\"max-h-96 overflow-y-auto\">
+          <div className="max-h-96 overflow-y-auto">
             {auditLog.length === 0 ? (
-              <Typography variant=\"small\" color=\"gray\" className=\"text-center py-8\">
+              <Typography variant="small" color="gray" className="text-center py-8">
                 No audit entries available
               </Typography>
             ) : (
-              <div className=\"space-y-2\">
+              <div className="space-y-2">
                 {auditLog.slice(-20).reverse().map((entry, index) => (
-                  <div key={index} className=\"p-3 bg-gray-50 rounded-lg text-sm\">
-                    <div className=\"flex items-center justify-between\">
-                      <Typography variant=\"small\" color=\"blue-gray\" className=\"font-medium\">
+                  <div key={index} className="p-3 bg-gray-50 rounded-lg text-sm">
+                    <div className="flex items-center justify-between">
+                      <Typography variant="small" color="blue-gray" className="font-medium">
                         {entry.action}
                       </Typography>
-                      <Typography variant=\"small\" color=\"gray\">
+                      <Typography variant="small" color="gray">
                         {new Date(entry.timestamp).toLocaleString()}
                       </Typography>
                     </div>
-                    <Typography variant=\"small\" color=\"gray\" className=\"mt-1\">
+                    <Typography variant="small" color="gray" className="mt-1">
                       {entry.message}
                     </Typography>
-                    <Typography variant=\"small\" color=\"gray\" className=\"mt-1 opacity-75\">
+                    <Typography variant="small" color="gray" className="mt-1 opacity-75">
                       Environment: {entry.systemState} | Config: {entry.configVersion}
                     </Typography>
                   </div>
