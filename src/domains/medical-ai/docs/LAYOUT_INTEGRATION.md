@@ -1,41 +1,28 @@
-# WhisperPreloadInitializer Layout Integration
+# WhisperPreloaderGlobal Layout Integration
 
 ## Problem
-When trying to import `WhisperPreloadInitializer` directly in the server-side layout, Next.js throws errors about client-only hooks (useState, useEffect, etc.) being used in server components.
+Previous versions used a `WhisperPreloadInitializer` component wrapped with `next/dynamic` to avoid server-side rendering errors. The logic has been simplified and now a single `WhisperPreloaderGlobal` component handles the preload without extra wrappers.
 
 ## Solution
-Created a client wrapper component that uses dynamic imports to safely integrate the preloader in server layouts.
+Simply import the component directly in your client layout and drop it once in the tree.
 
 ## Implementation
 
-### 1. Client Wrapper Component
-Created `/src/components/layout/WhisperPreloadClient.tsx`:
-```tsx
-'use client';
+### Example Layout
 
-import dynamic from 'next/dynamic';
-
-const WhisperPreloadInitializer = dynamic(
-  () => import('@/src/domains/medical-ai/components/WhisperPreloadInitializer')
-    .then(mod => mod.WhisperPreloadInitializer),
-  { 
-    ssr: false,
-    loading: () => null
-  }
-);
-```
-
-### 2. Layout Integration
-In `app/layout.js`:
 ```jsx
-import { WhisperPreloadClient } from "@/src/components/layout";
+import WhisperPreloaderGlobal from '@/src/domains/medical-ai/components/WhisperPreloaderGlobal';
 
-// In the layout body:
-<WhisperPreloadClient 
-  priority="auto"
-  delay={3000}
-  showProgress={false}
-/>
+export default function RootLayout({ children }) {
+  return (
+    <html>
+      <body>
+        {children}
+        <WhisperPreloaderGlobal />
+      </body>
+    </html>
+  );
+}
 ```
 
 ## Key Points
