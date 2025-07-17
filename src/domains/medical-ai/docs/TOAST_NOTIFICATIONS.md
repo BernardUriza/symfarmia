@@ -5,7 +5,7 @@ The Whisper preloading system now uses SweetAlert2 toast notifications to provid
 
 ## Changes Made
 
-### 1. Enhanced WhisperPreloadInitializer
+### 1. Enhanced WhisperPreloaderGlobal
 - Added SweetAlert2 toast notifications
 - Custom HTML with progress indicator
 - Auto-updating progress percentage
@@ -39,12 +39,9 @@ The Whisper preloading system now uses SweetAlert2 toast notifications to provid
 
 ### In Layout (Global)
 ```jsx
-<WhisperPreloadClient 
-  priority="auto"
-  delay={3000}
-  showProgress={false}  // Inline indicator
-  showToasts={true}     // Toast notifications
-/>
+import WhisperPreloaderGlobal from '@/src/domains/medical-ai/components/WhisperPreloaderGlobal';
+
+<WhisperPreloaderGlobal />
 ```
 
 ### Configuration Options

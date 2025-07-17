@@ -5,16 +5,16 @@ La integración con `@xenova/transformers` ahora es más robusta.
 ## ✨ Cambios Clave
 
 1. **Reintentos automáticos** al cargar el modelo con `retryCount` y `retryDelay`.
-2. **Precarga opcional** mediante el componente `WhisperPreloader` o la función `preloadModel` del hook.
+2. **Precarga opcional** mediante el componente `WhisperPreloaderGlobal` o la función `preloadModel` del hook.
 3. **Indicador de progreso** durante la descarga usando el parámetro `progress_callback` del pipeline.
 
 ## 🚀 Uso Rápido
 
 ```jsx
-import WhisperPreloader from '../domains/medical-ai/components/WhisperPreloader';
+import WhisperPreloaderGlobal from '../domains/medical-ai/components/WhisperPreloaderGlobal';
 
 // En la raíz de tu aplicación
-<WhisperPreloader retryCount={3} retryDelay={1000} />
+<WhisperPreloaderGlobal />
 ```
 
 Si prefieres controlar la carga manualmente:
@@ -27,6 +27,6 @@ const { preloadModel, loadProgress } = useSimpleWhisper({ autoPreload: false });
 ## 📁 Archivos Modificados
 
 - `useSimpleWhisper.js` ahora expone `preloadModel` y `loadProgress`.
-- Nuevo componente `WhisperPreloader.jsx` para realizar la precarga.
+- Nuevo componente `WhisperPreloaderGlobal.tsx` para realizar la precarga.
 
 Con estas mejoras, la experiencia de usuario es más fluida y se maneja mejor cualquier fallo de red.
