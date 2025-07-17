@@ -22,6 +22,7 @@ import {
 } from '@/src/components/medical/conversation-capture/components';
 import type { SOAPNotes } from '@/src/domains/medical-ai/types';
 import { diarizationService, DiarizationUtils, DiarizationResult } from '@/src/domains/medical-ai/services/DiarizationService';
+import AudioDenoisingDashboard from '@/src/components/medical/AudioDenoisingDashboard';
 
 interface ConversationCaptureProps {
   onNext?: () => void;
@@ -415,69 +416,7 @@ export const ConversationCapture = ({
         
         {/* DENOISING DASHBOARD - EN CONTEXTO */}
         {showDenoisingDashboard && !isManualMode && (
-          <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-blue-900">
-                🛡️ Audio Denoising Dashboard
-              </h3>
-              <button
-                onClick={() => setShowDenoisingDashboard(false)}
-                className="text-blue-600 hover:text-blue-800"
-              >
-                ✕
-              </button>
-            </div>
-            
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-              <div className="bg-white p-3 rounded-lg">
-                <div className="text-sm text-gray-600">Procesados</div>
-                <div className="text-xl font-bold text-blue-600">
-                  {denoisingStats.totalProcessed}
-                </div>
-              </div>
-              <div className="bg-white p-3 rounded-lg">
-                <div className="text-sm text-gray-600">Denoisados</div>
-                <div className="text-xl font-bold text-green-600">
-                  {denoisingStats.denoisingUsed}
-                </div>
-              </div>
-              <div className="bg-white p-3 rounded-lg">
-                <div className="text-sm text-gray-600">Calidad</div>
-                <div className="text-xl font-bold text-purple-600">
-                  {denoisingStats.averageQuality.toFixed(1)}%
-                </div>
-              </div>
-              <div className="bg-white p-3 rounded-lg">
-                <div className="text-sm text-gray-600">Tiempo</div>
-                <div className="text-xl font-bold text-orange-600">
-                  {denoisingStats.processingTime}ms
-                </div>
-              </div>
-            </div>
-            
-            <div className="bg-white p-3 rounded-lg">
-              <div className="text-sm text-gray-600 mb-2">Estado del Sistema</div>
-              <div className="flex items-center gap-4 text-sm">
-                <span className={`flex items-center gap-1 ${denoisingEnabled ? 'text-green-600' : 'text-gray-400'}`}>
-                  <Shield className="w-4 h-4" />
-                  {denoisingEnabled ? 'Activo' : 'Inactivo'}
-                </span>
-                <span className="text-blue-600">
-                  🏥 {denoisingEnvironment.charAt(0).toUpperCase() + denoisingEnvironment.slice(1)}
-                </span>
-                {isDenoisingProcessing && (
-                  <span className="text-yellow-600">
-                    🔄 Procesando...
-                  </span>
-                )}
-                {denoisingError && (
-                  <span className="text-red-600">
-                    ❌ Error: {denoisingError}
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
+          <AudioDenoisingDashboard />
         )}
       </div>
 
