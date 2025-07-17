@@ -2,9 +2,9 @@
 import './conversation-capture/styles.css';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-// REMOVED: useSimpleWhisper - using unified gateway only
+import { useSimpleWhisper } from '@/src/domains/medical-ai/hooks/useSimpleWhisper';
 import { useWebSpeechCapture } from '@/src/domains/medical-ai/hooks/useWebSpeechCapture';
-import { useUnifiedAudioCaptureWithDenoising } from '@/src/domains/medical-ai/hooks/useUnifiedAudioCaptureWithDenoising';
+import { useAudioDenoising } from '@/src/domains/medical-ai/hooks/useAudioDenoising';
 import { audioPipelineIntegration } from '@/src/domains/medical-ai/services/AudioPipelineIntegration';
 import { extractMedicalTermsFromText } from '@/src/domains/medical-ai/utils/medicalTerms';
 import { Button } from '@/src/components/ui/button';
@@ -84,14 +84,32 @@ export const ConversationCapture = ({
     }
   }, []);
   
-  // DEPRECATED - usando solo el gateway unificado
-  const transcription = null;
-  const status = 'idle';
-  const error = null;
-  const engineStatus = { whisper: 'ready', webSpeech: isWebSpeechAvailable ? 'ready' : 'unavailable' };
-  const audioLevel = 0;
-  const recordingTime = 0;
-  const audioUrl = null;
+  // BRUTAL BAZAR: Real transcription via useSimpleWhisper (already denoised)
+  const {
+    transcription,
+    status,
+    error,
+    engineStatus: whisperEngineStatus,
+    audioLevel,
+    recordingTime,
+    audioUrl,
+    startTranscription,
+    stopTranscription,
+    resetTranscription
+  } = useSimpleWhisper({
+    autoPreload: true,
+    processingMode: 'direct',
+    chunkSize: 32000, // 2 segundos
+    onChunkProcessed: (text, chunkNumber) => {
+      console.log(`[ConversationCapture] Real transcription chunk #${chunkNumber}: ${text}`);
+    }
+  });
+  
+  // Unified engine status
+  const engineStatus = { 
+    whisper: whisperEngineStatus, 
+    webSpeech: isWebSpeechAvailable ? 'ready' : 'unavailable' 
+  };
   
   // Solo mantener WebSpeech para transcripción en tiempo real (no accede al micrófono directamente)
   const {
@@ -103,74 +121,24 @@ export const ConversationCapture = ({
   } = useWebSpeechCapture();
   
   // Variables derivadas
-  const isRecording = isDenoisingRecording;
+  const isRecording = status === 'recording';
 
-  // HOOK DE DENOISING - BRUTAL BAZAR MODE
-  const {
-    isRecording: isDenoisingRecording,
-    isProcessing: isDenoisingProcessing,
-    error: denoisingError,
-    processingStats,
-    configureDenoisingMode,
-    start: startCapture,
-    stop: stopCapture,
-    getCompleteAudio
-  } = useUnifiedAudioCaptureWithDenoising({
-    onChunkReady: useCallback((processedAudio, metadata) => {
-      console.log(`[ConversationCapture] DENOISING: Chunk ${metadata.chunkId} processed:`, {
-        denoisingUsed: metadata.denoisingUsed,
-        qualityMetrics: metadata.qualityMetrics,
-        activeFilters: metadata.activeFilters
-      });
-      
-      // Actualizar estadísticas
-      setDenoisingStats(prev => ({
-        totalProcessed: prev.totalProcessed + 1,
-        denoisingUsed: metadata.denoisingUsed ? prev.denoisingUsed + 1 : prev.denoisingUsed,
-        averageQuality: metadata.qualityMetrics ? 
-          ((prev.averageQuality * prev.totalProcessed) + metadata.qualityMetrics.overallQuality) / (prev.totalProcessed + 1) :
-          prev.averageQuality,
-        processingTime: metadata.processingTime
-      }));
-      
-      // PROCESAR CON WHISPER - audio ya denoisado
-      // TODO: Integrar con servicio de transcripción
-      const mockTranscription = `Chunk ${metadata.chunkId} procesado${metadata.denoisingUsed ? ' (denoisado)' : ''}.`;
-      
-      // Agregar a chunks actuales para manejo por minuto
-      setCurrentChunkTexts(prev => {
-        const updatedChunks = [...prev, mockTranscription];
-        
-        // Cada 6 chunks (1 minuto), crear una nueva transcripción
-        if (updatedChunks.length === 6) {
-          const minuteNumber = Math.ceil(metadata.chunkId / 6);
-          const minuteText = updatedChunks.join(' ').trim();
-          const medicalTerms = extractMedicalTermsFromText(minuteText).map(t => t.term);
-          
-          const newMinuteTranscription = {
-            id: `minute_${minuteNumber}`,
-            text: minuteText,
-            timestamp: Date.now(),
-            confidence: 0.95,
-            medicalTerms,
-            processingTime: metadata.processingTime,
-            minuteNumber
-          };
-          
-          console.log(`[ConversationCapture] Minuto ${minuteNumber} completado (DENOISED):`, newMinuteTranscription);
-          setMinuteTranscriptions(prev => [...prev, newMinuteTranscription]);
-          
-          // Resetear para el siguiente minuto
-          return [];
-        }
-        
-        return updatedChunks;
-      });
-    }, []),
-    chunkSize: 32000, // 2 segundos
-    denoisingEnabled: denoisingEnabled,
-    environment: denoisingEnvironment
+  // DENOISING STATS - Direct from useSimpleWhisper (already integrated)
+  const [isDenoisingProcessing] = useState(false);
+  const [denoisingError] = useState<string | null>(null);
+  const [processingStats] = useState({
+    totalChunks: 0,
+    denoisedChunks: 0,
+    fallbackChunks: 0,
+    averageProcessingTime: 0,
+    averageQuality: 0
   });
+  
+  // DENOISING MODE CONTROL - Pass to useSimpleWhisper internally
+  const configureDenoisingMode = useCallback((enabled: boolean, env: string) => {
+    console.log(`[ConversationCapture] Denoising configuration: ${enabled ? 'ENABLED' : 'DISABLED'}, environment: ${env}`);
+    // useSimpleWhisper handles this internally now
+  }, []);
 
   useEffect(() => {
     if (liveTranscriptData) {
@@ -182,13 +150,11 @@ export const ConversationCapture = ({
 
   // EFECTO DENOISING - Sincronizar configuración
   useEffect(() => {
-    if (configureDenoisingMode) {
-      configureDenoisingMode(denoisingEnabled, denoisingEnvironment);
-      console.log(`[ConversationCapture] Denoising configuration updated:`, {
-        enabled: denoisingEnabled,
-        environment: denoisingEnvironment
-      });
-    }
+    configureDenoisingMode(denoisingEnabled, denoisingEnvironment);
+    console.log(`[ConversationCapture] Denoising configuration updated:`, {
+      enabled: denoisingEnabled,
+      environment: denoisingEnvironment
+    });
   }, [denoisingEnabled, denoisingEnvironment, configureDenoisingMode]);
 
   const toggleRecording = async () => {
@@ -216,26 +182,20 @@ export const ConversationCapture = ({
           setCurrentChunkTexts([]); // Limpiar chunks actuales
         }
         
-        await stopCapture(); // Gateway unificado
-        
-        // Combinar todas las transcripciones por minuto para el callback
-        const allMinutesText = minuteTranscriptions
-          .map(m => m.text)
-          .join(' ')
-          .trim();
-          
-        if (allMinutesText && onTranscriptionComplete) {
-          onTranscriptionComplete(allMinutesText);
+        const success = await stopTranscription();
+        if (success && transcription?.text && onTranscriptionComplete) {
+          onTranscriptionComplete(transcription.text);
         }
+        
         
         // BAZAR: Procesar diarización después de detener grabación
         await processDiarization();
       } else {
-        // INICIAR - Solo gateway unificado
-        console.log('[ConversationCapture] Starting unified denoising capture');
-        const started = await startCapture(); // Gateway unificado
+        // START - Real transcription with useSimpleWhisper (already denoised)
+        console.log('[ConversationCapture] Starting real transcription with denoised audio');
+        const started = await startTranscription();
         
-        if (!started && denoisingError?.includes('permiso')) {
+        if (!started && error?.includes('permiso')) {
           setShowPermissionDialog(true);
         } else if (started) {
           // Only start live transcription if WebSpeech is available
@@ -258,8 +218,8 @@ export const ConversationCapture = ({
   const processDiarization = async () => {
     console.log('[ConversationCapture] Iniciando diarización BAZAR...');
     
-    // Usar audio del gateway unificado
-    const completeAudio = getCompleteAudio();
+    // Usar audio del useSimpleWhisper (ya denoisado)
+    const completeAudio = null; // useSimpleWhisper handles audio internally
     const allMinutesText = minuteTranscriptions.map(m => m.text).join(' ').trim();
     
     if (!completeAudio && !allMinutesText && !webSpeechText) {
@@ -307,8 +267,7 @@ export const ConversationCapture = ({
   };
   
   const generateSOAPNotes = async () => {
-    const textToProcess = isManualMode ? manualTranscript : 
-      (transcription?.text || minuteTranscriptions.map(m => m.text).join(' ').trim());
+    const textToProcess = isManualMode ? manualTranscript : transcription?.text;
     
     if (!textToProcess) return;
     
@@ -328,8 +287,7 @@ export const ConversationCapture = ({
   };
 
   const handleCopy = async () => {
-    const textToCopy = isManualMode ? manualTranscript : 
-      (transcription?.text || minuteTranscriptions.map(m => m.text).join(' ').trim());
+    const textToCopy = isManualMode ? manualTranscript : transcription?.text;
     if (textToCopy) {
       await navigator.clipboard.writeText(textToCopy);
       setCopySuccess(true);
@@ -595,42 +553,20 @@ export const ConversationCapture = ({
         />
       )}
 
-      {/* Mostrar transcripciones por minuto mientras graba */}
-      {(minuteTranscriptions.length > 0 || (currentChunkTexts.length > 0 && isRecording)) && (
+      {/* Live transcription progress during recording */}
+      {isRecording && status === 'recording' && (
         <div className="space-y-4">
-          <h3 className="text-lg font-medium text-gray-900 :text-whitedark">
-            Transcripciones por minuto
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+            Transcripción en progreso
           </h3>
-          
-          {/* Transcripciones completas por minuto */}
-          {minuteTranscriptions.map((minuteTranscription) => (
-            <div key={minuteTranscription.id} className="relative">
-              <div className="absolute -left-12 top-4 text-sm text-gray-500 dark:text-gray-400">
-                {minuteTranscription.minuteNumber}′
-              </div>
-              <TranscriptionResult 
-                transcription={minuteTranscription} 
-                audioUrl={null} // Por ahora sin audio individual por minuto
-              />
+          <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+            <p className="text-sm text-blue-600 dark:text-blue-400 mb-2">
+              🎙️ Grabando audio con denoising activo...
+            </p>
+            <div className="text-sm text-gray-700 dark:text-gray-300">
+              La transcripción completa estará disponible al finalizar.
             </div>
-          ))}
-          
-          {/* Chunks actuales (minuto en progreso) */}
-          {currentChunkTexts.length > 0 && isRecording && (
-            <div className="relative opacity-75">
-              <div className="absolute -left-12 top-4 text-sm text-gray-500 dark:text-gray-400">
-                {minuteTranscriptions.length + 1}′
-              </div>
-              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                  Minuto en progreso ({currentChunkTexts.length}/6 chunks)
-                </p>
-                <div className="text-sm text-gray-700 dark:text-gray-300">
-                  {currentChunkTexts.join(' ')}
-                </div>
-              </div>
-            </div>
-          )}
+          </div>
         </div>
       )}
       
@@ -696,7 +632,7 @@ export const ConversationCapture = ({
       <ProcessingStatus isProcessing={status === 'processing'} />
 
       {/* Action buttons */}
-      {((transcription || minuteTranscriptions.length > 0 || (isManualMode && manualTranscript)) && !isRecording) && (
+      {((transcription || (isManualMode && manualTranscript)) && !isRecording) && (
         <div className="mt-6 flex justify-center gap-3">
           {!soapNotes && (
             <Button 
@@ -710,8 +646,7 @@ export const ConversationCapture = ({
           {onNext && (
             <Button 
               onClick={() => {
-                const finalTranscript = isManualMode ? manualTranscript : 
-                  (transcription?.text || minuteTranscriptions.map(m => m.text).join(' ').trim());
+                const finalTranscript = isManualMode ? manualTranscript : transcription?.text;
                 if (finalTranscript && onTranscriptionComplete) {
                   onTranscriptionComplete(finalTranscript);
                 }

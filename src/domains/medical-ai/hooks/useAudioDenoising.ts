@@ -13,7 +13,7 @@ import { useAudioProcessor } from './useAudioProcessor';
 import { AudioChunkManager } from '../audio/AudioChunkManager';
 import { audioPipelineIntegration } from '../services/AudioPipelineIntegration';
 
-interface UseUnifiedAudioCaptureOptions {
+interface UseAudioDenoisingOptions {
   onChunkReady?: (audioData: Float32Array, metadata: ProcessingMetadata) => void;
   chunkSize?: number;
   sampleRate?: number;
@@ -34,19 +34,20 @@ interface ProcessingMetadata {
 }
 
 /**
- * UNIFIED AUDIO CAPTURE - BAZAR MODE
- * - Denoising integrado en CADA chunk
+ * AUDIO DENOISING - BRUTAL BAZAR MODE
+ * - Único productor de audio limpio
+ * - Consumible por cualquier hook/módulo
  * - Proceso completamente auditable
- * - Sin bypass del sistema
+ * - Sin centralización forzada
  */
-export function useUnifiedAudioCaptureWithDenoising({
+export function useAudioDenoising({
   onChunkReady,
   chunkSize = 16000, // 1 segundo a 16kHz
   sampleRate = 16000,
   mode = 'direct',
   denoisingEnabled = true,
   environment = 'consultorio'
-}: UseUnifiedAudioCaptureOptions = {}) {
+}: UseAudioDenoisingOptions = {}) {
   
   // Estados principales
   const [isRecording, setIsRecording] = useState(false);
@@ -67,6 +68,13 @@ export function useUnifiedAudioCaptureWithDenoising({
   const startTimeRef = useRef<number>(0);
   const allChunksRef = useRef<Float32Array[]>([]);
   const processingQueueRef = useRef<Array<{id: number, data: Float32Array}>>([]);
+  
+  // BRUTAL BAZAR: Chunks expuestos para cualquier consumidor
+  const [audioChunks, setAudioChunks] = useState<Array<{
+    id: number;
+    data: Float32Array;
+    metadata: ProcessingMetadata;
+  }>>([]);
   
   // Configuración
   const MAX_RECORDING_SECONDS = 40 * 60; // 40 minutos máximo
@@ -141,23 +149,30 @@ export function useUnifiedAudioCaptureWithDenoising({
         return newStats;
       });
       
-      console.log(`[UnifiedCapture] Chunk #${chunkId} processed:`, {
+      console.log(`[AudioDenoising] Chunk #${chunkId} processed:`, {
         denoisingUsed: pipelineResult.usedDenoising,
         processingTime: processingTime,
         qualityImprovement: pipelineResult.qualityMetrics?.overallQuality || 0,
         activeFilters: metadata.activeFilters
       });
       
-      // Enviar audio procesado (NUNCA el original)
+      // BRUTAL BAZAR: Exponer chunk para CUALQUIER consumidor
+      setAudioChunks(prev => [...prev, {
+        id: chunkId,
+        data: pipelineResult.processedAudio,
+        metadata: metadata
+      }]);
+      
+      // Callback para consumidores específicos
       onChunkReady?.(pipelineResult.processedAudio, metadata);
       
     } catch (error) {
-      console.error(`[UnifiedCapture] Error processing chunk #${chunkId}:`, error);
+      console.error(`[AudioDenoising] Error processing chunk #${chunkId}:`, error);
       setError(`Error processing audio: ${error.message}`);
       
       // En caso de error crítico, usar fallback básico
       if (denoisingEnabled) {
-        console.warn(`[UnifiedCapture] Using fallback for chunk #${chunkId}`);
+        console.warn(`[AudioDenoising] Using fallback for chunk #${chunkId}`);
         const metadata: ProcessingMetadata = {
           chunkId: chunkId,
           originalLength: chunk.length,
@@ -302,6 +317,9 @@ export function useUnifiedAudioCaptureWithDenoising({
     isRecording,
     isProcessing,
     error,
+    
+    // BRUTAL BAZAR: Audio chunks para CUALQUIER consumidor
+    audioChunks,
     
     // Funciones de control
     start,
