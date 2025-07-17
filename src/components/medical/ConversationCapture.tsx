@@ -22,12 +22,35 @@ import { diarizationService, DiarizationUtils, DiarizationResult } from '@/src/d
 import AudioDenoisingDashboard from '@/src/components/medical/AudioDenoisingDashboard';
 import { SOAPNotesManager } from '@/src/components/medical/SOAPNotesManager';
 
+// Custom hooks for better state management
+import { useUIState } from './conversation-capture/hooks/useUIState';
+import { useTranscriptionState } from './conversation-capture/hooks/useTranscriptionState';
+import { useDiarizationState } from './conversation-capture/hooks/useDiarizationState';
+
 interface ConversationCaptureProps {
   onNext?: () => void;
   onTranscriptionComplete?: (transcript: string) => void;
   onSoapGenerated?: (notes: SOAPNotes) => void;
   className?: string;
 }
+
+// Constants for configuration (DRY)
+const TRANSCRIPTION_CONFIG = {
+  autoPreload: true,
+  processingMode: 'direct' as const,
+  chunkSize: 32000, // 2 segundos
+  onChunkProcessed: (text: string, chunkNumber: number) => {
+    console.log(`[ConversationCapture] Real transcription chunk #${chunkNumber}: ${text}`);
+  }
+};
+
+const SOAP_CONFIG = {
+  autoGenerate: false,
+  style: 'detailed' as const,
+  includeTimestamps: true,
+  includeConfidence: true,
+  medicalTerminology: 'mixed' as const
+};
 
 export const ConversationCapture = ({ 
   onNext, 
@@ -37,32 +60,10 @@ export const ConversationCapture = ({
 }: ConversationCaptureProps) => {  
   const { t } = useI18n();
   
-  // UI States
-  const [showPermissionDialog, setShowPermissionDialog] = useState(false);
-  const [showDenoisingDashboard, setShowDenoisingDashboard] = useState(false);
-  const [copySuccess, setCopySuccess] = useState(false);
-  const [isManualMode, setIsManualMode] = useState(false);
-  
-  // Transcription States
-  const [liveTranscript, setLiveTranscript] = useState('');
-  const [manualTranscript, setManualTranscript] = useState('');
-  const [webSpeechText, setWebSpeechText] = useState('');
-  const [minuteTranscriptions, setMinuteTranscriptions] = useState<Array<{
-    id: string;
-    text: string;
-    timestamp: number;
-    confidence: number;
-    medicalTerms: string[];
-    processingTime: number;
-    minuteNumber: number;
-  }>>([]);
-  const [currentChunkTexts, setCurrentChunkTexts] = useState<string[]>([]);
-  
-  
-  // Diarization States
-  const [diarizationResult, setDiarizationResult] = useState<DiarizationResult | null>(null);
-  const [isDiarizationProcessing, setIsDiarizationProcessing] = useState(false);
-  const [diarizationError, setDiarizationError] = useState<string | null>(null);
+  // Use custom hooks for state management (SRP)
+  const uiState = useUIState();
+  const transcriptionState = useTranscriptionState();
+  const diarizationState = useDiarizationState();
   
   // Refs
   const chunkCountRef = useRef(0);
@@ -81,6 +82,7 @@ export const ConversationCapture = ({
   }, []);
   
   // BRUTAL BAZAR: Real transcription via useSimpleWhisper (already denoised)
+  const whisperService = useSimpleWhisper(TRANSCRIPTION_CONFIG);
   const {
     transcription,
     status,
@@ -92,14 +94,7 @@ export const ConversationCapture = ({
     startTranscription,
     stopTranscription,
     resetTranscription
-  } = useSimpleWhisper({
-    autoPreload: true,
-    processingMode: 'direct',
-    chunkSize: 32000, // 2 segundos
-    onChunkProcessed: (text, chunkNumber) => {
-      console.log(`[ConversationCapture] Real transcription chunk #${chunkNumber}: ${text}`);
-    }
-  });
+  } = whisperService;
   
   // Unified engine status
   const engineStatus = { 
@@ -108,49 +103,31 @@ export const ConversationCapture = ({
   };
   
   // Solo mantener WebSpeech para transcripción en tiempo real (no accede al micrófono directamente)
+  const webSpeechService = useWebSpeechCapture();
   const {
     transcript: liveTranscriptData,
     isAvailable: isWebSpeechAvailable,
     error: webSpeechError,
     startRecording: startLiveTranscription,
     stopRecording: stopLiveTranscription
-  } = useWebSpeechCapture();
+  } = webSpeechService;
   
-  // Variables derivadas
+  // Variables derivadas (DRY)
   const isRecording = status === 'recording';
+  const hasTranscription = !!(transcription || (uiState.isManualMode && transcriptionState.manualTranscript));
+  const currentTranscript = uiState.isManualMode ? transcriptionState.manualTranscript : transcription?.text;
 
   
 
   useEffect(() => {
     if (liveTranscriptData) {
-      setLiveTranscript(liveTranscriptData);
-      // Almacenar el texto de Web Speech completo
-      setWebSpeechText(liveTranscriptData);
+      transcriptionState.updateLiveTranscript(liveTranscriptData);
     }
-  }, [liveTranscriptData]);
+  }, [liveTranscriptData, transcriptionState.updateLiveTranscript]);
 
 
   // Extract partial minute transcription logic
-  const savePartialMinuteTranscription = useCallback(() => {
-    if (currentChunkTexts.length > 0) {
-      const minuteNumber = minuteTranscriptions.length + 1;
-      const minuteText = currentChunkTexts.join(' ').trim();
-      const medicalTerms = extractMedicalTermsFromText(minuteText).map(t => t.term);
-      
-      const partialMinute = {
-        id: `minute_${minuteNumber}_partial`,
-        text: minuteText,
-        timestamp: Date.now(),
-        confidence: 0.95,
-        medicalTerms,
-        processingTime: 0,
-        minuteNumber
-      };
-      
-      setMinuteTranscriptions(prev => [...prev, partialMinute]);
-      setCurrentChunkTexts([]);
-    }
-  }, [currentChunkTexts, minuteTranscriptions.length]);
+  const savePartialMinuteTranscription = transcriptionState.savePartialMinuteTranscription;
 
   // Handle recording start
   const handleStartRecording = useCallback(async () => {
@@ -158,7 +135,7 @@ export const ConversationCapture = ({
     const started = await startTranscription();
     
     if (!started && error?.includes('permiso')) {
-      setShowPermissionDialog(true);
+      uiState.setShowPermissionDialog(true);
     } else if (started) {
       // Only start live transcription if WebSpeech is available
       if (isWebSpeechAvailable) {
@@ -211,20 +188,20 @@ export const ConversationCapture = ({
     
     // Usar audio del useSimpleWhisper (ya denoisado)
     const completeAudio = null; // useSimpleWhisper handles audio internally
-    const allMinutesText = minuteTranscriptions.map(m => m.text).join(' ').trim();
+    const allMinutesText = transcriptionState.minuteTranscriptions.map(m => m.text).join(' ').trim();
     
-    if (!completeAudio && !allMinutesText && !webSpeechText) {
+    if (!completeAudio && !allMinutesText && !transcriptionState.webSpeechText) {
       console.warn('[ConversationCapture] No hay audio ni texto para diarizar');
       return;
     }
     
-    setIsDiarizationProcessing(true);
-    setDiarizationError(null);
+    diarizationState.setDiarizationProcessing(true);
+    diarizationState.setDiarizationError(null);
     
     try {
       // 1. FUSIÓN DE TRANSCRIPCIONES - Algoritmo público
       const denoisedTranscriptionText = allMinutesText || '';
-      const mergedText = DiarizationUtils.mergeTranscriptions(denoisedTranscriptionText, webSpeechText);
+      const mergedText = DiarizationUtils.mergeTranscriptions(denoisedTranscriptionText, transcriptionState.webSpeechText);
       
       // Usar audio denoisado si está disponible
       if (completeAudio) {
@@ -234,7 +211,7 @@ export const ConversationCapture = ({
       
       console.log('[ConversationCapture] Texto fusionado:', {
         denoisedLength: denoisedTranscriptionText.length,
-        webSpeechLength: webSpeechText.length,
+        webSpeechLength: transcriptionState.webSpeechText.length,
         mergedLength: mergedText.length
       });
       
@@ -247,49 +224,43 @@ export const ConversationCapture = ({
       const result = await diarizationService.diarizeAudio(audioDataRef.current);
       
       console.log('[ConversationCapture] Diarización completada:', result);
-      setDiarizationResult(result);
+      diarizationState.setDiarizationResult(result);
       
     } catch (error) {
       console.error('[ConversationCapture] Error en diarización:', error);
-      setDiarizationError(error instanceof Error ? error.message : 'Error desconocido');
+      diarizationState.setDiarizationError(error instanceof Error ? error.message : 'Error desconocido');
     } finally {
-      setIsDiarizationProcessing(false);
+      diarizationState.setDiarizationProcessing(false);
     }
-  }, [minuteTranscriptions, webSpeechText]);
+  }, [transcriptionState.minuteTranscriptions, transcriptionState.webSpeechText, diarizationState]);
   
 
   const handleCopy = useCallback(async () => {
-    const textToCopy = isManualMode ? manualTranscript : transcription?.text;
+    const textToCopy = uiState.isManualMode ? transcriptionState.manualTranscript : transcription?.text;
     if (textToCopy) {
       await navigator.clipboard.writeText(textToCopy);
-      setCopySuccess(true);
-      setTimeout(() => setCopySuccess(false), 2000);
+      uiState.showCopySuccessFeedback();
     }
-  }, [isManualMode, manualTranscript, transcription]);
+  }, [uiState, transcriptionState.manualTranscript, transcription]);
 
   const handleReset = useCallback(() => {
     resetTranscription();
-    setLiveTranscript('');
-    setMinuteTranscriptions([]);
-    setCurrentChunkTexts([]);
-    setWebSpeechText('');
-    setDiarizationResult(null);
-    setDiarizationError(null);
+    transcriptionState.resetTranscriptionState();
+    diarizationState.resetDiarization();
     audioDataRef.current = null;
     chunkCountRef.current = 0;
-    setManualTranscript('');
     // Clear any WebSpeech error
     if (webSpeechError) {
       console.clear();
     }
-  }, [resetTranscription, webSpeechError]);
+  }, [resetTranscription, transcriptionState, diarizationState, webSpeechError]);
 
   const toggleMode = useCallback(() => {
-    setIsManualMode(!isManualMode);
+    uiState.toggleMode();
     if (isRecording) {
       toggleRecording();
     }
-  }, [isManualMode, isRecording, toggleRecording]);
+  }, [uiState, isRecording, toggleRecording]);
 
   // UI Rendering Methods
   const renderHeader = () => (
@@ -309,7 +280,7 @@ export const ConversationCapture = ({
           size="sm"
           className="flex items-center gap-2"
         >
-          {isManualMode ? (
+          {uiState.isManualMode ? (
             <>
               <Mic className="w-4 h-4" />
               Cambiar a voz
@@ -325,16 +296,16 @@ export const ConversationCapture = ({
       
       {/* Mode Indicator & Denoising Controls - BAZAR MODE */}
       <div className="flex items-center justify-center gap-4 mt-4">
-        <Badge variant={isManualMode ? 'secondary' : 'default'}>
-          {isManualMode ? 'Modo Manual' : 'Modo Voz'}
+        <Badge variant={uiState.isManualMode ? 'secondary' : 'default'}>
+          {uiState.isManualMode ? 'Modo Manual' : 'Modo Voz'}
         </Badge>
         
         {/* DENOISING DASHBOARD TOGGLE */}
-        {!isManualMode && (
+        {!uiState.isManualMode && (
           <button
-            onClick={() => setShowDenoisingDashboard(!showDenoisingDashboard)}
+            onClick={uiState.toggleDenoisingDashboard}
             className={`flex items-center gap-2 px-3 py-1 rounded-md text-sm transition-colors ${
-              showDenoisingDashboard 
+              uiState.showDenoisingDashboard 
                 ? 'bg-blue-100 text-blue-700' 
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
@@ -346,7 +317,7 @@ export const ConversationCapture = ({
       </div>
       
       {/* DENOISING DASHBOARD - EN CONTEXTO */}
-      {showDenoisingDashboard && !isManualMode && (
+      {uiState.showDenoisingDashboard && !uiState.isManualMode && (
         <AudioDenoisingDashboard />
       )}
     </div>
@@ -360,8 +331,8 @@ export const ConversationCapture = ({
             Escribe la conversación manualmente:
           </label>
           <textarea
-            value={manualTranscript}
-            onChange={(e) => setManualTranscript(e.target.value)}
+            value={transcriptionState.manualTranscript}
+            onChange={(e) => transcriptionState.updateManualTranscript(e.target.value)}
             className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
             rows={8}
             placeholder="Escribe o pega la transcripción de la conversación médica aquí..."
@@ -383,9 +354,9 @@ export const ConversationCapture = ({
             onClick={handleCopy}
             variant="outline"
             size="sm"
-            disabled={!manualTranscript}
+            disabled={!transcriptionState.manualTranscript}
           >
-            {copySuccess ? 'Copiado!' : 'Copiar'}
+            {uiState.copySuccess ? 'Copiado!' : 'Copiar'}
           </Button>
         </div>
       </CardContent>
@@ -400,9 +371,8 @@ export const ConversationCapture = ({
       <div className="mt-6 flex justify-center">
         <Button 
           onClick={() => {
-            const finalTranscript = isManualMode ? manualTranscript : transcription?.text;
-            if (finalTranscript && onTranscriptionComplete) {
-              onTranscriptionComplete(finalTranscript);
+            if (currentTranscript && onTranscriptionComplete) {
+              onTranscriptionComplete(currentTranscript);
             }
             onNext();
           }} 
@@ -418,15 +388,15 @@ export const ConversationCapture = ({
   return (
     <div className={`max-w-4xl mx-auto space-y-6 ${className} fade-in`}>
       <PermissionDialog 
-        isOpen={showPermissionDialog} 
-        onClose={() => setShowPermissionDialog(false)} 
+        isOpen={uiState.showPermissionDialog} 
+        onClose={() => uiState.setShowPermissionDialog(false)} 
       />
 
 
       {renderHeader()}
 
       {/* Info message when WebSpeech is not available */}
-      {!isWebSpeechAvailable && !isManualMode && (
+      {!isWebSpeechAvailable && !uiState.isManualMode && (
         <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-4">
           <div className="flex items-start">
             <svg className="w-5 h-5 text-blue-600  mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
@@ -443,18 +413,18 @@ export const ConversationCapture = ({
       )}
 
       {/* Manual Input Interface */}
-      {isManualMode ? (
+      {uiState.isManualMode ? (
         renderManualInput()
       ) : (
         <RecordingCard
           isRecording={isRecording}
           audioLevel={audioLevel}
           recordingTime={recordingTime}
-          liveTranscript={liveTranscript}
+          liveTranscript={transcriptionState.liveTranscript}
           status={status}
           engineStatus={engineStatus}
           transcription={transcription}
-          copySuccess={copySuccess}
+          copySuccess={uiState.copySuccess}
           onToggleRecording={toggleRecording}
           onReset={handleReset}
           onCopy={handleCopy}
@@ -479,18 +449,18 @@ export const ConversationCapture = ({
       )}
       
       {/* Mostrar transcripción final cuando termine */}
-      {(transcription || (isManualMode && manualTranscript)) && !isRecording && (
+      {hasTranscription && !isRecording && (
         <>
           {console.log('[ConversationCapture] MOSTRANDO TRANSCRIPCIÓN FINAL:', transcription)}
           <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
               Transcripción completa
             </h3>
-            {isManualMode ? (
+            {uiState.isManualMode ? (
               <Card>
                 <CardContent className="p-4">
                   <p className="text-gray-800 dark:text-gray-200 whitespace-pre-wrap">
-                    {manualTranscript}
+                    {transcriptionState.manualTranscript}
                   </p>
                 </CardContent>
               </Card>
@@ -498,10 +468,10 @@ export const ConversationCapture = ({
               <TranscriptionResult 
                 transcription={transcription} 
                 audioUrl={audioUrl}
-                webSpeechText={webSpeechText}
-                diarizationResult={diarizationResult}
-                isDiarizationProcessing={isDiarizationProcessing}
-                diarizationError={diarizationError}
+                webSpeechText={transcriptionState.webSpeechText}
+                diarizationResult={diarizationState.diarizationResult}
+                isDiarizationProcessing={diarizationState.isDiarizationProcessing}
+                diarizationError={diarizationState.diarizationError}
               />
             )}
           </div>
@@ -509,17 +479,11 @@ export const ConversationCapture = ({
       )}
 
       {/* SOAP Notes Manager */}
-      {(transcription || (isManualMode && manualTranscript)) && !isRecording && (
+      {hasTranscription && !isRecording && (
         <SOAPNotesManager
-          transcription={isManualMode ? manualTranscript : transcription?.text}
+          transcription={currentTranscript}
           onNotesGenerated={onSoapGenerated}
-          config={{
-            autoGenerate: false,
-            style: 'detailed',
-            includeTimestamps: true,
-            includeConfidence: true,
-            medicalTerminology: 'mixed'
-          }}
+          config={SOAP_CONFIG}
           showActions={true}
           editable={true}
           className="mt-6"
@@ -531,7 +495,7 @@ export const ConversationCapture = ({
       <ProcessingStatus isProcessing={status === 'processing'} />
 
       {/* Action buttons */}
-      {((transcription || (isManualMode && manualTranscript)) && !isRecording) && renderActionButtons()}
+      {hasTranscription && !isRecording && renderActionButtons()}
     </div>
   );
 };
