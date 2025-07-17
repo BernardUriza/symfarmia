@@ -17,7 +17,7 @@ import {
   ErrorDisplay,
   ProcessingStatus
 } from '@/src/components/medical/conversation-capture/components';
-import type { SOAPNotes } from '@/src/domains/medical-ai/types';
+import type { SOAPNotes } from '@/src/types/medical';
 import { diarizationService, DiarizationUtils, DiarizationResult } from '@/src/domains/medical-ai/services/DiarizationService';
 import AudioDenoisingDashboard from '@/src/components/medical/AudioDenoisingDashboard';
 import { SOAPNotesManager } from '@/src/components/medical/SOAPNotesManager';
@@ -96,12 +96,6 @@ export const ConversationCapture = ({
     resetTranscription
   } = whisperService;
   
-  // Unified engine status
-  const engineStatus = { 
-    whisper: whisperEngineStatus, 
-    webSpeech: isWebSpeechAvailable ? 'ready' : 'unavailable' 
-  };
-  
   // Solo mantener WebSpeech para transcripción en tiempo real (no accede al micrófono directamente)
   const webSpeechService = useWebSpeechCapture();
   const {
@@ -111,6 +105,12 @@ export const ConversationCapture = ({
     startRecording: startLiveTranscription,
     stopRecording: stopLiveTranscription
   } = webSpeechService;
+  
+  // Unified engine status
+  const engineStatus = { 
+    whisper: whisperEngineStatus, 
+    webSpeech: isWebSpeechAvailable ? 'ready' : 'unavailable' 
+  };
   
   // Variables derivadas (DRY)
   const isRecording = status === 'recording';
@@ -128,6 +128,58 @@ export const ConversationCapture = ({
 
   // Extract partial minute transcription logic
   const savePartialMinuteTranscription = transcriptionState.savePartialMinuteTranscription;
+  
+  // BAZAR: Función de diarización completamente auditable
+  const processDiarization = useCallback(async () => {
+    console.log('[ConversationCapture] Iniciando diarización BAZAR...');
+    
+    // Usar audio del useSimpleWhisper (ya denoisado)
+    const completeAudio = null; // useSimpleWhisper handles audio internally
+    const allMinutesText = transcriptionState.minuteTranscriptions.map(m => m.text).join(' ').trim();
+    
+    if (!completeAudio && !allMinutesText && !transcriptionState.webSpeechText) {
+      console.warn('[ConversationCapture] No hay audio ni texto para diarizar');
+      return;
+    }
+    
+    diarizationState.setDiarizationProcessing(true);
+    diarizationState.setDiarizationError(null);
+    
+    try {
+      // 1. FUSIÓN DE TRANSCRIPCIONES - Algoritmo público
+      const denoisedTranscriptionText = allMinutesText || '';
+      const mergedText = DiarizationUtils.mergeTranscriptions(denoisedTranscriptionText, transcriptionState.webSpeechText);
+      
+      // Usar audio denoisado si está disponible
+      if (completeAudio) {
+        audioDataRef.current = completeAudio;
+        console.log(`[ConversationCapture] Usando audio denoisado para diarización: ${completeAudio.length} samples`);
+      }
+      
+      console.log('[ConversationCapture] Texto fusionado:', {
+        denoisedLength: denoisedTranscriptionText.length,
+        webSpeechLength: transcriptionState.webSpeechText.length,
+        mergedLength: mergedText.length
+      });
+      
+      // 2. OBTENER AUDIO DATA - Transparente
+      if (!audioDataRef.current) {
+        throw new Error('No hay datos de audio disponibles para diarización');
+      }
+      
+      // 3. PROCESAR DIARIZACIÓN - Servicio modular
+      const result = await diarizationService.diarizeAudio(audioDataRef.current);
+      
+      console.log('[ConversationCapture] Diarización completada:', result);
+      diarizationState.setDiarizationResult(result);
+      
+    } catch (error) {
+      console.error('[ConversationCapture] Error en diarización:', error);
+      diarizationState.setDiarizationError(error instanceof Error ? error.message : 'Error desconocido');
+    } finally {
+      diarizationState.setDiarizationProcessing(false);
+    }
+  }, [transcriptionState.minuteTranscriptions, transcriptionState.webSpeechText, diarizationState]);
 
   // Handle recording start
   const handleStartRecording = useCallback(async () => {
@@ -182,59 +234,6 @@ export const ConversationCapture = ({
     }
   };
   
-  // BAZAR: Función de diarización completamente auditable
-  const processDiarization = useCallback(async () => {
-    console.log('[ConversationCapture] Iniciando diarización BAZAR...');
-    
-    // Usar audio del useSimpleWhisper (ya denoisado)
-    const completeAudio = null; // useSimpleWhisper handles audio internally
-    const allMinutesText = transcriptionState.minuteTranscriptions.map(m => m.text).join(' ').trim();
-    
-    if (!completeAudio && !allMinutesText && !transcriptionState.webSpeechText) {
-      console.warn('[ConversationCapture] No hay audio ni texto para diarizar');
-      return;
-    }
-    
-    diarizationState.setDiarizationProcessing(true);
-    diarizationState.setDiarizationError(null);
-    
-    try {
-      // 1. FUSIÓN DE TRANSCRIPCIONES - Algoritmo público
-      const denoisedTranscriptionText = allMinutesText || '';
-      const mergedText = DiarizationUtils.mergeTranscriptions(denoisedTranscriptionText, transcriptionState.webSpeechText);
-      
-      // Usar audio denoisado si está disponible
-      if (completeAudio) {
-        audioDataRef.current = completeAudio;
-        console.log(`[ConversationCapture] Usando audio denoisado para diarización: ${completeAudio.length} samples`);
-      }
-      
-      console.log('[ConversationCapture] Texto fusionado:', {
-        denoisedLength: denoisedTranscriptionText.length,
-        webSpeechLength: transcriptionState.webSpeechText.length,
-        mergedLength: mergedText.length
-      });
-      
-      // 2. OBTENER AUDIO DATA - Transparente
-      if (!audioDataRef.current) {
-        throw new Error('No hay datos de audio disponibles para diarización');
-      }
-      
-      // 3. PROCESAR DIARIZACIÓN - Servicio modular
-      const result = await diarizationService.diarizeAudio(audioDataRef.current);
-      
-      console.log('[ConversationCapture] Diarización completada:', result);
-      diarizationState.setDiarizationResult(result);
-      
-    } catch (error) {
-      console.error('[ConversationCapture] Error en diarización:', error);
-      diarizationState.setDiarizationError(error instanceof Error ? error.message : 'Error desconocido');
-    } finally {
-      diarizationState.setDiarizationProcessing(false);
-    }
-  }, [transcriptionState.minuteTranscriptions, transcriptionState.webSpeechText, diarizationState]);
-  
-
   const handleCopy = useCallback(async () => {
     const textToCopy = uiState.isManualMode ? transcriptionState.manualTranscript : transcription?.text;
     if (textToCopy) {
