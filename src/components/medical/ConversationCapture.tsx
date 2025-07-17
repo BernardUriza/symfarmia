@@ -10,7 +10,7 @@ import { useI18n } from '@/src/domains/core/hooks/useI18n';
 import { Badge } from '@/src/components/ui/badge';
 import { Card, CardContent } from '@/src/components/ui/card';
 import { medicalAIService } from '@/src/domains/medical-ai/services/medicalAIService';
-import { PenTool, Keyboard, Settings } from 'lucide-react';
+import { PenTool, Keyboard, Settings, Mic } from 'lucide-react';
 import {
   PermissionDialog,
   RecordingCard,
@@ -133,57 +133,75 @@ export const ConversationCapture = ({
   }, [liveTranscriptData]);
 
 
+  // Extract partial minute transcription logic
+  const savePartialMinuteTranscription = useCallback(() => {
+    if (currentChunkTexts.length > 0) {
+      const minuteNumber = minuteTranscriptions.length + 1;
+      const minuteText = currentChunkTexts.join(' ').trim();
+      const medicalTerms = extractMedicalTermsFromText(minuteText).map(t => t.term);
+      
+      const partialMinute = {
+        id: `minute_${minuteNumber}_partial`,
+        text: minuteText,
+        timestamp: Date.now(),
+        confidence: 0.95,
+        medicalTerms,
+        processingTime: 0,
+        minuteNumber
+      };
+      
+      setMinuteTranscriptions(prev => [...prev, partialMinute]);
+      setCurrentChunkTexts([]);
+    }
+  }, [currentChunkTexts, minuteTranscriptions.length]);
+
+  // Handle recording start
+  const handleStartRecording = useCallback(async () => {
+    console.log('[ConversationCapture] Starting real transcription with denoised audio');
+    const started = await startTranscription();
+    
+    if (!started && error?.includes('permiso')) {
+      setShowPermissionDialog(true);
+    } else if (started) {
+      // Only start live transcription if WebSpeech is available
+      if (isWebSpeechAvailable) {
+        const liveStarted = await startLiveTranscription();
+        if (!liveStarted && webSpeechError) {
+          console.warn('Live transcription not available:', webSpeechError);
+        }
+      } else {
+        console.info('WebSpeech not available, using Whisper only');
+      }
+    }
+    return started;
+  }, [startTranscription, error, isWebSpeechAvailable, startLiveTranscription, webSpeechError]);
+
+  // Handle recording stop
+  const handleStopRecording = useCallback(async () => {
+    stopLiveTranscription();
+    
+    // Save any pending chunks
+    savePartialMinuteTranscription();
+    
+    const success = await stopTranscription();
+    if (success && transcription?.text && onTranscriptionComplete) {
+      onTranscriptionComplete(transcription.text);
+    }
+    
+    // Process diarization after stopping
+    await processDiarization();
+    
+    return success;
+  }, [stopLiveTranscription, savePartialMinuteTranscription, stopTranscription, 
+      transcription, onTranscriptionComplete, processDiarization]);
+
+  // Main toggle recording function
   const toggleRecording = async () => {
     try {
       if (isRecording) {
-        stopLiveTranscription();
-        
-        // Si hay chunks pendientes, agregarlos como último minuto parcial
-        if (currentChunkTexts.length > 0) {
-          const minuteNumber = minuteTranscriptions.length + 1;
-          const minuteText = currentChunkTexts.join(' ').trim();
-          const medicalTerms = extractMedicalTermsFromText(minuteText).map(t => t.term);
-          
-          const partialMinute = {
-            id: `minute_${minuteNumber}_partial`,
-            text: minuteText,
-            timestamp: Date.now(),
-            confidence: 0.95,
-            medicalTerms,
-            processingTime: 0,
-            minuteNumber
-          };
-          
-          setMinuteTranscriptions(prev => [...prev, partialMinute]);
-          setCurrentChunkTexts([]); // Limpiar chunks actuales
-        }
-        
-        const success = await stopTranscription();
-        if (success && transcription?.text && onTranscriptionComplete) {
-          onTranscriptionComplete(transcription.text);
-        }
-        
-        
-        // BAZAR: Procesar diarización después de detener grabación
-        await processDiarization();
+        await handleStopRecording();
       } else {
-        // START - Real transcription with useSimpleWhisper (already denoised)
-        console.log('[ConversationCapture] Starting real transcription with denoised audio');
-        const started = await startTranscription();
-        
-        if (!started && error?.includes('permiso')) {
-          setShowPermissionDialog(true);
-        } else if (started) {
-          // Only start live transcription if WebSpeech is available
-          if (isWebSpeechAvailable) {
-            const liveStarted = await startLiveTranscription();
-            if (!liveStarted && webSpeechError) {
-              console.warn('Live transcription not available:', webSpeechError);
-            }
-          } else {
-            console.info('WebSpeech not available, using Whisper only');
-          }
-        }
+        await handleStartRecording();
       }
     } catch (error) {
       console.error(t('conversation.capture.error_toggling_recording'), error);
@@ -191,7 +209,7 @@ export const ConversationCapture = ({
   };
   
   // BAZAR: Función de diarización completamente auditable
-  const processDiarization = async () => {
+  const processDiarization = useCallback(async () => {
     console.log('[ConversationCapture] Iniciando diarización BAZAR...');
     
     // Usar audio del useSimpleWhisper (ya denoisado)
@@ -240,9 +258,9 @@ export const ConversationCapture = ({
     } finally {
       setIsDiarizationProcessing(false);
     }
-  };
+  }, [minuteTranscriptions, webSpeechText]);
   
-  const generateSOAPNotes = async () => {
+  const generateSOAPNotes = useCallback(async () => {
     const textToProcess = isManualMode ? manualTranscript : transcription?.text;
     
     if (!textToProcess) return;
@@ -260,26 +278,26 @@ export const ConversationCapture = ({
     } finally {
       setIsGeneratingSOAP(false);
     }
-  };
+  }, [isManualMode, manualTranscript, transcription, onSoapGenerated]);
 
-  const handleCopy = async () => {
+  const handleCopy = useCallback(async () => {
     const textToCopy = isManualMode ? manualTranscript : transcription?.text;
     if (textToCopy) {
       await navigator.clipboard.writeText(textToCopy);
       setCopySuccess(true);
       setTimeout(() => setCopySuccess(false), 2000);
     }
-  };
+  }, [isManualMode, manualTranscript, transcription]);
 
-  const handleReset = () => {
+  const handleReset = useCallback(() => {
     resetTranscription();
     setLiveTranscript('');
     setMinuteTranscriptions([]);
     setCurrentChunkTexts([]);
-    setWebSpeechText(''); // Limpiar texto de Web Speech
-    setDiarizationResult(null); // Limpiar resultado de diarización
-    setDiarizationError(null); // Limpiar errores de diarización
-    audioDataRef.current = null; // Limpiar referencia de audio
+    setWebSpeechText('');
+    setDiarizationResult(null);
+    setDiarizationError(null);
+    audioDataRef.current = null;
     chunkCountRef.current = 0;
     setManualTranscript('');
     setSoapNotes(null);
@@ -287,14 +305,170 @@ export const ConversationCapture = ({
     if (webSpeechError) {
       console.clear();
     }
-  };
+  }, [resetTranscription, webSpeechError]);
 
-  const toggleMode = () => {
+  const toggleMode = useCallback(() => {
     setIsManualMode(!isManualMode);
     if (isRecording) {
       toggleRecording();
     }
-  };
+  }, [isManualMode, isRecording, toggleRecording]);
+
+  // UI Rendering Methods
+  const renderHeader = () => (
+    <div className="mb-6">
+      <div className="flex justify-between items-center">
+        <div className="text-center flex-1">
+          <h1 className="text-2xl font-medium mb-2">
+            {t('conversation.capture.title')}
+          </h1>
+          <p className="text-gray">
+            {t('conversation.capture.subtitle')}
+          </p>
+        </div>
+        <Button
+          onClick={toggleMode}
+          variant="outline"
+          size="sm"
+          className="flex items-center gap-2"
+        >
+          {isManualMode ? (
+            <>
+              <Mic className="w-4 h-4" />
+              Cambiar a voz
+            </>
+          ) : (
+            <>
+              <PenTool className="w-4 h-4" />
+              Modo manual
+            </>
+          )}
+        </Button>
+      </div>
+      
+      {/* Mode Indicator & Denoising Controls - BAZAR MODE */}
+      <div className="flex items-center justify-center gap-4 mt-4">
+        <Badge variant={isManualMode ? 'secondary' : 'default'}>
+          {isManualMode ? 'Modo Manual' : 'Modo Voz'}
+        </Badge>
+        
+        {/* DENOISING DASHBOARD TOGGLE */}
+        {!isManualMode && (
+          <button
+            onClick={() => setShowDenoisingDashboard(!showDenoisingDashboard)}
+            className={`flex items-center gap-2 px-3 py-1 rounded-md text-sm transition-colors ${
+              showDenoisingDashboard 
+                ? 'bg-blue-100 text-blue-700' 
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            }`}
+          >
+            <Settings className="w-4 h-4" />
+            Dashboard
+          </button>
+        )}
+      </div>
+      
+      {/* DENOISING DASHBOARD - EN CONTEXTO */}
+      {showDenoisingDashboard && !isManualMode && (
+        <AudioDenoisingDashboard />
+      )}
+    </div>
+  );
+
+  const renderManualInput = () => (
+    <Card>
+      <CardContent className="p-6 space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Escribe la conversación manualmente:
+          </label>
+          <textarea
+            value={manualTranscript}
+            onChange={(e) => setManualTranscript(e.target.value)}
+            className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+            rows={8}
+            placeholder="Escribe o pega la transcripción de la conversación médica aquí..."
+            autoFocus
+          />
+        </div>
+        <p className="text-sm">
+          Puedes escribir directamente o pegar texto desde otra fuente.
+        </p>
+        <div className="flex justify-end space-x-2">
+          <Button
+            onClick={handleReset}
+            variant="outline"
+            size="sm"
+          >
+            Limpiar
+          </Button>
+          <Button
+            onClick={handleCopy}
+            variant="outline"
+            size="sm"
+            disabled={!manualTranscript}
+          >
+            {copySuccess ? 'Copiado!' : 'Copiar'}
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  const renderSOAPNotes = () => (
+    <Card className="mt-4">
+      <CardContent className="space-y-3 p-6">
+        <h3 className="font-semibold text-gray-900 dark:text-white text-lg mb-4">Notas SOAP</h3>
+        <div className="space-y-3">
+          <div>
+            <span className="font-medium text-gray-700 dark:text-gray-300">Subjetivo:</span>
+            <p className="text-gray-600 dark:text-gray-400 mt-1">{soapNotes?.subjective}</p>
+          </div>
+          <div>
+            <span className="font-medium text-gray-700 dark:text-gray-300">Objetivo:</span>
+            <p className="text-gray-600 dark:text-gray-400 mt-1">{soapNotes?.objective}</p>
+          </div>
+          <div>
+            <span className="font-medium text-gray-700 dark:text-gray-300">Evaluación:</span>
+            <p className="text-gray-600 dark:text-gray-400 mt-1">{soapNotes?.assessment}</p>
+          </div>
+          <div>
+            <span className="font-medium text-gray-700 dark:text-gray-300">Plan:</span>
+            <p className="text-gray-600 dark:text-gray-400 mt-1">{soapNotes?.plan}</p>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  const renderActionButtons = () => (
+    <div className="mt-6 flex justify-center gap-3">
+      {!soapNotes && (
+        <Button 
+          onClick={generateSOAPNotes} 
+          variant="outline"
+          disabled={isGeneratingSOAP}
+        >
+          {isGeneratingSOAP ? 'Generando...' : 'Generar Notas SOAP'}
+        </Button>
+      )}
+      {onNext && (
+        <Button 
+          onClick={() => {
+            const finalTranscript = isManualMode ? manualTranscript : transcription?.text;
+            if (finalTranscript && onTranscriptionComplete) {
+              onTranscriptionComplete(finalTranscript);
+            }
+            onNext();
+          }} 
+          size="lg" 
+          variant="default"
+        >
+          {t('conversation.capture.next')}
+        </Button>
+      )}
+    </div>
+  );
   
   return (
     <div className={`max-w-4xl mx-auto space-y-6 ${className} fade-in`}>
@@ -304,63 +478,7 @@ export const ConversationCapture = ({
       />
 
 
-      <div className="mb-6">
-        <div className="flex justify-between items-center">
-          <div className="text-center flex-1">
-            <h1 className="text-2xl font-medium mb-2">
-              {t('conversation.capture.title')}
-            </h1>
-            <p className="text-gray">
-              {t('conversation.capture.subtitle')}
-            </p>
-          </div>
-          <Button
-            onClick={toggleMode}
-            variant="outline"
-            size="sm"
-            className="flex items-center gap-2"
-          >
-            {isManualMode ? (
-              <>
-                <Mic className="w-4 h-4" />
-                Cambiar a voz
-              </>
-            ) : (
-              <>
-                <PenTool className="w-4 h-4" />
-                Modo manual
-              </>
-            )}
-          </Button>
-        </div>
-        
-        {/* Mode Indicator & Denoising Controls - BAZAR MODE */}
-        <div className="flex items-center justify-center gap-4 mt-4">
-          <Badge variant={isManualMode ? 'secondary' : 'default'}>
-            {isManualMode ? 'Modo Manual' : 'Modo Voz'}
-          </Badge>
-          
-          {/* DENOISING DASHBOARD TOGGLE */}
-          {!isManualMode && (
-            <button
-              onClick={() => setShowDenoisingDashboard(!showDenoisingDashboard)}
-              className={`flex items-center gap-2 px-3 py-1 rounded-md text-sm transition-colors ${
-                showDenoisingDashboard 
-                  ? 'bg-blue-100 text-blue-700' 
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              <Settings className="w-4 h-4" />
-              Dashboard
-            </button>
-          )}
-        </div>
-        
-        {/* DENOISING DASHBOARD - EN CONTEXTO */}
-        {showDenoisingDashboard && !isManualMode && (
-          <AudioDenoisingDashboard />
-        )}
-      </div>
+      {renderHeader()}
 
       {/* Info message when WebSpeech is not available */}
       {!isWebSpeechAvailable && !isManualMode && (
@@ -381,43 +499,7 @@ export const ConversationCapture = ({
 
       {/* Manual Input Interface */}
       {isManualMode ? (
-        <Card>
-          <CardContent className="p-6 space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Escribe la conversación manualmente:
-              </label>
-              <textarea
-                value={manualTranscript}
-                onChange={(e) => setManualTranscript(e.target.value)}
-                className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                rows={8}
-                placeholder="Escribe o pega la transcripción de la conversación médica aquí..."
-                autoFocus
-              />
-            </div>
-            <p className="text-sm">
-              Puedes escribir directamente o pegar texto desde otra fuente.
-            </p>
-            <div className="flex justify-end space-x-2">
-              <Button
-                onClick={handleReset}
-                variant="outline"
-                size="sm"
-              >
-                Limpiar
-              </Button>
-              <Button
-                onClick={handleCopy}
-                variant="outline"
-                size="sm"
-                disabled={!manualTranscript}
-              >
-                {copySuccess ? 'Copiado!' : 'Copiar'}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        renderManualInput()
       ) : (
         <RecordingCard
           isRecording={isRecording}
@@ -482,65 +564,14 @@ export const ConversationCapture = ({
       )}
 
       {/* SOAP Notes Display */}
-      {soapNotes && (
-        <Card className="mt-4">
-          <CardContent className="space-y-3 p-6">
-            <h3 className="font-semibold text-gray-900 dark:text-white text-lg mb-4">Notas SOAP</h3>
-            <div className="space-y-3">
-              <div>
-                <span className="font-medium text-gray-700 dark:text-gray-300">Subjetivo:</span>
-                <p className="text-gray-600 dark:text-gray-400 mt-1">{soapNotes.subjective}</p>
-              </div>
-              <div>
-                <span className="font-medium text-gray-700 dark:text-gray-300">Objetivo:</span>
-                <p className="text-gray-600 dark:text-gray-400 mt-1">{soapNotes.objective}</p>
-              </div>
-              <div>
-                <span className="font-medium text-gray-700 dark:text-gray-300">Evaluación:</span>
-                <p className="text-gray-600 dark:text-gray-400 mt-1">{soapNotes.assessment}</p>
-              </div>
-              <div>
-                <span className="font-medium text-gray-700 dark:text-gray-300">Plan:</span>
-                <p className="text-gray-600 dark:text-gray-400 mt-1">{soapNotes.plan}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      {soapNotes && renderSOAPNotes()}
 
       <ErrorDisplay error={error} />
 
       <ProcessingStatus isProcessing={status === 'processing'} />
 
       {/* Action buttons */}
-      {((transcription || (isManualMode && manualTranscript)) && !isRecording) && (
-        <div className="mt-6 flex justify-center gap-3">
-          {!soapNotes && (
-            <Button 
-              onClick={generateSOAPNotes} 
-              variant="outline"
-              disabled={isGeneratingSOAP}
-            >
-              {isGeneratingSOAP ? 'Generando...' : 'Generar Notas SOAP'}
-            </Button>
-          )}
-          {onNext && (
-            <Button 
-              onClick={() => {
-                const finalTranscript = isManualMode ? manualTranscript : transcription?.text;
-                if (finalTranscript && onTranscriptionComplete) {
-                  onTranscriptionComplete(finalTranscript);
-                }
-                onNext();
-              }} 
-              size="lg" 
-              variant="default"
-            >
-              {t('conversation.capture.next')}
-            </Button>
-          )}
-        </div>
-      )}
+      {((transcription || (isManualMode && manualTranscript)) && !isRecording) && renderActionButtons()}
     </div>
   );
 };
