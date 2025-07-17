@@ -3,7 +3,7 @@ import './conversation-capture/styles.css';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useSimpleWhisper } from '@/src/domains/medical-ai/hooks/useSimpleWhisper';
-import { useRealAudioCapture } from '@/src/domains/medical-ai/hooks/useRealAudioCapture';
+import { useWebSpeechCapture } from '@/src/domains/medical-ai/hooks/useWebSpeechCapture';
 import { useUnifiedAudioCaptureWithDenoising } from '@/src/domains/medical-ai/hooks/useUnifiedAudioCaptureWithDenoising';
 import { audioPipelineIntegration } from '@/src/domains/medical-ai/services/AudioPipelineIntegration';
 import { extractMedicalTermsFromText } from '@/src/domains/medical-ai/utils/medicalTerms';
@@ -150,7 +150,7 @@ export const ConversationCapture = ({
     error: webSpeechError,
     startRecording: startLiveTranscription,
     stopRecording: stopLiveTranscription
-  } = useRealAudioCapture();
+  } = useWebSpeechCapture();
 
   // HOOK DE DENOISING - BRUTAL BAZAR MODE
   const {
