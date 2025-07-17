@@ -15,18 +15,14 @@ The Whisper preloading system allows the AI model to load in the background when
 ### 1. Add to Root Layout (Recommended)
 ```tsx
 // app/layout.tsx
-import { WhisperPreloadInitializer } from '@/src/domains/medical-ai';
+import WhisperPreloaderGlobal from '@/src/domains/medical-ai/components/WhisperPreloaderGlobal';
 
 export default function RootLayout({ children }) {
   return (
     <html>
       <body>
         {children}
-        <WhisperPreloadInitializer 
-          priority="auto"     // auto | high | low
-          delay={3000}        // ms to wait after page load
-          showProgress={false} // show loading indicator
-        />
+        <WhisperPreloaderGlobal />
       </body>
     </html>
   );
