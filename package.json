@@ -16,7 +16,7 @@
     "dev:reset": "rm -rf .next && npm run kill:brave-cache && npm run dev",
     "kill:ports": "node scripts/kill-ports.js",
     "kill:brave-cache": "node scripts/kill-brave-cache.js",
-    "build": "npm run version:generate && npx prisma generate && next build",
+    "build": "npm run version:generate && npx prisma generate && NODE_OPTIONS='--max-old-space-size=4096' next build",
     "build:guardian": "node scripts/build-guardian.js --build && npm run build",
     "build:enhanced": "node scripts/enhanced-build.js",
     "build:emergency": "node scripts/build-recovery.js emergency",

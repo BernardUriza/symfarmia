@@ -7,6 +7,12 @@ const nextConfig = {
     unoptimized: true,
   },
 
+  // Memory optimizations for Next.js 15+
+  experimental: {
+    webpackMemoryOptimizations: true,
+    cpus: 1,
+  },
+
   // Dev server configuration
   devIndicators: {
     position: 'bottom-right',
