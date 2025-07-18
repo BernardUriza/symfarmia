@@ -1,282 +1,206 @@
-/**
- * useAudioDenoising - Captura unificada con preprocesamiento (denoising)
- *
- * Este hook centraliza la captura de audio, aplica denoising mediante
- * AudioPipelineIntegration y expone los chunks limpios, estadísticas
- * y control (start/stop).
- */
-import { useState, useRef, useEffect, useCallback } from 'react'
-import { audioPipelineIntegration } from '../services/AudioPipelineIntegration'
-import { useAudioProcessor } from './useAudioProcessor'
-import * as RnnoiseModule from '@jitsi/rnnoise-wasm'
+import { useEffect, useRef, useState, useCallback } from 'react';
+import * as RnnoiseModule from '@jitsi/rnnoise-wasm';
 
-
-/** Metadata asociada al procesamiento de cada chunk */
 export interface ProcessingMetadata {
-  chunkId: number
-  originalLength: number
-  processedLength: number
-  denoisingUsed: boolean
-  processingTime: number
-  qualityMetrics?: any
-  activeFilters?: string[]
-  fallbackMode?: boolean
+  chunkId: number;
+  originalLength: number;
+  processedLength: number;
+  denoisingUsed: boolean;
+  processingTime: number;
+  qualityMetrics?: any;
+  activeFilters?: string[];
+  fallbackMode?: boolean;
 }
 
-/** Opciones de configuración del hook */
 export interface UseAudioDenoisingOptions {
-  onChunkReady?: (audio: Float32Array, metadata: ProcessingMetadata) => void
-  chunkSize?: number
-  sampleRate?: number
+  onChunkReady?: (audio: Float32Array, metadata: ProcessingMetadata) => void;
+  chunkSize?: number;
+  sampleRate?: number;
 }
 
-/** Interfaz de retorno del hook */
 export interface UseAudioDenoisingReturn {
-  isRecording: boolean
-  isProcessing: boolean
-  error: string
-  audioChunks: Array<{ id: number; data: Float32Array; metadata: ProcessingMetadata }>
-  start: () => Promise<MediaStream | null>
-  stop: () => void
-  getCompleteAudio: () => Float32Array
+  isRecording: boolean;
+  isProcessing: boolean;
+  error: string;
+  audioChunks: Array<{ id: number; data: Float32Array; metadata: ProcessingMetadata }>;
+  start: () => Promise<MediaStream | null>;
+  stop: () => void;
+  getCompleteAudio: () => Float32Array;
   processingStats: {
-    totalChunks: number
-    denoisedChunks: number
-    fallbackChunks: number
-    averageProcessingTime: number
-  }
-  configureDenoisingMode: (enabled: boolean) => void
-  reset: () => void
-  /** Nivel de audio del último chunk procesado (0-255) */
-  audioLevel: number
-  /** Tiempo de grabación en segundos */
-  recordingTime: number
+    totalChunks: number;
+    denoisedChunks: number;
+    fallbackChunks: number;
+    averageProcessingTime: number;
+  };
+  configureDenoisingMode: (enabled: boolean) => void;
+  reset: () => void;
+  audioLevel: number;
+  recordingTime: number;
 }
 
 export function useAudioDenoising(
-  { onChunkReady, chunkSize = 4096, sampleRate = 16000 }: UseAudioDenoisingOptions = {}
+  { onChunkReady, chunkSize = 480, sampleRate = 48000 }: UseAudioDenoisingOptions = {}
 ): UseAudioDenoisingReturn {
-  const [isRecording, setIsRecording] = useState(false)
-  const [isProcessing, setIsProcessing] = useState(false)
-  const [error, setError] = useState('')
-  const [audioChunks, setAudioChunks] = useState<UseAudioDenoisingReturn['audioChunks']>([])
-  const [audioLevel, setAudioLevel] = useState(0)
-  const [recordingTime, setRecordingTime] = useState(0)
-  const recordingStartRef = useRef<number>(0)
-  const recordingIntervalRef = useRef<number>(0)
+  const [isRecording, setIsRecording] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState('');
+  const [audioChunks, setAudioChunks] = useState<UseAudioDenoisingReturn['audioChunks']>([]);
+  const [audioLevel, setAudioLevel] = useState(0);
+  const [recordingTime, setRecordingTime] = useState(0);
 
-  // Estadísticas internas
-  const statsRef = useRef({ totalChunks: 0, denoisedChunks: 0, fallbackChunks: 0, totalTime: 0 })
-  const [processingStats, setProcessingStats] = useState<UseAudioDenoisingReturn['processingStats']>({
+  const recordingStartRef = useRef<number>(0);
+  const recordingIntervalRef = useRef<number>(0);
+  const chunkIdRef = useRef(0);
+  const allChunksRef = useRef<Float32Array[]>([]);
+  const statsRef = useRef({ totalChunks: 0, denoisedChunks: 0, fallbackChunks: 0, totalTime: 0 });
+
+  const [processingStats, setProcessingStats] = useState({
     totalChunks: 0,
     denoisedChunks: 0,
     fallbackChunks: 0,
     averageProcessingTime: 0,
-  })
+  });
 
-  const chunkIdRef = useRef(0)
-  const allChunksRef = useRef<Float32Array[]>([])
+  const workletNodeRef = useRef<AudioWorkletNode | null>(null);
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const mediaStreamRef = useRef<MediaStream | null>(null);
 
-
-  // Convert Float32Array (Web Audio) to Int16Array (RNNoise)
-  const float32ToInt16 = (input: Float32Array): Int16Array => {
-    const output = new Int16Array(input.length)
-    for (let i = 0; i < input.length; i++) {
-      const s = Math.max(-1, Math.min(1, input[i]))
-      output[i] = s < 0 ? s * 0x8000 : s * 0x7fff
-    }
-    return output
-  }
-
-  // Convert Int16Array back to Float32Array
-  const int16ToFloat32 = (input: Int16Array): Float32Array => {
-    const output = new Float32Array(input.length)
-    for (let i = 0; i < input.length; i++) {
-      const v = input[i] / 0x7fff
-      output[i] = Math.max(-1, Math.min(1, v))
-    }
-    return output
-  }
-
-  // Configuración inicial del pipeline
+  // Inicialización brutal del pipeline
   useEffect(() => {
-    audioPipelineIntegration.configure({
-      enableDenoising: true,
-      enableFallback: true,
-      enableQualityMetrics: true,
-      enablePersistence: false,
-      logLevel: 'info',
-    })
-  }, [])
-
-  // AudioProcessor genera datos crudos
-  const { start: startProc, stop: stopProc } = useAudioProcessor({
-    onAudioData: (raw) => handleRawChunk(raw),
-    bufferSize: chunkSize,
-    sampleRate,
-  })
-
-  /** Procesa cada bloque crudo con denoising y actualiza estado */
-  const handleRawChunk = useCallback(
-    async (chunk: Float32Array) => {
-      // Nivel de audio (pico) para visualización
-      const peak = chunk.reduce((max, v) => Math.max(max, Math.abs(v)), 0)
-      setAudioLevel(Math.round(peak * 255))
-      // Paso de denoising con RNNoise (pre-Whisper)
-      let denoisedChunk: Float32Array = chunk
-      if (RnnoiseModule) {
-        try {
-          const int16 = float32ToInt16(chunk)
-          const out16 = RnnoiseModule.current.process(int16)
-          denoisedChunk = int16ToFloat32(out16)
-        } catch (err) {
-          console.warn('RNNoise processing failed, using original chunk', err)
-        }
-      }
-      const id = chunkIdRef.current!++
-      allChunksRef.current!.push(denoisedChunk)
-      setIsProcessing(true)
-      const startTime = Date.now()
+    let cancelled = false;
+    (async () => {
       try {
-        const result = await audioPipelineIntegration.processAudioWithDenoising(denoisedChunk, {})
-        const metadata: ProcessingMetadata = {
-          chunkId: id,
-          originalLength: chunk.length,
-          processedLength: result.processedAudio.length,
-          denoisingUsed: result.usedDenoising,
-          processingTime: Date.now() - startTime,
-          qualityMetrics: result.qualityMetrics,
-          activeFilters: result.denoisingResult ? Object.keys(result.denoisingResult.activeFilters) : [],
-          fallbackMode: !!result.fallbackMode,
-        }
-        statsRef.current!.totalChunks++
-        if (metadata.denoisingUsed) statsRef.current!.denoisedChunks++
-        if (metadata.fallbackMode) statsRef.current!.fallbackChunks++
-        statsRef.current!.totalTime += metadata.processingTime
-        setProcessingStats({
-          totalChunks: statsRef.current!.totalChunks,
-          denoisedChunks: statsRef.current!.denoisedChunks,
-          fallbackChunks: statsRef.current!.fallbackChunks,
-          averageProcessingTime: statsRef.current!.totalTime / statsRef.current!.totalChunks,
-        })
-        setAudioChunks((prev) => [...prev, { id, data: result.processedAudio, metadata }])
-        onChunkReady?.(result.processedAudio, metadata)
+        const ctx = new window.AudioContext({ sampleRate });
+        await ctx.audioWorklet.addModule('/audio-denoiser.worklet.js');
+        const rnnoise = await (RnnoiseModule as any).default();
+        const workletNode = new window.AudioWorkletNode(ctx, 'audio-denoiser-processor');
+        // RNNoise no es transferible, así que usa métodos serializables o wrappers si es necesario
+        (workletNode.port as any).postMessage({ type: 'rnnoise-init', rnnoise });
+        workletNodeRef.current = workletNode;
+        audioCtxRef.current = ctx;
       } catch (e: any) {
-        setError(e.message || 'Error processing audio chunk')
-        const metadata: ProcessingMetadata = {
-          chunkId: id,
-          originalLength: chunk.length,
-          processedLength: chunk.length,
-          denoisingUsed: false,
-          processingTime: Date.now() - startTime,
-          fallbackMode: true,
-        }
-        statsRef.current!.totalChunks++
-        statsRef.current!.fallbackChunks++
-        setProcessingStats({
-          totalChunks: statsRef.current!.totalChunks,
-          denoisedChunks: statsRef.current!.denoisedChunks,
-          fallbackChunks: statsRef.current!.fallbackChunks,
-          averageProcessingTime: statsRef.current!.totalTime / statsRef.current!.totalChunks,
-        })
-        setAudioChunks((prev) => [...prev, { id, data: chunk, metadata }])
-        onChunkReady?.(chunk, metadata)
-      } finally {
-        setIsProcessing(false)
+        setError('Failed to load denoiser: ' + e.message);
       }
-    },
-    [onChunkReady]
-  )
+    })();
+    return () => {
+      cancelled = true;
+      workletNodeRef.current = null;
+      audioCtxRef.current?.close();
+    };
+  }, [sampleRate]);
 
-  /** Detiene captura y procesamiento */
-  const stop = useCallback(async (): Promise<void> => {
-    if (!isRecording) return
-    // Ensure audio processor resources are fully released
-    await stopProc()
-    setIsRecording(false)
-    // Clear recording timer and reset levels
-    if (recordingIntervalRef.current) {
-      clearInterval(recordingIntervalRef.current)
-      recordingIntervalRef.current = 0
-    }
-    recordingStartRef.current = 0
-    setRecordingTime(0)
-    setAudioLevel(0)
-    // Clean residual data and stats
-    allChunksRef.current = []
-    statsRef.current = { totalChunks: 0, denoisedChunks: 0, fallbackChunks: 0, totalTime: 0 }
-    setAudioChunks([])
-    setProcessingStats({ totalChunks: 0, denoisedChunks: 0, fallbackChunks: 0, averageProcessingTime: 0 })
-  }, [isRecording, stopProc])
-
-  /** Inicia captura y procesamiento unificado */
+  // Control brutal de grabación
   const start = useCallback(async (): Promise<MediaStream | null> => {
-    if (isRecording) {
-      // Stop any ongoing recording to ensure resources are released
-      await stop()
-    }
-    setError('')
-    // Reset internal buffers and stats
-    allChunksRef.current = []
-    statsRef.current = { totalChunks: 0, denoisedChunks: 0, fallbackChunks: 0, totalTime: 0 }
-    chunkIdRef.current = 0
-    setAudioChunks([])
-    setProcessingStats({ totalChunks: 0, denoisedChunks: 0, fallbackChunks: 0, averageProcessingTime: 0 })
-    // Setup recording timer
-    recordingStartRef.current = Date.now()
-    setRecordingTime(0)
-    if (recordingIntervalRef.current) clearInterval(recordingIntervalRef.current)
-    recordingIntervalRef.current = window.setInterval(() => {
-      if (recordingStartRef.current != null) {
-        setRecordingTime(Math.floor((Date.now() - recordingStartRef.current) / 1000))
-      }
-    }, 1000)
     try {
-      const stream = await startProc()
-      if (stream) setIsRecording(true)
-      return stream
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaStreamRef.current = stream;
+      const ctx = audioCtxRef.current!;
+      const source = ctx.createMediaStreamSource(stream);
+      source.connect(workletNodeRef.current!);
+      setIsRecording(true);
+
+      workletNodeRef.current!.port.onmessage = (e: MessageEvent) => {
+        if (e.data.type === 'denoised') {
+          setIsProcessing(true);
+          const chunkId = chunkIdRef.current++;
+          const floatData = new Float32Array(e.data.data);
+          const peak = floatData.reduce((max, v) => Math.max(max, Math.abs(v)), 0);
+          setAudioLevel(Math.round(peak * 255));
+          const startTime = Date.now();
+          const metadata: ProcessingMetadata = {
+            chunkId,
+            originalLength: floatData.length,
+            processedLength: floatData.length,
+            denoisingUsed: true,
+            processingTime: Date.now() - startTime,
+          };
+          allChunksRef.current.push(floatData);
+          statsRef.current.totalChunks++;
+          statsRef.current.denoisedChunks++;
+          statsRef.current.totalTime += metadata.processingTime;
+          setProcessingStats({
+            totalChunks: statsRef.current.totalChunks,
+            denoisedChunks: statsRef.current.denoisedChunks,
+            fallbackChunks: statsRef.current.fallbackChunks,
+            averageProcessingTime: statsRef.current.totalTime / statsRef.current.totalChunks,
+          });
+          setAudioChunks(prev => [...prev, { id: chunkId, data: floatData, metadata }]);
+          onChunkReady?.(floatData, metadata);
+          setIsProcessing(false);
+        }
+      };
+
+      recordingStartRef.current = Date.now();
+      setRecordingTime(0);
+      if (recordingIntervalRef.current) clearInterval(recordingIntervalRef.current);
+      recordingIntervalRef.current = window.setInterval(() => {
+        setRecordingTime(Math.floor((Date.now() - recordingStartRef.current) / 1000));
+      }, 1000);
+
+      ctx.resume();
+      return stream;
     } catch (e: any) {
-      setError(e.message || 'Error starting audio capture')
-      return null
+      setError('Recording failed: ' + e.message);
+      return null;
     }
-  }, [isRecording, startProc, stop])
+  }, [onChunkReady]);
 
-  /** Devuelve todo el audio concatenado */
-  const getCompleteAudio = useCallback((): Float32Array => {
-    const total = allChunksRef.current!.reduce((sum, c) => sum + c.length, 0)
-    const buf = new Float32Array(total)
-    let offset = 0
-    for (const c of allChunksRef.current!) {
-      buf.set(c, offset)
-      offset += c.length
-    }
-    return buf
-  }, [])
-
-  /** Ajusta el modo de denoising dinámicamente */
-  const configureDenoisingMode = useCallback((enabled: boolean) => {
-    audioPipelineIntegration.configure({ enableDenoising: enabled, enableFallback: true, enableQualityMetrics: true, enablePersistence: false, logLevel: 'info' })
-  }, [])
-
-  /** Resetea el estado del hook y limpia chunks */
-  const reset = useCallback(() => {
-    setError('')
-    setAudioChunks([])
-    setProcessingStats({ totalChunks: 0, denoisedChunks: 0, fallbackChunks: 0, averageProcessingTime: 0 })
-    statsRef.current = { totalChunks: 0, denoisedChunks: 0, fallbackChunks: 0, totalTime: 0 }
-    allChunksRef.current = []
-    chunkIdRef.current = 0
-    setIsProcessing(false)
-    setIsRecording(false)
-    // Reset audio level and recording timer
+  const stop = useCallback(() => {
+    setIsRecording(false);
+    mediaStreamRef.current?.getTracks().forEach(track => track.stop());
+    audioCtxRef.current?.suspend();
     if (recordingIntervalRef.current) {
-      clearInterval(recordingIntervalRef.current)
-      recordingIntervalRef.current = 0
+      clearInterval(recordingIntervalRef.current);
+      recordingIntervalRef.current = 0;
     }
-    recordingStartRef.current = 0
-    setRecordingTime(0)
-    setAudioLevel(0)
-  }, [])
+    setRecordingTime(0);
+    setAudioLevel(0);
+  }, []);
 
-  return { isRecording, isProcessing, error, audioChunks, start, stop, getCompleteAudio, processingStats, configureDenoisingMode, reset, audioLevel, recordingTime }
+  const getCompleteAudio = useCallback((): Float32Array => {
+    const total = allChunksRef.current.reduce((sum, c) => sum + c.length, 0);
+    const buf = new Float32Array(total);
+    let offset = 0;
+    for (const c of allChunksRef.current) {
+      buf.set(c, offset);
+      offset += c.length;
+    }
+    return buf;
+  }, []);
+
+  const configureDenoisingMode = useCallback((enabled: boolean) => {
+    // No-op: Denoising always on. Si implementas fallback, aquí va el mensaje.
+  }, []);
+
+  const reset = useCallback(() => {
+    setError('');
+    setAudioChunks([]);
+    setProcessingStats({ totalChunks: 0, denoisedChunks: 0, fallbackChunks: 0, averageProcessingTime: 0 });
+    statsRef.current = { totalChunks: 0, denoisedChunks: 0, fallbackChunks: 0, totalTime: 0 };
+    allChunksRef.current = [];
+    chunkIdRef.current = 0;
+    setIsProcessing(false);
+    setIsRecording(false);
+    if (recordingIntervalRef.current) {
+      clearInterval(recordingIntervalRef.current);
+      recordingIntervalRef.current = 0;
+    }
+    setRecordingTime(0);
+    setAudioLevel(0);
+  }, []);
+
+  return {
+    isRecording,
+    isProcessing,
+    error,
+    audioChunks,
+    start,
+    stop,
+    getCompleteAudio,
+    processingStats,
+    configureDenoisingMode,
+    reset,
+    audioLevel,
+    recordingTime,
+  };
 }

@@ -11,6 +11,7 @@ import { whisperModelCache } from '../services/whisperModelCache';
 export default function WhisperPreloaderGlobal() {
   const [loadingState, setLoadingState] = useState<'idle' | 'loading' | 'loaded' | 'error'>('idle');
   const [progress, setProgress] = useState(0);
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -60,7 +61,28 @@ export default function WhisperPreloaderGlobal() {
     };
   }, []);
 
-  // Show UI during loading or error
+  // Show a brief success toast when loading completes
+  useEffect(() => {
+    if (loadingState === 'loaded') {
+      setShowSuccessToast(true);
+      const timer = setTimeout(() => setShowSuccessToast(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [loadingState]);
+
+  // Show UI during loading, success, or error
+  if (showSuccessToast) {
+    return (
+      <div className="fixed bottom-4 right-4 p-3 bg-green-50 rounded-lg shadow-lg border border-green-200 z-50">
+        <div className="flex items-center gap-3">
+          <div className="text-green-500">✅</div>
+          <span className="text-sm text-green-600">
+            Modelo Whisper cargado correctamente.
+          </span>
+        </div>
+      </div>
+    );
+  }
   if (loadingState === 'loading') {
     return (
       <div className="fixed bottom-4 right-4 p-3 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
