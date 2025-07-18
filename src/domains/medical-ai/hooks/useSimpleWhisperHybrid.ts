@@ -46,6 +46,7 @@ export function useSimpleWhisperHybrid({
   const timerRef = useRef<number | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const workerRef = useRef<Worker | null>(null);
+  const isMonitoringRef = useRef<boolean>(false);
 
   // Initialize worker and fallback
   const initializeProcessing = useCallback(async () => {
@@ -91,6 +92,9 @@ export function useSimpleWhisperHybrid({
           await loadWhisperModel({
             retryCount,
             retryDelay,
+            onProgress: (p) => {
+              if (p?.progress) setLoadProgress(p.progress);
+            }
           });
           setLoadProgress(100); // Set to 100% when loaded
         }
@@ -100,6 +104,9 @@ export function useSimpleWhisperHybrid({
         await loadWhisperModel({
           retryCount,
           retryDelay,
+          onProgress: (p) => {
+            if (p?.progress) setLoadProgress(p.progress);
+          }
         });
         setLoadProgress(100); // Set to 100% when loaded
       }
@@ -129,9 +136,18 @@ export function useSimpleWhisperHybrid({
   }, [audioUrl]);
 
   const setupAudioMonitoring = useCallback((stream: MediaStream) => {
-    console.log('[Hybrid] Setting up audio monitoring');
+    console.log('[Hybrid] Setting up audio monitoring', {
+      streamActive: stream.active,
+      tracks: stream.getTracks().length
+    });
 
     try {
+      // Ensure stream is active
+      if (!stream.active) {
+        console.error('[Hybrid] Stream is not active!');
+        return;
+      }
+
       const audioContext = new AudioContext();
       const analyser = audioContext.createAnalyser();
       const source = audioContext.createMediaStreamSource(stream);
@@ -142,13 +158,17 @@ export function useSimpleWhisperHybrid({
       // Connect the source to analyser and check connection
       source.connect(analyser);
       
-      // Verify the audio is flowing
-      const testArray = new Uint8Array(analyser.frequencyBinCount);
-      analyser.getByteTimeDomainData(testArray);
-      console.log('[Hybrid] Initial audio test:', {
-        firstValues: Array.from(testArray.slice(0, 10)),
-        hasSignal: testArray.some(v => v !== 128)
-      });
+      // Wait a bit before testing to ensure audio is flowing
+      setTimeout(() => {
+        const testArray = new Uint8Array(analyser.frequencyBinCount);
+        analyser.getByteTimeDomainData(testArray);
+        console.log('[Hybrid] Initial audio test:', {
+          firstValues: Array.from(testArray.slice(0, 10)),
+          hasSignal: testArray.some(v => v !== 128),
+          stream: stream.active,
+          tracks: stream.getTracks().map(t => ({ enabled: t.enabled, readyState: t.readyState }))
+        });
+      }, 100);
       
       console.log('[Hybrid] Audio analyser configured:', {
         fftSize: analyser.fftSize,
@@ -161,44 +181,68 @@ export function useSimpleWhisperHybrid({
 
       const dataArray = new Uint8Array(analyser.frequencyBinCount);
 
+      let frameCount = 0;
       const updateLevel = () => {
+        frameCount++;
+        if (frameCount % 60 === 0) { // Log every 60 frames (~1 second)
+          console.log('[Hybrid] updateLevel running:', {
+            frame: frameCount,
+            recorderState: mediaRecorderRef.current?.state,
+            analyserExists: !!analyserRef.current,
+            contextState: audioContextRef.current?.state
+          });
+        }
+        
         try {
-          // More robust state checking
-          if (!mediaRecorderRef.current || 
-              mediaRecorderRef.current.state !== 'recording' ||
-              !analyserRef.current ||
-              audioContextRef.current?.state === 'closed') {
+          // Check if we should continue monitoring
+          if (!isMonitoringRef.current || !analyserRef.current || audioContextRef.current?.state === 'closed') {
+            if (!isMonitoringRef.current) {
+              console.log('[Hybrid] Monitoring stopped by flag');
+            } else {
+              console.warn('[Hybrid] Analyser or context not available, stopping monitor');
+            }
             setAudioLevel(0);
             return;
           }
 
-          // Use time domain data for better audio level monitoring
+          // Try both time domain and frequency domain for better results
           analyserRef.current.getByteTimeDomainData(dataArray);
           
-          // Calculate RMS (Root Mean Square) for more accurate level
+          // Calculate amplitude from time domain data
           let sum = 0;
           let max = 0;
           for (let i = 0; i < dataArray.length; i++) {
-            const normalized = (dataArray[i] - 128) / 128; // Normalize to -1 to 1
-            sum += Math.abs(normalized); // Use absolute value for better sensitivity
-            max = Math.max(max, Math.abs(normalized));
+            const normalized = Math.abs(dataArray[i] - 128) / 128;
+            sum += normalized;
+            max = Math.max(max, normalized);
           }
           
-          // Average amplitude with amplification factor
+          // Also try frequency data for comparison
+          const freqArray = new Uint8Array(analyserRef.current.frequencyBinCount);
+          analyserRef.current.getByteFrequencyData(freqArray);
+          const freqAvg = freqArray.reduce((a, b) => a + b, 0) / freqArray.length;
+          
+          // Use the higher value between time and frequency domain
           const avgAmplitude = sum / dataArray.length;
-          const amplificationFactor = 5; // Amplify the signal for better visibility
-          const level = Math.min(100, Math.round(avgAmplitude * 100 * amplificationFactor));
+          const amplificationFactor = 8; // Increased amplification
+          const timeLevel = Math.min(100, Math.round(avgAmplitude * 100 * amplificationFactor));
+          const freqLevel = Math.min(100, Math.round(freqAvg * 100 / 255));
+          const level = Math.max(timeLevel, freqLevel);
           
           // Always update level for debugging
           setAudioLevel(level);
           
           // Log every 10th frame for debugging
-          if (Math.random() < 0.1) {
+          if (Math.random() < 0.2) { // Increased frequency for debugging
             console.log('[Hybrid] Audio monitoring:', {
               level,
+              timeLevel,
+              freqLevel,
               avgAmplitude: avgAmplitude.toFixed(4),
+              freqAvg: freqAvg.toFixed(2),
               max: max.toFixed(4),
               dataArraySample: [dataArray[0], dataArray[1], dataArray[2]],
+              freqSample: [freqArray[0], freqArray[1], freqArray[2]],
               analyserState: audioContextRef.current?.state,
               recorderState: mediaRecorderRef.current?.state
             });
@@ -217,7 +261,12 @@ export function useSimpleWhisperHybrid({
         }
       };
 
-      updateLevel();
+      // Start the update loop with a small delay to ensure everything is ready
+      setTimeout(() => {
+        console.log('[Hybrid] Starting audio level monitoring...');
+        isMonitoringRef.current = true;
+        updateLevel();
+      }, 50);
     } catch (error) {
       console.error('[Hybrid] Failed to setup audio monitoring:', error);
       setAudioLevel(0);
@@ -313,6 +362,9 @@ export function useSimpleWhisperHybrid({
 
   const stopTranscription = useCallback(async () => {
     console.log('[Hybrid] Stopping transcription...');
+    
+    // Stop monitoring
+    isMonitoringRef.current = false;
     
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
       mediaRecorderRef.current.stop();
