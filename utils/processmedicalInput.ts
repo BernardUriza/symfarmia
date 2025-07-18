@@ -1,5 +1,5 @@
 import { processMedicalQuery } from '@/app/services/MedicalAILogic';
-import { MedicalAIConfig } from '@/app/config/MedicalAIConfig.js';
+import { MedicalAIConfig } from '@/src/lib/config/MedicalAIConfig';
 
 const MEDICAL_KEYWORDS = [
   'duele',
