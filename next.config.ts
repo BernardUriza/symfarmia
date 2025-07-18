@@ -34,6 +34,21 @@ const nextConfig: NextConfig = {
       path: false,
       crypto: false,
     };
+    
+    // Add WASM support
+    config.experiments = {
+      ...config.experiments,
+      asyncWebAssembly: true,
+    };
+    
+    // Handle WASM files
+    config.module.rules.push({
+      test: /\.wasm$/,
+      type: 'asset/resource',
+      generator: {
+        filename: 'static/chunks/[name][ext]',
+      },
+    });
     // Apply split-chunks and persistent cache for faster builds (client-only)
     if (!isServer) {
       config.cache = {
@@ -79,6 +94,32 @@ const nextConfig: NextConfig = {
           {
             key: "Access-Control-Allow-Headers",
             value: "Content-Type, Authorization",
+          },
+        ],
+      },
+      {
+        source: "/:path*.wasm",
+        headers: [
+          {
+            key: "Content-Type",
+            value: "application/wasm",
+          },
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
+        source: "/:path*.worklet.js",
+        headers: [
+          {
+            key: "Service-Worker-Allowed",
+            value: "/",
+          },
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
           },
         ],
       },

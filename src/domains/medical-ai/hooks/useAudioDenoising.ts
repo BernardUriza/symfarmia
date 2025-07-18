@@ -72,7 +72,7 @@ export function useAudioDenoising(
       try {
         const ctx = new window.AudioContext({ sampleRate });
         await ctx.audioWorklet.addModule('/audio-denoiser.worklet.js');
-        const rnnoise = await (RnnoiseModule as any).default();
+        const rnnoise = await RnnoiseModule();
         const workletNode = new window.AudioWorkletNode(ctx, 'audio-denoiser-processor');
         // RNNoise no es transferible, así que usa métodos serializables o wrappers si es necesario
         (workletNode.port as any).postMessage({ type: 'rnnoise-init', rnnoise });
@@ -102,7 +102,7 @@ export function useAudioDenoising(
       workletNodeRef.current!.port.onmessage = (e: MessageEvent) => {
         if (e.data.type === 'denoised') {
           setIsProcessing(true);
-          const chunkId = chunkIdRef.current++;
+          const chunkId = chunkIdRef.current!++;
           const floatData = new Float32Array(e.data.data);
           const peak = floatData.reduce((max, v) => Math.max(max, Math.abs(v)), 0);
           setAudioLevel(Math.round(peak * 255));
@@ -114,15 +114,15 @@ export function useAudioDenoising(
             denoisingUsed: true,
             processingTime: Date.now() - startTime,
           };
-          allChunksRef.current.push(floatData);
-          statsRef.current.totalChunks++;
-          statsRef.current.denoisedChunks++;
-          statsRef.current.totalTime += metadata.processingTime;
+          allChunksRef.current!.push(floatData);
+          statsRef.current!.totalChunks++;
+          statsRef.current!.denoisedChunks++;
+          statsRef.current!.totalTime += metadata.processingTime;
           setProcessingStats({
-            totalChunks: statsRef.current.totalChunks,
-            denoisedChunks: statsRef.current.denoisedChunks,
-            fallbackChunks: statsRef.current.fallbackChunks,
-            averageProcessingTime: statsRef.current.totalTime / statsRef.current.totalChunks,
+            totalChunks: statsRef.current!.totalChunks,
+            denoisedChunks: statsRef.current!.denoisedChunks,
+            fallbackChunks: statsRef.current!.fallbackChunks,
+            averageProcessingTime: statsRef.current!.totalTime / statsRef.current!.totalChunks,
           });
           setAudioChunks(prev => [...prev, { id: chunkId, data: floatData, metadata }]);
           onChunkReady?.(floatData, metadata);
@@ -134,7 +134,7 @@ export function useAudioDenoising(
       setRecordingTime(0);
       if (recordingIntervalRef.current) clearInterval(recordingIntervalRef.current);
       recordingIntervalRef.current = window.setInterval(() => {
-        setRecordingTime(Math.floor((Date.now() - recordingStartRef.current) / 1000));
+        setRecordingTime(Math.floor((Date.now() - recordingStartRef.current!) / 1000));
       }, 1000);
 
       ctx.resume();
@@ -158,10 +158,10 @@ export function useAudioDenoising(
   }, []);
 
   const getCompleteAudio = useCallback((): Float32Array => {
-    const total = allChunksRef.current.reduce((sum, c) => sum + c.length, 0);
+    const total = allChunksRef.current!.reduce((sum, c) => sum + c.length, 0);
     const buf = new Float32Array(total);
     let offset = 0;
-    for (const c of allChunksRef.current) {
+    for (const c of allChunksRef.current!) {
       buf.set(c, offset);
       offset += c.length;
     }
