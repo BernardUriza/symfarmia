@@ -8,7 +8,7 @@ import {
 interface UseLlmAuditReturn {
   auditTranscript: (params: LLMAuditRequest) => Promise<LLMAuditResult>
   isLoading: boolean
-  error: string | null
+  error: string
   result: LLMAuditResult | null
   reset: () => void
   retryCount: number
@@ -21,12 +21,12 @@ const REQUEST_TIMEOUT = 30000 // 30 seconds
 
 export function useLlmAudit(): UseLlmAuditReturn {
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<string>('')
   const [result, setResult] = useState<LLMAuditResult | null>(null)
   const [retryCount, setRetryCount] = useState(0)
 
   const reset = useCallback(() => {
-    setError(null)
+    setError('')
     setResult(null)
     setIsLoading(false)
     setRetryCount(0)
@@ -34,7 +34,7 @@ export function useLlmAudit(): UseLlmAuditReturn {
 
   const auditTranscript = useCallback(async (params: LLMAuditRequest): Promise<LLMAuditResult> => {
     setIsLoading(true)
-    setError(null)
+    setError('')
     setRetryCount(0)
 
     const attemptRequest = async (attempt: number): Promise<LLMAuditResult> => {

@@ -1,4 +1,3 @@
-// useAudioRecording.ts (brutal, autocontenible)
 import { useCallback, useRef, useState } from "react";
 
 interface AudioRecordingOptions {
@@ -85,7 +84,7 @@ export function useAudioRecording({ sampleRate, chunkSize, onAudioChunk }: Audio
 
   // --- Getters para audio grabado ---
   const getAudioData = useCallback(() => {
-    if (!chunksRef.current.length) return null;
+    if (!chunksRef.current.length) return new Float32Array(0);
     // Concatenar todos los chunks
     const totalLength = chunksRef.current.reduce((sum, chunk) => sum + chunk.length, 0);
     const fullAudio = new Float32Array(totalLength);
@@ -100,7 +99,7 @@ export function useAudioRecording({ sampleRate, chunkSize, onAudioChunk }: Audio
   // --- Crear WAV Blob ---
   const createWavBlob = useCallback(() => {
     const audioData = getAudioData();
-    if (!audioData) return null;
+    if (!audioData) return new Blob();
     const length = audioData.length;
     const buffer = new ArrayBuffer(44 + length * 2);
     const view = new DataView(buffer);

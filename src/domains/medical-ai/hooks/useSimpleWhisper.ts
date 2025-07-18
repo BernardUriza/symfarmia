@@ -152,5 +152,3 @@ export function useSimpleWhisper({
     setLogger: logger.setEnabled?.bind(logger)
   };
 }
-
-// --- TODO: Implementar y conectar aux_hooks/useAudioRecording.ts, useWhisperEngine.ts y types.ts ---
