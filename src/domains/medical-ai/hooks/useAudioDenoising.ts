@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import * as RnnoiseModule from '@jitsi/rnnoise-wasm';
+import { createRNNWasmModule } from '@jitsi/rnnoise-wasm';
 
 export interface ProcessingMetadata {
   chunkId: number;
@@ -76,17 +76,15 @@ export function useAudioDenoising(
         await ctx.audioWorklet.addModule('/audio-denoiser.worklet.js');
         console.log('[useAudioDenoising] AudioWorklet loaded');
         
-        // Try to load RNNoise - different modules export differently
-        let rnnoise;
-        if (typeof RnnoiseModule === 'function') {
-          rnnoise = await RnnoiseModule();
-        } else if ((RnnoiseModule as any).default) {
-          rnnoise = await (RnnoiseModule as any).default();
-        } else if ((RnnoiseModule as any).createRnnoise) {
-          rnnoise = await (RnnoiseModule as any).createRnnoise();
-        } else {
-          throw new Error('Unable to initialize RNNoise module');
-        }
+        // Load RNNoise module with explicit path to wasm file
+        const rnnoise = await createRNNWasmModule({
+          locateFile: (filename: string) => {
+            if (filename.endsWith('.wasm')) {
+              return '/dist/rnnoise.wasm';
+            }
+            return filename;
+          }
+        });
         console.log('[useAudioDenoising] RNNoise module loaded');
         
         const workletNode = new window.AudioWorkletNode(ctx, 'audio-denoiser-processor');
