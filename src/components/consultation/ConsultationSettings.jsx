@@ -17,9 +17,55 @@ const { t } = useTranslation();
 
 const [activeTab, setActiveTab] = useState('audio');
 
-const [settings, setSettings] = useState({ // Audio settings audioSource: 'primary', // 'primary' | 'bluetooth' | 'system' audioQuality: 'high', // 'low' | 'medium' | 'high' | 'ultra' noiseSuppression: true, echoCancellation: true, medicalVoiceFilter: true, sensitivity: 75, // 0-100 // Transcription settings language: 'es-MX', // Changed to Mexican Spanish for medical context transcriptionService: 'browser', confidenceThreshold: 75, // Changed from 100% to 75% (more realistic) realtimeMode: true, medicalTerminology: true, clinicalAbbreviations: true, drugNames: true, // AI Assistant settings medicalSpecialty: 'general', // 'general' | 'cardiology' | 'pediatrics' | 'emergency' aiAssistanceLevel: 'intermediate', // 'basic' | 'intermediate' | 'advanced' clinicalAlerts: true, emergencyAlerts: true, drugInteractionChecks: true, redFlags: true, notesFormat: 'soap', // 'soap' | 'narrative' | 'hybrid' // Presets activePreset: 'general' // 'general' | 'emergency' | 'night' | 'custom' });
+const [settings, setSettings] = useState({
+  // Audio settings audioSource: 'primary',
+  // 'primary' | 'bluetooth' | 'system' audioQuality: 'high',
+  // 'low' | 'medium' | 'high' | 'ultra' noiseSuppression: true,
+  echoCancellation: true,
+  medicalVoiceFilter: true,
+  sensitivity: 75,
+  // 0-100 // Transcription settings language: 'es-MX',
+  // Changed to Mexican Spanish for medical context transcriptionService: 'browser',
+  confidenceThreshold: 75,
+  // Changed from 100% to 75% (more realistic) realtimeMode: true,
+  medicalTerminology: true,
+  clinicalAbbreviations: true,
+  drugNames: true,
+  // AI Assistant settings medicalSpecialty: 'general',
+  // 'general' | 'cardiology' | 'pediatrics' | 'emergency' aiAssistanceLevel: 'intermediate',
+  // 'basic' | 'intermediate' | 'advanced' clinicalAlerts: true,
+  emergencyAlerts: true,
+  drugInteractionChecks: true,
+  redFlags: true,
+  notesFormat: 'soap',
+  // 'soap' | 'narrative' | 'hybrid' // Presets activePreset: 'general' // 'general' | 'emergency' | 'night' | 'custom'
+});
 
-const tabs = [ { id: 'audio', label: '🎤 Audio', icon: MicrophoneIcon, component: AudioSettings, description: 'Micrófono y calidad de grabación' }, { id: 'transcription', label: '📝 Transcripción', icon: DocumentTextIcon, component: TranscriptionSettings, description: 'Idioma y precisión de texto' }, { id: 'ai', label: '🤖 Asistente IA', icon: SparklesIcon, component: AISettings, description: 'Especialidad y nivel de asistencia' }, { id: 'presets', label: '⚡ Presets', icon: BoltIcon, component: QuickPresets, description: 'Configuraciones rápidas' } ];
+const tabs = [ {
+  id: 'audio',
+  label: '🎤 Audio',
+  icon: MicrophoneIcon,
+  component: AudioSettings,
+  description: 'Micrófono y calidad de grabación'
+}, {
+  id: 'transcription',
+  label: '📝 Transcripción',
+  icon: DocumentTextIcon,
+  component: TranscriptionSettings,
+  description: 'Idioma y precisión de texto'
+}, {
+  id: 'ai',
+  label: '🤖 Asistente IA',
+  icon: SparklesIcon,
+  component: AISettings,
+  description: 'Especialidad y nivel de asistencia'
+}, {
+  id: 'presets',
+  label: '⚡ Presets',
+  icon: BoltIcon,
+  component: QuickPresets,
+  description: 'Configuraciones rápidas'
+} ];
 
 const handleSettingChange = (key, value) => {
    setSettings(prev => ({ ...prev, [key]: value }));
@@ -32,12 +78,56 @@ onClose();
 };
 
 const handleReset = () => {
-   setSettings({ audioSource: 'primary', audioQuality: 'high', noiseSuppression: true, echoCancellation: true, medicalVoiceFilter: true, sensitivity: 75, language: 'es-MX', transcriptionService: 'browser', confidenceThreshold: 75, realtimeMode: true, medicalTerminology: true, clinicalAbbreviations: true, drugNames: true, medicalSpecialty: 'general', aiAssistanceLevel: 'intermediate', clinicalAlerts: true, emergencyAlerts: true, drugInteractionChecks: true, redFlags: true, notesFormat: 'soap', activePreset: 'general' });
+   setSettings({
+  audioSource: 'primary',
+  audioQuality: 'high',
+  noiseSuppression: true,
+  echoCancellation: true,
+  medicalVoiceFilter: true,
+  sensitivity: 75,
+  language: 'es-MX',
+  transcriptionService: 'browser',
+  confidenceThreshold: 75,
+  realtimeMode: true,
+  medicalTerminology: true,
+  clinicalAbbreviations: true,
+  drugNames: true,
+  medicalSpecialty: 'general',
+  aiAssistanceLevel: 'intermediate',
+  clinicalAlerts: true,
+  emergencyAlerts: true,
+  drugInteractionChecks: true,
+  redFlags: true,
+  notesFormat: 'soap',
+  activePreset: 'general'
+});
 };
 const handlePresetSelect = (presetName) => {
   
 
-const presets = { general: { audioQuality: 'high', aiAssistanceLevel: 'intermediate', confidenceThreshold: 75, language: 'es-MX', medicalTerminology: true, clinicalAlerts: true, notesFormat: 'soap' }, emergency: { audioQuality: 'ultra', aiAssistanceLevel: 'advanced', confidenceThreshold: 70, realtimeMode: true, emergencyAlerts: true, redFlags: true, clinicalAlerts: true }, night: { noiseSuppression: true, medicalVoiceFilter: true, sensitivity: 85, clinicalAlerts: false, emergencyAlerts: true } };
+const presets = {
+  general: { audioQuality: 'high',
+  aiAssistanceLevel: 'intermediate',
+  confidenceThreshold: 75,
+  language: 'es-MX',
+  medicalTerminology: true,
+  clinicalAlerts: true,
+  notesFormat: 'soap'
+}, emergency: {
+  audioQuality: 'ultra',
+  aiAssistanceLevel: 'advanced',
+  confidenceThreshold: 70,
+  realtimeMode: true,
+  emergencyAlerts: true,
+  redFlags: true,
+  clinicalAlerts: true
+}, night: {
+  noiseSuppression: true,
+  medicalVoiceFilter: true,
+  sensitivity: 85,
+  clinicalAlerts: false,
+  emergencyAlerts: true
+} };
 if (presets[presetName]) { setSettings(prev => ({ ...prev, ...presets[presetName], activePreset: presetName }));
 } };
 const ActiveTabComponent = tabs.find(tab => tab.id === activeTab)?.component;

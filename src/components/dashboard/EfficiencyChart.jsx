@@ -115,7 +115,12 @@ const mockData = generateCompleteMockData();
 const weeklyTrend = calculateWeeklyTrend(mockData.consultations);
 // Add additional data for charts
 
-const enhancedData = weeklyTrend.map((week, index) => ({ ...week, timeSavedHours: 1.5 + (index * 0.3), // Progressive improvement automationRatio: 45 + (index * 10), // Automation growth avgConsultationTime: 18 - (index * 1.2) // Efficiency improvement }));
+const enhancedData = weeklyTrend.map((week, index) => ({
+  ...week,
+  timeSavedHours: 1.5 + (index * 0.3), // Progressive improvement
+  automationRatio: 45 + (index * 10), // Automation growth
+  avgConsultationTime: 18 - (index * 1.2) // Efficiency improvement
+}));
 setChartData(enhancedData);
 } catch (err) { console.error('Error loading chart data:', err);
 setError(err.message);

@@ -10,7 +10,9 @@ import {
   HeartIcon,
 } from '@heroicons/react/24/outline';
 
-const MedicalCharts = ({ section = 'overview' }) => {
+const MedicalCharts = ({ section = 'overview' }
+  ) =>
+    {
   const { t } = useTranslation();
 
   const [selectedChart, setSelectedChart] = useState('diagnoses');
@@ -52,7 +54,8 @@ const MedicalCharts = ({ section = 'overview' }) => {
   };
   const currentOptions = chartOptions[section] || chartOptions.overview;
 
-  const getMockChartData = () => {
+  const getMockChartData = () =>
+    {
     switch (selectedChart) {
       case 'diagnoses':
         return {
@@ -120,12 +123,13 @@ const MedicalCharts = ({ section = 'overview' }) => {
 
   const renderPieChart = (data) => (
     <div className="flex items-center justify-center h-64">
-      {' '}
-      <div className="relative">
-        {' '}
-        <svg width="200" height="200" viewBox="0 0 200 200">
-          {' '}
-          {data.data.map((item, index) => {
+    {' '}
+    <div className="relative">
+    {' '}
+    <svg width="200" height="200" viewBox="0 0 200 200">
+    {' '}
+          {data.data.map((item, index) =>
+    {
             const total = data.data.reduce((sum, d) => sum + d.value, 0);
             //
 
@@ -153,6 +157,7 @@ const MedicalCharts = ({ section = 'overview' }) => {
 
             const pathData = `M 100 100 L ${x1} ${y1} A 80 80 0 ${largeArcFlag} 1 ${x2} ${y2} Z`;
             return (
+  
               <path
                 key={index}
                 d={pathData}
@@ -160,59 +165,73 @@ const MedicalCharts = ({ section = 'overview' }) => {
                 className="hover:opacity-80 transition-opacity"
               />
             );
-          })}{' '}
-        </svg>{' '}
-      </div>{' '}
-      <div className="ml-8 space-y-2">
-        {' '}
+          }
+  )}{' '}
+    </svg>
+    {' '}
+    </div>
+    {' '}
+    <div className="ml-8 space-y-2">
+    {' '}
         {data.data.map((item, index) => (
           <div key={index} className="flex items-center">
-            {' '}
-            <div
+    {' '}
+    <div
               className="w-4 h-4 rounded-full mr-3"
               style={{ backgroundColor: item.color }}
-            ></div>{' '}
-            <span className="text-sm text-gray-700 ">{item.name}</span>{' '}
-            <span className="ml-auto text-sm font-medium text-gray-900 ">
-              {item.value}%
-            </span>{' '}
-          </div>
+            >
+    </div>
+    {' '}
+    <span className="text-sm text-gray-700 ">
+    {item.name}
+    </span>
+    {' '}
+    <span className="ml-auto text-sm font-medium text-gray-900 ">
+    {item.value}%
+            </span>
+    {' '}
+    </div>
         ))}{' '}
-      </div>{' '}
+    </div>
+    {' '}
     </div>
   );
 
   const renderBarChart = (data) => (
     <div className="h-64 flex items-end justify-center space-x-4 p-4">
-      {' '}
+    {' '}
       {data.data.map((item, index) => (
         <div key={index} className="flex flex-col items-center">
-          {' '}
-          <div
+    {' '}
+    <div
             className="w-16 rounded-t-lg transition-all duration-300 hover:opacity-80"
             style={{
               height: `${(item.value / Math.max(...data.data.map((d) => d.value))) * 200}px`,
               backgroundColor: item.color,
             }}
-          ></div>{' '}
-          <span className="text-xs text-gray-600 mt-2 text-center">
-            {item.name}
-          </span>{' '}
-          <span className="text-xs font-medium text-gray-900 ">
-            {item.value}%
-          </span>{' '}
-        </div>
+          >
+    </div>
+    {' '}
+    <span className="text-xs text-gray-600 mt-2 text-center">
+    {item.name}
+    </span>
+    {' '}
+    <span className="text-xs font-medium text-gray-900 ">
+    {item.value}%
+          </span>
+    {' '}
+    </div>
       ))}{' '}
     </div>
   );
 
   const renderLineChart = (data) => (
     <div className="h-64 flex items-end justify-center p-4">
-      {' '}
-      <div className="relative w-full h-full">
-        {' '}
-        <svg width="100%" height="100%" viewBox="0 0 400 200">
-          {' '}
+    {' '}
+    <div className="relative w-full h-full">
+    {' '}
+    <svg width="100%" height="100%" viewBox="0 0 400 200">
+    {' '}
           {/* Grid lines */}{' '}
           {[0, 1, 2, 3, 4].map((i) => (
             <line
@@ -226,7 +245,7 @@ const MedicalCharts = ({ section = 'overview' }) => {
             />
           ))}{' '}
           {/* Data line */}{' '}
-          <polyline
+    <polyline
             points={data.data
               .map(
                 (d, i) =>
@@ -236,7 +255,8 @@ const MedicalCharts = ({ section = 'overview' }) => {
             fill="none"
             stroke="#3B82F6"
             strokeWidth="3"
-          />{' '}
+          />
+    {' '}
           {/* Data points */}{' '}
           {data.data.map((d, i) => (
             <circle
@@ -247,19 +267,25 @@ const MedicalCharts = ({ section = 'overview' }) => {
               fill="#3B82F6"
             />
           ))}{' '}
-        </svg>{' '}
+    </svg>
+    {' '}
         {/* X-axis labels */}{' '}
-        <div className="absolute bottom-0 left-0 right-0 flex justify-between text-xs text-gray-600 ">
-          {' '}
+    <div className="absolute bottom-0 left-0 right-0 flex justify-between text-xs text-gray-600 ">
+    {' '}
           {data.data.map((d, i) => (
-            <span key={i}>{d.month}</span>
+            <span key={i}>
+    {d.month}
+    </span>
           ))}{' '}
-        </div>{' '}
-      </div>{' '}
+    </div>
+    {' '}
+    </div>
+    {' '}
     </div>
   );
 
-  const renderChart = () => {
+  const renderChart = () =>
+    {
     switch (chartData.type) {
       case 'pie':
         return renderPieChart(chartData);
@@ -273,48 +299,58 @@ const MedicalCharts = ({ section = 'overview' }) => {
   };
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {' '}
+    {' '}
       {/* Chart Selection */}{' '}
-      <div className="lg:col-span-1">
-        {' '}
-        <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200 ">
-          {' '}
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+    <div className="lg:col-span-1">
+    {' '}
+    <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200 ">
+    {' '}
+    <h3 className="text-lg font-semibold text-gray-900 mb-4">
             Chart Selection
-          </h3>{' '}
-          <div className="space-y-2">
-            {' '}
+          </h3>
+    {' '}
+    <div className="space-y-2">
+    {' '}
             {currentOptions.map((option) => (
               <button
                 key={option.id}
                 onClick={() => setSelectedChart(option.id)}
-                className={`w-full flex items-center p-3 rounded-lg text-left transition-colors ${selectedChart === option.id ? 'bg-blue-50 text-blue-700 border border-blue-200 ' : 'text-gray-700 hover:bg-gray-50 '}`}
+                          className={`w-full flex items-center p-3 rounded-lg text-left transition-colors ${selectedChart === option.id ? 'bg-blue-50 text-blue-700 border border-blue-200 ' : 'text-gray-700 hover:bg-gray-50 '}`}
               >
-                {' '}
-                <option.icon className="w-5 h-5 mr-3" /> {option.name}{' '}
-              </button>
+    {' '}
+    <option.icon className="w-5 h-5 mr-3" />
+    {option.name}{' '}
+    </button>
             ))}{' '}
-          </div>{' '}
-        </div>{' '}
-      </div>{' '}
+    </div>
+    {' '}
+    </div>
+    {' '}
+    </div>
+    {' '}
       {/* Chart Display */}{' '}
-      <div className="lg:col-span-2">
-        {' '}
-        <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200 ">
-          {' '}
-          <div className="flex items-center justify-between mb-6">
-            {' '}
-            <h3 className="text-lg font-semibold text-gray-900 ">
-              {chartData.title}
-            </h3>{' '}
-            <div className="flex items-center text-sm text-gray-500 ">
-              {' '}
-              <CalendarDaysIcon className="w-4 h-4 mr-1" /> Last 30 days{' '}
-            </div>{' '}
-          </div>{' '}
+    <div className="lg:col-span-2">
+    {' '}
+    <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200 ">
+    {' '}
+    <div className="flex items-center justify-between mb-6">
+    {' '}
+    <h3 className="text-lg font-semibold text-gray-900 ">
+    {chartData.title}
+    </h3>
+    {' '}
+    <div className="flex items-center text-sm text-gray-500 ">
+    {' '}
+    <CalendarDaysIcon className="w-4 h-4 mr-1" /> Last 30 days{' '}
+    </div>
+    {' '}
+    </div>
+    {' '}
           {renderChart()}{' '}
-        </div>{' '}
-      </div>{' '}
+    </div>
+    {' '}
+    </div>
+    {' '}
     </div>
   );
 };

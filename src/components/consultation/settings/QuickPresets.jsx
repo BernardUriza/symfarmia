@@ -6,12 +6,74 @@ import { BoltIcon, SunIcon, ExclamationTriangleIcon, MoonIcon, CogIcon, CheckCir
 const QuickPresets = ({ settings, onPresetSelect }) => {
   
 
-const presets = [ { id: 'general', name: 'Consulta General', icon: '🏥', iconComponent: SunIcon, description: 'Configuración balanceada para consultorios regulares', color: 'blue', settings: { audioQuality: 'high', aiAssistanceLevel: 'intermediate', confidenceThreshold: 75, language: 'es-MX', medicalTerminology: true, clinicalAlerts: true, emergencyAlerts: true, notesFormat: 'soap', noiseSuppression: true, echoCancellation: true }, features: [ 'Audio HD + IA Intermedia', 'Español MX + Términos Médicos', 'SOAP + Alertas Básicas', 'Umbral de confianza 75%' ], bestFor: 'Medicina general, consultas rutinarias, medicina familiar' }, { id: 'emergency', name: 'Consulta de Emergencia', icon: '🚨', iconComponent: ExclamationTriangleIcon, description: 'Máxima precisión y alertas críticas para casos urgentes', color: 'red', settings: { audioQuality: 'ultra', aiAssistanceLevel: 'advanced', confidenceThreshold: 70, realtimeMode: true, emergencyAlerts: true, redFlags: true, clinicalAlerts: true, drugInteractionChecks: true, medicalVoiceFilter: true, sensitivity: 90 }, features: [ 'Audio Máxima Calidad', 'IA Avanzada + Alertas Críticas', 'Transcripción Instantánea', 'Banderas Rojas Activas' ], bestFor: 'Urgencias, casos críticos, medicina de emergencia' }, { id: 'night', name: 'Consulta Nocturna', icon: '🌙', iconComponent: MoonIcon, description: 'Optimizado para guardias nocturnas y ambientes silenciosos', color: 'indigo', settings: { noiseSuppression: true, medicalVoiceFilter: true, sensitivity: 85, clinicalAlerts: false, emergencyAlerts: true, audioQuality: 'high', aiAssistanceLevel: 'intermediate', confidenceThreshold: 80 }, features: [ 'Filtro de Ruido Agresivo', 'Modo Oscuro Automático', 'Solo Alertas Críticas', 'Sensibilidad Optimizada' ], bestFor: 'Guardias nocturnas, consultas en silencio, telemedicia' }, { id: 'custom', name: 'Configuración Personalizada', icon: '⚙️', iconComponent: CogIcon, description: 'Configuración manual ajustada por el usuario', color: 'gray', settings: {}, features: [ 'Configurado manualmente', 'Ajustes específicos del usuario', 'Totalmente personalizable', 'Sin restricciones predefinidas' ], bestFor: 'Usuarios avanzados, necesidades específicas, especialidades particulares' } ];
+const presets = [ {
+  id: 'general',
+  name: 'Consulta General',
+  icon: '🏥',
+  iconComponent: SunIcon,
+  description: 'Configuración balanceada para consultorios regulares',
+  color: 'blue',
+  settings: { audioQuality: 'high',
+  aiAssistanceLevel: 'intermediate',
+  confidenceThreshold: 75,
+  language: 'es-MX',
+  medicalTerminology: true,
+  clinicalAlerts: true,
+  emergencyAlerts: true,
+  notesFormat: 'soap',
+  noiseSuppression: true,
+  echoCancellation: true
+}, features: [ 'Audio HD + IA Intermedia', 'Español MX + Términos Médicos', 'SOAP + Alertas Básicas', 'Umbral de confianza 75%' ], bestFor: 'Medicina general, consultas rutinarias, medicina familiar' }, {
+  id: 'emergency',
+  name: 'Consulta de Emergencia',
+  icon: '🚨',
+  iconComponent: ExclamationTriangleIcon,
+  description: 'Máxima precisión y alertas críticas para casos urgentes',
+  color: 'red',
+  settings: { audioQuality: 'ultra',
+  aiAssistanceLevel: 'advanced',
+  confidenceThreshold: 70,
+  realtimeMode: true,
+  emergencyAlerts: true,
+  redFlags: true,
+  clinicalAlerts: true,
+  drugInteractionChecks: true,
+  medicalVoiceFilter: true,
+  sensitivity: 90
+}, features: [ 'Audio Máxima Calidad', 'IA Avanzada + Alertas Críticas', 'Transcripción Instantánea', 'Banderas Rojas Activas' ], bestFor: 'Urgencias, casos críticos, medicina de emergencia' }, {
+  id: 'night',
+  name: 'Consulta Nocturna',
+  icon: '🌙',
+  iconComponent: MoonIcon,
+  description: 'Optimizado para guardias nocturnas y ambientes silenciosos',
+  color: 'indigo',
+  settings: { noiseSuppression: true,
+  medicalVoiceFilter: true,
+  sensitivity: 85,
+  clinicalAlerts: false,
+  emergencyAlerts: true,
+  audioQuality: 'high',
+  aiAssistanceLevel: 'intermediate',
+  confidenceThreshold: 80
+}, features: [ 'Filtro de Ruido Agresivo', 'Modo Oscuro Automático', 'Solo Alertas Críticas', 'Sensibilidad Optimizada' ], bestFor: 'Guardias nocturnas, consultas en silencio, telemedicia' }, {
+  id: 'custom',
+  name: 'Configuración Personalizada',
+  icon: '⚙️',
+  iconComponent: CogIcon,
+  description: 'Configuración manual ajustada por el usuario',
+  color: 'gray',
+  settings: {
+}, features: [ 'Configurado manualmente', 'Ajustes específicos del usuario', 'Totalmente personalizable', 'Sin restricciones predefinidas' ], bestFor: 'Usuarios avanzados, necesidades específicas, especialidades particulares' } ];
 
 const getColorClasses = (color, isSelected) => {
   
 
-const colors = { blue: isSelected ? 'border-blue-500 bg-blue-50 ' : 'border-gray-200 hover:border-blue-300', red: isSelected ? 'border-red-500 bg-red-50 ' : 'border-gray-200 hover:border-red-300', indigo: isSelected ? 'border-indigo-500 bg-indigo-50 ' : 'border-gray-200 hover:border-indigo-300', gray: isSelected ? 'border-gray-500 bg-gray-50 ' : 'border-gray-200 hover:border-gray-300' };
+const colors = {
+  blue: isSelected ? 'border-blue-500 bg-blue-50 ' : 'border-gray-200 hover:border-blue-300',
+  red: isSelected ? 'border-red-500 bg-red-50 ' : 'border-gray-200 hover:border-red-300',
+  indigo: isSelected ? 'border-indigo-500 bg-indigo-50 ' : 'border-gray-200 hover:border-indigo-300',
+  gray: isSelected ? 'border-gray-500 bg-gray-50 ' : 'border-gray-200 hover:border-gray-300'
+};
 return colors[color] || colors.blue;
 };
 const getButtonColorClasses = (color) => {
@@ -38,3 +100,4 @@ return ( <motion.div key={preset.id} className={`rounded-xl border-2 transition-
 };
 
 export default QuickPresets;
+}}

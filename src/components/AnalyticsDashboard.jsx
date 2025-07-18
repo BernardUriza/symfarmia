@@ -16,7 +16,8 @@ import {
   ArrowLeftIcon,
 } from '@heroicons/react/24/outline';
 
-const AnalyticsDashboard = () => {
+const AnalyticsDashboard = () =>
+    {
   const { t } = useTranslation();
 
   const { isDemoMode } = useAppMode();
@@ -32,216 +33,293 @@ const AnalyticsDashboard = () => {
   ];
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 ">
-      {' '}
+    {' '}
       {/* Header */}{' '}
-      <header className="bg-white shadow-sm border-b border-gray-200 ">
-        {' '}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {' '}
-          <div className="flex justify-between items-center h-16">
-            {' '}
-            <div className="flex items-center">
-              {' '}
-              <a
+    <header className="bg-white shadow-sm border-b border-gray-200 ">
+    {' '}
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    {' '}
+    <div className="flex justify-between items-center h-16">
+    {' '}
+    <div className="flex items-center">
+    {' '}
+    <a
                 href="/"
                 className="flex items-center text-gray-600 hover:text-blue-600 transition-colors"
               >
-                {' '}
-                <ArrowLeftIcon className="w-5 h-5 mr-2" />{' '}
-                <HomeIcon className="w-5 h-5 mr-2" />{' '}
-                <span className="text-sm font-medium">Back to Home</span>{' '}
-              </a>{' '}
-              <div className="ml-6 h-6 w-px bg-gray-300 "></div>{' '}
-              <h1 className="ml-6 text-2xl font-bold text-gray-900 ">
-                {' '}
-                <span className="text-blue-600 ">SYMFARMIA</span>{' '}
-                <span className="ml-2 text-lg text-gray-600 ">
+    {' '}
+    <ArrowLeftIcon className="w-5 h-5 mr-2" />
+    {' '}
+    <HomeIcon className="w-5 h-5 mr-2" />
+    {' '}
+    <span className="text-sm font-medium">Back to Home</span>
+    {' '}
+    </a>
+    {' '}
+    <div className="ml-6 h-6 w-px bg-gray-300 ">
+    </div>
+    {' '}
+    <h1 className="ml-6 text-2xl font-bold text-gray-900 ">
+    {' '}
+    <span className="text-blue-600 ">SYMFARMIA</span>
+    {' '}
+    <span className="ml-2 text-lg text-gray-600 ">
                   Analytics
-                </span>{' '}
-              </h1>{' '}
-            </div>{' '}
-            <div className="flex items-center gap-4">
-              {' '}
+                </span>
+    {' '}
+    </h1>
+    {' '}
+    </div>
+    {' '}
+    <div className="flex items-center gap-4">
+    {' '}
               {isDemoMode && (
                 <div className="px-3 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full">
-                  {' '}
+    {' '}
                   Demo Mode{' '}
-                </div>
+    </div>
               )}{' '}
-              <ThemeToggle />{' '}
-            </div>{' '}
-          </div>{' '}
-        </div>{' '}
-      </header>{' '}
+    <ThemeToggle />
+    {' '}
+    </div>
+    {' '}
+    </div>
+    {' '}
+    </div>
+    {' '}
+    </header>
+    {' '}
       {/* Navigation Tabs */}{' '}
-      <nav className="bg-white border-b border-gray-200 ">
-        {' '}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {' '}
-          <div className="flex space-x-8">
-            {' '}
+    <nav className="bg-white border-b border-gray-200 ">
+    {' '}
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    {' '}
+    <div className="flex space-x-8">
+    {' '}
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center px-1 py-4 text-sm font-medium border-b-2 transition-colors ${activeTab === tab.id ? 'border-blue-500 text-blue-600 ' : 'border-transparent text-gray-500 hover:text-gray-700 '}`}
+                            className={`flex items-center px-1 py-4 text-sm font-medium border-b-2 transition-colors ${activeTab === tab.id ? 'border-blue-500 text-blue-600 ' : 'border-transparent text-gray-500 hover:text-gray-700 '}`}
               >
-                {' '}
-                <tab.icon className="w-5 h-5 mr-2" /> {tab.name}{' '}
-              </button>
+    {' '}
+    <tab.icon className="w-5 h-5 mr-2" />
+    {tab.name}{' '}
+    </button>
             ))}{' '}
-          </div>{' '}
-        </div>{' '}
-      </nav>{' '}
+    </div>
+    {' '}
+    </div>
+    {' '}
+    </nav>
+    {' '}
       {/* Main Content */}{' '}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {' '}
+    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    {' '}
         {activeTab === 'overview' && (
           <div className="space-y-8">
-            {' '}
-            <div className="flex items-center justify-between">
-              {' '}
-              <div>
-                {' '}
-                <h2 className="text-3xl font-bold text-gray-900 ">
-                  {t('medical_analytics_overview')}
-                </h2>{' '}
-                <p className="mt-2 text-gray-600 ">
-                  {t('comprehensive_medical_insights')}
-                </p>{' '}
-              </div>{' '}
-              <div className="flex items-center gap-4">
-                {' '}
-                <select className="px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 ">
-                  {' '}
-                  <option>Last 30 days</option> <option>Last 90 days</option>{' '}
-                  <option>Last 12 months</option> <option>All time</option>{' '}
-                </select>{' '}
-              </div>{' '}
-            </div>{' '}
-            <MedicalKPICards /> <MedicalCharts />{' '}
-          </div>
+    {' '}
+    <div className="flex items-center justify-between">
+    {' '}
+    <div>
+    {' '}
+    <h2 className="text-3xl font-bold text-gray-900 ">
+    {t('medical_analytics_overview')}
+    </h2>
+    {' '}
+    <p className="mt-2 text-gray-600 ">
+    {t('comprehensive_medical_insights')}
+    </p>
+    {' '}
+    </div>
+    {' '}
+    <div className="flex items-center gap-4">
+    {' '}
+    <select className="px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 ">
+    {' '}
+    <option>Last 30 days</option>
+    <option>Last 90 days</option>
+    {' '}
+    <option>Last 12 months</option>
+    <option>All time</option>
+    {' '}
+    </select>
+    {' '}
+    </div>
+    {' '}
+    </div>
+    {' '}
+    <MedicalKPICards />
+    <MedicalCharts />
+    {' '}
+    </div>
         )}{' '}
         {activeTab === 'patients' && (
           <div className="space-y-8">
-            {' '}
-            <h2 className="text-3xl font-bold text-gray-900 ">
-              {t('patient_analytics')}
-            </h2>{' '}
-            <MedicalKPICards section="patients" />{' '}
-            <MedicalCharts section="patients" />{' '}
-          </div>
+    {' '}
+    <h2 className="text-3xl font-bold text-gray-900 ">
+    {t('patient_analytics')}
+    </h2>
+    {' '}
+    <MedicalKPICards section="patients" />
+    {' '}
+    <MedicalCharts section="patients" />
+    {' '}
+    </div>
         )}{' '}
         {activeTab === 'clinical' && (
           <div className="space-y-8">
-            {' '}
-            <h2 className="text-3xl font-bold text-gray-900 ">
-              {t('clinical_metrics')}
-            </h2>{' '}
-            <MedicalKPICards section="clinical" />{' '}
-            <MedicalCharts section="clinical" />{' '}
-          </div>
+    {' '}
+    <h2 className="text-3xl font-bold text-gray-900 ">
+    {t('clinical_metrics')}
+    </h2>
+    {' '}
+    <MedicalKPICards section="clinical" />
+    {' '}
+    <MedicalCharts section="clinical" />
+    {' '}
+    </div>
         )}{' '}
         {activeTab === 'reports' && (
           <div className="space-y-8">
-            {' '}
-            <h2 className="text-3xl font-bold text-gray-900 ">
-              {t('reports_analysis')}
-            </h2>{' '}
-            <MedicalKPICards section="reports" />{' '}
-            <MedicalCharts section="reports" />{' '}
-          </div>
+    {' '}
+    <h2 className="text-3xl font-bold text-gray-900 ">
+    {t('reports_analysis')}
+    </h2>
+    {' '}
+    <MedicalKPICards section="reports" />
+    {' '}
+    <MedicalCharts section="reports" />
+    {' '}
+    </div>
         )}{' '}
         {activeTab === 'ai-insights' && (
           <div className="space-y-8">
-            {' '}
-            <div className="flex items-center justify-between">
-              {' '}
-              <div>
-                {' '}
-                <h2 className="text-3xl font-bold text-gray-900 ">
-                  {t('ai_medical_insights')}
-                </h2>{' '}
-                <p className="mt-2 text-gray-600 ">
-                  {t('ai_powered_clinical_analysis')}
-                </p>{' '}
-              </div>{' '}
-              <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg">
-                {' '}
-                <SparklesIcon className="w-5 h-5" />{' '}
-                <span className="text-sm font-medium">AI Powered</span>{' '}
-              </div>{' '}
-            </div>{' '}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {' '}
-              <div className="lg:col-span-2">
-                {' '}
-                <AIChat />{' '}
-              </div>{' '}
-              <div className="space-y-6">
-                {' '}
-                <div className="bg-white rounded-lg p-6 shadow-sm">
-                  {' '}
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                    {t('quick_insights')}
-                  </h3>{' '}
-                  <div className="space-y-3">
-                    {' '}
-                    <div className="p-3 bg-blue-50 rounded-lg">
-                      {' '}
-                      <p className="text-sm text-blue-900 ">
-                        {t('diabetes_trend_up')}
-                      </p>{' '}
-                    </div>{' '}
-                    <div className="p-3 bg-green-50 rounded-lg">
-                      {' '}
-                      <p className="text-sm text-green-900 ">
-                        {t('treatment_adherence_improved')}
-                      </p>{' '}
-                    </div>{' '}
-                    <div className="p-3 bg-amber-50 rounded-lg">
-                      {' '}
-                      <p className="text-sm text-amber-900 ">
-                        {t('follow_up_required')}
-                      </p>{' '}
-                    </div>{' '}
-                  </div>{' '}
-                </div>{' '}
-                <div className="bg-white rounded-lg p-6 shadow-sm">
-                  {' '}
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                    {t('suggested_actions')}
-                  </h3>{' '}
-                  <div className="space-y-3">
-                    {' '}
-                    <div className="flex items-start gap-3">
-                      {' '}
-                      <div className="w-2 h-2 bg-red-500 rounded-full mt-2"></div>{' '}
-                      <p className="text-sm text-gray-700 ">
-                        {t('schedule_preventive_care')}
-                      </p>{' '}
-                    </div>{' '}
-                    <div className="flex items-start gap-3">
-                      {' '}
-                      <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>{' '}
-                      <p className="text-sm text-gray-700 ">
-                        {t('review_medication_protocols')}
-                      </p>{' '}
-                    </div>{' '}
-                    <div className="flex items-start gap-3">
-                      {' '}
-                      <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>{' '}
-                      <p className="text-sm text-gray-700 ">
-                        {t('update_treatment_plans')}
-                      </p>{' '}
-                    </div>{' '}
-                  </div>{' '}
-                </div>{' '}
-              </div>{' '}
-            </div>{' '}
-          </div>
+    {' '}
+    <div className="flex items-center justify-between">
+    {' '}
+    <div>
+    {' '}
+    <h2 className="text-3xl font-bold text-gray-900 ">
+    {t('ai_medical_insights')}
+    </h2>
+    {' '}
+    <p className="mt-2 text-gray-600 ">
+    {t('ai_powered_clinical_analysis')}
+    </p>
+    {' '}
+    </div>
+    {' '}
+    
+                    <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg">
+    {' '}
+    <SparklesIcon className="w-5 h-5" />
+    {' '}
+    <span className="text-sm font-medium">AI Powered</span>
+    {' '}
+    </div>
+    {' '}
+    </div>
+    {' '}
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    {' '}
+    <div className="lg:col-span-2">
+    {' '}
+    <AIChat />
+    {' '}
+    </div>
+    {' '}
+    <div className="space-y-6">
+    {' '}
+    <div className="bg-white rounded-lg p-6 shadow-sm">
+    {' '}
+    <h3 className="text-lg font-semibold text-gray-900 mb-4">
+    {t('quick_insights')}
+    </h3>
+    {' '}
+    <div className="space-y-3">
+    {' '}
+    <div className="p-3 bg-blue-50 rounded-lg">
+    {' '}
+    <p className="text-sm text-blue-900 ">
+    {t('diabetes_trend_up')}
+    </p>
+    {' '}
+    </div>
+    {' '}
+    <div className="p-3 bg-green-50 rounded-lg">
+    {' '}
+    <p className="text-sm text-green-900 ">
+    {t('treatment_adherence_improved')}
+    </p>
+    {' '}
+    </div>
+    {' '}
+    <div className="p-3 bg-amber-50 rounded-lg">
+    {' '}
+    <p className="text-sm text-amber-900 ">
+    {t('follow_up_required')}
+    </p>
+    {' '}
+    </div>
+    {' '}
+    </div>
+    {' '}
+    </div>
+    {' '}
+    <div className="bg-white rounded-lg p-6 shadow-sm">
+    {' '}
+    <h3 className="text-lg font-semibold text-gray-900 mb-4">
+    {t('suggested_actions')}
+    </h3>
+    {' '}
+    <div className="space-y-3">
+    {' '}
+    <div className="flex items-start gap-3">
+    {' '}
+    <div className="w-2 h-2 bg-red-500 rounded-full mt-2">
+    </div>
+    {' '}
+    <p className="text-sm text-gray-700 ">
+    {t('schedule_preventive_care')}
+    </p>
+    {' '}
+    </div>
+    {' '}
+    <div className="flex items-start gap-3">
+    {' '}
+    <div className="w-2 h-2 bg-blue-500 rounded-full mt-2">
+    </div>
+    {' '}
+    <p className="text-sm text-gray-700 ">
+    {t('review_medication_protocols')}
+    </p>
+    {' '}
+    </div>
+    {' '}
+    <div className="flex items-start gap-3">
+    {' '}
+    <div className="w-2 h-2 bg-green-500 rounded-full mt-2">
+    </div>
+    {' '}
+    <p className="text-sm text-gray-700 ">
+    {t('update_treatment_plans')}
+    </p>
+    {' '}
+    </div>
+    {' '}
+    </div>
+    {' '}
+    </div>
+    {' '}
+    </div>
+    {' '}
+    </div>
+    {' '}
+    </div>
         )}{' '}
-      </main>{' '}
+    </main>
+    {' '}
     </div>
   );
 };
