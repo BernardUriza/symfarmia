@@ -17,7 +17,7 @@ import { DemoResetButton } from '../../src/domains/demo';
 import { useDemoPatients } from '../../src/domains/demo/hooks/useDemoPatients';
 
 // EXACT Figma workflow steps as specified
-const getMedicalWorkflowSteps = (t: any) => [
+const getMedicalWorkflowSteps = (t) => [
   { id: 'escuchar', label: t('workflow.steps.listen'), icon: Mic, component: ConversationCapture },
   { id: 'revisar', label: t('workflow.steps.review'), icon: MessageSquare, component: DialogueFlow },
   { id: 'notas', label: t('workflow.steps.notes'), icon: FileText, component: ClinicalNotes },

@@ -20,7 +20,7 @@ import {
 } from '@/src/components/medical/conversation-capture/components';
 import type { SOAPNotes } from '@/src/types/medical';
 import { diarizationService, DiarizationUtils, DiarizationResult } from '@/src/domains/medical-ai/services/DiarizationService';
-import AudioDenoisingDashboard from '@/src/components/medical/AudioDenoisingDashboard';
+import { AudioDenoisingDashboard } from '@/src/components/medical/AudioDenoisingDashboard';
 import { SOAPNotesManager } from '@/src/components/medical/SOAPNotesManager';
 import { useLlmAudit } from '@/app/hooks/useLlmAudit';
 
