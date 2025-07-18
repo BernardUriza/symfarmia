@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { whisperModelCache } from '../services/whisperModelCache';
 import { whisperPreloadManager } from '../services/WhisperPreloadManager';
 import { audioPipelineIntegration } from '../services/AudioPipelineIntegration';
-import { useSimpleWhisper } from '../hooks/useSimpleWhisper';
+import { useSimpleWhisperHybrid } from '../hooks/useSimpleWhisperHybrid';
 import { Button } from '@/src/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
 
@@ -22,15 +22,11 @@ export function WhisperDiagnosticTool() {
   const recordingCountRef = useRef(0);
   const chunkTimingsRef = useRef<number[]>([]);
   
-  const whisper = useSimpleWhisper({
+  const whisper = useSimpleWhisperHybrid({
     autoPreload: false,
-    processingMode: 'direct' as const,
-    chunkSize: 16384, // Must be a power of 2 between 256 and 16384
-    onChunkProcessed: (text, chunkNumber) => {
-      const timing = Date.now();
-      chunkTimingsRef.current.push(timing);
-      console.log(`[DIAG] Chunk ${chunkNumber} processed at ${timing}`);
-    }
+    preferWorker: false, // Use main thread for diagnostic
+    retryCount: 3,
+    retryDelay: 1000
   });
 
   // Test 1: Verificar estado inicial del preload

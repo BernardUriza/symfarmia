@@ -61,10 +61,10 @@ const AudioProcessingTest: React.FC<AudioProcessingTestProps> = ({
     onChunkProgress: handleChunkProgress,
   }), [handleChunkProcessed, handleChunkProgress]);
 
-  // Whisper hook integration - hybrid approach
+  // Whisper hook integration - hybrid approach (worker + main thread fallback)
   const whisperHook = useSimpleWhisperHybrid({
     autoPreload: true,
-    preferWorker: true,
+    preferWorker: false, // Start with main thread since worker CDN is failing
     retryCount: 3,
     retryDelay: 1000
   });
@@ -78,7 +78,15 @@ const AudioProcessingTest: React.FC<AudioProcessingTestProps> = ({
     recordingTime,
     audioUrl,
     audioBlob,
+    processingMode,
   } = whisperHook;
+
+  // Show processing mode instead of RNNoise stats
+  const isProcessingModeActive = processingMode === 'worker' || processingMode === 'main';
+  
+  // These variables are not provided by the hook, so we'll set them to false/null for now
+  const isRNNoiseActive = false;
+  const processingStats = null;
 
   // Action handlers
   const {
@@ -147,6 +155,27 @@ const AudioProcessingTest: React.FC<AudioProcessingTestProps> = ({
                 )}
               </span>
             </div>
+
+            {/* RNNoise Victory Message */}
+            {isRNNoiseActive && (
+              <div className="flex items-center justify-between">
+                <span>RNNoise Denoising:</span>
+                <span className="font-medium text-green-600 flex items-center gap-1">
+                  <span className="animate-pulse">🎉</span>
+                  ¡Victoria! Audio limpio
+                </span>
+              </div>
+            )}
+
+            {/* Processing Stats */}
+            {processingStats && processingStats.totalChunks > 0 && (
+              <div className="flex items-center justify-between">
+                <span>Audio procesado:</span>
+                <span className="font-medium text-blue-600">
+                  {processingStats.denoisedChunks}/{processingStats.totalChunks} chunks
+                </span>
+              </div>
+            )}
 
             {isRecording && (
               <>
@@ -217,6 +246,7 @@ const AudioProcessingTest: React.FC<AudioProcessingTestProps> = ({
           transcription={transcription}
           recordingTime={recordingTime}
           isRecording={isRecording}
+          audioBlob={audioBlob}
           onAudioDownload={(url) => console.log('Audio downloaded:', url)}
         />
       )}

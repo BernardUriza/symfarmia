@@ -5,7 +5,7 @@ import './conversation-capture/styles.css';
 import React, { useState, useEffect, useRef, useCallback } from "react";
 
 // **Hooks**
-import { useSimpleWhisper } from "@/src/domains/medical-ai/hooks/useSimpleWhisper";
+import { useSimpleWhisperHybrid } from "@/src/domains/medical-ai/hooks/useSimpleWhisperHybrid";
 import { useWebSpeechCapture } from "@/src/domains/medical-ai/hooks/useWebSpeechCapture";
 import { useI18n } from "@/src/domains/core/hooks/useI18n";
 import { useLlmAudit } from "@/app/hooks/useLlmAudit";
@@ -38,11 +38,9 @@ import { diarizationService, DiarizationUtils } from "@/src/domains/medical-ai/s
 // **CONFIG**
 const TRANSCRIPTION_CONFIG = {
   autoPreload: true,
-  processingMode: "direct" as const,
-  chunkSize: 16384, // Must be a power of 2 between 256 and 16384 for createScriptProcessor
-  onChunkProcessed: (text, chunkNumber) => {
-    console.log(`[ConversationCapture] Chunk #${chunkNumber}:`, text);
-  }
+  preferWorker: true,
+  retryCount: 3,
+  retryDelay: 1000
 };
 const SOAP_CONFIG = {
   autoGenerate: false,
@@ -97,7 +95,7 @@ export const ConversationCapture = ({
   }, []);
 
   // **Whisper + WebSpeech**
-  const whisperService = useSimpleWhisper(TRANSCRIPTION_CONFIG);
+  const whisperService = useSimpleWhisperHybrid(TRANSCRIPTION_CONFIG);
   const {
     transcription,
     status,

@@ -1,5 +1,5 @@
 /**
- * Unit tests for useSimpleWhisper hook - ensuring no mock data is used
+ * Unit tests for useSimpleWhisperHybrid hook - ensuring no mock data is used
  * Tests the real audio processing pipeline
  */
 
@@ -107,7 +107,7 @@ describe('useSimpleWhisper Hook', () => {
     mockAudioDenoising.isRecording = false;
     
     // Import the hook
-    const module = await import('../../src/domains/medical-ai/hooks/useSimpleWhisper');
+    const module = await import('../../src/domains/medical-ai/hooks/useSimpleWhisperHybrid');
     useSimpleWhisper = module.useSimpleWhisper;
   });
   

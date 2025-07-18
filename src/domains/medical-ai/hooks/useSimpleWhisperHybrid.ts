@@ -131,33 +131,76 @@ export function useSimpleWhisperHybrid({
   const setupAudioMonitoring = useCallback((stream: MediaStream) => {
     console.log('[Hybrid] Setting up audio monitoring');
 
-    const audioContext = new AudioContext();
-    const analyser = audioContext.createAnalyser();
-    const source = audioContext.createMediaStreamSource(stream);
+    try {
+      const audioContext = new AudioContext();
+      const analyser = audioContext.createAnalyser();
+      const source = audioContext.createMediaStreamSource(stream);
 
-    analyser.fftSize = 256;
-    source.connect(analyser);
+      analyser.fftSize = 2048; // Larger buffer for smoother readings
+      analyser.smoothingTimeConstant = 0.3; // Less smoothing for more responsive meter
+      source.connect(analyser);
+      
+      console.log('[Hybrid] Audio analyser configured:', {
+        fftSize: analyser.fftSize,
+        frequencyBinCount: analyser.frequencyBinCount,
+        smoothingTimeConstant: analyser.smoothingTimeConstant
+      });
 
-    audioContextRef.current = audioContext;
-    analyserRef.current = analyser;
+      audioContextRef.current = audioContext;
+      analyserRef.current = analyser;
 
-    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+      const dataArray = new Uint8Array(analyser.frequencyBinCount);
 
-    const updateLevel = () => {
-      if (!mediaRecorderRef.current || mediaRecorderRef.current.state !== 'recording') {
-        setAudioLevel(0);
-        return;
-      }
+      const updateLevel = () => {
+        try {
+          // More robust state checking
+          if (!mediaRecorderRef.current || 
+              mediaRecorderRef.current.state !== 'recording' ||
+              !analyserRef.current ||
+              audioContextRef.current?.state === 'closed') {
+            setAudioLevel(0);
+            return;
+          }
 
-      analyser.getByteFrequencyData(dataArray);
-      const average = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
-      const level = Math.round(average * 100 / 255); // Scale to 0-100
-      setAudioLevel(level);
+          // Use time domain data for better audio level monitoring
+          analyser.getByteTimeDomainData(dataArray);
+          
+          // Calculate RMS (Root Mean Square) for more accurate level
+          let sum = 0;
+          for (let i = 0; i < dataArray.length; i++) {
+            const normalized = (dataArray[i] - 128) / 128; // Normalize to -1 to 1
+            sum += normalized * normalized;
+          }
+          const rms = Math.sqrt(sum / dataArray.length);
+          const level = Math.round(rms * 100); // Scale to 0-100
+          
+          // Validate level is reasonable
+          if (level >= 0 && level <= 100) {
+            setAudioLevel(level);
+            // Log every 10th frame for debugging
+            if (Math.random() < 0.1) {
+              console.log('[Hybrid] Audio level:', level, 'RMS:', rms.toFixed(4));
+            }
+          }
 
-      animationFrameRef.current = requestAnimationFrame(updateLevel);
-    };
+          animationFrameRef.current = requestAnimationFrame(updateLevel);
+        } catch (error) {
+          console.warn('[Hybrid] Audio level monitoring error:', error);
+          setAudioLevel(0);
+          // Try to restart after a delay
+          setTimeout(() => {
+            if (mediaRecorderRef.current?.state === 'recording') {
+              animationFrameRef.current = requestAnimationFrame(updateLevel);
+            }
+          }, 100);
+        }
+      };
 
-    updateLevel();
+      updateLevel();
+    } catch (error) {
+      console.error('[Hybrid] Failed to setup audio monitoring:', error);
+      setAudioLevel(0);
+    }
   }, []);
 
   const startTranscription = useCallback(async () => {
@@ -248,24 +291,38 @@ export function useSimpleWhisperHybrid({
   }, [engineStatus, setupAudioMonitoring]);
 
   const stopTranscription = useCallback(async () => {
+    console.log('[Hybrid] Stopping transcription...');
+    
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
       mediaRecorderRef.current.stop();
     }
 
     if (timerRef.current) {
       clearInterval(timerRef.current);
+      timerRef.current = null;
     }
 
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
     }
 
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
     }
 
     if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
-      audioContextRef.current.close();
+      try {
+        await audioContextRef.current.close();
+      } catch (error) {
+        console.warn('[Hybrid] Error closing audio context:', error);
+      }
+      audioContextRef.current = null;
+    }
+
+    if (analyserRef.current) {
+      analyserRef.current = null;
     }
 
     setIsRecording(false);

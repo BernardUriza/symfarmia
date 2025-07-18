@@ -69,7 +69,7 @@ export const AudioRecordingPanel: React.FC<AudioRecordingPanelProps> = ({
         {/* Audio Info */}
         <div className="text-sm text-gray-600 text-center">
           <p>
-            {t('transcription.audio_format')}: WAV • {' '}
+            {t('transcription.audio_format')}: {audioBlob?.type?.split('/')[1]?.toUpperCase() || 'WEBM'} • {' '}
             {t('transcription.duration')}: {formatTime(recordingTime)}
           </p>
           

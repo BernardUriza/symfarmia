@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { whisperModelManager } from '@/src/domains/medical-ai/services/WhisperModelManager';
 import { whisperModelCache } from '@/src/domains/medical-ai/services/whisperModelCache';
 import { whisperPreloadManager } from '@/src/domains/medical-ai/services/WhisperPreloadManager';
-import { useSimpleWhisper } from '@/src/domains/medical-ai/hooks/useSimpleWhisper';
+import { useSimpleWhisperHybrid } from '@/src/domains/medical-ai/hooks/useSimpleWhisperHybrid';
 
 export function WhisperDebugPanel() {
   const [status, setStatus] = useState(() => whisperModelManager.getStatus());
@@ -18,10 +18,11 @@ export function WhisperDebugPanel() {
     preloadProgress, // eslint-disable-line @typescript-eslint/no-unused-vars
     isPreloaded,
     loadProgress
-  } = useSimpleWhisper({ 
+  } = useSimpleWhisperHybrid({ 
     autoPreload: false,
-    processingMode: 'direct',
-    showPreloadStatus: true
+    preferWorker: false,
+    retryCount: 3,
+    retryDelay: 1000
   });
   
   useEffect(() => {
