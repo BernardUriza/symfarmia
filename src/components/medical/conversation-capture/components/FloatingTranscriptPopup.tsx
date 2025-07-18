@@ -1,23 +1,20 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { X, Copy, Download, RefreshCw, ChevronDown, ChevronUp, Bot } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { X, Copy, CheckCircle, RefreshCw, Download, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/src/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
+import { Card, CardContent } from '@/src/components/ui/card';
 import { Badge } from '@/src/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/ui/tabs';
 import { LLMAuditResult } from '@/app/types/llm-audit';
-import { useI18n } from '@/src/domains/core/hooks/useI18n';
 
 interface FloatingTranscriptPopupProps {
-  isOpen: boolean;
-  onClose: () => void;
-  transcript: string;
-  llmResult?: LLMAuditResult | null;
-  isAuditLoading?: boolean;
-  auditError?: string | null;
-  onReaudit?: () => void;
-  className?: string;
+  isOpen: boolean
+  onClose: () => void
+  transcript: string
+  llmResult: LLMAuditResult | null
+  isAuditLoading: boolean
+  auditError: string | null
+  onReaudit?: () => Promise<void>
 }
 
 export const FloatingTranscriptPopup: React.FC<FloatingTranscriptPopupProps> = ({
@@ -25,204 +22,241 @@ export const FloatingTranscriptPopup: React.FC<FloatingTranscriptPopupProps> = (
   onClose,
   transcript,
   llmResult,
-  isAuditLoading = false,
+  isAuditLoading,
   auditError,
-  onReaudit,
-  className = ''
+  onReaudit
 }) => {
-  const { t } = useI18n();
-  const [isMinimized, setIsMinimized] = useState(false);
-  const [activeTab, setActiveTab] = useState('transcript');
+  const [activeTab, setActiveTab] = useState<'merged' | 'speakers' | 'logs'>('merged');
   const [copySuccess, setCopySuccess] = useState(false);
-
+  const [showDetails, setShowDetails] = useState(false);
+  
+  const displayText = llmResult?.mergedTranscript || transcript;
+  
   useEffect(() => {
     if (copySuccess) {
       const timer = setTimeout(() => setCopySuccess(false), 2000);
       return () => clearTimeout(timer);
     }
   }, [copySuccess]);
-
-  if (!isOpen) return null;
-
-  const handleCopy = async (text: string) => {
+  
+  const handleCopy = useCallback(async () => {
     try {
-      await navigator.clipboard.writeText(text);
+      await navigator.clipboard.writeText(displayText);
       setCopySuccess(true);
     } catch (err) {
-      console.error('Error copying text:', err);
+      console.error('Failed to copy:', err);
     }
-  };
-
-  const handleDownload = (text: string, filename: string) => {
-    const blob = new Blob([text], { type: 'text/plain' });
+  }, [displayText]);
+  
+  const handleDownload = useCallback(() => {
+    const blob = new Blob([displayText], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = filename;
+    a.download = `transcripcion_${new Date().toISOString().split('T')[0]}.txt`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-  };
-
-  const displayText = llmResult?.mergedTranscript || transcript;
-
+  }, [displayText]);
+  
+  if (!isOpen) return null;
+  
   return (
-    <div 
-      className={`fixed bottom-4 right-4 z-50 w-96 max-h-[80vh] transition-all duration-300 ${
-        isMinimized ? 'h-16' : ''
-      } ${className}`}
-    >
-      <Card className="shadow-2xl border-2">
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Bot className="w-5 h-5" />
-              {t('conversation.capture.transcript_popup_title', 'Transcripción')}
-              {llmResult && (
-                <Badge variant="outline" className="ml-2">
-                  GPT Auditado
-                </Badge>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 animate-in fade-in duration-200">
+      <Card className="w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl animate-in slide-in-from-bottom-4 duration-300">
+        <div className="flex items-center justify-between p-4 border-b border-border/50">
+          <div className="flex items-center gap-4">
+            <h2 className="text-xl font-semibold">Transcripción Procesada</h2>
+            {isAuditLoading && (
+              <Badge variant="secondary" className="animate-pulse">
+                <RefreshCw className="w-3 h-3 mr-1 animate-spin" />
+                Procesando con ChatGPT...
+              </Badge>
+            )}
+            {llmResult && !isAuditLoading && (
+              <Badge variant="default" className="bg-green-500/10 text-green-600">
+                <CheckCircle className="w-3 h-3 mr-1" />
+                Auditado por GPT
+              </Badge>
+            )}
+          </div>
+          <Button
+            onClick={onClose}
+            size="icon"
+            variant="ghost"
+            className="rounded-full"
+          >
+            <X className="w-5 h-5" />
+          </Button>
+        </div>
+        
+        <CardContent className="p-0 h-[calc(90vh-80px)] overflow-y-auto">
+          {/* Tabs */}
+          <div className="sticky top-0 bg-background z-10 border-b border-border/50">
+            <div className="flex">
+              <button
+                onClick={() => setActiveTab('merged')}
+                className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
+                  activeTab === 'merged'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                Texto Final
+              </button>
+              {llmResult?.speakers && llmResult.speakers.length > 0 && (
+                <button
+                  onClick={() => setActiveTab('speakers')}
+                  className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
+                    activeTab === 'speakers'
+                      ? 'border-primary text-primary'
+                      : 'border-transparent text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  Speakers ({llmResult.speakers.length})
+                </button>
               )}
-            </CardTitle>
-            <div className="flex gap-1">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsMinimized(!isMinimized)}
-                className="h-8 w-8"
-              >
-                {isMinimized ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onClose}
-                className="h-8 w-8"
-              >
-                <X className="h-4 w-4" />
-              </Button>
+              {llmResult?.gptLogs && llmResult.gptLogs.length > 0 && (
+                <button
+                  onClick={() => setActiveTab('logs')}
+                  className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
+                    activeTab === 'logs'
+                      ? 'border-primary text-primary'
+                      : 'border-transparent text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  Log GPT
+                </button>
+              )}
             </div>
           </div>
-        </CardHeader>
-
-        {!isMinimized && (
-          <CardContent className="pb-4">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="transcript">Texto Final</TabsTrigger>
-                <TabsTrigger value="speakers">Speakers</TabsTrigger>
-                <TabsTrigger value="logs">Log GPT</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="transcript" className="mt-4">
-                <div className="bg-muted/30 dark:bg-muted/20 rounded-lg p-4 max-h-96 overflow-y-auto">
-                  {isAuditLoading ? (
-                    <div className="flex items-center justify-center py-8">
-                      <RefreshCw className="h-6 w-6 animate-spin mr-2" />
-                      <span>Revisando con ChatGPT...</span>
-                    </div>
-                  ) : auditError ? (
-                    <div className="text-destructive dark:text-destructive/90">
-                      Error: {auditError}
-                    </div>
-                  ) : (
-                    <pre className="whitespace-pre-wrap text-sm font-mono">
-                      {displayText}
-                    </pre>
-                  )}
-                </div>
-
+          
+          {/* Content */}
+          <div className="p-6">
+            {activeTab === 'merged' && (
+              <div className="space-y-4">
                 {llmResult?.summary && (
-                  <div className="mt-4 p-3 bg-primary/5 dark:bg-primary/10 rounded-lg">
-                    <h4 className="font-semibold text-sm mb-1">Resumen Clínico:</h4>
-                    <p className="text-sm">{llmResult.summary}</p>
+                  <div className="bg-primary/5 dark:bg-primary/10 rounded-lg p-4 border border-primary/20">
+                    <h3 className="font-medium text-sm mb-2 text-primary">Resumen Clínico</h3>
+                    <p className="text-sm text-foreground/90">{llmResult.summary}</p>
                   </div>
                 )}
-              </TabsContent>
-
-              <TabsContent value="speakers" className="mt-4">
-                <div className="space-y-2 max-h-96 overflow-y-auto">
-                  {llmResult?.speakers && llmResult.speakers.length > 0 ? (
-                    llmResult.speakers.map((segment, idx) => (
-                      <div 
-                        key={idx} 
-                        className={`p-3 rounded-lg ${
-                          segment.speaker === 'Doctor' 
-                            ? 'bg-primary/5 dark:bg-primary/10' 
-                            : 'bg-green-500/5 dark:bg-green-500/10'
-                        }`}
-                      >
-                        <div className="flex justify-between items-center mb-1">
-                          <Badge variant={segment.speaker === 'Doctor' ? 'default' : 'secondary'}>
-                            {segment.speaker}
-                          </Badge>
-                          <span className="text-xs text-muted-foreground">
-                            {segment.start}s - {segment.end}s
-                          </span>
-                        </div>
-                        <p className="text-sm">{segment.text || 'N/A'}</p>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-center text-muted-foreground py-8">
-                      No hay datos de diarización disponibles
-                    </p>
-                  )}
+                
+                <div className="bg-muted/30 rounded-lg p-4">
+                  <pre className="whitespace-pre-wrap text-sm font-mono text-foreground/90">
+                    {displayText}
+                  </pre>
                 </div>
-              </TabsContent>
-
-              <TabsContent value="logs" className="mt-4">
-                <div className="space-y-2 max-h-96 overflow-y-auto">
-                  {llmResult?.gptLogs && llmResult.gptLogs.length > 0 ? (
-                    llmResult.gptLogs.map((log, idx) => (
-                      <div key={idx} className="p-2 bg-muted/30 dark:bg-muted/20 rounded text-sm">
-                        <span className="text-muted-foreground">#{idx + 1}:</span> {log}
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-center text-muted-foreground py-8">
-                      No hay logs de auditoría disponibles
-                    </p>
-                  )}
-                </div>
-              </TabsContent>
-            </Tabs>
-
-            <div className="flex gap-2 mt-4 pt-4 border-t">
+              </div>
+            )}
+            
+            {activeTab === 'speakers' && llmResult?.speakers && (
+              <div className="space-y-3">
+                {llmResult.speakers.map((segment, idx) => (
+                  <div key={idx} className="bg-muted/30 rounded-lg p-3 hover:bg-muted/40 transition-colors">
+                    <div className="flex items-center justify-between mb-2">
+                      <Badge variant={segment.speaker === 'Doctor' ? 'default' : 'secondary'}>
+                        {segment.speaker}
+                      </Badge>
+                      <span className="text-xs text-muted-foreground">
+                        {segment.start}s - {segment.end}s
+                      </span>
+                    </div>
+                    <p className="text-sm text-foreground/90">{segment.text}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            {activeTab === 'logs' && llmResult?.gptLogs && (
+              <div className="space-y-2">
+                {llmResult.gptLogs.map((log, idx) => (
+                  <div key={idx} className="flex items-start gap-2">
+                    <span className="text-muted-foreground text-sm">•</span>
+                    <p className="text-sm text-foreground/80">{log}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            {auditError && (
+              <div className="bg-destructive/5 border border-destructive/20 rounded-lg p-4 mt-4">
+                <p className="text-sm text-destructive">Error: {auditError}</p>
+              </div>
+            )}
+          </div>
+        </CardContent>
+        
+        {/* Actions */}
+        <div className="border-t border-border/50 p-4 bg-muted/10">
+          <div className="flex items-center justify-between">
+            <div className="flex gap-2">
               <Button
-                size="sm"
+                onClick={handleCopy}
                 variant="outline"
-                onClick={() => handleCopy(displayText)}
-                className="flex-1"
+                size="sm"
+                className="flex items-center gap-2"
               >
-                <Copy className="h-4 w-4 mr-1" />
-                {copySuccess ? 'Copiado!' : 'Copiar'}
+                {copySuccess ? (
+                  <>
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    Copiado!
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4" />
+                    Copiar
+                  </>
+                )}
               </Button>
+              
               <Button
-                size="sm"
+                onClick={handleDownload}
                 variant="outline"
-                onClick={() => handleDownload(displayText, 'transcripcion-auditada.txt')}
-                className="flex-1"
+                size="sm"
+                className="flex items-center gap-2"
               >
-                <Download className="h-4 w-4 mr-1" />
+                <Download className="w-4 h-4" />
                 Descargar
               </Button>
+              
               {onReaudit && (
                 <Button
-                  size="sm"
-                  variant="default"
                   onClick={onReaudit}
+                  variant="outline"
+                  size="sm"
                   disabled={isAuditLoading}
-                  className="flex-1"
+                  className="flex items-center gap-2"
                 >
-                  <RefreshCw className={`h-4 w-4 mr-1 ${isAuditLoading ? 'animate-spin' : ''}`} />
-                  Re-auditar
+                  <RefreshCw className={`w-4 h-4 ${isAuditLoading ? 'animate-spin' : ''}`} />
+                  Re-auditar con GPT
                 </Button>
               )}
             </div>
-          </CardContent>
-        )}
+            
+            <button
+              onClick={() => setShowDetails(!showDetails)}
+              className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Detalles técnicos
+              {showDetails ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            </button>
+          </div>
+          
+          {showDetails && (
+            <div className="mt-3 pt-3 border-t border-border/50 text-xs text-muted-foreground space-y-1">
+              <p>Caracteres: {displayText.length}</p>
+              <p>Palabras: {displayText.split(/\s+/).length}</p>
+              {llmResult && (
+                <>
+                  <p>Speakers detectados: {llmResult.speakers.length}</p>
+                  <p>Logs de proceso: {llmResult.gptLogs?.length || 0}</p>
+                </>
+              )}
+            </div>
+          )}
+        </div>
       </Card>
     </div>
   );

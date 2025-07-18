@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { LLMAuditRequest, LLMAuditResponse, LLMAuditResult } from '@/app/types/llm-audit'
+import { llmCache } from '@/app/services/llmCache'
+import { llmMetrics } from '@/app/services/llmMetrics'
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
@@ -28,6 +30,8 @@ FORMATO DE RESPUESTA OBLIGATORIO (JSON):
 IMPORTANTE: Responde SOLO con el JSON, sin texto adicional.`
 
 export async function POST(request: NextRequest) {
+  const startTime = Date.now()
+  
   try {
     const body: LLMAuditRequest = await request.json()
     const { transcript, webSpeech, diarization, task } = body
@@ -44,6 +48,17 @@ export async function POST(request: NextRequest) {
         success: false,
         error: 'OpenAI API key not configured'
       }, { status: 500 })
+    }
+
+    // Check cache first
+    const cachedResult = llmCache.get(transcript, task || 'audit-transcript')
+    if (cachedResult) {
+      console.log('[LLM Audit] Returning cached result')
+      llmMetrics.recordCall(true, Date.now() - startTime, 0, undefined, true)
+      return NextResponse.json<LLMAuditResponse>({
+        success: true,
+        data: cachedResult
+      })
     }
 
     const userContent = `
@@ -82,6 +97,13 @@ TAREA: ${task === 'diarize' ? 'Enfócate en asignar speakers correctamente' : 'A
       throw new Error('Invalid response structure from OpenAI')
     }
 
+    // Cache the successful result
+    llmCache.set(transcript, task || 'audit-transcript', result)
+
+    // Record metrics
+    const tokens = completion.usage?.total_tokens || 0
+    llmMetrics.recordCall(true, Date.now() - startTime, tokens)
+
     return NextResponse.json<LLMAuditResponse>({
       success: true,
       data: result
@@ -89,6 +111,9 @@ TAREA: ${task === 'diarize' ? 'Enfócate en asignar speakers correctamente' : 'A
 
   } catch (error) {
     console.error('LLM Audit Error:', error)
+    
+    const errorMessage = error instanceof Error ? error.message : 'Failed to audit transcript'
+    llmMetrics.recordCall(false, Date.now() - startTime, 0, errorMessage)
     
     if (error instanceof OpenAI.APIError) {
       return NextResponse.json<LLMAuditResponse>({
@@ -99,7 +124,7 @@ TAREA: ${task === 'diarize' ? 'Enfócate en asignar speakers correctamente' : 'A
 
     return NextResponse.json<LLMAuditResponse>({
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to audit transcript'
+      error: errorMessage
     }, { status: 500 })
   }
 }
