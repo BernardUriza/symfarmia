@@ -18,8 +18,7 @@
   NODE_ENV = "production"
   NETLIFY = "true"
   NEXT_TELEMETRY_DISABLED = "1"
-  NODE_VERSION = "18.20.5"
-  NPM_VERSION = "9.8.1"
+  NODE_VERSION = "20.12.2"
 
 # Optimized function configuration for transcription
 [functions]
