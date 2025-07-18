@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from '../providers/I18nProvider';
 import { useAppMode } from '../providers/AppModeProvider';
-import ThemeToggle from './layout/ThemeToggle';
 import MedicalKPICards from './MedicalKPICards';
 import MedicalCharts from './MedicalCharts';
 import AIChat from './AIChat';
@@ -78,8 +77,7 @@ const AnalyticsDashboard = () =>
     {' '}
                   Demo Mode{' '}
     </div>
-              )}{' '}
-    <ThemeToggle />
+              )}
     {' '}
     </div>
     {' '}

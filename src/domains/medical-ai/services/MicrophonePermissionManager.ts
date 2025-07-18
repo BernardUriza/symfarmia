@@ -5,9 +5,62 @@
  * before initializing any transcription engine
  */
 
+// TypeScript interfaces
+export interface MediaConstraints {
+  audio: {
+    echoCancellation: boolean;
+    noiseSuppression: boolean;
+    autoGainControl: boolean;
+    sampleRate: number;
+  };
+}
+
+export interface PermissionResult {
+  granted: boolean;
+  stream: MediaStream | null;
+  state: 'granted' | 'denied' | 'prompt';
+  error?: ErrorInfo;
+}
+
+export interface ErrorInfo {
+  type: 'permission_denied' | 'no_microphone' | 'hardware_error' | 'constraint_error' | 'unknown';
+  message: string;
+  recoverable: boolean;
+  userAction: string;
+}
+
+export interface PermissionInstructions {
+  browser: string;
+  steps: string[];
+}
+
+export interface MicrophoneTestResult {
+  success: boolean;
+  maxLevel?: number;
+  avgLevel?: number;
+  working?: boolean;
+  error?: string;
+}
+
+export interface PermissionEventData {
+  oldState?: string;
+  newState?: string;
+  stream?: MediaStream | null;
+  error?: ErrorInfo;
+}
+
+export type PermissionState = 'prompt' | 'granted' | 'denied';
+export type PermissionEvent = 'granted' | 'denied' | 'stateChange' | 'streamReleased';
+
 export class MicrophonePermissionManager {
+  private permissionState: PermissionState;
+  private audioStream: MediaStream | null;
+  private permissionChecked: boolean;
+  private listeners: Map<PermissionEvent, Set<(data: PermissionEventData) => void>>;
+  private constraints: MediaConstraints;
+
   constructor() {
-    this.permissionState = 'prompt'; // 'prompt', 'granted', 'denied'
+    this.permissionState = 'prompt';
     this.audioStream = null;
     this.permissionChecked = false;
     this.listeners = new Map();
@@ -24,19 +77,19 @@ export class MicrophonePermissionManager {
   /**
    * Check current permission state
    */
-  async checkPermissionState() {
+  async checkPermissionState(): Promise<PermissionState> {
     try {
       // Check if Permissions API is available
       if ('permissions' in navigator) {
-        const permission = await navigator.permissions.query({ name: 'microphone' });
-        this.permissionState = permission.state;
+        const permission = await navigator.permissions.query({ name: 'microphone' as PermissionName });
+        this.permissionState = permission.state as PermissionState;
         
         // Listen for permission changes
         permission.addEventListener('change', () => {
-          this.handlePermissionChange(permission.state);
+          this.handlePermissionChange(permission.state as PermissionState);
         });
         
-        return permission.state;
+        return permission.state as PermissionState;
       }
       
       // Fallback: try to check if we already have a stream
@@ -55,7 +108,7 @@ export class MicrophonePermissionManager {
   /**
    * Request microphone permission
    */
-  async requestPermission(constraints = null) {
+  async requestPermission(constraints: MediaConstraints | null = null): Promise<PermissionResult> {
     try {
       // Check if already granted
       const currentState = await this.checkPermissionState();
@@ -86,7 +139,7 @@ export class MicrophonePermissionManager {
         state: 'granted'
       };
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Microphone permission denied:', error);
       
       this.permissionState = 'denied';
@@ -108,7 +161,7 @@ export class MicrophonePermissionManager {
   /**
    * Classify permission error
    */
-  classifyPermissionError(error) {
+  private classifyPermissionError(error: Error): ErrorInfo {
     const errorString = error.toString().toLowerCase();
     const errorName = error.name?.toLowerCase() || '';
     
@@ -159,7 +212,7 @@ export class MicrophonePermissionManager {
   /**
    * Handle permission state change
    */
-  handlePermissionChange(newState) {
+  private handlePermissionChange(newState: PermissionState): void {
     const oldState = this.permissionState;
     this.permissionState = newState;
     
@@ -179,21 +232,21 @@ export class MicrophonePermissionManager {
   /**
    * Get current audio stream
    */
-  getAudioStream() {
+  getAudioStream(): MediaStream | null {
     return this.audioStream;
   }
 
   /**
    * Check if permission is granted
    */
-  isGranted() {
-    return this.permissionState === 'granted' && this.audioStream && this.audioStream.active;
+  isGranted(): boolean {
+    return this.permissionState === 'granted' && this.audioStream !== null && this.audioStream.active;
   }
 
   /**
    * Release audio stream
    */
-  releaseStream() {
+  releaseStream(): void {
     if (this.audioStream) {
       console.log('Releasing microphone stream');
       
@@ -210,11 +263,11 @@ export class MicrophonePermissionManager {
   /**
    * Add event listener
    */
-  addEventListener(event, callback) {
+  addEventListener(event: PermissionEvent, callback: (data: PermissionEventData) => void): () => void {
     if (!this.listeners.has(event)) {
       this.listeners.set(event, new Set());
     }
-    this.listeners.get(event).add(callback);
+    this.listeners.get(event)!.add(callback);
     
     // Return remove function
     return () => {
@@ -228,7 +281,7 @@ export class MicrophonePermissionManager {
   /**
    * Remove event listener
    */
-  removeEventListener(event, callback) {
+  removeEventListener(event: PermissionEvent, callback: (data: PermissionEventData) => void): void {
     const callbacks = this.listeners.get(event);
     if (callbacks) {
       callbacks.delete(callback);
@@ -238,7 +291,7 @@ export class MicrophonePermissionManager {
   /**
    * Notify listeners
    */
-  notifyListeners(event, data) {
+  private notifyListeners(event: PermissionEvent, data: PermissionEventData): void {
     const callbacks = this.listeners.get(event);
     if (callbacks) {
       callbacks.forEach(callback => {
@@ -254,22 +307,28 @@ export class MicrophonePermissionManager {
   /**
    * Check browser compatibility
    */
-  checkBrowserCompatibility() {
+  checkBrowserCompatibility(): {
+    getUserMedia: boolean;
+    permissions: boolean;
+    audioContext: boolean;
+    isCompatible: boolean;
+  } {
     const compatibility = {
       getUserMedia: !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia),
       permissions: 'permissions' in navigator,
-      audioContext: !!(window.AudioContext || window.webkitAudioContext)
+      audioContext: !!(window.AudioContext || (window as any).webkitAudioContext)
     };
     
-    compatibility.isCompatible = compatibility.getUserMedia && compatibility.audioContext;
-    
-    return compatibility;
+    return {
+      ...compatibility,
+      isCompatible: compatibility.getUserMedia && compatibility.audioContext
+    };
   }
 
   /**
    * Get permission instructions for user
    */
-  getPermissionInstructions() {
+  getPermissionInstructions(): PermissionInstructions {
     const userAgent = navigator.userAgent.toLowerCase();
     
     if (userAgent.includes('chrome') || userAgent.includes('chromium')) {
@@ -329,18 +388,19 @@ export class MicrophonePermissionManager {
   /**
    * Test microphone with audio level detection
    */
-  async testMicrophone() {
+  async testMicrophone(): Promise<MicrophoneTestResult> {
     try {
       if (!this.audioStream) {
         const result = await this.requestPermission();
         if (!result.granted) {
-          return { success: false, error: result.error };
+          return { success: false, error: result.error?.message };
         }
       }
 
-      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+      const audioContext = new AudioContextClass();
       const analyser = audioContext.createAnalyser();
-      const microphone = audioContext.createMediaStreamSource(this.audioStream);
+      const microphone = audioContext.createMediaStreamSource(this.audioStream!);
       const dataArray = new Uint8Array(analyser.frequencyBinCount);
       
       microphone.connect(analyser);
@@ -379,7 +439,7 @@ export class MicrophonePermissionManager {
         checkLevel();
       });
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Microphone test failed:', error);
       return {
         success: false,
@@ -391,7 +451,7 @@ export class MicrophonePermissionManager {
   /**
    * Reset permission manager
    */
-  reset() {
+  reset(): void {
     this.releaseStream();
     this.permissionState = 'prompt';
     this.permissionChecked = false;

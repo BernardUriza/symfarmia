@@ -4,7 +4,6 @@
  * Components used for application layout and structure
  */
 
-export { default as ThemeToggle } from './ThemeToggle';
 export { default as BraveCacheBuster } from './BraveCacheBuster';
 export { default as GlobalLanguageSwitcher, HeaderLanguageSwitcher } from './GlobalLanguageSwitcher';
 export { default as DemoModeBanner } from './DemoModeBanner';

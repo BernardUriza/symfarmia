@@ -11,7 +11,6 @@ import {
   CheckCircle,
   Mic
 } from 'lucide-react';
-import { ThemeToggle } from '@/src/components/layout';
 import { ActionButton } from '@/src/components/ui';
 import { UserPlusIcon } from '@heroicons/react/24/outline';
 // import { TranscriptionPanel } from '@/src/domains/medical-ai/components/TranscriptionPanel';
@@ -169,7 +168,6 @@ const ConsultationPage = () => {
                 {t('consultation.page.subtitle')}
               </div>
               <div className="w-px h-6 bg-border"></div>
-              <ThemeToggle className="ml-2" />
             </div>
           </div>
         </header>
