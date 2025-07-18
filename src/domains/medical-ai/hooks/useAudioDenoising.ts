@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { createRNNWasmModule } from '@jitsi/rnnoise-wasm';
 
 export interface ProcessingMetadata {
   chunkId: number;
@@ -76,20 +75,25 @@ export function useAudioDenoising(
         await ctx.audioWorklet.addModule('/audio-denoiser.worklet.js');
         console.log('[useAudioDenoising] AudioWorklet loaded');
         
-        // Load RNNoise module with explicit path to wasm file
-        const rnnoise = await createRNNWasmModule({
-          locateFile: (filename: string) => {
-            if (filename.endsWith('.wasm')) {
-              return '/dist/rnnoise.wasm';
-            }
-            return filename;
-          }
-        });
-        console.log('[useAudioDenoising] RNNoise module loaded');
-        
         const workletNode = new window.AudioWorkletNode(ctx, 'audio-denoiser-processor');
-        // RNNoise no es transferible, así que usa métodos serializables o wrappers si es necesario
-        (workletNode.port as any).postMessage({ type: 'rnnoise-init', rnnoise });
+        
+        // Wait for worklet to initialize RNNoise
+        await new Promise<void>((resolve, reject) => {
+          const timeout = setTimeout(() => {
+            reject(new Error('Timeout waiting for RNNoise initialization'));
+          }, 5000);
+          
+          workletNode.port.onmessage = (event) => {
+            if (event.data.type === 'init-complete') {
+              clearTimeout(timeout);
+              console.log('[useAudioDenoising] RNNoise initialized in worklet');
+              resolve();
+            } else if (event.data.type === 'init-error') {
+              clearTimeout(timeout);
+              reject(new Error(`RNNoise init error: ${event.data.error}`));
+            }
+          };
+        });
         
         if (!cancelled) {
           workletNodeRef.current = workletNode;

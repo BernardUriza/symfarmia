@@ -1,5 +1,8 @@
 // audio-denoiser.worklet.js
 
+// Import the sync version of RNNoise
+importScripts('/rnnoise-sync.js');
+
 let rnnoise = null;
 let buffer = [];
 const FRAME_SIZE = 480;
@@ -8,13 +11,39 @@ class AudioDenoiserProcessor extends AudioWorkletProcessor {
   constructor() {
     super();
     this.port.onmessage = this.handleMessage.bind(this);
+    this.initializeRNNoise();
+  }
+
+  async initializeRNNoise() {
+    try {
+      // createRNNWasmModuleSync should be available from the imported script
+      if (typeof createRNNWasmModuleSync !== 'undefined') {
+        const rnnoiseModule = createRNNWasmModuleSync();
+        // Create denoiser instance
+        rnnoise = {
+          state: rnnoiseModule._rnnoise_create(),
+          process: (frame) => {
+            const ptr = rnnoiseModule._malloc(frame.length * 2);
+            rnnoiseModule.HEAP16.set(frame, ptr >> 1);
+            rnnoiseModule._rnnoise_process_frame(rnnoise.state, ptr, ptr);
+            const result = new Int16Array(frame.length);
+            result.set(rnnoiseModule.HEAP16.subarray(ptr >> 1, (ptr >> 1) + frame.length));
+            rnnoiseModule._free(ptr);
+            return result;
+          },
+          module: rnnoiseModule
+        };
+        this.port.postMessage({ type: 'init-complete' });
+      } else {
+        throw new Error('createRNNWasmModuleSync not found');
+      }
+    } catch (error) {
+      this.port.postMessage({ type: 'init-error', error: error.message });
+    }
   }
 
   handleMessage(event) {
-    if (event.data.type === 'rnnoise-init') {
-      rnnoise = event.data.rnnoise;
-      this.port.postMessage({ type: 'init-complete' });
-    }
+    // Keep for any additional messages if needed
   }
 
   process(inputs) {
