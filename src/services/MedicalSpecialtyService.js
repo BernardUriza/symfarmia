@@ -6,7 +6,7 @@
  */
 
 // Lazy load heavy dependencies
-const getMedicalAIConfig = () => import('../lib/config/MedicalAIConfig.js').then(m => m.MedicalAIConfig);
+const getMedicalAIConfig = () => import('../lib/config/MedicalAIConfig').then(m => m.MedicalAIConfig);
 
 export class MedicalSpecialtyService {
   

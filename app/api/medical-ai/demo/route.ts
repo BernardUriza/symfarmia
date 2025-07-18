@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { processMedicalQuery, getErrorMessage } from '@/src/services/MedicalAILogic';
-import { MedicalAIConfig } from '@/src/lib/config/MedicalAIConfig.js';
+import { MedicalAIConfig } from '@/src/lib/config/MedicalAIConfig';
 
 interface MedicalAIRequest {
   input: string;

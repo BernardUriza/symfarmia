@@ -1,5 +1,5 @@
 import { POST, GET } from '../../app/api/medical-ai/demo/route.js';
-import { MedicalAIConfig } from '../../app/config/MedicalAIConfig.js';
+import { MedicalAIConfig } from '../../src/lib/config/MedicalAIConfig';
 
 function createRequest(body, method = 'POST') {
   return {

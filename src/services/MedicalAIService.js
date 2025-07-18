@@ -5,7 +5,7 @@
  * Designed to be easily extracted into a microservice.
  */
 
-import { MedicalAIConfig } from '../lib/config/MedicalAIConfig.js';
+import { MedicalAIConfig } from '../lib/config/MedicalAIConfig';
 
 export class MedicalAIService {
   constructor(config = MedicalAIConfig) {
