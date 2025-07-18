@@ -110,7 +110,7 @@ export function AudioDenoisingDashboard() {
       } else {
         setError(data.error || 'Failed to fetch status');
       }
-    } catch (error) {
+    } catch {
       setError('Network error fetching status');
     }
   }, []);
@@ -126,7 +126,7 @@ export function AudioDenoisingDashboard() {
       } else {
         setError(data.error || 'Failed to fetch metrics');
       }
-    } catch (error) {
+    } catch {
       setError('Network error fetching metrics');
     }
   }, []);
@@ -143,7 +143,7 @@ export function AudioDenoisingDashboard() {
       } else {
         setError(data.error || 'Failed to fetch config');
       }
-    } catch (error) {
+    } catch {
       setError('Network error fetching config');
     }
   }, []);
@@ -159,7 +159,7 @@ export function AudioDenoisingDashboard() {
       } else {
         setError(data.error || 'Failed to fetch audit log');
       }
-    } catch (error) {
+    } catch {
       setError('Network error fetching audit log');
     }
   }, []);
@@ -176,7 +176,7 @@ export function AudioDenoisingDashboard() {
         fetchConfig(),
         fetchAuditLog()
       ]);
-    } catch (error) {
+    } catch {
       setError('Failed to load dashboard data');
     } finally {
       setIsLoading(false);
@@ -201,7 +201,7 @@ export function AudioDenoisingDashboard() {
       } else {
         setError(data.error || 'Failed to update configuration');
       }
-    } catch (error) {
+    } catch {
       setError('Network error updating configuration');
     }
   };
@@ -234,23 +234,23 @@ export function AudioDenoisingDashboard() {
     await updateConfig(updatedConfig);
   };
 
-  // Update noise threshold
-  const updateNoiseThreshold = async (noiseType: string, threshold: number) => {
-    if (!config) return;
-    
-    const updatedConfig = {
-      ...config,
-      noiseTypes: {
-        ...config.noiseTypes,
-        [noiseType]: {
-          ...config.noiseTypes[noiseType],
-          threshold: threshold
-        }
-      }
-    };
-    
-    await updateConfig(updatedConfig);
-  };
+  // Update noise threshold - commented out as not currently used
+  // const updateNoiseThreshold = async (noiseType: string, threshold: number) => {
+  //   if (!config) return;
+  //   
+  //   const updatedConfig = {
+  //     ...config,
+  //     noiseTypes: {
+  //       ...config.noiseTypes,
+  //       [noiseType]: {
+  //         ...config.noiseTypes[noiseType],
+  //         threshold: threshold
+  //       }
+  //     }
+  //   };
+  //   
+  //   await updateConfig(updatedConfig);
+  // };
 
   // Export configuration
   const exportConfiguration = async () => {
@@ -271,7 +271,7 @@ export function AudioDenoisingDashboard() {
       } else {
         setError(data.error || 'Failed to export configuration');
       }
-    } catch (error) {
+    } catch {
       setError('Network error exporting configuration');
     }
   };

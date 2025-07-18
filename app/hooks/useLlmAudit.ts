@@ -2,8 +2,7 @@ import { useState, useCallback } from 'react'
 import { 
   LLMAuditRequest, 
   LLMAuditResult, 
-  LLMAuditResponse,
-  DiarizationSegment 
+  LLMAuditResponse
 } from '@/app/types/llm-audit'
 
 interface UseLlmAuditReturn {

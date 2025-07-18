@@ -139,7 +139,7 @@ TAREA: ${task === 'diarize' ? 'Enfócate en asignar speakers correctamente' : 'A
   }
 }
 
-export async function OPTIONS(request: NextRequest) {
+export async function OPTIONS(_request: NextRequest) {
   return new NextResponse(null, {
     status: 200,
     headers: {

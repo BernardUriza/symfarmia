@@ -14,6 +14,21 @@ export function useMemoryManager(options: MemoryManagerOptions = {}) {
   const audioBuffers = useRef<Map<string, Float32Array>>(new Map());
   const lastCleanup = useRef<number>(Date.now());
 
+  const cleanupOldBuffers = useCallback(() => {
+    const maxBuffers = Math.ceil(maxAudioDuration / 60); // Assuming 1 minute chunks
+    
+    if (audioBuffers.current.size > maxBuffers) {
+      const entries = Array.from(audioBuffers.current.entries());
+      const toRemove = entries.slice(0, entries.length - maxBuffers);
+      
+      toRemove.forEach(([id]) => {
+        audioBuffers.current.delete(id);
+      });
+      
+      console.log(`[MemoryManager] Cleaned up ${toRemove.length} old audio buffers`);
+    }
+  }, [maxAudioDuration]);
+
   const addAudioBuffer = useCallback((id: string, buffer: Float32Array) => {
     // Check if we need to cleanup old buffers
     const now = Date.now();
@@ -30,22 +45,7 @@ export function useMemoryManager(options: MemoryManagerOptions = {}) {
       .reduce((sum, buf) => sum + buf.length * 4, 0); // Float32 = 4 bytes
     
     console.log(`[MemoryManager] Audio buffers: ${audioBuffers.current.size}, Total size: ${(totalSize / 1024 / 1024).toFixed(2)} MB`);
-  }, [cleanupInterval]);
-
-  const cleanupOldBuffers = useCallback(() => {
-    const maxBuffers = Math.ceil(maxAudioDuration / 60); // Assuming 1 minute chunks
-    
-    if (audioBuffers.current.size > maxBuffers) {
-      const entries = Array.from(audioBuffers.current.entries());
-      const toRemove = entries.slice(0, entries.length - maxBuffers);
-      
-      toRemove.forEach(([id]) => {
-        audioBuffers.current.delete(id);
-      });
-      
-      console.log(`[MemoryManager] Cleaned up ${toRemove.length} old audio buffers`);
-    }
-  }, [maxAudioDuration]);
+  }, [cleanupInterval, cleanupOldBuffers]);
 
   const clearAllBuffers = useCallback(() => {
     const count = audioBuffers.current.size;

@@ -1,13 +1,13 @@
 'use client'
-import { useEffect, useState, useCallback, useMemo } from 'react'
-import { logWarn, logError } from '../../../utils/logger/ProductionLogger'
+import { useEffect, useState, useCallback } from 'react'
+import { logWarn } from '../../../utils/logger/ProductionLogger'
 
 // Throttled logging to prevent excessive console output
 const throttledLoggers = new Map()
 const getThrottledLogger = (key: string, delay: number = 60000) => {
   if (!throttledLoggers.has(key)) {
     let lastLog = 0
-    throttledLoggers.set(key, (message: string, data?: any) => {
+    throttledLoggers.set(key, (message: string, data?: unknown) => {
       const now = Date.now()
       if (now - lastLog > delay) {
         logWarn(message, data)
@@ -18,7 +18,7 @@ const getThrottledLogger = (key: string, delay: number = 60000) => {
   return throttledLoggers.get(key)
 }
 
-const throttledLogWarn = getThrottledLogger('brave-cache-buster')
+// const throttledLogWarn = getThrottledLogger('brave-cache-buster')
 
 /**
  * Simplified Brave cache helper.
@@ -31,8 +31,9 @@ export default function BraveCacheBuster() {
   const detectBrave = useCallback(async () => {
     try {
       if (navigator.userAgent.includes('Brave')) return true
-      if ((navigator as any).brave?.isBrave) {
-        return await (navigator as any).brave.isBrave()
+      const braveNavigator = navigator as Navigator & { brave?: { isBrave: () => Promise<boolean> } }
+      if (braveNavigator.brave?.isBrave) {
+        return await braveNavigator.brave.isBrave()
       }
     } catch {
       // ignore detection errors

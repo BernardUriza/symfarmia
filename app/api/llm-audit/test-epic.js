@@ -8,8 +8,8 @@
 const ENDPOINT = 'http://localhost:3000/api/llm-audit';
 
 // 🎭 PERSONAJES
-const GRISHNAKH = "Orco Paciente";
-const ELROND = "Elfo Doctor";
+// const GRISHNAKH = "Orco Paciente";
+// const ELROND = "Elfo Doctor";
 
 // 🔥 TEST 1: CONSULTA MÉDICA ORCO-ELFO
 async function testConsultaOrcaria() {

@@ -79,11 +79,17 @@ export const ConversationCapture = ({
   // Log model status before using the hook
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      const globalWindow = window as Window & {
+        __WHISPER_WORKER_INSTANCE__?: unknown;
+        __WHISPER_MODEL_LOADED__?: unknown;
+        __WHISPER_PRELOAD_STATE__?: unknown;
+        __WHISPER_MODEL_CACHE__?: unknown;
+      };
       console.log('[ConversationCapture] Global cache status:', {
-        whisperWorker: !!(window as any).__WHISPER_WORKER_INSTANCE__,
-        whisperModelLoaded: !!(window as any).__WHISPER_MODEL_LOADED__,
-        whisperPreloadState: !!(window as any).__WHISPER_PRELOAD_STATE__,
-        whisperModelCache: !!(window as any).__WHISPER_MODEL_CACHE__
+        whisperWorker: !!globalWindow.__WHISPER_WORKER_INSTANCE__,
+        whisperModelLoaded: !!globalWindow.__WHISPER_MODEL_LOADED__,
+        whisperPreloadState: !!globalWindow.__WHISPER_PRELOAD_STATE__,
+        whisperModelCache: !!globalWindow.__WHISPER_MODEL_CACHE__
       });
     }
   }, []);
@@ -221,7 +227,7 @@ export const ConversationCapture = ({
       }
     }
     return started;
-  }, [startTranscription, error, isWebSpeechAvailable, startLiveTranscription, webSpeechError]);
+  }, [startTranscription, error, isWebSpeechAvailable, startLiveTranscription, webSpeechError, uiState]);
   // Handle recording stop
   const handleStopRecording = useCallback(async () => {
     stopLiveTranscription();
@@ -277,7 +283,7 @@ export const ConversationCapture = ({
       setShowTranscriptPopup, partialTranscripts, confidence, language]);
 
   // Main toggle recording function
-  const toggleRecording = async () => {
+  const toggleRecording = useCallback(async () => {
     try {
       if (isRecording) {
         await handleStopRecording();
@@ -287,7 +293,7 @@ export const ConversationCapture = ({
     } catch (error) {
       console.error(t('conversation.capture.error_toggling_recording'), error);
     }
-  };
+  }, [isRecording, handleStopRecording, handleStartRecording, t]);
   
   const handleCopy = useCallback(async () => {
     const textToCopy = uiState.isManualMode ? transcriptionState.manualTranscript : transcription?.text;

@@ -1,6 +1,8 @@
+import { LLMAuditResult } from '@/app/types/llm-audit'
+
 interface CacheEntry {
   key: string
-  result: any
+  result: LLMAuditResult
   timestamp: number
   ttl: number
 }
@@ -22,7 +24,7 @@ class LLMResponseCache {
     return btoa(content).replace(/[^a-zA-Z0-9]/g, '').slice(0, 32)
   }
 
-  get(transcript: string, task: string): any | null {
+  get(transcript: string, task: string): LLMAuditResult | null {
     const key = this.generateKey(transcript, task)
     const entry = this.cache.get(key)
 
@@ -42,7 +44,7 @@ class LLMResponseCache {
     return entry.result
   }
 
-  set(transcript: string, task: string, result: any, ttl?: number): void {
+  set(transcript: string, task: string, result: LLMAuditResult, ttl?: number): void {
     const key = this.generateKey(transcript, task)
 
     // Implement LRU eviction if cache is full

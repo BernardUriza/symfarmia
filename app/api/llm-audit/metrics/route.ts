@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { llmMetrics } from '@/app/services/llmMetrics'
 import { llmCache } from '@/app/services/llmCache'
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   // Get metrics from the service
   const metrics = llmMetrics.getMetrics()
   const health = llmMetrics.getHealthStatus()
@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
 }
 
 // Allow CORS for metrics endpoint
-export async function OPTIONS(request: NextRequest) {
+export async function OPTIONS(_request: NextRequest) {
   return new NextResponse(null, {
     status: 200,
     headers: {

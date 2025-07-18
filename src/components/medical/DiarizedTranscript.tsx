@@ -72,7 +72,7 @@ export const DiarizedTranscript: React.FC<DiarizedTranscriptProps> = ({
   segments,
   audioUrl,
   onSegmentEdit,
-  onSpeakerChange,
+  onSpeakerChange: _onSpeakerChange,
   onTimelineClick,
   editable = true,
   showTimeline = true,
@@ -191,7 +191,7 @@ export const DiarizedTranscript: React.FC<DiarizedTranscriptProps> = ({
   };
   
   // FUNCIÓN PÚBLICA - COMPONENTE DE TIMELINE
-  const TimelineBar: React.FC<{ segment: DiarizationSegment; index: number }> = ({ segment, index }) => {
+  const TimelineBar: React.FC<{ segment: DiarizationSegment; index: number }> = ({ segment, index: _index }) => {
     const speakerConfig = getSpeakerConfig(segment.speaker);
     const duration = segment.endTime - segment.startTime;
     const isActive = currentTime >= segment.startTime && currentTime <= segment.endTime;

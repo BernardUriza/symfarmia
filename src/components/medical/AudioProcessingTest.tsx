@@ -1,7 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import { useSimpleWhisper } from '@/src/domains/medical-ai/hooks/useSimpleWhisper';
-import { useI18n } from '@/src/domains/core/hooks/useI18n';
+// import { useI18n } from '@/src/domains/core/hooks/useI18n';
 
 interface ChunkData {
   text: string;
@@ -9,7 +9,7 @@ interface ChunkData {
 }
 
 const AudioProcessingTest = () => {
-  const { t } = useI18n();
+  // const { t } = useI18n();
   const [chunks, setChunks] = useState<ChunkData[]>([]);
   const [currentChunk, setCurrentChunk] = useState<{ text: string; number: number } | null>(null);
   const [chunkProgress, setChunkProgress] = useState<{ [key: number]: number }>({});
