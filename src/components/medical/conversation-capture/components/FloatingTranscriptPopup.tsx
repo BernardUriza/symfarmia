@@ -1,9 +1,236 @@
-'use client'; import React, { useState, useEffect, useCallback } from 'react';
+'use client';
+
+import React, { useState, useEffect, useCallback } from 'react';
 import { X, Copy, CheckCircle, RefreshCw, Download, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/src/components/ui/button';
 import { Card, CardContent } from '@/src/components/ui/card';
 import { Badge } from '@/src/components/ui/badge';
-import { LLMAuditResult } from '@/app/types/llm-audit'; interface FloatingTranscriptPopupProps { isOpen: boolean onClose: () => void transcript: string llmResult: LLMAuditResult | null isAuditLoading: boolean auditError: string | null onReaudit?: () => Promise<void>
-} export const FloatingTranscriptPopup: React.FC<FloatingTranscriptPopupProps> = ({ isOpen, onClose, transcript, llmResult, isAuditLoading, auditError, onReaudit
-}) => { const [activeTab, setActiveTab] = useState<'merged' | 'speakers' | 'logs'>('merged'); const [copySuccess, setCopySuccess] = useState(false); const [showDetails, setShowDetails] = useState(false); const displayText = llmResult?.mergedTranscript || transcript; useEffect(() => { if (copySuccess) { const timer = setTimeout(() => setCopySuccess(false), 2000); return () => clearTimeout(timer); } }, [copySuccess]); const handleCopy = useCallback(async () => { try { await navigator.clipboard.writeText(displayText); setCopySuccess(true); } catch (err) { console.error('Failed to copy:', err); } }, [displayText]); const handleDownload = useCallback(() => { const blob = new Blob([displayText], { type: 'text/plain' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `transcripcion_${new Date().toISOString().split('T')[0]}.txt`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); }, [displayText]); if (!isOpen) return null; return ( <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 animate-in fade-in duration-200"> <Card className="w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl animate-in slide-in-from-bottom-4 duration-300"> <div className="flex items-center justify-between p-4 border-b border-border/50"> <div className="flex items-center gap-4"> <h2 className="text-xl font-semibold">Transcripción Procesada</h2> {isAuditLoading && ( <Badge variant="secondary" className="animate-pulse"> <RefreshCw className="w-3 h-3 mr-1 animate-spin" /> Procesando con ChatGPT... </Badge> )} {llmResult && !isAuditLoading && ( <Badge variant="default" className="bg-green-500/10 text-green-600"> <CheckCircle className="w-3 h-3 mr-1" /> Auditado por GPT </Badge> )} </div> <Button onClick={onClose} size="icon" variant="ghost" className="rounded-full" > <X className="w-5 h-5" /> </Button> </div> <CardContent className="p-0 h-[calc(90vh-80px)] overflow-y-auto"> {/* Tabs */} <div className="sticky top-0 bg-background z-10 border-b border-border/50"> <div className="flex"> <button onClick={() => setActiveTab('merged')} className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${ activeTab === 'merged' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground' }`} > Texto Final </button> {llmResult?.speakers && llmResult.speakers.length > 0 && ( <button onClick={() => setActiveTab('speakers')} className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${ activeTab === 'speakers' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground' }`} > Speakers ({llmResult.speakers.length}) </button> )} {llmResult?.gptLogs && llmResult.gptLogs.length > 0 && ( <button onClick={() => setActiveTab('logs')} className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${ activeTab === 'logs' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground' }`} > Log GPT </button> )} </div> </div> {/* Content */} <div className="p-6"> {activeTab === 'merged' && ( <div className="space-y-4"> {llmResult?.summary && ( <div className="bg-primary/5 rounded-lg p-4 border border-primary/20"> <h3 className="font-medium text-sm mb-2 text-primary">Resumen Clínico</h3> <p className="text-sm text-foreground/90">{llmResult.summary}</p> </div> )} <div className="bg-muted/30 rounded-lg p-4"> <pre className="whitespace-pre-wrap text-sm font-mono text-foreground/90"> {displayText} </pre> </div> </div> )} {activeTab === 'speakers' && llmResult?.speakers && ( <div className="space-y-3"> {llmResult.speakers.map((segment, idx) => ( <div key={idx} className="bg-muted/30 rounded-lg p-3 hover:bg-muted/40 transition-colors"> <div className="flex items-center justify-between mb-2"> <Badge variant={segment.speaker === 'Doctor' ? 'default' : 'secondary'}> {segment.speaker} </Badge> <span className="text-xs text-muted-foreground"> {segment.start}s - {segment.end}s </span> </div> <p className="text-sm text-foreground/90">{segment.text}</p> </div> ))} </div> )} {activeTab === 'logs' && llmResult?.gptLogs && ( <div className="space-y-2"> {llmResult.gptLogs.map((log, idx) => ( <div key={idx} className="flex items-start gap-2"> <span className="text-muted-foreground text-sm">•</span> <p className="text-sm text-foreground/80">{log}</p> </div> ))} </div> )} {auditError && ( <div className="bg-destructive/5 border border-destructive/20 rounded-lg p-4 mt-4"> <p className="text-sm text-destructive">Error: {auditError}</p> </div> )} </div> </CardContent> {/* Actions */} <div className="border-t border-border/50 p-4 bg-muted/10"> <div className="flex items-center justify-between"> <div className="flex gap-2"> <Button onClick={handleCopy} variant="outline" size="sm" className="flex items-center gap-2" > {copySuccess ? ( <> <CheckCircle className="w-4 h-4 text-green-500" /> Copiado! </> ) : ( <> <Copy className="w-4 h-4" /> Copiar </> )} </Button> <Button onClick={handleDownload} variant="outline" size="sm" className="flex items-center gap-2" > <Download className="w-4 h-4" /> Descargar </Button> {onReaudit && ( <Button onClick={onReaudit} variant="outline" size="sm" disabled={isAuditLoading} className="flex items-center gap-2" > <RefreshCw className={`w-4 h-4 ${isAuditLoading ? 'animate-spin' : ''}`} /> Re-auditar con GPT </Button> )} </div> <button onClick={() => setShowDetails(!showDetails)} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors" > Detalles técnicos {showDetails ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />} </button> </div> {showDetails && ( <div className="mt-3 pt-3 border-t border-border/50 text-xs text-muted-foreground space-y-1"> <p>Caracteres: {displayText.length}</p> <p>Palabras: {displayText.split(/\s+/).length}</p> {llmResult && ( <> <p>Speakers detectados: {llmResult.speakers.length}</p> <p>Logs de proceso: {llmResult.gptLogs?.length || 0}</p> </> )} </div> )} </div> </Card> </div> );
+import { LLMAuditResult } from '@/app/types/llm-audit';
+
+interface FloatingTranscriptPopupProps {
+  isOpen: boolean;
+  onClose: () => void;
+  transcript: string;
+  llmResult: LLMAuditResult | null;
+  isAuditLoading: boolean;
+  auditError: string | null;
+  onReaudit?: () => Promise<void>;
+}
+
+export const FloatingTranscriptPopup: React.FC<FloatingTranscriptPopupProps> = ({
+  isOpen,
+  onClose,
+  transcript,
+  llmResult,
+  isAuditLoading,
+  auditError,
+  onReaudit
+}) => {
+  const [activeTab, setActiveTab] = useState<'merged' | 'speakers' | 'logs'>('merged');
+  const [copySuccess, setCopySuccess] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
+  const displayText = llmResult?.mergedTranscript || transcript;
+
+  useEffect(() => {
+    if (copySuccess) {
+      const timer = setTimeout(() => setCopySuccess(false), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [copySuccess]);
+
+  const handleCopy = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(displayText);
+      setCopySuccess(true);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
+  }, [displayText]);
+
+  const handleDownload = useCallback(() => {
+    const blob = new Blob([displayText], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `transcripcion_${new Date().toISOString().split('T')[0]}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, [displayText]);
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 animate-in fade-in duration-200">
+      <Card className="w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl animate-in slide-in-from-bottom-4 duration-300">
+        <div className="flex items-center justify-between p-4 border-b border-border/50">
+          <div className="flex items-center gap-4">
+            <h2 className="text-xl font-semibold">Transcripción Procesada</h2>
+            {isAuditLoading && (
+              <Badge variant="secondary" className="animate-pulse">
+                <RefreshCw className="w-3 h-3 mr-1 animate-spin" />
+                Procesando con ChatGPT...
+              </Badge>
+            )}
+            {llmResult && !isAuditLoading && (
+              <Badge variant="default" className="bg-green-500/10 text-green-600">
+                <CheckCircle className="w-3 h-3 mr-1" />
+                Auditado por GPT
+              </Badge>
+            )}
+          </div>
+          <Button onClick={onClose} size="icon" variant="ghost" className="rounded-full">
+            <X className="w-5 h-5" />
+          </Button>
+        </div>
+        <CardContent className="p-0 h-[calc(90vh-80px)] overflow-y-auto">
+          {/* Tabs */}
+          <div className="sticky top-0 bg-background z-10 border-b border-border/50">
+            <div className="flex">
+              <button
+                onClick={() => setActiveTab('merged')}
+                className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
+                  activeTab === 'merged'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                Texto Final
+              </button>
+              {llmResult?.speakers && llmResult.speakers.length > 0 && (
+                <button
+                  onClick={() => setActiveTab('speakers')}
+                  className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
+                    activeTab === 'speakers'
+                      ? 'border-primary text-primary'
+                      : 'border-transparent text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  Speakers ({llmResult.speakers.length})
+                </button>
+              )}
+              {llmResult?.gptLogs && llmResult.gptLogs.length > 0 && (
+                <button
+                  onClick={() => setActiveTab('logs')}
+                  className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
+                    activeTab === 'logs'
+                      ? 'border-primary text-primary'
+                      : 'border-transparent text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  Log GPT
+                </button>
+              )}
+            </div>
+          </div>
+          {/* Content */}
+          <div className="p-6">
+            {activeTab === 'merged' && (
+              <div className="space-y-4">
+                {llmResult?.summary && (
+                  <div className="bg-primary/5 rounded-lg p-4 border border-primary/20">
+                    <h3 className="font-medium text-sm mb-2 text-primary">Resumen Clínico</h3>
+                    <p className="text-sm text-foreground/90">{llmResult.summary}</p>
+                  </div>
+                )}
+                <div className="bg-muted/30 rounded-lg p-4">
+                  <pre className="whitespace-pre-wrap text-sm font-mono text-foreground/90">
+                    {displayText}
+                  </pre>
+                </div>
+              </div>
+            )}
+            {activeTab === 'speakers' && llmResult?.speakers && (
+              <div className="space-y-3">
+                {llmResult.speakers.map((segment, idx) => (
+                  <div key={idx} className="bg-muted/30 rounded-lg p-3 hover:bg-muted/40 transition-colors">
+                    <div className="flex items-center justify-between mb-2">
+                      <Badge variant={segment.speaker === 'Doctor' ? 'default' : 'secondary'}>
+                        {segment.speaker}
+                      </Badge>
+                      <span className="text-xs text-muted-foreground">
+                        {segment.start}s - {segment.end}s
+                      </span>
+                    </div>
+                    <p className="text-sm text-foreground/90">{segment.text}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+            {activeTab === 'logs' && llmResult?.gptLogs && (
+              <div className="space-y-2">
+                {llmResult.gptLogs.map((log, idx) => (
+                  <div key={idx} className="flex items-start gap-2">
+                    <span className="text-muted-foreground text-sm">•</span>
+                    <p className="text-sm text-foreground/80">{log}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+            {auditError && (
+              <div className="bg-destructive/5 border border-destructive/20 rounded-lg p-4 mt-4">
+                <p className="text-sm text-destructive">Error: {auditError}</p>
+              </div>
+            )}
+          </div>
+        </CardContent>
+        {/* Actions */}
+        <div className="border-t border-border/50 p-4 bg-muted/10">
+          <div className="flex items-center justify-between">
+            <div className="flex gap-2">
+              <Button onClick={handleCopy} variant="outline" size="sm" className="flex items-center gap-2">
+                {copySuccess ? (
+                  <>
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    Copiado!
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4" />
+                    Copiar
+                  </>
+                )}
+              </Button>
+              <Button onClick={handleDownload} variant="outline" size="sm" className="flex items-center gap-2">
+                <Download className="w-4 h-4" />
+                Descargar
+              </Button>
+              {onReaudit && (
+                <Button
+                  onClick={onReaudit}
+                  variant="outline"
+                  size="sm"
+                  disabled={isAuditLoading}
+                  className="flex items-center gap-2"
+                >
+                  <RefreshCw className={`w-4 h-4 ${isAuditLoading ? 'animate-spin' : ''}`} />
+                  Re-auditar con GPT
+                </Button>
+              )}
+            </div>
+            <button
+              onClick={() => setShowDetails(!showDetails)}
+              className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Detalles técnicos
+              {showDetails ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            </button>
+          </div>
+          {showDetails && (
+            <div className="mt-3 pt-3 border-t border-border/50 text-xs text-muted-foreground space-y-1">
+              <p>Caracteres: {displayText.length}</p>
+              <p>Palabras: {displayText.split(/\s+/).length}</p>
+              {llmResult && (
+                <>
+                  <p>Speakers detectados: {llmResult.speakers.length}</p>
+                  <p>Logs de proceso: {llmResult.gptLogs?.length || 0}</p>
+                </>
+              )}
+            </div>
+          )}
+        </div>
+      </Card>
+    </div>
+  );
 };

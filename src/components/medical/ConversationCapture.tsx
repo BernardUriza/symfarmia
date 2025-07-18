@@ -154,159 +154,196 @@ export const ConversationCapture = ({
   const isRecording = status === 'recording';
   const hasTranscription = !!(transcription || (uiState.isManualMode && transcriptionState.manualTranscript));
   const currentTranscript = uiState.isManualMode ? transcriptionState.manualTranscript : transcription?.text;
- useEffect(() => {
-
- if (liveTranscriptData) {
- transcriptionState.updateLiveTranscript(liveTranscriptData);
- 
-} }, [liveTranscriptData, transcriptionState]);
- // Sync Web Speech language with i18n language useEffect(() => {
-
- if (currentLanguage && setLanguage) {
- const webSpeechLang = currentLanguage === 'es' ? 'es-MX' : 'en-US';
- if (language !== webSpeechLang) {
- setLanguage(webSpeechLang);
- console.log(`[ConversationCapture] Web Speech language synced to: ${
-webSpeechLang
-}`);
- 
-} 
-} }, [currentLanguage, language, setLanguage]);
- // Extract partial minute transcription logic const savePartialMinuteTranscription = transcriptionState.savePartialMinuteTranscription;
- // BAZAR: Función de diarización completamente auditable const processDiarization = useCallback(async () => {
-
- console.log('[ConversationCapture] Iniciando diarización BAZAR...');
- // Get audio data from whisper service
-    const completeAudio = getCompleteAudio();
- const allMinutesText = transcriptionState.minuteTranscriptions.map(m => m.text).join(' ').trim();
- if (!completeAudio && !audioBlob && !allMinutesText && !transcriptionState.webSpeechText) {
- console.warn('[ConversationCapture] No hay audio ni texto para diarizar');
- return;
- 
-} diarizationState.setDiarizationProcessing(true);
- diarizationState.setDiarizationError(null);
- try {
- // 1. FUSIÓN DE TRANSCRIPCIONES - Algoritmo público const denoisedTranscriptionText = allMinutesText || '';
- const mergedText = DiarizationUtils.mergeTranscriptions(denoisedTranscriptionText, transcriptionState.webSpeechText);
- // Audio is handled internally by useSimpleWhisper console.log('[ConversationCapture] Texto fusionado:', {
- denoisedLength: denoisedTranscriptionText.length, webSpeechLength: transcriptionState.webSpeechText.length, mergedLength: mergedText.length });
- // 2. OBTENER AUDIO DATA - Transparente // Store audio data for diarization
-    if (completeAudio) {
-      audioDataRef.current = completeAudio;
+  useEffect(() => {
+    if (liveTranscriptData) {
+      transcriptionState.updateLiveTranscript(liveTranscriptData);
     }
-    
-    if (!audioDataRef.current) {
- throw new Error('No hay datos de audio disponibles para diarización');
- 
-} // 3. PROCESAR DIARIZACIÓN - Servicio modular const result = await diarizationService.diarizeAudio(audioDataRef.current);
- console.log('[ConversationCapture] Diarización completada:', result);
- diarizationState.setDiarizationResult(result);
- 
-} catch (error) {
- console.error('[ConversationCapture] Error en diarización:', error);
- diarizationState.setDiarizationError(error instanceof Error ? error.message : 'Error desconocido');
- 
-} finally {
- diarizationState.setDiarizationProcessing(false);
- 
-} }, [transcriptionState.minuteTranscriptions, transcriptionState.webSpeechText, diarizationState, audioBlob, getCompleteAudio]);
- // Handle recording start const handleStartRecording = useCallback(async () => {
-
- console.log('[ConversationCapture] Starting real transcription with denoised audio');
- const started = await startTranscription();
- if (!started && error?.includes('permiso')) {
- uiState.setShowPermissionDialog(true);
- 
-} else if (started) {
- // Only start live transcription if WebSpeech is available if (isWebSpeechAvailable) {
- const liveStarted = await startLiveTranscription();
- if (!liveStarted && webSpeechError) {
- console.warn('Live transcription not available:', webSpeechError);
- 
-} 
-} else {
- console.info('WebSpeech not available, using Whisper only');
- 
-} 
-} return started;
- }, [startTranscription, error, isWebSpeechAvailable, startLiveTranscription, webSpeechError, uiState]);
- // Handle recording stop const handleStopRecording = useCallback(async () => {
-
- stopLiveTranscription();
- // Save any pending chunks savePartialMinuteTranscription();
- const success = await stopTranscription();
- if (success && transcription?.text) {
- // Process diarization first await processDiarization();
- // Show popup with loading state setShowTranscriptPopup(true);
- console.log('[ConversationCapture] Iniciando auditoría con ChatGPT...');
- try {
- const llmResult = await auditTranscript({
- transcript: transcription.text, webSpeech: transcriptionState.webSpeechText, diarization: diarizationState.diarizationResult?.segments.map(seg => ({
- start: seg.startTime, end: seg.endTime, speaker: seg.speaker })) || [], partialTranscripts: partialTranscripts, confidence: confidence, language: language, task: 'audit-transcript' });
- console.log('[ConversationCapture] Auditoría ChatGPT completada:', llmResult);
- // Call onTranscriptionComplete ONLY ONCE with the best available text const finalText = llmResult.mergedTranscript || transcription.text;
- if (onTranscriptionComplete) {
- onTranscriptionComplete(finalText);
- 
-} 
-} catch (err) {
- console.error('[ConversationCapture] Error en auditoría ChatGPT:', err);
- // On error, still provide the raw transcription if (onTranscriptionComplete) {
- onTranscriptionComplete(transcription.text);
- 
-} 
-} 
-} return success;
- }, [stopLiveTranscription, savePartialMinuteTranscription, stopTranscription, transcription, onTranscriptionComplete, processDiarization, auditTranscript, transcriptionState.webSpeechText, diarizationState.diarizationResult, setShowTranscriptPopup, partialTranscripts, confidence, language]);
- // Main toggle recording function const toggleRecording = useCallback(async () => {
-
- try {
- if (isRecording) {
- await handleStopRecording();
- 
-} else {
- await handleStartRecording();
- 
-} 
-} catch (error) {
- console.error(t('conversation.capture.error_toggling_recording'), error);
- 
-} }, [isRecording, handleStopRecording, handleStartRecording, t]);
- const handleCopy = useCallback(async () => {
-
- const textToCopy = uiState.isManualMode ? transcriptionState.manualTranscript : transcription?.text;
- if (textToCopy) {
- await navigator.clipboard.writeText(textToCopy);
- uiState.showCopySuccessFeedback();
- 
-} }, [uiState, transcriptionState.manualTranscript, transcription]);
- const handleReset = useCallback(() => {
-
- resetTranscription();
- transcriptionState.resetTranscriptionState();
- diarizationState.resetDiarization();
- audioDataRef.current = null;
- chunkCountRef.current = 0;
- // Log WebSpeech error reset without clearing console if (webSpeechError) {
- console.log('[ConversationCapture] WebSpeech error cleared on reset');
- 
-} }, [resetTranscription, transcriptionState, diarizationState, webSpeechError]);
- const toggleMode = useCallback(async () => {
-
- if (isRecording) {
- // Stop recording before changing mode await toggleRecording();
- 
-} uiState.toggleMode();
- }, [uiState, isRecording, toggleRecording]);
- // UI Rendering Methods const renderHeader = () => ( <div className="mb-6"> <div className="flex justify-between items-center"> <div className="text-center flex-1"> <h1 className="text-2xl font-medium mb-2"> {
-t('conversation.capture.title')
-} </h1> <p className="text-foreground/60"> {
-t('conversation.capture.subtitle')
-} </p> </div> <Button onClick={
-toggleMode
-} variant="outline" size="sm" className="flex items-center gap-2" > {
-uiState.isManualMode ? ( <> <Mic className="w-4 h-4" /> Cambiar a voz </> ) : ( <> <PenTool className="w-4 h-4" /> Modo manual </> )
-} </Button> </div> {
+  }, [liveTranscriptData, transcriptionState]);
+  // Sync Web Speech language with i18n language
+  useEffect(() => {
+    if (currentLanguage && setLanguage) {
+      const webSpeechLang = currentLanguage === 'es' ? 'es-MX' : 'en-US';
+      if (language !== webSpeechLang) {
+        setLanguage(webSpeechLang);
+        console.log(`[ConversationCapture] Web Speech language synced to: ${webSpeechLang}`);
+      }
+    }
+  }, [currentLanguage, language, setLanguage]);
+  // Extract partial minute transcription logic
+  const savePartialMinuteTranscription = transcriptionState.savePartialMinuteTranscription;
+  // BAZAR: Función de diarización completamente auditable
+  const processDiarization = useCallback(async () => {
+    console.log('[ConversationCapture] Iniciando diarización BAZAR...');
+    // Get audio data from whisper service
+    const completeAudio = getCompleteAudio();
+    const allMinutesText = transcriptionState.minuteTranscriptions.map(m => m.text).join(' ').trim();
+    if (!completeAudio && !audioBlob && !allMinutesText && !transcriptionState.webSpeechText) {
+      console.warn('[ConversationCapture] No hay audio ni texto para diarizar');
+      return;
+    }
+    diarizationState.setDiarizationProcessing(true);
+    diarizationState.setDiarizationError(null);
+    try {
+      // 1. FUSIÓN DE TRANSCRIPCIONES - Algoritmo público
+      const denoisedTranscriptionText = allMinutesText || '';
+      const mergedText = DiarizationUtils.mergeTranscriptions(denoisedTranscriptionText, transcriptionState.webSpeechText);
+      // Audio is handled internally by useSimpleWhisper
+      console.log('[ConversationCapture] Texto fusionado:', {
+        denoisedLength: denoisedTranscriptionText.length,
+        webSpeechLength: transcriptionState.webSpeechText.length,
+        mergedLength: mergedText.length
+      });
+      // 2. OBTENER AUDIO DATA - Transparente
+      // Store audio data for diarization
+      if (completeAudio) {
+        audioDataRef.current = completeAudio;
+      }
+      
+      if (!audioDataRef.current) {
+        throw new Error('No hay datos de audio disponibles para diarización');
+      }
+      // 3. PROCESAR DIARIZACIÓN - Servicio modular
+      const result = await diarizationService.diarizeAudio(audioDataRef.current);
+      console.log('[ConversationCapture] Diarización completada:', result);
+      diarizationState.setDiarizationResult(result);
+    } catch (error) {
+      console.error('[ConversationCapture] Error en diarización:', error);
+      diarizationState.setDiarizationError(error instanceof Error ? error.message : 'Error desconocido');
+    } finally {
+      diarizationState.setDiarizationProcessing(false);
+    }
+  }, [transcriptionState.minuteTranscriptions, transcriptionState.webSpeechText, diarizationState, audioBlob, getCompleteAudio]);
+  // Handle recording start
+  const handleStartRecording = useCallback(async () => {
+    console.log('[ConversationCapture] Starting real transcription with denoised audio');
+    const started = await startTranscription();
+    if (!started && error?.includes('permiso')) {
+      uiState.setShowPermissionDialog(true);
+    } else if (started) {
+      // Only start live transcription if WebSpeech is available
+      if (isWebSpeechAvailable) {
+        const liveStarted = await startLiveTranscription();
+        if (!liveStarted && webSpeechError) {
+          console.warn('Live transcription not available:', webSpeechError);
+        }
+      } else {
+        console.info('WebSpeech not available, using Whisper only');
+      }
+    }
+    return started;
+  }, [startTranscription, error, isWebSpeechAvailable, startLiveTranscription, webSpeechError, uiState]);
+  // Handle recording stop
+  const handleStopRecording = useCallback(async () => {
+    stopLiveTranscription();
+    // Save any pending chunks
+    savePartialMinuteTranscription();
+    const success = await stopTranscription();
+    if (success && transcription?.text) {
+      // Process diarization first
+      await processDiarization();
+      // Show popup with loading state
+      setShowTranscriptPopup(true);
+      console.log('[ConversationCapture] Iniciando auditoría con ChatGPT...');
+      try {
+        const llmResult = await auditTranscript({
+          transcript: transcription.text,
+          webSpeech: transcriptionState.webSpeechText,
+          diarization: diarizationState.diarizationResult?.segments.map(seg => ({
+            start: seg.startTime,
+            end: seg.endTime,
+            speaker: seg.speaker
+          })) || [],
+          partialTranscripts: partialTranscripts,
+          confidence: confidence,
+          language: language,
+          task: 'audit-transcript'
+        });
+        console.log('[ConversationCapture] Auditoría ChatGPT completada:', llmResult);
+        // Call onTranscriptionComplete ONLY ONCE with the best available text
+        const finalText = llmResult.mergedTranscript || transcription.text;
+        if (onTranscriptionComplete) {
+          onTranscriptionComplete(finalText);
+        }
+      } catch (err) {
+        console.error('[ConversationCapture] Error en auditoría ChatGPT:', err);
+        // On error, still provide the raw transcription
+        if (onTranscriptionComplete) {
+          onTranscriptionComplete(transcription.text);
+        }
+      }
+    }
+    return success;
+  }, [stopLiveTranscription, savePartialMinuteTranscription, stopTranscription, transcription, onTranscriptionComplete, processDiarization, auditTranscript, transcriptionState.webSpeechText, diarizationState.diarizationResult, setShowTranscriptPopup, partialTranscripts, confidence, language]);
+  
+  // Main toggle recording function
+  const toggleRecording = useCallback(async () => {
+    try {
+      if (isRecording) {
+        await handleStopRecording();
+      } else {
+        await handleStartRecording();
+      }
+    } catch (error) {
+      console.error(t('conversation.capture.error_toggling_recording'), error);
+    }
+  }, [isRecording, handleStopRecording, handleStartRecording, t]);
+  const handleCopy = useCallback(async () => {
+    const textToCopy = uiState.isManualMode ? transcriptionState.manualTranscript : transcription?.text;
+    if (textToCopy) {
+      await navigator.clipboard.writeText(textToCopy);
+      uiState.showCopySuccessFeedback();
+    }
+  }, [uiState, transcriptionState.manualTranscript, transcription]);
+  const handleReset = useCallback(() => {
+    resetTranscription();
+    transcriptionState.resetTranscriptionState();
+    diarizationState.resetDiarization();
+    audioDataRef.current = null;
+    chunkCountRef.current = 0;
+    // Log WebSpeech error reset without clearing console
+    if (webSpeechError) {
+      console.log('[ConversationCapture] WebSpeech error cleared on reset');
+    }
+  }, [resetTranscription, transcriptionState, diarizationState, webSpeechError]);
+  const toggleMode = useCallback(async () => {
+    if (isRecording) {
+      // Stop recording before changing mode
+      await toggleRecording();
+    }
+    uiState.toggleMode();
+  }, [uiState, isRecording, toggleRecording]);
+  // UI Rendering Methods
+  const renderHeader = () => (
+    <div className="mb-6">
+      <div className="flex justify-between items-center">
+        <div className="text-center flex-1">
+          <h1 className="text-2xl font-medium mb-2">
+            {t('conversation.capture.title')}
+          </h1>
+          <p className="text-foreground/60">
+            {t('conversation.capture.subtitle')}
+          </p>
+        </div>
+        <Button
+          onClick={toggleMode}
+          variant="outline"
+          size="sm"
+          className="flex items-center gap-2"
+        >
+          {uiState.isManualMode ? (
+            <>
+              <Mic className="w-4 h-4" />
+              Cambiar a voz
+            </>
+          ) : (
+            <>
+              <PenTool className="w-4 h-4" />
+              Modo manual
+            </>
+          )}
+        </Button>
+      </div>
+      {
 /* Mode Indicator & Denoising Controls - BAZAR MODE */
 } <div className="flex items-center justify-center gap-4 mt-4"> <Badge variant={
 uiState.isManualMode ? 'secondary' : 'default'
