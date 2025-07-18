@@ -4,6 +4,10 @@
 import { useRef, useState, useCallback, useEffect } from 'react'
 import type { EngineStatus, TranscriptionChunk, WhisperEngineOptions } from './types'
 
+// Global worker instance to prevent multiple workers
+let globalWorker: Worker | null = null;
+let globalWorkerInitialized = false;
+
 // Import the updated worker - use relative path for Next.js compatibility
 const WhisperWorkerPath = '/workers/audioProcessingWorker.js'
 
@@ -20,8 +24,18 @@ export function useWhisperEngine({
 
   // Iniciar worker y suscribirse a mensajes
   useEffect(() => {
-    const worker = new Worker(WhisperWorkerPath)
-    workerRef.current = worker
+    // Use global worker to prevent multiple instances
+    if (!globalWorker) {
+      console.log('[WhisperEngine] Creating single global worker instance');
+      globalWorker = new Worker(WhisperWorkerPath);
+      globalWorkerInitialized = false;
+    } else {
+      console.log('[WhisperEngine] Using existing global worker instance');
+    }
+    
+    workerRef.current = globalWorker;
+    const worker = globalWorker;
+    
     worker.onmessage = ({ data: msg }) => {
       switch (msg.type) {
         case 'MODEL_READY':
@@ -55,9 +69,18 @@ export function useWhisperEngine({
           break
       }
     }
-    // Inicializar modelo
-    worker.postMessage({ type: 'INIT' })
-    return () => worker.terminate()
+    
+    // Only initialize once
+    if (!globalWorkerInitialized) {
+      console.log('[WhisperEngine] Initializing global worker model');
+      worker.postMessage({ type: 'INIT' });
+      globalWorkerInitialized = true;
+    }
+    
+    // Don't terminate the global worker on unmount
+    return () => {
+      console.log('[WhisperEngine] Component unmounting, keeping global worker alive');
+    }
   }, [logger, onChunkProcessed, onChunkProgress])
 
   // Enviar audio al worker
@@ -77,11 +100,10 @@ export function useWhisperEngine({
   }, [])
 
   const getChunks = useCallback(() => {
-    return [...chunksRef.current]
+    return chunksRef.current
   }, [])
 
   const reset = useCallback(() => {
-    setStatus('loading')
     chunksRef.current = []
     confidenceRef.current = 0
     processingTimeRef.current = 0
@@ -93,8 +115,8 @@ export function useWhisperEngine({
     processAudioChunk,
     getFullTranscription,
     getChunks,
-    confidence: confidenceRef.current,
-    processingTime: processingTimeRef.current,
-    reset
+    reset,
+    get confidence() { return confidenceRef.current },
+    get processingTime() { return processingTimeRef.current }
   }
 }

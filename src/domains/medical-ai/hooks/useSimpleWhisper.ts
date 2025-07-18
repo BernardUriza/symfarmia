@@ -34,6 +34,7 @@ export function useSimpleWhisper({
     delay: preloadDelay
   });
 
+  // Use a single engine instance to prevent multiple workers
   const engine = useWhisperEngine({
     logger,
     chunkSize,
