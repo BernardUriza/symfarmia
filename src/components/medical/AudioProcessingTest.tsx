@@ -21,6 +21,14 @@ const AudioProcessingTest = React.memo(() => {
   const [currentChunk, setCurrentChunk] = useState<ChunkWithProgress | null>(null);
   const [chunkProgress, setChunkProgress] = useState<{ [key: number]: number }>({});
 
+  // Debug component lifecycle
+  React.useEffect(() => {
+    console.log('[AudioProcessingTest] Component mounted');
+    return () => {
+      console.log('[AudioProcessingTest] Component unmounting');
+    };
+  }, []);
+
   const {
     transcription,
     isRecording,
@@ -52,6 +60,11 @@ const AudioProcessingTest = React.memo(() => {
       );
     }
   });
+
+  // Debug audio level changes
+  React.useEffect(() => {
+    console.log('[AudioProcessingTest] Audio level changed:', audioLevel);
+  }, [audioLevel]);
 
   const handleStart = async () => {
     try {
@@ -299,6 +312,6 @@ const AudioProcessingTest = React.memo(() => {
       )}
     </div>
   );
-};
+});
 
 export default AudioProcessingTest;
