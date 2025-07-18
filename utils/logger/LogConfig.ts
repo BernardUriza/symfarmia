@@ -4,15 +4,60 @@
  */
 
 // Log levels for different environments
-export const LOG_LEVELS = {
-  ERROR: 0,
-  WARN: 1,
-  INFO: 2,
-  DEBUG: 3
-};
+export enum LOG_LEVELS {
+  ERROR = 0,
+  WARN = 1,
+  INFO = 2,
+  DEBUG = 3
+}
+
+export type LogLevel = LOG_LEVELS;
+export type LogCategory = 'error' | 'critical' | 'security' | 'performance' | 'debug' | 'info' | 'warn' | 'test';
+export type Environment = 'production' | 'development' | 'test';
+
+interface EnvironmentLogConfig {
+  level: LogLevel;
+  enabledComponents: string[];
+  enabledCategories: string[];
+  performanceThreshold: number;
+  apiErrorsOnly: boolean;
+  userDataLogging: boolean;
+}
+
+interface ComponentLogConfig {
+  enabled: boolean;
+  level: LogLevel;
+  categories: LogCategory[];
+  verboseInDev: boolean;
+}
+
+interface CategoryConfig {
+  alwaysLog: boolean;
+  storeInAuditTrail: boolean;
+  sendToErrorTracking: boolean;
+  alertDevelopers?: boolean;
+  sanitizeData?: boolean;
+  thresholdBased?: boolean;
+  developmentOnly?: boolean;
+}
+
+interface LogPreset {
+  level: LogLevel;
+  categories: string[];
+  components: string[];
+}
+
+interface LoggingStats {
+  environment: string;
+  totalComponents: number;
+  enabledComponents: number;
+  currentLevel: LogLevel;
+  enabledCategories: string[];
+  performanceThreshold: number;
+}
 
 // Environment-based logging configuration
-export const ENV_LOG_CONFIG = {
+export const ENV_LOG_CONFIG: Record<Environment, EnvironmentLogConfig> = {
   production: {
     level: LOG_LEVELS.ERROR,
     enabledComponents: ['MedicalErrors', 'CriticalSystems', 'AuthErrors'],
@@ -42,7 +87,7 @@ export const ENV_LOG_CONFIG = {
 };
 
 // Component-specific logging configuration
-export const COMPONENT_LOG_CONFIG = {
+export const COMPONENT_LOG_CONFIG: Record<string, ComponentLogConfig> = {
   // Theme-related components
   'ThemeProvider': {
     enabled: true,
@@ -130,7 +175,7 @@ export const COMPONENT_LOG_CONFIG = {
 };
 
 // Category-based logging rules
-export const CATEGORY_CONFIG = {
+export const CATEGORY_CONFIG: Record<LogCategory, CategoryConfig> = {
   error: {
     alwaysLog: true,
     storeInAuditTrail: true,
@@ -176,17 +221,23 @@ export const CATEGORY_CONFIG = {
     alwaysLog: true,
     storeInAuditTrail: true,
     sendToErrorTracking: false
+  },
+
+  test: {
+    alwaysLog: false,
+    storeInAuditTrail: false,
+    sendToErrorTracking: false
   }
 };
 
 // Get current environment configuration
-export const getCurrentEnvConfig = () => {
-  const env = process.env.NODE_ENV || 'development';
+export const getCurrentEnvConfig = (): EnvironmentLogConfig => {
+  const env = (process.env.NODE_ENV || 'development') as Environment;
   return ENV_LOG_CONFIG[env] || ENV_LOG_CONFIG.development;
 };
 
 // Check if component should log
-export const shouldComponentLog = (componentName, level, category) => {
+export const shouldComponentLog = (componentName: string, level: LogLevel, category: LogCategory): boolean => {
   const envConfig = getCurrentEnvConfig();
   const componentConfig = COMPONENT_LOG_CONFIG[componentName];
   
@@ -222,9 +273,9 @@ export const shouldComponentLog = (componentName, level, category) => {
 };
 
 // Get logging configuration for a component
-export const getComponentLogConfig = (componentName) => {
+export const getComponentLogConfig = (componentName: string) => {
   const envConfig = getCurrentEnvConfig();
-  const componentConfig = COMPONENT_LOG_CONFIG[componentName] || {};
+  const componentConfig = COMPONENT_LOG_CONFIG[componentName] || {} as Partial<ComponentLogConfig>;
   
   return {
     enabled: componentConfig.enabled !== false,
@@ -238,13 +289,13 @@ export const getComponentLogConfig = (componentName) => {
 };
 
 // Check if category should always log
-export const shouldCategoryAlwaysLog = (category) => {
+export const shouldCategoryAlwaysLog = (category: LogCategory): boolean => {
   const categoryConfig = CATEGORY_CONFIG[category];
   return categoryConfig?.alwaysLog || false;
 };
 
 // Get category configuration
-export const getCategoryConfig = (category) => {
+export const getCategoryConfig = (category: LogCategory): CategoryConfig => {
   return CATEGORY_CONFIG[category] || {
     alwaysLog: false,
     storeInAuditTrail: false,
@@ -253,24 +304,24 @@ export const getCategoryConfig = (category) => {
 };
 
 // Runtime configuration updates
-export const updateComponentLogConfig = (componentName, config) => {
+export const updateComponentLogConfig = (componentName: string, config: Partial<ComponentLogConfig>): void => {
   if (process.env.NODE_ENV === 'development') {
     COMPONENT_LOG_CONFIG[componentName] = {
       ...COMPONENT_LOG_CONFIG[componentName],
       ...config
-    };
+    } as ComponentLogConfig;
   }
 };
 
 // Enable/disable logging for a component
-export const setComponentLogging = (componentName, enabled) => {
+export const setComponentLogging = (componentName: string, enabled: boolean): void => {
   if (process.env.NODE_ENV === 'development') {
     updateComponentLogConfig(componentName, { enabled });
   }
 };
 
 // Bulk enable/disable components
-export const setComponentsLogging = (componentNames, enabled) => {
+export const setComponentsLogging = (componentNames: string[], enabled: boolean): void => {
   if (process.env.NODE_ENV === 'development') {
     componentNames.forEach(name => {
       setComponentLogging(name, enabled);
@@ -279,12 +330,12 @@ export const setComponentsLogging = (componentNames, enabled) => {
 };
 
 // Get all component names
-export const getComponentNames = () => {
+export const getComponentNames = (): string[] => {
   return Object.keys(COMPONENT_LOG_CONFIG);
 };
 
 // Get logging statistics
-export const getLoggingStats = () => {
+export const getLoggingStats = (): LoggingStats => {
   const envConfig = getCurrentEnvConfig();
   const components = getComponentNames();
   const enabledComponents = components.filter(name => 
@@ -292,7 +343,7 @@ export const getLoggingStats = () => {
   );
   
   return {
-    environment: process.env.NODE_ENV,
+    environment: process.env.NODE_ENV || 'development',
     totalComponents: components.length,
     enabledComponents: enabledComponents.length,
     currentLevel: envConfig.level,
@@ -302,7 +353,7 @@ export const getLoggingStats = () => {
 };
 
 // Export configuration presets
-export const LOG_PRESETS = {
+export const LOG_PRESETS: Record<string, LogPreset> = {
   MINIMAL: {
     level: LOG_LEVELS.ERROR,
     categories: ['error', 'critical'],
@@ -329,7 +380,7 @@ export const LOG_PRESETS = {
 };
 
 // Apply a preset configuration
-export const applyLogPreset = (presetName) => {
+export const applyLogPreset = (presetName: string): void => {
   const preset = LOG_PRESETS[presetName];
   if (!preset) {
     throw new Error(`Unknown log preset: ${presetName}`);

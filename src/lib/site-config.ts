@@ -1,5 +1,15 @@
 // Centralized site configuration
-export function getSiteUrl() {
+
+export interface SiteConfig {
+  name: string;
+  title: string;
+  description: string;
+  url: string;
+  image: string;
+  favicon: string;
+}
+
+export function getSiteUrl(): string {
   // Check environment variables for production URL first
   if (process.env.NEXT_PUBLIC_SITE_URL) {
     return process.env.NEXT_PUBLIC_SITE_URL;
@@ -15,7 +25,7 @@ export function getSiteUrl() {
 }
 
 // Static site configuration to avoid hydration issues
-function createSiteConfig() {
+function createSiteConfig(): SiteConfig {
   const baseUrl = getSiteUrl();
   return {
     name: 'SYMFARMIA',
@@ -27,8 +37,8 @@ function createSiteConfig() {
   };
 }
 
-export const SITE_CONFIG = createSiteConfig();
+export const SITE_CONFIG: SiteConfig = createSiteConfig();
 
-export function getSiteConfig() {
+export function getSiteConfig(): SiteConfig {
   return SITE_CONFIG;
 }

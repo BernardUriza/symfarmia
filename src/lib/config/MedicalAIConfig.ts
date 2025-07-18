@@ -5,20 +5,56 @@
  * Designed for easy extraction into microservice configuration.
  */
 
+export type ModelType = 'fill-mask' | 'text-generation';
+export type QueryType = 'diagnosis' | 'prescription' | 'soap' | 'analytics';
+
+interface ModelParameters {
+  max_length?: number;
+  temperature?: number;
+  do_sample?: boolean;
+  num_return_sequences?: number;
+  pad_token_id?: number;
+}
+
+interface MicroserviceConfig {
+  service: {
+    name: string;
+    version: string;
+    description: string;
+  };
+  api: {
+    baseUrl: string;
+    timeout: number;
+    userAgent: string;
+  };
+  models: {
+    map: Record<QueryType, string>;
+    parameters: Record<string, ModelParameters>;
+  };
+  security: {
+    tokenRequired: boolean;
+    rateLimiting: boolean;
+  };
+  health: {
+    endpoint: string;
+    timeout: number;
+  };
+}
+
 export class MedicalAIConfig {
-  static BASE_URL = 'https://api-inference.huggingface.co/models';
-  static TIMEOUT = 30000; // 30 seconds
-  static USER_AGENT = 'SYMFARMIA-Medical-Assistant/1.0';
+  static readonly BASE_URL = 'https://api-inference.huggingface.co/models';
+  static readonly TIMEOUT = 30000; // 30 seconds
+  static readonly USER_AGENT = 'SYMFARMIA-Medical-Assistant/1.0';
   
   // MEDICAL MODELS - TEXT GENERATION FOR REAL RESPONSES
-  static SUPPORTED_MODELS = [
+  static readonly SUPPORTED_MODELS: readonly string[] = [
     'gpt2',
     'distilgpt2',
     'microsoft/DialoGPT-small',
     'emilyalsentzer/Bio_ClinicalBERT'
   ];
 
-  static MODEL_MAP = {
+  static readonly MODEL_MAP: Readonly<Record<QueryType, string>> = {
     diagnosis: 'gpt2',
     prescription: 'gpt2', 
     soap: 'gpt2',
@@ -26,7 +62,7 @@ export class MedicalAIConfig {
   };
 
   // MODEL TYPE MAPPING - CRITICAL FOR PARAMETER VALIDATION
-  static MODEL_TYPE_MAP = {
+  static readonly MODEL_TYPE_MAP: Readonly<Record<string, ModelType>> = {
     'emilyalsentzer/Bio_ClinicalBERT': 'fill-mask',
     'gpt2': 'text-generation',
     'distilgpt2': 'text-generation',
@@ -34,7 +70,7 @@ export class MedicalAIConfig {
   };
 
   // PARAMETERS FOR TEXT GENERATION MODELS
-  static MODEL_PARAMS = {
+  static readonly MODEL_PARAMS: Readonly<Record<string, ModelParameters>> = {
     'emilyalsentzer/Bio_ClinicalBERT': {
       // FillMask models accept NO generation parameters
     },
@@ -61,33 +97,33 @@ export class MedicalAIConfig {
     }
   };
 
-  static DISCLAIMER = 'AVISO MÉDICO: Esta información es generada por IA y debe ser validada por un médico certificado. No reemplaza el criterio médico profesional.';
+  static readonly DISCLAIMER = 'AVISO MÉDICO: Esta información es generada por IA y debe ser validada por un médico certificado. No reemplaza el criterio médico profesional.';
 
   /**
    * Get Hugging Face API token from environment
    */
-  static getToken() {
+  static getToken(): string | undefined {
     return process.env.HUGGINGFACE_TOKEN;
   }
 
   /**
    * Get base URL for API requests
    */
-  static getBaseUrl() {
+  static getBaseUrl(): string {
     return this.BASE_URL;
   }
 
   /**
    * Get request timeout in milliseconds
    */
-  static getTimeout() {
+  static getTimeout(): number {
     return this.TIMEOUT;
   }
 
   /**
    * Get user agent string
    */
-  static getUserAgent() {
+  static getUserAgent(): string {
     return this.USER_AGENT;
   }
 
@@ -95,10 +131,10 @@ export class MedicalAIConfig {
    * Get model name for a given query type
    * STRICT VALIDATION - NO FALLBACKS
    */
-  static getModel(type) {
+  static getModel(type: QueryType): string {
     const model = this.MODEL_MAP[type];
     if (!model) {
-      const error = new Error(`Unsupported query type: ${type}`);
+      const error = new Error(`Unsupported query type: ${type}`) as Error & { status?: number; type?: string };
       error.status = 400;
       error.type = 'validation_error';
       throw error;
@@ -109,16 +145,16 @@ export class MedicalAIConfig {
   /**
    * Validate if a model is supported
    */
-  static isModelSupported(modelName) {
+  static isModelSupported(modelName: string): boolean {
     return this.SUPPORTED_MODELS.includes(modelName);
   }
 
   /**
    * Validate model with strict enforcement
    */
-  static validateModel(modelName) {
+  static validateModel(modelName: string): true {
     if (!this.isModelSupported(modelName)) {
-      const error = new Error(`Modelo no soportado: ${modelName}. Modelos válidos: ${this.SUPPORTED_MODELS.join(', ')}`);
+      const error = new Error(`Modelo no soportado: ${modelName}. Modelos válidos: ${this.SUPPORTED_MODELS.join(', ')}`) as Error & { status?: number; type?: string };
       error.status = 400;
       error.type = 'validation_error';
       throw error;
@@ -129,7 +165,7 @@ export class MedicalAIConfig {
   /**
    * Get model type for parameter validation
    */
-  static getModelType(model) {
+  static getModelType(model: string): ModelType {
     this.validateModel(model);
     return this.MODEL_TYPE_MAP[model];
   }
@@ -137,7 +173,7 @@ export class MedicalAIConfig {
   /**
    * Check if model accepts generation parameters
    */
-  static acceptsParameters(model) {
+  static acceptsParameters(model: string): boolean {
     const modelType = this.getModelType(model);
     // FillMask models accept NO parameters except inputs
     return modelType !== 'fill-mask';
@@ -147,7 +183,7 @@ export class MedicalAIConfig {
    * Get parameters for a specific model
    * STRICT VALIDATION - NO FALLBACKS
    */
-  static getModelParameters(model) {
+  static getModelParameters(model: string): ModelParameters {
     this.validateModel(model);
     
     // FillMask models get no parameters
@@ -161,29 +197,29 @@ export class MedicalAIConfig {
   /**
    * Get medical disclaimer text
    */
-  static getDisclaimer() {
+  static getDisclaimer(): string {
     return this.DISCLAIMER;
   }
 
   /**
    * Get available query types
    */
-  static getAvailableTypes() {
-    return Object.keys(this.MODEL_MAP);
+  static getAvailableTypes(): QueryType[] {
+    return Object.keys(this.MODEL_MAP) as QueryType[];
   }
 
   /**
    * Get supported models list
    */
-  static getSupportedModels() {
+  static getSupportedModels(): readonly string[] {
     return [...this.SUPPORTED_MODELS];
   }
 
   /**
    * Validate configuration
    */
-  static validateConfig() {
-    const errors = [];
+  static validateConfig(): string[] {
+    const errors: string[] = [];
 
     if (!this.getToken()) {
       errors.push('HUGGINGFACE_TOKEN environment variable is required');
@@ -216,7 +252,7 @@ export class MedicalAIConfig {
    * Get microservice configuration object
    * Useful for deploying as a standalone service
    */
-  static getMicroserviceConfig() {
+  static getMicroserviceConfig(): MicroserviceConfig {
     return {
       service: {
         name: 'medical-ai-service',
