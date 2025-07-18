@@ -1,4 +1,16 @@
-export const mockPatients = [
+// TypeScript interface for patient data
+export interface Patient {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  information: string;
+  dateOfBirth: string;
+  gender: string;
+  status: 'Activo' | 'Inactivo';
+}
+
+export const mockPatients: Patient[] = [
   {
     id: 1,
     name: "María González",

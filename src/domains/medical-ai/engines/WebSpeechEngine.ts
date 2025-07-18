@@ -4,7 +4,116 @@
  * Provides resilient speech recognition with automatic recovery
  */
 
+// TypeScript interfaces
+export interface RecognitionResult {
+  transcript: string;
+  isFinal: boolean;
+  confidence: number;
+}
+
+export interface ErrorResult {
+  error: string;
+  recoverable: boolean;
+  message: string;
+}
+
+export interface EngineCallbacks {
+  onStart?: () => void;
+  onResult?: (result: RecognitionResult) => void;
+  onError?: (error: ErrorResult) => void;
+  onEnd?: () => void;
+}
+
+export interface TranscriptionSession {
+  id: string;
+  startTime: number;
+  transcript: string;
+}
+
+export interface EngineState {
+  isListening: boolean;
+  isCircuitBreakerOpen: boolean;
+  consecutiveErrors: number;
+  retryCount: number;
+  lastErrorTime: number | null;
+  hasRecognition: boolean;
+  currentSession: {
+    id: string;
+    duration: number;
+  } | null;
+}
+
+// Extend Window interface to include speech recognition
+declare global {
+  interface Window {
+    SpeechRecognition?: new () => SpeechRecognition;
+    webkitSpeechRecognition?: new () => SpeechRecognition;
+  }
+}
+
+// SpeechRecognition interface
+interface SpeechRecognition extends EventTarget {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  maxAlternatives: number;
+  onstart: ((this: SpeechRecognition, ev: Event) => any) | null;
+  onresult: ((this: SpeechRecognition, ev: SpeechRecognitionEvent) => any) | null;
+  onerror: ((this: SpeechRecognition, ev: SpeechRecognitionErrorEvent) => any) | null;
+  onend: ((this: SpeechRecognition, ev: Event) => any) | null;
+  start(): void;
+  stop(): void;
+}
+
+interface SpeechRecognitionEvent extends Event {
+  results: SpeechRecognitionResultList;
+}
+
+interface SpeechRecognitionErrorEvent extends Event {
+  error: string;
+}
+
+interface SpeechRecognitionResultList {
+  length: number;
+  item(index: number): SpeechRecognitionResult;
+  [index: number]: SpeechRecognitionResult;
+}
+
+interface SpeechRecognitionResult {
+  length: number;
+  item(index: number): SpeechRecognitionAlternative;
+  [index: number]: SpeechRecognitionAlternative;
+  isFinal: boolean;
+}
+
+interface SpeechRecognitionAlternative {
+  transcript: string;
+  confidence: number;
+}
+
 export class WebSpeechEngine {
+  private isCircuitBreakerOpen: boolean;
+  private consecutiveErrors: number;
+  private retryCount: number;
+  private lastErrorTime: number | null;
+  
+  // Configuration
+  private readonly maxConsecutiveErrors: number;
+  private readonly circuitBreakerTimeout: number;
+  private readonly maxRetries: number;
+  
+  // Speech recognition
+  private recognition: SpeechRecognition | null;
+  private isListening: boolean;
+  private currentSession: TranscriptionSession | null;
+  
+  // Error types
+  private readonly RECOVERABLE_ERRORS: string[];
+  private readonly CRITICAL_ERRORS: string[];
+  
+  // Callbacks
+  private callbacks: EngineCallbacks;
+  
   constructor() {
     // Circuit breaker state
     this.isCircuitBreakerOpen = false;
@@ -41,7 +150,7 @@ export class WebSpeechEngine {
   /**
    * Force reset circuit breaker - clears all error states
    */
-  forceResetCircuitBreaker() {
+  forceResetCircuitBreaker(): void {
     console.log('[WebSpeechEngine] Force resetting circuit breaker');
     this.isCircuitBreakerOpen = false;
     this.consecutiveErrors = 0;
@@ -52,7 +161,7 @@ export class WebSpeechEngine {
   /**
    * Initialize speech recognition
    */
-  initializeRecognition() {
+  initializeRecognition(): boolean {
     try {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       
@@ -75,7 +184,7 @@ export class WebSpeechEngine {
   /**
    * Setup recognition configuration
    */
-  setupRecognitionConfig() {
+  private setupRecognitionConfig(): void {
     if (!this.recognition) return;
     
     this.recognition.continuous = true;
@@ -87,7 +196,7 @@ export class WebSpeechEngine {
   /**
    * Setup recognition event handlers
    */
-  setupRecognitionHandlers() {
+  private setupRecognitionHandlers(): void {
     if (!this.recognition) return;
     
     this.recognition.onstart = () => {
@@ -96,7 +205,7 @@ export class WebSpeechEngine {
       this.callbacks.onStart?.();
     };
     
-    this.recognition.onresult = (event) => {
+    this.recognition.onresult = (event: SpeechRecognitionEvent) => {
       const results = Array.from(event.results);
       const transcript = results
         .map(result => result[0].transcript)
@@ -116,7 +225,7 @@ export class WebSpeechEngine {
       }
     };
     
-    this.recognition.onerror = (event) => {
+    this.recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
       console.error('[WebSpeechEngine] Recognition error:', event.error);
       this.handleRecognitionError(event);
     };
@@ -138,7 +247,7 @@ export class WebSpeechEngine {
   /**
    * Handle recognition errors with circuit breaker logic
    */
-  handleRecognitionError(event) {
+  private handleRecognitionError(event: SpeechRecognitionErrorEvent): void {
     const error = event.error;
     const isRecoverable = this.RECOVERABLE_ERRORS.includes(error);
     const isCritical = this.CRITICAL_ERRORS.includes(error);
@@ -195,8 +304,8 @@ export class WebSpeechEngine {
   /**
    * Get user-friendly error message
    */
-  getErrorMessage(error) {
-    const errorMessages = {
+  private getErrorMessage(error: string): string {
+    const errorMessages: Record<string, string> = {
       'not-allowed': 'Permisos de micrófono denegados. Por favor, permite el acceso al micrófono.',
       'no-speech': 'No se detectó voz. Por favor, habla más cerca del micrófono.',
       'audio-capture': 'Error al capturar audio. Verifica tu micrófono.',
@@ -212,7 +321,7 @@ export class WebSpeechEngine {
   /**
    * Start transcription with circuit breaker reset
    */
-  async startTranscription(callbacks = {}) {
+  async startTranscription(callbacks: EngineCallbacks = {}): Promise<boolean> {
     console.log('[WebSpeechEngine] Starting transcription');
     
     // Always reset circuit breaker when starting new transcription
@@ -253,18 +362,18 @@ export class WebSpeechEngine {
     
     try {
       // Start recognition
-      this.recognition.start();
+      this.recognition!.start();
       this.isListening = true;
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error('[WebSpeechEngine] Failed to start recognition:', error);
       
       // If already started, try to stop and restart
       if (error.message?.includes('already started')) {
         try {
-          this.recognition.stop();
+          this.recognition!.stop();
           await new Promise(resolve => setTimeout(resolve, 100));
-          this.recognition.start();
+          this.recognition!.start();
           this.isListening = true;
           return true;
         } catch (retryError) {
@@ -282,9 +391,22 @@ export class WebSpeechEngine {
   }
   
   /**
+   * Start recognition (internal method)
+   */
+  private startRecognition(): void {
+    if (this.recognition && !this.isListening) {
+      try {
+        this.recognition.start();
+      } catch (error) {
+        console.error('[WebSpeechEngine] Error restarting recognition:', error);
+      }
+    }
+  }
+  
+  /**
    * Stop transcription
    */
-  stopTranscription() {
+  stopTranscription(): void {
     console.log('[WebSpeechEngine] Stopping transcription');
     
     if (this.recognition && this.isListening) {
@@ -302,7 +424,7 @@ export class WebSpeechEngine {
   /**
    * Get engine state for debugging
    */
-  getEngineState() {
+  getEngineState(): EngineState {
     return {
       isListening: this.isListening,
       isCircuitBreakerOpen: this.isCircuitBreakerOpen,
@@ -320,7 +442,7 @@ export class WebSpeechEngine {
   /**
    * Cleanup
    */
-  cleanup() {
+  cleanup(): void {
     this.stopTranscription();
     this.recognition = null;
     this.callbacks = {

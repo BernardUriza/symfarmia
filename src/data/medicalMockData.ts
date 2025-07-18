@@ -1,5 +1,154 @@
 // Medical mock data for realistic scenarios
-export const mockPatients = [
+
+// TypeScript interfaces
+export interface Condition {
+  code: string;
+  name: string;
+  onset: string;
+  status: 'active' | 'inactive' | 'resolved';
+}
+
+export interface Medication {
+  name: string;
+  dose: string;
+  frequency: string;
+  route: string;
+  prescriber: string;
+}
+
+export interface Allergy {
+  allergen: string;
+  reaction: string;
+  severity: 'mild' | 'moderate' | 'severe';
+}
+
+export interface Vitals {
+  date: string;
+  systolic_bp: number;
+  diastolic_bp: number;
+  heart_rate: number;
+  temperature: number;
+  respiratory_rate: number;
+  oxygen_saturation: number;
+  weight: number;
+  height: number;
+  bmi: number;
+}
+
+export interface LabResults {
+  date: string;
+  hba1c?: number;
+  glucose?: number;
+  creatinine?: number;
+  bun?: number;
+  sodium?: number;
+  potassium?: number;
+  total_cholesterol?: number;
+  ldl?: number;
+  hdl?: number;
+  triglycerides?: number;
+  inr?: number;
+  bnp?: number;
+  egfr?: number;
+  hemoglobin?: number;
+  hematocrit?: number;
+}
+
+export interface Visit {
+  date: string;
+  type: string;
+  chiefComplaint: string;
+  notes: string;
+  provider: string;
+}
+
+export interface MockPatient {
+  id: string;
+  name: string;
+  age: number;
+  gender: 'male' | 'female' | 'other';
+  dateOfBirth: string;
+  medicalRecordNumber: string;
+  primaryPhysician: string;
+  conditions: Condition[];
+  medications: Medication[];
+  allergies: Allergy[];
+  vitals: Vitals[];
+  labs: LabResults[];
+  riskFactors: string[];
+  visits: Visit[];
+}
+
+export interface DifferentialDiagnosis {
+  diagnosis: string;
+  probability: number;
+  urgency: 'low' | 'medium' | 'high';
+}
+
+export interface ClinicalScenarioPatient {
+  age: number;
+  gender: 'male' | 'female' | 'other';
+  chiefComplaint: string;
+  symptoms: string[];
+  vitals: {
+    bp: string;
+    hr: number;
+    temp: string;
+    rr: number;
+    spo2: number;
+  };
+  riskFactors: string[];
+}
+
+export interface ClinicalScenario {
+  id: string;
+  title: string;
+  patient: ClinicalScenarioPatient;
+  differentialDx: DifferentialDiagnosis[];
+  workup: string[];
+  treatment: string[];
+}
+
+export interface DrugInteraction {
+  drug1: string;
+  drug2: string;
+  severity: 'low' | 'medium' | 'high';
+  mechanism: string;
+  clinicalEffect: string;
+  management: string;
+  reference: string;
+}
+
+export interface ClinicalRule {
+  id: string;
+  name: string;
+  condition: string;
+  criteria: string;
+  recommendation: string;
+  strength: string;
+  evidence: string;
+}
+
+export interface LabRange {
+  min?: number;
+  max?: number;
+  unit: string;
+  critical?: { low: number; high: number };
+  optimal?: string;
+}
+
+export interface GenderSpecificLabRange {
+  male: LabRange;
+  female: LabRange;
+}
+
+export interface LabReferenceRanges {
+  [category: string]: {
+    [test: string]: LabRange | GenderSpecificLabRange;
+  };
+}
+
+export const mockPatients: MockPatient[] = [
   {
     id: 'p001',
     name: 'Sarah Johnson',
@@ -213,7 +362,7 @@ export const mockPatients = [
 ];
 
 // Clinical scenarios for AI training
-export const clinicalScenarios = [
+export const clinicalScenarios: ClinicalScenario[] = [
   {
     id: 'scenario001',
     title: 'Chest Pain Evaluation',
@@ -279,7 +428,7 @@ export const clinicalScenarios = [
 ];
 
 // Drug interaction database
-export const drugInteractionDatabase = [
+export const drugInteractionDatabase: DrugInteraction[] = [
   {
     drug1: 'Warfarin',
     drug2: 'Aspirin',
@@ -319,7 +468,7 @@ export const drugInteractionDatabase = [
 ];
 
 // Clinical decision support rules
-export const clinicalRules = [
+export const clinicalRules: ClinicalRule[] = [
   {
     id: 'rule001',
     name: 'Anticoagulation in Atrial Fibrillation',
@@ -359,7 +508,7 @@ export const clinicalRules = [
 ];
 
 // Reference ranges for lab values
-export const labReferenceRanges = {
+export const labReferenceRanges: LabReferenceRanges = {
   'Complete Blood Count': {
     hemoglobin: {
       male: { min: 13.8, max: 17.2, unit: 'g/dL', critical: { low: 7.0, high: 20.0 } },
