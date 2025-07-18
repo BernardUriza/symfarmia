@@ -8,7 +8,8 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { audioPipelineIntegration } from '../services/AudioPipelineIntegration'
 import { useAudioProcessor } from './useAudioProcessor'
-import RnnoiseModule from '@jitsi/rnnoise-wasm'
+import * as RnnoiseModule from '@jitsi/rnnoise-wasm'
+
 
 /** Metadata asociada al procesamiento de cada chunk */
 export interface ProcessingMetadata {
