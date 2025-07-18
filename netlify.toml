@@ -1,3 +1,5 @@
+# Netlify Configuration for Next.js App
+
 [dev]
   command = "node scripts/netlify-dev-wrapper.js"
   port = 8888
@@ -11,8 +13,8 @@
   DEBUG = ""
 
 [build]
-  command = "echo '🔍 Starting build...' && npm install --production=false && echo '📦 Installing function deps...' && cd netlify/functions && npm install && cd ../.. && npm run build"
-  functions = "netlify/functions"
+  command = "npm install --production=false && npm run build"
+  publish = ".next"
 
 [build.environment]
   NODE_ENV = "production"
@@ -20,71 +22,39 @@
   NEXT_TELEMETRY_DISABLED = "1"
   NODE_VERSION = "20.12.2"
 
-# Optimized function configuration for transcription
-[functions]
-  node_bundler = "esbuild"
-  
-[functions."transcribe-upload"]
-  timeout = 180 # Maximum allowed timeout (3 minutes)
-  memory = 3008 # Maximum allowed memory (3GB)
-  
-[functions."transcribe-server-file"]
-  timeout = 180 # Maximum allowed timeout (3 minutes)
-  memory = 3008 # Maximum allowed memory (3GB)
-
-[functions.environment]
-  # Xenova/transformers.js configuration
-  TRANSFORMERS_CACHE = "/tmp/.cache"
-  HF_HOME = "/tmp/.cache"
-  # Disable telemetry for performance
-  DO_NOT_TRACK = "1"
-
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# Headers para CORS
+# Headers for API routes
 [[headers]]
-  for = "/.netlify/functions/*"
+  for = "/api/*"
   [headers.values]
     Access-Control-Allow-Origin = "*"
-    Access-Control-Allow-Methods = "GET, POST, OPTIONS"
-    Access-Control-Allow-Headers = "Content-Type"
+    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
+    Access-Control-Allow-Headers = "Content-Type, Authorization"
 
-# ✅ ESPECÍFICOS PRIMERO - Transcription endpoints
-[[redirects]]
-  from = "/api/transcribe-server-file"
-  to = "/.netlify/functions/transcribe-server-file"
-  status = 200
+# Cache control for static assets
+[[headers]]
+  for = "/_next/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
 
-[[redirects]]
-  from = "/api/transcribe-upload"
-  to = "/.netlify/functions/transcribe-upload"
-  status = 200
+# Security headers
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"
 
-# Auth routes específicos
-[[redirects]]
-  from = "/auth/login"
-  to = "/.netlify/functions/api-auth-login"
-  status = 200
-
-[[redirects]]
-  from = "/auth/logout" 
-  to = "/.netlify/functions/api-auth-logout"
-  status = 200
-
-[[redirects]]
-  from = "/auth/callback"
-  to = "/.netlify/functions/api-auth-callback"
-  status = 200
-
-# ✅ GENÉRICO AL FINAL - para otras API routes
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/api-:splat"
-  status = 200
-
-# ✅ SPA fallback - ÚLTIMO
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+# Environment variable placeholders (set in Netlify UI)
+# OPENAI_API_KEY
+# DATABASE_URL
+# AUTH0_SECRET
+# AUTH0_BASE_URL
+# AUTH0_ISSUER_BASE_URL
+# AUTH0_CLIENT_ID
+# AUTH0_CLIENT_SECRET
+# EDGE_STORE_ACCESS_KEY
+# EDGE_STORE_SECRET_KEY
