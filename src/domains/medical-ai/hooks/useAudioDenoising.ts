@@ -47,6 +47,7 @@ export function useAudioDenoising(
   const [audioChunks, setAudioChunks] = useState<UseAudioDenoisingReturn['audioChunks']>([]);
   const [audioLevel, setAudioLevel] = useState(0);
   const [recordingTime, setRecordingTime] = useState(0);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   const recordingStartRef = useRef<number>(0);
   const recordingIntervalRef = useRef<number>(0);
@@ -70,20 +71,44 @@ export function useAudioDenoising(
     let cancelled = false;
     (async () => {
       try {
+        console.log('[useAudioDenoising] Initializing audio denoiser...');
         const ctx = new window.AudioContext({ sampleRate });
         await ctx.audioWorklet.addModule('/audio-denoiser.worklet.js');
-        const rnnoise = await RnnoiseModule();
+        console.log('[useAudioDenoising] AudioWorklet loaded');
+        
+        // Try to load RNNoise - different modules export differently
+        let rnnoise;
+        if (typeof RnnoiseModule === 'function') {
+          rnnoise = await RnnoiseModule();
+        } else if ((RnnoiseModule as any).default) {
+          rnnoise = await (RnnoiseModule as any).default();
+        } else if ((RnnoiseModule as any).createRnnoise) {
+          rnnoise = await (RnnoiseModule as any).createRnnoise();
+        } else {
+          throw new Error('Unable to initialize RNNoise module');
+        }
+        console.log('[useAudioDenoising] RNNoise module loaded');
+        
         const workletNode = new window.AudioWorkletNode(ctx, 'audio-denoiser-processor');
         // RNNoise no es transferible, así que usa métodos serializables o wrappers si es necesario
         (workletNode.port as any).postMessage({ type: 'rnnoise-init', rnnoise });
-        workletNodeRef.current = workletNode;
-        audioCtxRef.current = ctx;
+        
+        if (!cancelled) {
+          workletNodeRef.current = workletNode;
+          audioCtxRef.current = ctx;
+          setIsInitialized(true);
+          setError('');
+          console.log('[useAudioDenoising] Audio denoiser initialized successfully');
+        }
       } catch (e: any) {
+        console.error('[useAudioDenoising] Failed to initialize:', e);
         setError('Failed to load denoiser: ' + e.message);
+        setIsInitialized(false);
       }
     })();
     return () => {
       cancelled = true;
+      setIsInitialized(false);
       workletNodeRef.current = null;
       audioCtxRef.current?.close();
     };
@@ -92,17 +117,23 @@ export function useAudioDenoising(
   // Control brutal de grabación
   const start = useCallback(async (): Promise<MediaStream | null> => {
     try {
+      // Verificar que el audio denoiser esté inicializado
+      if (!isInitialized || !audioCtxRef.current || !workletNodeRef.current) {
+        console.error('[useAudioDenoising] Not initialized:', { isInitialized, hasAudioCtx: !!audioCtxRef.current, hasWorklet: !!workletNodeRef.current });
+        throw new Error('Audio denoiser not ready. Please wait for initialization to complete.');
+      }
+      
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       mediaStreamRef.current = stream;
-      const ctx = audioCtxRef.current!;
+      const ctx = audioCtxRef.current;
       const source = ctx.createMediaStreamSource(stream);
-      source.connect(workletNodeRef.current!);
+      source.connect(workletNodeRef.current);
       setIsRecording(true);
 
-      workletNodeRef.current!.port.onmessage = (e: MessageEvent) => {
+      workletNodeRef.current.port.onmessage = (e: MessageEvent) => {
         if (e.data.type === 'denoised') {
           setIsProcessing(true);
-          const chunkId = chunkIdRef.current!++;
+          const chunkId = chunkIdRef.current++;
           const floatData = new Float32Array(e.data.data);
           const peak = floatData.reduce((max, v) => Math.max(max, Math.abs(v)), 0);
           setAudioLevel(Math.round(peak * 255));
@@ -114,15 +145,15 @@ export function useAudioDenoising(
             denoisingUsed: true,
             processingTime: Date.now() - startTime,
           };
-          allChunksRef.current!.push(floatData);
-          statsRef.current!.totalChunks++;
-          statsRef.current!.denoisedChunks++;
-          statsRef.current!.totalTime += metadata.processingTime;
+          allChunksRef.current.push(floatData);
+          statsRef.current.totalChunks++;
+          statsRef.current.denoisedChunks++;
+          statsRef.current.totalTime += metadata.processingTime;
           setProcessingStats({
-            totalChunks: statsRef.current!.totalChunks,
-            denoisedChunks: statsRef.current!.denoisedChunks,
-            fallbackChunks: statsRef.current!.fallbackChunks,
-            averageProcessingTime: statsRef.current!.totalTime / statsRef.current!.totalChunks,
+            totalChunks: statsRef.current.totalChunks,
+            denoisedChunks: statsRef.current.denoisedChunks,
+            fallbackChunks: statsRef.current.fallbackChunks,
+            averageProcessingTime: statsRef.current.totalTime / statsRef.current.totalChunks,
           });
           setAudioChunks(prev => [...prev, { id: chunkId, data: floatData, metadata }]);
           onChunkReady?.(floatData, metadata);
@@ -134,7 +165,8 @@ export function useAudioDenoising(
       setRecordingTime(0);
       if (recordingIntervalRef.current) clearInterval(recordingIntervalRef.current);
       recordingIntervalRef.current = window.setInterval(() => {
-        setRecordingTime(Math.floor((Date.now() - recordingStartRef.current!) / 1000));
+        const startTime = recordingStartRef.current || Date.now();
+        setRecordingTime(Math.floor((Date.now() - startTime) / 1000));
       }, 1000);
 
       ctx.resume();
@@ -143,7 +175,7 @@ export function useAudioDenoising(
       setError('Recording failed: ' + e.message);
       return null;
     }
-  }, [onChunkReady]);
+  }, [onChunkReady, isInitialized]);
 
   const stop = useCallback(() => {
     setIsRecording(false);
