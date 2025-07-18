@@ -1,5 +1,15 @@
 // audio-denoiser.worklet.js
 
+// Configure Module before importing
+self.Module = {
+  locateFile: (filename) => {
+    if (filename.endsWith('.wasm')) {
+      return '/rnnoise.wasm';
+    }
+    return filename;
+  }
+};
+
 // Import the sync version of RNNoise
 importScripts('/rnnoise-sync.js');
 
@@ -16,12 +26,30 @@ class AudioDenoiserProcessor extends AudioWorkletProcessor {
 
   async initializeRNNoise() {
     try {
+      console.log('[Worklet] Initializing RNNoise...');
+      
       // createRNNWasmModuleSync should be available from the imported script
       if (typeof createRNNWasmModuleSync !== 'undefined') {
+        console.log('[Worklet] createRNNWasmModuleSync found, creating module...');
         const rnnoiseModule = createRNNWasmModuleSync();
+        
+        // Wait for module to be ready
+        if (rnnoiseModule.calledRun === false) {
+          await new Promise(resolve => {
+            rnnoiseModule.onRuntimeInitialized = resolve;
+          });
+        }
+        
+        console.log('[Worklet] RNNoise module ready, creating denoiser...');
+        
         // Create denoiser instance
+        const state = rnnoiseModule._rnnoise_create();
+        if (!state) {
+          throw new Error('Failed to create RNNoise state');
+        }
+        
         rnnoise = {
-          state: rnnoiseModule._rnnoise_create(),
+          state: state,
           process: (frame) => {
             const ptr = rnnoiseModule._malloc(frame.length * 2);
             rnnoiseModule.HEAP16.set(frame, ptr >> 1);
@@ -33,11 +61,14 @@ class AudioDenoiserProcessor extends AudioWorkletProcessor {
           },
           module: rnnoiseModule
         };
+        
+        console.log('[Worklet] RNNoise initialized successfully');
         this.port.postMessage({ type: 'init-complete' });
       } else {
         throw new Error('createRNNWasmModuleSync not found');
       }
     } catch (error) {
+      console.error('[Worklet] RNNoise initialization error:', error);
       this.port.postMessage({ type: 'init-error', error: error.message });
     }
   }
