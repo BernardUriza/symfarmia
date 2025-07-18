@@ -57,6 +57,7 @@
     "audio_format": "Format",
     "duration": "Duration",
     "processing_time": "Processing Time",
-    "confidence": "Confidence"
+    "confidence": "Confidence",
+    "system_info": "System Info"
   }
 }

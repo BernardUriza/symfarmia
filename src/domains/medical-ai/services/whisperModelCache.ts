@@ -122,9 +122,9 @@ class WhisperModelCache {
             console.log('[WhisperCache] Model already loaded, skipping init');
             resolve();
           } else {
-            // Initialize the model
+            // Initialize the model with transformers module
             console.log('[WhisperCache] Initializing model in worker');
-            this.worker.postMessage({ type: 'INIT' });
+            this.initializeWithTransformers();
           }
         } else {
           // Worker already exists
@@ -148,6 +148,29 @@ class WhisperModelCache {
         reject(error);
       }
     });
+  }
+  
+  private async initializeWithTransformers(): Promise<void> {
+    try {
+      console.log('[WhisperCache] Loading transformers module...');
+      
+      // Import transformers module
+      const transformersModule = await import('@xenova/transformers');
+      
+      console.log('[WhisperCache] Sending transformers module to worker');
+      
+      // Send the transformers module to the worker
+      this.worker!.postMessage({ 
+        type: 'INIT',
+        data: {
+          transformers: transformersModule
+        }
+      });
+      
+    } catch (error) {
+      console.error('[WhisperCache] Failed to load transformers module:', error);
+      throw error;
+    }
   }
   
   addMessageListener(listener: (event: MessageEvent) => void): () => void {
