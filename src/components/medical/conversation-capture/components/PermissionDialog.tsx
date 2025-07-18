@@ -15,12 +15,12 @@ export const PermissionDialog: React.FC<PermissionDialogProps> = ({ isOpen, onCl
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded-lg max-w-md">
-        <h3 className="text-lg font-semibold mb-2">
+    <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50">
+      <div className="bg-background border border-border/50 p-6 rounded-lg max-w-md shadow-xl">
+        <h3 className="text-lg font-semibold mb-2 text-foreground">
           {t('conversation.capture.permission_title')}
         </h3>
-        <p className="text-gray-600 mb-4">
+        <p className="text-muted-foreground mb-4">
           {t('conversation.capture.permission_message')}
         </p>
         <Button 

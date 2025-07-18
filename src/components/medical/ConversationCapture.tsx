@@ -15,7 +15,8 @@ import {
   RecordingCard,
   TranscriptionResult,
   ErrorDisplay,
-  ProcessingStatus
+  ProcessingStatus,
+  FloatingTranscriptPopup
 } from '@/src/components/medical/conversation-capture/components';
 import type { SOAPNotes } from '@/src/types/medical';
 import { diarizationService, DiarizationUtils, DiarizationResult } from '@/src/domains/medical-ai/services/DiarizationService';
@@ -68,6 +69,9 @@ export const ConversationCapture = ({
   
   // LLM Audit hook for ChatGPT integration
   const { auditTranscript, isLoading: isAuditLoading, error: auditError, result: auditResult } = useLlmAudit();
+  
+  // State for popup
+  const [showTranscriptPopup, setShowTranscriptPopup] = useState(false);
   
   // Refs
   const chunkCountRef = useRef(0);
@@ -223,6 +227,9 @@ export const ConversationCapture = ({
     // BRUTAL: Audit transcript with ChatGPT
     if (transcription?.text) {
       console.log('[ConversationCapture] Iniciando auditoría con ChatGPT...');
+      // Show popup when transcription is complete
+      setShowTranscriptPopup(true);
+      
       try {
         const llmResult = await auditTranscript({
           transcript: transcription.text,
@@ -243,7 +250,9 @@ export const ConversationCapture = ({
     
     return success;
   }, [stopLiveTranscription, savePartialMinuteTranscription, stopTranscription, 
-      transcription, onTranscriptionComplete, processDiarization]);
+      transcription, onTranscriptionComplete, processDiarization, auditTranscript,
+      transcriptionState.webSpeechText, diarizationState.diarizationResult,
+      setShowTranscriptPopup]);
 
   // Main toggle recording function
   const toggleRecording = async () => {
@@ -293,7 +302,7 @@ export const ConversationCapture = ({
           <h1 className="text-2xl font-medium mb-2">
             {t('conversation.capture.title')}
           </h1>
-          <p className="text-gray">
+          <p className="text-foreground/60">
             {t('conversation.capture.subtitle')}
           </p>
         </div>
@@ -329,8 +338,8 @@ export const ConversationCapture = ({
             onClick={uiState.toggleDenoisingDashboard}
             className={`flex items-center gap-2 px-3 py-1 rounded-md text-sm transition-colors ${
               uiState.showDenoisingDashboard 
-                ? 'bg-blue-100 text-blue-700' 
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                ? 'bg-primary/10 text-primary dark:bg-primary/20' 
+                : 'bg-muted/50 text-muted-foreground hover:bg-muted/70'
             }`}
           >
             <Settings className="w-4 h-4" />
@@ -350,13 +359,13 @@ export const ConversationCapture = ({
     <Card>
       <CardContent className="p-6 space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-foreground/70 mb-2">
             Escribe la conversación manualmente:
           </label>
           <textarea
             value={transcriptionState.manualTranscript}
             onChange={(e) => transcriptionState.updateManualTranscript(e.target.value)}
-            className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+            className="w-full px-4 py-3 border border-border/50 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary/50 resize-none bg-background/50 text-foreground"
             rows={8}
             placeholder="Escribe o pega la transcripción de la conversación médica aquí..."
             autoFocus
@@ -420,14 +429,14 @@ export const ConversationCapture = ({
 
       {/* Info message when WebSpeech is not available */}
       {!isWebSpeechAvailable && !uiState.isManualMode && (
-        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-4">
+        <div className="bg-primary/5 dark:bg-primary/10 border border-primary/20 dark:border-primary/30 rounded-lg p-4 mb-4">
           <div className="flex items-start">
-            <svg className="w-5 h-5 text-blue-600  mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
+            <svg className="w-5 h-5 text-primary mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
             </svg>
-            <div className="text-sm text-blue-800 ">
+            <div className="text-sm text-primary/80">
               <p className="font-medium mb-1">Transcripción en tiempo real no disponible</p>
-              <p className="text-blue-700 ">
+              <p className="text-primary/60">
                 La transcripción final con Whisper estará disponible al detener la grabación.
               </p>
             </div>
@@ -457,14 +466,14 @@ export const ConversationCapture = ({
       {/* Live transcription progress during recording */}
       {isRecording && status === 'recording' && (
         <div className="space-y-4">
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+          <h3 className="text-lg font-medium text-foreground">
             Transcripción en progreso
           </h3>
-          <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-            <p className="text-sm text-blue-600 dark:text-blue-400 mb-2">
+          <div className="p-4 bg-primary/5 dark:bg-primary/10 rounded-lg border border-primary/20 dark:border-primary/30">
+            <p className="text-sm text-primary dark:text-primary/80 mb-2">
               🎙️ Grabando audio con denoising activo...
             </p>
-            <div className="text-sm text-gray-700 dark:text-gray-300">
+            <div className="text-sm text-foreground/70">
               La transcripción completa estará disponible al finalizar.
             </div>
           </div>
@@ -475,14 +484,14 @@ export const ConversationCapture = ({
       {hasTranscription && (status === 'collecting-residues' || status === 'completed') && (
         <>
           {console.log('[ConversationCapture] MOSTRANDO TRANSCRIPCIÓN:', transcription, 'Status:', status)}
-          <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+          <div className="mt-6 pt-6 border-t border-border/50">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+              <h3 className="text-lg font-medium text-foreground">
                 {status === 'collecting-residues' ? 'Transcripción parcial' : 'Transcripción completa'}
               </h3>
               {/* BAZAR: Show warning badge if there's a residue error */}
               {status === 'completed' && error && error.includes('último fragmento') && (
-                <Badge variant="secondary" className="bg-amber-100 text-amber-800">
+                <Badge variant="secondary" className="bg-amber-500/10 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400">
                   ⚠️ Completado con advertencia
                 </Badge>
               )}
@@ -490,7 +499,7 @@ export const ConversationCapture = ({
             {uiState.isManualMode ? (
               <Card>
                 <CardContent className="p-4">
-                  <p className="text-gray-800 dark:text-gray-200 whitespace-pre-wrap">
+                  <p className="text-foreground/90 whitespace-pre-wrap">
                     {transcriptionState.manualTranscript}
                   </p>
                 </CardContent>
@@ -507,12 +516,12 @@ export const ConversationCapture = ({
             )}
             {/* BAZAR: Show residue warning if applicable */}
             {status === 'completed' && error && error.includes('último fragmento') && (
-              <div className="mt-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3">
+              <div className="mt-4 bg-amber-500/5 dark:bg-amber-500/10 border border-amber-500/20 dark:border-amber-500/30 rounded-lg p-3">
                 <div className="flex items-start">
-                  <svg className="w-5 h-5 text-amber-600 mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                   </svg>
-                  <p className="text-sm text-amber-800 dark:text-amber-200">{error}</p>
+                  <p className="text-sm text-amber-700 dark:text-amber-400">{error}</p>
                 </div>
               </div>
             )}
@@ -538,6 +547,26 @@ export const ConversationCapture = ({
 
       {/* Action buttons */}
       {hasTranscription && !isRecording && renderActionButtons()}
+
+      {/* Floating Transcript Popup with LLM Results */}
+      <FloatingTranscriptPopup
+        isOpen={showTranscriptPopup}
+        onClose={() => setShowTranscriptPopup(false)}
+        transcript={transcription?.text || ''}
+        llmResult={auditResult}
+        isAuditLoading={isAuditLoading}
+        auditError={auditError}
+        onReaudit={async () => {
+          if (transcription?.text) {
+            await auditTranscript({
+              transcript: transcription.text,
+              webSpeech: transcriptionState.webSpeechText,
+              diarization: diarizationState.diarizationResult?.segments || [],
+              task: 'audit-transcript'
+            });
+          }
+        }}
+      />
     </div>
   );
 };

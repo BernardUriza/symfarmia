@@ -42,13 +42,13 @@ export const TranscriptionResult: React.FC<TranscriptionResultProps> = ({
         </h3>
         
         {/* Tabs */}
-        <div className="flex border-b border-gray-200 mb-3">
+        <div className="flex border-b border-border/50 mb-3">
           <button
             onClick={() => setActiveTab('whisper')}
             className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
               activeTab === 'whisper'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
+                ? 'border-primary text-primary'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
             }`}
           >
             Whisper (Opción 1)
@@ -58,8 +58,8 @@ export const TranscriptionResult: React.FC<TranscriptionResultProps> = ({
               onClick={() => setActiveTab('webspeech')}
               className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === 'webspeech'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
+                  ? 'border-primary text-primary'
+                  : 'border-transparent text-muted-foreground hover:text-foreground'
               }`}
             >
               Web Speech (Opción 2)
@@ -69,8 +69,8 @@ export const TranscriptionResult: React.FC<TranscriptionResultProps> = ({
             onClick={() => setActiveTab('diarization')}
             className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
               activeTab === 'diarization'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
+                ? 'border-primary text-primary'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
             }`}
           >
             Diarización (Opción 3)
@@ -85,13 +85,13 @@ export const TranscriptionResult: React.FC<TranscriptionResultProps> = ({
           <div className="mb-3">
             {isDiarizationProcessing ? (
               <div className="flex items-center justify-center p-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-                <span className="ml-2 text-gray-600">Procesando diarización...</span>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                <span className="ml-2 text-muted-foreground">Procesando diarización...</span>
               </div>
             ) : diarizationError ? (
-              <div className="bg-red-50 border border-red-200 rounded p-4">
-                <p className="text-red-700 font-medium">Error en diarización:</p>
-                <p className="text-red-600 text-sm mt-1">{diarizationError}</p>
+              <div className="bg-destructive/5 dark:bg-destructive/10 border border-destructive/20 dark:border-destructive/30 rounded p-4">
+                <p className="text-destructive dark:text-destructive/90 font-medium">Error en diarización:</p>
+                <p className="text-destructive/80 dark:text-destructive/70 text-sm mt-1">{diarizationError}</p>
               </div>
             ) : diarizationResult ? (
               <DiarizedTranscript 
@@ -102,15 +102,15 @@ export const TranscriptionResult: React.FC<TranscriptionResultProps> = ({
                 className="border-0 p-0"
               />
             ) : (
-              <div className="bg-gray-50 p-4 rounded text-center">
-                <p className="text-gray-500">
+              <div className="bg-muted/50 p-4 rounded text-center">
+                <p className="text-muted-foreground">
                   La diarización se procesará automáticamente al completar la transcripción.
                 </p>
               </div>
             )}
           </div>
         ) : (
-          <div className="bg-gray-50 p-3 rounded text-sm mb-3">
+          <div className="bg-muted/30 p-3 rounded text-sm mb-3">
             {activeTab === 'whisper' ? (
               transcription.text
             ) : (
@@ -134,7 +134,7 @@ export const TranscriptionResult: React.FC<TranscriptionResultProps> = ({
           </div>
         )}
         
-        <div className="flex gap-4 text-xs text-gray-600">
+        <div className="flex gap-4 text-xs text-muted-foreground">
           {activeTab === 'whisper' ? (
             <>
               <span>
@@ -166,7 +166,7 @@ export const TranscriptionResult: React.FC<TranscriptionResultProps> = ({
         
         {(activeTab === 'whisper' && transcription.medicalTerms.length > 0) && (
           <div className="mt-3">
-            <p className="text-xs text-gray-600 mb-1">
+            <p className="text-xs text-muted-foreground mb-1">
               {t('conversation.capture.medical_terms_detected')}
             </p>
             <div className="flex flex-wrap gap-1">

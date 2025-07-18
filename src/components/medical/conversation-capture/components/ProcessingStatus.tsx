@@ -29,20 +29,20 @@ export const ProcessingStatus: React.FC<ProcessingStatusProps> = ({ status, isPr
   const getStatusStyle = () => {
     switch (currentStatus) {
       case 'collecting-residues':
-        return 'bg-amber-50 border-amber-200 text-amber-700';
+        return 'bg-amber-500/5 dark:bg-amber-500/10 border-amber-500/20 dark:border-amber-500/30 text-amber-700 dark:text-amber-400';
       case 'processing':
       default:
-        return 'bg-blue-50 border-blue-200 text-blue-700';
+        return 'bg-primary/5 dark:bg-primary/10 border-primary/20 dark:border-primary/30 text-primary dark:text-primary/90';
     }
   };
 
   const getSpinnerStyle = () => {
     switch (currentStatus) {
       case 'collecting-residues':
-        return 'border-amber-500';
+        return 'border-amber-500 dark:border-amber-400';
       case 'processing':
       default:
-        return 'border-blue-500';
+        return 'border-primary';
     }
   };
 

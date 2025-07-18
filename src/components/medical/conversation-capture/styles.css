@@ -32,6 +32,8 @@
 .swal2-toast {
   border-radius: 0.75rem !important;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+  backdrop-filter: blur(8px);
+  background-color: rgba(255, 255, 255, 0.95) !important;
 }
 
 .swal2-toast.swal2-show {
@@ -56,8 +58,9 @@
 /* Dark mode support for toasts */
 @media (prefers-color-scheme: dark) {
   .swal2-toast {
-    background-color: rgb(31 41 55) !important;
+    background-color: rgba(31, 41, 55, 0.95) !important;
     color: rgb(249 250 251) !important;
+    border: 1px solid rgba(55, 65, 81, 0.5) !important;
   }
   
   .swal2-toast .swal2-title {
@@ -67,4 +70,24 @@
   .swal2-toast .swal2-html-container {
     color: rgb(209 213 219) !important;
   }
+}
+
+/* Custom scrollbar styles for better contrast */
+.dark ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
 }

@@ -51,19 +51,19 @@ export const RecordingCard: React.FC<RecordingCardProps> = ({
   };
 
   return (
-    <Card className="border-2 border-dashed border-blue-200 shadow-sm transition-all duration-300 ease-in-out slide-in">
+    <Card className="border-2 border-dashed border-primary/30 dark:border-primary/40 shadow-sm transition-all duration-300 ease-in-out slide-in">
       <CardContent className="p-8 text-center">
         {/* Show transcription result when completed */}
         {transcription && !isRecording && (
-          <div className="mb-6 p-4 bg-gray-100 rounded-lg">
-            <h3 className="text-lg font-medium text-gray-900 mb-3">
+          <div className="mb-6 p-4 bg-muted/50 rounded-lg">
+            <h3 className="text-lg font-medium text-foreground mb-3">
               {t('conversation.capture.transcription_result')}:
             </h3>
             <div className="flex justify-center gap-4 text-sm">
-              <span className="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-800">
+              <span className="inline-flex items-center px-3 py-1 rounded-full bg-green-500/10 text-green-700 dark:bg-green-500/20 dark:text-green-400">
                 {t('conversation.capture.confidence')}: {Math.round(transcription.confidence * 100)}%
               </span>
-              <span className="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-800">
+              <span className="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary dark:bg-primary/20">
                 {t('conversation.capture.processing_time')}: {transcription.processingTime}ms
               </span>
             </div>
@@ -89,7 +89,7 @@ export const RecordingCard: React.FC<RecordingCardProps> = ({
           </Badge>
 
           {isRecording && (
-            <div className="text-3xl font-mono font-semibold text-blue-600 mb-4">
+            <div className="text-3xl font-mono font-semibold text-primary mb-4">
               {formatTime(recordingTime)}
             </div>
           )}
@@ -108,12 +108,12 @@ export const RecordingCard: React.FC<RecordingCardProps> = ({
           
           {isRecording && (
             <div className="space-y-2">
-              <div className="flex items-center gap-2 text-sm text-slate-600">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Activity className="h-4 w-4" />
                 <span>{t('conversation.capture.audio_level')}:</span>
-                <div className="w-32 h-2 bg-slate-200 rounded-full overflow-hidden">
+                <div className="w-32 h-2 bg-muted/50 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-green-500 transition-all duration-200"
+                    className="h-full bg-green-500/80 transition-all duration-200"
                     style={{ width: `${Math.min(100, (audioLevel / 255) * 100)}%` }}
                   />
                 </div>
