@@ -5,16 +5,16 @@
   /* 🎨 Modern Medical Design System - Optimized for Healthcare UX */
   
   /* Core semantic colors with WCAG AAA compliance */
-  --color-background: #FFFFFF;
+  --color-background: #F8FAFC; /* Soft light background to reduce glare */
   --color-foreground: #0F172A;
-  --color-card: #FFFFFF;
+  --color-card: #FFFFFF; /* Cards may remain white for contrast */
   --color-card-foreground: #0F172A;
   --color-border: #E2E8F0;
   --color-input: #F8FAFC;
   --color-primary: #10B981;
-  --color-primary-foreground: #FFFFFF;
+  --color-primary-foreground: #F0F4F8; /* Avoid pure white text */
   --color-secondary: #0EA5E9;
-  --color-secondary-foreground: #FFFFFF;
+  --color-secondary-foreground: #F0F4F8;
   --color-muted: #F1F5F9;
   --color-muted-foreground: #64748B;
   --color-accent: #8B5CF6;
@@ -28,7 +28,7 @@
   --gradient-primary: linear-gradient(135deg, #10B981 0%, #0EA5E9 100%);
   --gradient-secondary: linear-gradient(135deg, #0EA5E9 0%, #3B82F6 100%);
   --gradient-accent: linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%);
-  --gradient-surface: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
+  --gradient-surface: linear-gradient(180deg, #F9FAFB 0%, #F3F4F6 100%);
   --gradient-dark: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
   
   /* Professional Medical Color Palette */
