@@ -91,8 +91,8 @@ export function useSimpleWhisperHybrid({
           await loadWhisperModel({
             retryCount,
             retryDelay,
-            onProgress: (p) => setLoadProgress(p?.progress || 0),
           });
+          setLoadProgress(100); // Set to 100% when loaded
         }
       } else {
         // Direct main thread initialization
@@ -100,8 +100,8 @@ export function useSimpleWhisperHybrid({
         await loadWhisperModel({
           retryCount,
           retryDelay,
-          onProgress: (p) => setLoadProgress(p?.progress || 0),
         });
+        setLoadProgress(100); // Set to 100% when loaded
       }
 
       setEngineStatus('ready');
@@ -136,9 +136,19 @@ export function useSimpleWhisperHybrid({
       const analyser = audioContext.createAnalyser();
       const source = audioContext.createMediaStreamSource(stream);
 
-      analyser.fftSize = 2048; // Larger buffer for smoother readings
-      analyser.smoothingTimeConstant = 0.3; // Less smoothing for more responsive meter
+      analyser.fftSize = 256; // Smaller buffer for more responsive readings
+      analyser.smoothingTimeConstant = 0.8; // More smoothing
+      
+      // Connect the source to analyser and check connection
       source.connect(analyser);
+      
+      // Verify the audio is flowing
+      const testArray = new Uint8Array(analyser.frequencyBinCount);
+      analyser.getByteTimeDomainData(testArray);
+      console.log('[Hybrid] Initial audio test:', {
+        firstValues: Array.from(testArray.slice(0, 10)),
+        hasSignal: testArray.some(v => v !== 128)
+      });
       
       console.log('[Hybrid] Audio analyser configured:', {
         fftSize: analyser.fftSize,
@@ -163,24 +173,35 @@ export function useSimpleWhisperHybrid({
           }
 
           // Use time domain data for better audio level monitoring
-          analyser.getByteTimeDomainData(dataArray);
+          analyserRef.current.getByteTimeDomainData(dataArray);
           
           // Calculate RMS (Root Mean Square) for more accurate level
           let sum = 0;
+          let max = 0;
           for (let i = 0; i < dataArray.length; i++) {
             const normalized = (dataArray[i] - 128) / 128; // Normalize to -1 to 1
-            sum += normalized * normalized;
+            sum += Math.abs(normalized); // Use absolute value for better sensitivity
+            max = Math.max(max, Math.abs(normalized));
           }
-          const rms = Math.sqrt(sum / dataArray.length);
-          const level = Math.round(rms * 100); // Scale to 0-100
           
-          // Validate level is reasonable
-          if (level >= 0 && level <= 100) {
-            setAudioLevel(level);
-            // Log every 10th frame for debugging
-            if (Math.random() < 0.1) {
-              console.log('[Hybrid] Audio level:', level, 'RMS:', rms.toFixed(4));
-            }
+          // Average amplitude with amplification factor
+          const avgAmplitude = sum / dataArray.length;
+          const amplificationFactor = 5; // Amplify the signal for better visibility
+          const level = Math.min(100, Math.round(avgAmplitude * 100 * amplificationFactor));
+          
+          // Always update level for debugging
+          setAudioLevel(level);
+          
+          // Log every 10th frame for debugging
+          if (Math.random() < 0.1) {
+            console.log('[Hybrid] Audio monitoring:', {
+              level,
+              avgAmplitude: avgAmplitude.toFixed(4),
+              max: max.toFixed(4),
+              dataArraySample: [dataArray[0], dataArray[1], dataArray[2]],
+              analyserState: audioContextRef.current?.state,
+              recorderState: mediaRecorderRef.current?.state
+            });
           }
 
           animationFrameRef.current = requestAnimationFrame(updateLevel);
@@ -223,7 +244,7 @@ export function useSimpleWhisperHybrid({
       setupAudioMonitoring(stream);
 
       // Check supported audio formats and use the best available
-      const options = [];
+      const options: MediaRecorderOptions[] = [];
       if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
         options.push({ mimeType: 'audio/webm;codecs=opus' });
       } else if (MediaRecorder.isTypeSupported('audio/webm')) {
@@ -236,15 +257,15 @@ export function useSimpleWhisperHybrid({
       mediaRecorderRef.current = mediaRecorder;
 
       mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
+        if (event.data.size > 0 && audioChunksRef.current) {
           audioChunksRef.current.push(event.data);
         }
       };
 
       mediaRecorder.onstop = async () => {
-        console.log('[Hybrid] MediaRecorder stopped, processing audio chunks:', audioChunksRef.current.length);
+        console.log('[Hybrid] MediaRecorder stopped, processing audio chunks:', audioChunksRef.current?.length || 0);
         
-        if (audioChunksRef.current.length === 0) {
+        if (!audioChunksRef.current || audioChunksRef.current.length === 0) {
           console.error('[Hybrid] No audio chunks available');
           setError('No se pudo grabar el audio');
           return;
@@ -252,7 +273,7 @@ export function useSimpleWhisperHybrid({
 
         // Use the same mimeType as the recorder
         const mimeType = mediaRecorder.mimeType || 'audio/webm';
-        const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
+        const audioBlob = new Blob(audioChunksRef.current || [], { type: mimeType });
         
         console.log('[Hybrid] Created audio blob:', {
           size: audioBlob.size,
