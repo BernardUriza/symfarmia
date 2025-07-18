@@ -1,4 +1,49 @@
-export const mockMedicalReports = [
+// TypeScript interfaces for medical report data
+export interface Category {
+  id: number;
+  name: string;
+}
+
+export interface StudyType {
+  id: number;
+  name: string;
+  category: Category;
+}
+
+export interface Patient {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  dateOfBirth: string;
+  gender: string;
+}
+
+export interface Study {
+  id: number;
+  name: string;
+  result: string;
+  status: string;
+  type: StudyType;
+  date: string;
+  normalRange: string;
+  notes: string;
+}
+
+export interface MedicalReport {
+  id: number;
+  patientId: number;
+  patient: Patient;
+  date: string;
+  status: string;
+  diagnosis: string;
+  expirationDate: string;
+  studies: Study[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const mockMedicalReports: MedicalReport[] = [
   {
     id: 1,
     patientId: 1,
@@ -308,7 +353,7 @@ export const mockMedicalReports = [
   }
 ];
 
-export const mockStudyTypes = [
+export const mockStudyTypes: StudyType[] = [
   {
     id: 1,
     name: "Análisis de sangre",

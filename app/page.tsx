@@ -4,7 +4,11 @@ import LandingSkeleton from '../src/components/LandingSkeleton'
 
 export const dynamic = 'force-static'
 
-export default function HomePage({ searchParams }) {
+interface HomePageProps {
+  searchParams?: { demo?: string }
+}
+
+export default function HomePage({ searchParams }: HomePageProps) {
   const isDemo = searchParams?.demo === 'true'
   return (
     <Suspense fallback={<LandingSkeleton />}>

@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
 // Configuración requerida para Netlify
@@ -6,12 +6,19 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
+interface ConsultationAnalyticsBody {
+  sessionId: string;
+  event: string;
+  specialty?: string;
+  location?: string;
+  metadata?: Record<string, any>;
+}
 
 const prisma = new PrismaClient();
 
-export async function POST(request) {
+export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    const body: ConsultationAnalyticsBody = await request.json();
     
     const {
       sessionId,
@@ -66,14 +73,14 @@ export async function POST(request) {
   }
 }
 
-export async function GET(request) {
+export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const sessionId = searchParams.get('sessionId');
     const event = searchParams.get('event');
     const specialty = searchParams.get('specialty');
     
-    let whereClause = {};
+    let whereClause: Record<string, string> = {};
     
     if (sessionId) whereClause.sessionId = sessionId;
     if (event) whereClause.event = event;
@@ -88,7 +95,7 @@ export async function GET(request) {
     // Generate summary stats
     const totalEvents = analytics.length;
     const uniqueSessions = new Set(analytics.map(a => a.sessionId)).size;
-    const specialtyBreakdown = analytics.reduce((acc, item) => {
+    const specialtyBreakdown = analytics.reduce((acc: Record<string, number>, item) => {
       if (item.specialty) {
         acc[item.specialty] = (acc[item.specialty] || 0) + 1;
       }

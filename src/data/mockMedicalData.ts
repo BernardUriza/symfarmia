@@ -8,6 +8,114 @@
 import { subDays, format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
+// TypeScript interfaces
+export interface ConsultationType {
+  type: string;
+  weight: number;
+  duration: [number, number];
+  fee: [number, number];
+}
+
+export interface WeightedItem {
+  type: string | number;
+  weight: number;
+}
+
+export interface AutomationCurve {
+  week: number;
+  ratio: number;
+}
+
+export interface Consultation {
+  id: string;
+  date: string;
+  duration: number;
+  fee: number;
+  type: string;
+  patientId: string;
+  patientName: string;
+  condition: string;
+  status: string;
+}
+
+export interface Note {
+  id: string;
+  consultationId: string;
+  date: string;
+  isAutomatic: boolean;
+  length: number;
+  type: 'ai_generated' | 'manual';
+  content: string;
+  createdAt: string;
+  modifiedAt: string;
+}
+
+export interface ProductivityTrend {
+  week: string;
+  weekNumber: number;
+  consultationsPerDay: number;
+  automationRatio: number;
+  avgConsultationTime: number;
+  timeSavedHours: number;
+  additionalConsultations: number;
+  revenue: number;
+  efficiency: number;
+}
+
+export interface RevenueMetrics {
+  dailyRevenue: number;
+  monthlyRevenue: number;
+  yearlyRevenue: number;
+}
+
+export interface ImprovementMetrics {
+  dailyIncrease: number;
+  monthlyIncrease: number;
+  yearlyIncrease: number;
+  percentageIncrease: number;
+}
+
+export interface EconomicProjections {
+  current: RevenueMetrics;
+  withSystemOptimization: RevenueMetrics;
+  improvement: ImprovementMetrics;
+}
+
+export interface ComparisonMetrics {
+  avgConsultationTime: number;
+  automaticNotesRatio: number;
+  dailyPatientCount: number;
+  timeSavedHours: number;
+}
+
+export interface ComparisonData {
+  previousMonth: ComparisonMetrics;
+  previousWeek: ComparisonMetrics;
+}
+
+export interface DayMetrics {
+  consultations: Consultation[];
+  notes: Note[];
+  totalRevenue: number;
+  avgConsultationTime: number;
+  automationRatio: number;
+}
+
+export interface CompleteMockData {
+  consultations: Consultation[];
+  notes: Note[];
+  productivityTrend: ProductivityTrend[];
+  economicProjections: EconomicProjections;
+  comparisonData: ComparisonData;
+  generatedAt: string;
+  totalConsultations: number;
+  totalNotes: number;
+  dataRange: {
+    from?: string;
+    to?: string;
+  };
+}
+
 // 🏥 MEXICAN MEDICAL PRACTICE PATTERNS
 const MEXICAN_PRACTICE_PATTERNS = {
   PEAK_HOURS: [9, 10, 11, 16, 17, 18], // Common consultation hours
@@ -16,7 +124,7 @@ const MEXICAN_PRACTICE_PATTERNS = {
     { type: 'followup', weight: 30, duration: [8, 12], fee: [600, 900] },
     { type: 'urgent', weight: 15, duration: [15, 25], fee: [1200, 1800] },
     { type: 'specialist', weight: 5, duration: [20, 30], fee: [1500, 2500] }
-  ],
+  ] as ConsultationType[],
   PATIENT_NAMES: [
     'María González López', 'José Luis Martínez', 'Ana Patricia Hernández',
     'Carlos Eduardo Ramírez', 'Lucia Fernández Torres', 'Roberto Sánchez Díaz',
@@ -37,14 +145,14 @@ const MEXICAN_PRACTICE_PATTERNS = {
     { week: 2, ratio: 62 },
     { week: 3, ratio: 78 },
     { week: 4, ratio: 85 }
-  ]
+  ] as AutomationCurve[]
 };
 
 /**
  * Generate realistic consultation data
  */
-function generateConsultationData() {
-  const consultations = [];
+function generateConsultationData(): Consultation[] {
+  const consultations: Consultation[] = [];
   const now = new Date();
   
   // Generate 4 weeks of historical data
@@ -66,10 +174,11 @@ function generateConsultationData() {
       const fee = randomBetween(consultationType.fee[0], consultationType.fee[1]);
       
       // Generate consultation time during peak hours
-      const hour = selectWeightedRandom(MEXICAN_PRACTICE_PATTERNS.PEAK_HOURS.map(h => ({ type: h, weight: 1 })));
+      const hourWeightedItems = MEXICAN_PRACTICE_PATTERNS.PEAK_HOURS.map(h => ({ type: h, weight: 1 }));
+      const hour = selectWeightedRandom(hourWeightedItems);
       const minute = Math.floor(Math.random() * 60);
       const consultationDateTime = new Date(date);
-      consultationDateTime.setHours(hour.type || 10, minute, 0, 0);
+      consultationDateTime.setHours(typeof hour.type === 'number' ? hour.type : 10, minute, 0, 0);
       
       consultations.push({
         id: `consultation_${format(date, 'yyyy-MM-dd')}_${i}`,
@@ -85,19 +194,19 @@ function generateConsultationData() {
     }
   }
   
-  return consultations.sort((a, b) => new Date(b.date) - new Date(a.date));
+  return consultations.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 }
 
 /**
  * Generate realistic notes data with automation progression
  */
-function generateNotesData(consultations) {
-  const notes = [];
+function generateNotesData(consultations: Consultation[]): Note[] {
+  const notes: Note[] = [];
   const now = new Date();
   
   consultations.forEach(consultation => {
     const consultationDate = new Date(consultation.date);
-    const daysAgo = Math.floor((now - consultationDate) / (1000 * 60 * 60 * 24));
+    const daysAgo = Math.floor((now.getTime() - consultationDate.getTime()) / (1000 * 60 * 60 * 24));
     const weekAgo = Math.floor(daysAgo / 7);
     
     // Automation improves over time (learning curve)
@@ -127,7 +236,7 @@ function generateNotesData(consultations) {
 /**
  * Generate realistic note content
  */
-function generateNoteContent(consultation, isAutomatic) {
+function generateNoteContent(consultation: Consultation, isAutomatic: boolean): string {
   const condition = consultation.condition;
   const patientName = consultation.patientName;
   
@@ -154,8 +263,8 @@ Próxima cita programada.
 /**
  * Generate productivity metrics over time
  */
-function generateProductivityTrend() {
-  const trend = [];
+function generateProductivityTrend(): ProductivityTrend[] {
+  const trend: ProductivityTrend[] = [];
   const now = new Date();
   
   for (let week = 0; week < 4; week++) {
@@ -184,7 +293,7 @@ function generateProductivityTrend() {
 /**
  * Generate economic impact projections
  */
-function generateEconomicProjections() {
+function generateEconomicProjections(): EconomicProjections {
   const currentMetrics = {
     dailyConsultations: 28,
     avgConsultationFee: 1000,
@@ -215,7 +324,7 @@ function generateEconomicProjections() {
 /**
  * Generate comparison data for previous periods
  */
-function generateComparisonData() {
+function generateComparisonData(): ComparisonData {
   return {
     previousMonth: {
       avgConsultationTime: 18.7,
@@ -234,7 +343,7 @@ function generateComparisonData() {
 
 // 🛠️ UTILITY FUNCTIONS
 
-function selectWeightedRandom(items) {
+function selectWeightedRandom<T extends WeightedItem>(items: T[]): T {
   const totalWeight = items.reduce((sum, item) => sum + item.weight, 0);
   let random = Math.random() * totalWeight;
   
@@ -246,14 +355,14 @@ function selectWeightedRandom(items) {
   return items[0];
 }
 
-function randomBetween(min, max) {
+function randomBetween(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 /**
  * Generate complete mock dataset
  */
-export function generateCompleteMockData() {
+export function generateCompleteMockData(): CompleteMockData {
   const consultations = generateConsultationData();
   const notes = generateNotesData(consultations);
   const productivityTrend = generateProductivityTrend();
@@ -279,7 +388,7 @@ export function generateCompleteMockData() {
 /**
  * Get current day metrics
  */
-export function getCurrentDayMetrics() {
+export function getCurrentDayMetrics(): DayMetrics {
   const data = generateCompleteMockData();
   const today = format(new Date(), 'yyyy-MM-dd');
   
@@ -295,8 +404,12 @@ export function getCurrentDayMetrics() {
     consultations: todayConsultations,
     notes: todayNotes,
     totalRevenue: todayConsultations.reduce((sum, c) => sum + c.fee, 0),
-    avgConsultationTime: todayConsultations.reduce((sum, c) => sum + c.duration, 0) / todayConsultations.length,
-    automationRatio: Math.round((todayNotes.filter(n => n.isAutomatic).length / todayNotes.length) * 100)
+    avgConsultationTime: todayConsultations.length > 0 
+      ? todayConsultations.reduce((sum, c) => sum + c.duration, 0) / todayConsultations.length 
+      : 0,
+    automationRatio: todayNotes.length > 0 
+      ? Math.round((todayNotes.filter(n => n.isAutomatic).length / todayNotes.length) * 100)
+      : 0
   };
 }
 
