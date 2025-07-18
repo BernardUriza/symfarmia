@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { useMedicalTranslation } from '@/src/domains/medical-ai/hooks/useMedicalTranslation';
 import { useSimpleWhisperHybrid } from '@/src/domains/medical-ai/hooks/useSimpleWhisperHybrid';
 
@@ -87,6 +87,18 @@ const AudioProcessingTest: React.FC<AudioProcessingTestProps> = ({
   // These variables are not provided by the hook, so we'll set them to false/null for now
   const isRNNoiseActive = false;
   const processingStats = null;
+
+  // Update current chunk when transcription changes (real-time from Web Speech API)
+  useEffect(() => {
+    if (transcription && transcription.text) {
+      if (isRecording) {
+        // Update current chunk with real-time transcription during recording
+        const chunkNumber = 1; // Use chunk 1 for real-time transcription
+        handleChunkProcessed(transcription.text, chunkNumber);
+        handleChunkProgress(chunkNumber, 100); // Mark as processed
+      }
+    }
+  }, [transcription, isRecording, handleChunkProcessed, handleChunkProgress]);
 
   // Action handlers
   const {

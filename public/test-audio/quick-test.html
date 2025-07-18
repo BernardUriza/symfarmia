@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Quick Whisper Test</title>
+    <style>
+        body { font-family: Arial; padding: 20px; max-width: 800px; margin: 0 auto; }
+        .box { border: 1px solid #ccc; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        #output { background: #f5f5f5; padding: 10px; font-family: monospace; white-space: pre-wrap; }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+    </style>
+</head>
+<body>
+    <h1>Quick Whisper Test - sample.wav</h1>
+    
+    <div class="box">
+        <button onclick="testSampleWav()">🎵 Test sample.wav</button>
+        <button onclick="testWithWorker()">🔧 Test with Worker</button>
+        <button onclick="testDirect()">📡 Test Direct API</button>
+    </div>
+    
+    <div id="status"></div>
+    <div id="output" class="box"></div>
+
+    <script type="module">
+        let pipeline = null;
+        
+        function log(msg, type = 'info') {
+            const output = document.getElementById('output');
+            const time = new Date().toLocaleTimeString();
+            const className = type;
+            output.innerHTML += `<span class="${className}">[${time}] ${msg}</span>\n`;
+            output.scrollTop = output.scrollHeight;
+        }
+        
+        function setStatus(msg, type = 'info') {
+            document.getElementById('status').innerHTML = `<div class="box ${type}">${msg}</div>`;
+        }
+        
+        // Test sample.wav directly
+        window.testSampleWav = async function() {
+            try {
+                log('Starting test with sample.wav...', 'info');
+                setStatus('Loading Whisper model...', 'info');
+                
+                // Import and create pipeline
+                if (!pipeline) {
+                    const { pipeline: createPipeline } = await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2');
+                    
+                    pipeline = await createPipeline(
+                        'automatic-speech-recognition',
+                        'Xenova/whisper-base',
+                        {
+                            progress_callback: (progress) => {
+                                if (progress.status === 'progress') {
+                                    setStatus(`Loading model: ${Math.round(progress.progress)}%`, 'info');
+                                }
+                            }
+                        }
+                    );
+                    log('✅ Model loaded successfully', 'success');
+                }
+                
+                // Load sample.wav
+                setStatus('Loading sample.wav...', 'info');
+                const response = await fetch('/test-audio/sample.wav');
+                if (!response.ok) {
+                    throw new Error(`Failed to load sample.wav: ${response.status}`);
+                }
+                
+                const arrayBuffer = await response.arrayBuffer();
+                log(`Loaded audio: ${(arrayBuffer.byteLength / 1024).toFixed(2)} KB`, 'info');
+                
+                // Decode audio
+                const audioContext = new AudioContext();
+                const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+                const audioData = audioBuffer.getChannelData(0);
+                
+                log(`Audio decoded: ${audioBuffer.duration.toFixed(2)}s @ ${audioBuffer.sampleRate}Hz`, 'info');
+                
+                // Transcribe
+                setStatus('Transcribing...', 'info');
+                const startTime = performance.now();
+                
+                const result = await pipeline(audioData, {
+                    language: 'es',
+                    task: 'transcribe'
+                });
+                
+                const duration = ((performance.now() - startTime) / 1000).toFixed(2);
+                
+                setStatus(`✅ Transcription complete in ${duration}s`, 'success');
+                log(`\nTRANSCRIPTION:\n${result.text || '(empty)'}\n`, 'success');
+                
+            } catch (error) {
+                setStatus(`❌ Error: ${error.message}`, 'error');
+                log(`Error: ${error.stack}`, 'error');
+            }
+        };
+        
+        // Test with worker
+        window.testWithWorker = async function() {
+            try {
+                log('Testing with worker...', 'info');
+                
+                const worker = new Worker('/workers/audioProcessingWorker.js');
+                
+                worker.onmessage = (event) => {
+                    log(`Worker: ${JSON.stringify(event.data)}`, 'info');
+                    
+                    if (event.data.type === 'MODEL_READY') {
+                        loadAndProcessWithWorker(worker);
+                    }
+                };
+                
+                worker.onerror = (error) => {
+                    log(`Worker error: ${error}`, 'error');
+                };
+                
+                worker.postMessage({ type: 'INIT' });
+                
+            } catch (error) {
+                log(`Error: ${error.message}`, 'error');
+            }
+        };
+        
+        async function loadAndProcessWithWorker(worker) {
+            try {
+                // Load sample.wav
+                const response = await fetch('/test-audio/sample.wav');
+                const arrayBuffer = await response.arrayBuffer();
+                
+                // Decode audio
+                const audioContext = new AudioContext();
+                const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+                const audioData = audioBuffer.getChannelData(0);
+                
+                // Send to worker
+                worker.postMessage({
+                    type: 'PROCESS_CHUNK',
+                    data: {
+                        audioData: audioData,
+                        chunkId: Date.now(),
+                        metadata: {}
+                    }
+                });
+                
+            } catch (error) {
+                log(`Error processing with worker: ${error.message}`, 'error');
+            }
+        }
+        
+        // Test direct API
+        window.testDirect = async function() {
+            try {
+                log('Testing direct API...', 'info');
+                
+                // Try to use the audioProcessingService directly
+                const serviceModule = await import('/src/domains/medical-ai/services/audioProcessingService.js');
+                
+                await serviceModule.loadWhisperModel({
+                    onProgress: (p) => log(`Progress: ${p.progress}%`, 'info')
+                });
+                
+                // Load and process sample.wav
+                const response = await fetch('/test-audio/sample.wav');
+                const arrayBuffer = await response.arrayBuffer();
+                const audioContext = new AudioContext();
+                const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+                const audioData = audioBuffer.getChannelData(0);
+                
+                const result = await serviceModule.transcribeAudio(audioData, {
+                    language: 'es'
+                });
+                
+                log(`Result: ${result.text}`, 'success');
+                
+            } catch (error) {
+                log(`Direct API error: ${error.message}`, 'error');
+            }
+        };
+        
+        // Auto-start on load
+        window.addEventListener('load', () => {
+            log('Page loaded. Click a button to start testing.', 'info');
+            log('Make sure sample.wav is in /public/test-audio/', 'info');
+        });
+    </script>
+</body>
+</html>

@@ -32,12 +32,24 @@ export async function loadWhisperModel(options: LoadWhisperModelOptions = {}): P
         console.log(`🔄 [AudioProcessing] Loading Whisper model, attempt ${attempt}/${retryCount}`);
         const { pipeline } = await import('@xenova/transformers');
         
-        const model = await pipeline('automatic-speech-recognition', 'Xenova/whisper-tiny', {
-          progress_callback: onProgress,
+        // Try to load from CDN with explicit quantized model
+        const modelId = 'Xenova/whisper-tiny';
+        console.log(`🎯 [AudioProcessing] Loading model: ${modelId}`);
+        
+        const model = await pipeline('automatic-speech-recognition', modelId, {
+          progress_callback: (progress: any) => {
+            console.log(`📊 [AudioProcessing] Download progress:`, progress);
+            if (onProgress) onProgress(progress);
+          },
+          // Force use of remote models
+          local_files_only: false,
+          // Use quantized model for faster loading
+          quantized: true
         });
         
         whisperModel = model;
         console.log('✅ [AudioProcessing] Whisper model loaded successfully!');
+        console.log('🔍 [AudioProcessing] Model type:', typeof model, 'Model:', model);
         return model;
       } catch (err) {
         console.warn(`❌ [AudioProcessing] Attempt ${attempt} failed:`, err);
@@ -78,7 +90,26 @@ export async function transcribeAudio(
   console.log('⚙️ [AudioProcessing] Model options:', modelOptions);
   
   try {
-    const result = await whisperModel(float32Audio, modelOptions);
+    console.log('🔧 [AudioProcessing] Calling whisperModel with audio...');
+    console.log('🔍 [AudioProcessing] Model is:', whisperModel);
+    
+    // Check if model is a function
+    if (typeof whisperModel !== 'function') {
+      console.error('❌ [AudioProcessing] Model is not a function, cannot transcribe');
+      throw new Error('Whisper model not properly loaded');
+    }
+    
+    // Add timeout to prevent hanging
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Transcription timeout after 10s')), 10000)
+    );
+    
+    const result = await Promise.race([
+      whisperModel(float32Audio, modelOptions),
+      timeoutPromise
+    ]);
+    
+    console.log('📋 [AudioProcessing] Raw result from model:', result);
     
     // Handle both single output and array output
     let transcriptionResult: { text: string; [key: string]: any };
@@ -107,7 +138,12 @@ export async function transcribeAudio(
     return transcriptionResult;
   } catch (error) {
     console.error('💥 [AudioProcessing] Transcription failed:', error);
-    throw error;
+    // Return empty result instead of throwing
+    return {
+      text: '[Error: Could not transcribe audio]',
+      error: error instanceof Error ? error.message : 'Unknown error',
+      chunks: []
+    };
   }
 }
 

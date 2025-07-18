@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { loadWhisperModel, transcribeAudio } from '../services/audioProcessingService';
 import { extractMedicalTermsFromText } from '../utils/medicalTerms';
+import { webSpeechFallback } from '../services/webSpeechFallback';
 
 // Types
 interface UseSimpleWhisperHybridOptions {
@@ -47,6 +48,7 @@ export function useSimpleWhisperHybrid({
   const animationFrameRef = useRef<number | null>(null);
   const workerRef = useRef<Worker | null>(null);
   const isMonitoringRef = useRef<boolean>(false);
+  const realtimeTranscriptRef = useRef<string>('');
 
   // Initialize worker and fallback
   const initializeProcessing = useCallback(async () => {
@@ -158,17 +160,7 @@ export function useSimpleWhisperHybrid({
       // Connect the source to analyser and check connection
       source.connect(analyser);
       
-      // Wait a bit before testing to ensure audio is flowing
-      setTimeout(() => {
-        const testArray = new Uint8Array(analyser.frequencyBinCount);
-        analyser.getByteTimeDomainData(testArray);
-        console.log('[Hybrid] Initial audio test:', {
-          firstValues: Array.from(testArray.slice(0, 10)),
-          hasSignal: testArray.some(v => v !== 128),
-          stream: stream.active,
-          tracks: stream.getTracks().map(t => ({ enabled: t.enabled, readyState: t.readyState }))
-        });
-      }, 100);
+      // Removed initial audio test logs
       
       console.log('[Hybrid] Audio analyser configured:', {
         fftSize: analyser.fftSize,
@@ -181,17 +173,7 @@ export function useSimpleWhisperHybrid({
 
       const dataArray = new Uint8Array(analyser.frequencyBinCount);
 
-      let frameCount = 0;
       const updateLevel = () => {
-        frameCount++;
-        if (frameCount % 60 === 0) { // Log every 60 frames (~1 second)
-          console.log('[Hybrid] updateLevel running:', {
-            frame: frameCount,
-            recorderState: mediaRecorderRef.current?.state,
-            analyserExists: !!analyserRef.current,
-            contextState: audioContextRef.current?.state
-          });
-        }
         
         try {
           // Check if we should continue monitoring
@@ -232,21 +214,7 @@ export function useSimpleWhisperHybrid({
           // Always update level for debugging
           setAudioLevel(level);
           
-          // Log every 10th frame for debugging
-          if (Math.random() < 0.2) { // Increased frequency for debugging
-            console.log('[Hybrid] Audio monitoring:', {
-              level,
-              timeLevel,
-              freqLevel,
-              avgAmplitude: avgAmplitude.toFixed(4),
-              freqAvg: freqAvg.toFixed(2),
-              max: max.toFixed(4),
-              dataArraySample: [dataArray[0], dataArray[1], dataArray[2]],
-              freqSample: [freqArray[0], freqArray[1], freqArray[2]],
-              analyserState: audioContextRef.current?.state,
-              recorderState: mediaRecorderRef.current?.state
-            });
-          }
+          // Removed audio level debugging logs
 
           animationFrameRef.current = requestAnimationFrame(updateLevel);
         } catch (error) {
@@ -286,7 +254,16 @@ export function useSimpleWhisperHybrid({
       setAudioUrl('');
       setAudioBlob(new Blob());
       audioChunksRef.current = [];
+      realtimeTranscriptRef.current = ''; // Reset real-time transcript
 
+      // Check if mediaDevices is available
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        console.error('❌ [Hybrid] MediaDevices API not available');
+        setError('Tu navegador no soporta grabación de audio');
+        return false;
+      }
+
+      console.log('🎙️ [Hybrid] Requesting microphone permission...');
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
 
@@ -306,8 +283,17 @@ export function useSimpleWhisperHybrid({
       mediaRecorderRef.current = mediaRecorder;
 
       mediaRecorder.ondataavailable = (event) => {
+        console.log('🎬 [Hybrid] ondataavailable fired, data size:', event.data.size);
         if (event.data.size > 0 && audioChunksRef.current) {
           audioChunksRef.current.push(event.data);
+          console.log('📦 [Hybrid] Chunk added, total chunks:', audioChunksRef.current.length);
+          
+          // Check if we're getting actual audio data
+          if (audioChunksRef.current.length === 1) {
+            console.log('🎵 [Hybrid] First audio chunk received, MediaRecorder is working');
+          }
+        } else if (event.data.size === 0) {
+          console.warn('⚠️ [Hybrid] Received empty audio chunk');
         }
       };
 
@@ -343,8 +329,45 @@ export function useSimpleWhisperHybrid({
         await processTranscription(audioBlob);
       };
 
-      mediaRecorder.start();
+      // Start recording with timeslice to get chunks periodically
+      const timeslice = 1000; // Get chunks every 1 second
+      mediaRecorder.start(timeslice);
+      console.log('🔴 [Hybrid] MediaRecorder started with timeslice:', timeslice, 'ms');
       setIsRecording(true);
+      
+      // Start Web Speech API for real-time transcription
+      try {
+        console.log('🚀 [Hybrid] Starting Web Speech API for real-time transcription...');
+        webSpeechFallback.startLiveTranscription((text, isFinal) => {
+          console.log(`🗣️ [Hybrid] Web Speech event - Final: ${isFinal}, Text: "${text}"`);
+          
+          if (text) {
+            // Update transcription for both interim and final results
+            const currentText = isFinal 
+              ? realtimeTranscriptRef.current + text + ' '
+              : realtimeTranscriptRef.current + text;
+            
+            if (isFinal) {
+              realtimeTranscriptRef.current = currentText;
+            }
+            
+            console.log('🎤 [Hybrid] Updating transcription state with:', currentText);
+            
+            // Update transcription in real-time
+            setTranscription({
+              text: currentText,
+              confidence: isFinal ? 0.9 : 0.7,
+              medicalTerms: extractMedicalTermsFromText(currentText).map(t => t.term),
+              processingTime: 0,
+              timestamp: Date.now(),
+              chunks: []
+            });
+          }
+        });
+        console.log('✅ [Hybrid] Web Speech API started successfully');
+      } catch (err) {
+        console.error('❌ [Hybrid] Web Speech API fallback failed:', err);
+      }
 
       // Start timer
       const startTime = Date.now();
@@ -365,6 +388,13 @@ export function useSimpleWhisperHybrid({
     
     // Stop monitoring
     isMonitoringRef.current = false;
+    
+    // Stop Web Speech API
+    try {
+      webSpeechFallback.stop();
+    } catch (err) {
+      console.warn('⚠️ [Hybrid] Error stopping Web Speech API:', err);
+    }
     
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
       mediaRecorderRef.current.stop();
@@ -407,14 +437,29 @@ export function useSimpleWhisperHybrid({
   const processTranscription = async (audioBlob: Blob) => {
     try {
       setStatus('processing');
-      console.log(`[Hybrid] Processing transcription using ${processingMode} mode`);
+      
+      // If we already have text from Web Speech API, use it
+      if (realtimeTranscriptRef.current) {
+        console.log('✅ [Hybrid] Using Web Speech API transcription');
+        const medicalTerms = extractMedicalTermsFromText(realtimeTranscriptRef.current).map(t => t.term);
+        setTranscription({
+          text: realtimeTranscriptRef.current,
+          confidence: 0.9,
+          medicalTerms,
+          processingTime: 0,
+          timestamp: Date.now(),
+          chunks: []
+        });
+        setStatus('completed');
+        return;
+      }
 
+      // Only try Whisper if Web Speech API didn't capture anything
+      console.log(`[Hybrid] No Web Speech text, trying ${processingMode} mode`);
       if (processingMode === 'worker' && workerRef.current) {
-        // Use worker for processing
         const result = await processWithWorker(audioBlob);
         setTranscription(result);
       } else {
-        // Use main thread for processing
         const result = await processWithMainThread(audioBlob);
         setTranscription(result);
       }
@@ -465,23 +510,54 @@ export function useSimpleWhisperHybrid({
   };
 
   const processWithMainThread = async (audioBlob: Blob): Promise<Transcription> => {
+    console.log('🎯 [Hybrid] Starting processWithMainThread...');
+    console.log('📊 [Hybrid] Audio blob size:', audioBlob.size, 'type:', audioBlob.type);
+    
     // Convert blob to Float32Array
     const arrayBuffer = await audioBlob.arrayBuffer();
+    console.log('📦 [Hybrid] ArrayBuffer size:', arrayBuffer.byteLength);
+    
     const audioContext = new AudioContext();
     const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-    const float32Audio = audioBuffer.getChannelData(0);
-
-    // Transcribe using main thread
-    const result = await transcribeAudio(float32Audio, {
-      language: 'es',
-      task: 'transcribe'
+    console.log('🎵 [Hybrid] Audio buffer:', {
+      duration: audioBuffer.duration,
+      sampleRate: audioBuffer.sampleRate,
+      numberOfChannels: audioBuffer.numberOfChannels,
+      length: audioBuffer.length
     });
+    
+    const float32Audio = audioBuffer.getChannelData(0);
+    console.log('🔊 [Hybrid] Float32Array length:', float32Audio.length);
+    
+    // Check if audio has actual content
+    const hasContent = float32Audio.some(sample => Math.abs(sample) > 0.01);
+    console.log('🎤 [Hybrid] Audio has content:', hasContent);
+    
+    // Transcribe using main thread
+    console.log('🚀 [Hybrid] Calling transcribeAudio...');
+    let result;
+    try {
+      result = await transcribeAudio(float32Audio, {
+        language: 'es',
+        task: 'transcribe'
+      });
+    } catch (error) {
+      console.error('❌ [Hybrid] Whisper transcription failed:', error);
+      // Don't use mock - rely on Web Speech API that already captured the text
+      result = {
+        text: realtimeTranscriptRef.current || '',
+        error: 'Using Web Speech API'
+      };
+    }
+    
+    console.log('✅ [Hybrid] Transcription result:', result);
 
     // Extract medical terms
     const medicalTerms = extractMedicalTermsFromText(result.text).map(t => t.term);
+    console.log('🏥 [Hybrid] Medical terms found:', medicalTerms);
 
     return {
-      text: result.text,
+      text: result.text || '[Sin transcripción]',
       confidence: 0.85,
       medicalTerms,
       processingTime: 0,
@@ -494,6 +570,7 @@ export function useSimpleWhisperHybrid({
     setTranscription(null);
     setStatus('idle');
     setError('');
+    realtimeTranscriptRef.current = '';
     if (audioUrl) {
       URL.revokeObjectURL(audioUrl);
     }

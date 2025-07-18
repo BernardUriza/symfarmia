@@ -59,34 +59,9 @@ async function loadTransformers() {
 }
 
 async function loadLocalTransformers() {
-  try {
-    // Create a simple mock implementation for testing
-    console.log('[Worker] Creating fallback Transformers implementation...');
-    
-    self.Transformers = {
-      pipeline: async (task, model, options) => {
-        console.log(`[Worker] Mock pipeline created for ${task} with model ${model}`);
-        return async (audioData, processingOptions) => {
-          console.log(`[Worker] Mock processing audio data with length ${audioData.length}`);
-          // Simulate processing delay
-          await new Promise(resolve => setTimeout(resolve, 100));
-          return { text: `Mock transcription of ${audioData.length} samples` };
-        };
-      },
-      env: {
-        allowLocalModels: true,
-        localURL: '/models/',
-        backends: { onnx: { wasm: { proxy: false } } }
-      }
-    };
-    
-    createPipeline = self.Transformers.pipeline;
-    console.log('[Worker] Fallback Transformers implementation created');
-    return true;
-  } catch (error) {
-    console.error('[Worker] Failed to create fallback:', error);
-    return false;
-  }
+  // No fallback - if we can't load real Transformers, we fail
+  console.error('[Worker] Cannot load Transformers.js - no local fallback available');
+  return false;
 }
 
 async function initializeModel() {
