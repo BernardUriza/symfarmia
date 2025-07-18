@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   AlertDialog,
   AlertDialogContent,
@@ -6,7 +6,7 @@ import {
   AlertDialogFooter,
   AlertDialogAction,
   AlertDialogCancel,
-} from "../../ui/alert-dialog";
+} from '../../ui/alert-dialog';
 
 export default function ConfirmAlert({ confirmation }) {
   const { text, onConfirm, onCancel } = confirmation || {};
@@ -18,12 +18,8 @@ export default function ConfirmAlert({ confirmation }) {
           {text}
         </AlertDialogDescription>
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={onCancel}>
-            Cancelar
-          </AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm}>
-            Confirmar
-          </AlertDialogAction>
+          <AlertDialogCancel onClick={onCancel}>Cancelar</AlertDialogCancel>
+          <AlertDialogAction onClick={onConfirm}>Confirmar</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

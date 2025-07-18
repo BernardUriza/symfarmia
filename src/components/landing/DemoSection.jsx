@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import React, { useState } from 'react';
 import { useTranslation } from '../../providers/I18nProvider';
 import { motion } from 'framer-motion';
@@ -61,35 +61,48 @@ export default function DemoSection() {
             <h3 className="text-2xl font-bold text-gray-900 mb-6">
               ¿Qué verás en el demo?
             </h3>
-            
+
             <div className="space-y-4">
               <div className="flex items-start">
                 <div className="bg-blue-500 rounded-full p-1 mr-3 mt-1">
                   <div className="w-2 h-2 bg-white rounded-full"></div>
                 </div>
                 <div>
-                  <h4 className="font-medium text-gray-900">{t('demo.start_medical_demo')}</h4>
-                  <p className="text-gray-600">{t('demo.experience_ai_doctor')}</p>
+                  <h4 className="font-medium text-gray-900">
+                    {t('demo.start_medical_demo')}
+                  </h4>
+                  <p className="text-gray-600">
+                    {t('demo.experience_ai_doctor')}
+                  </p>
                 </div>
               </div>
-              
+
               <div className="flex items-start">
                 <div className="bg-blue-500 rounded-full p-1 mr-3 mt-1">
                   <div className="w-2 h-2 bg-white rounded-full"></div>
                 </div>
                 <div>
-                  <h4 className="font-medium text-gray-900">Asistencia Diagnóstica</h4>
-                  <p className="text-gray-600">IA que sugiere diagnósticos diferenciales basados en síntomas</p>
+                  <h4 className="font-medium text-gray-900">
+                    Asistencia Diagnóstica
+                  </h4>
+                  <p className="text-gray-600">
+                    IA que sugiere diagnósticos diferenciales basados en
+                    síntomas
+                  </p>
                 </div>
               </div>
-              
+
               <div className="flex items-start">
                 <div className="bg-blue-500 rounded-full p-1 mr-3 mt-1">
                   <div className="w-2 h-2 bg-white rounded-full"></div>
                 </div>
                 <div>
-                  <h4 className="font-medium text-gray-900">Generación de Reportes</h4>
-                  <p className="text-gray-600">Crea automáticamente reportes médicos profesionales</p>
+                  <h4 className="font-medium text-gray-900">
+                    Generación de Reportes
+                  </h4>
+                  <p className="text-gray-600">
+                    Crea automáticamente reportes médicos profesionales
+                  </p>
                 </div>
               </div>
             </div>
@@ -101,7 +114,7 @@ export default function DemoSection() {
               >
                 {t('demo.start_medical_demo')}
               </Link>
-              
+
               <Link
                 href="/dashboard"
                 className="block w-full border border-blue-600 text-blue-600 text-center px-6 py-3 rounded-md hover:bg-blue-50 transition-colors"
@@ -123,12 +136,12 @@ export default function DemoSection() {
             <div className="text-3xl font-bold text-blue-600">2 min</div>
             <p className="text-gray-600">Tiempo promedio de consulta</p>
           </div>
-          
+
           <div className="text-center">
             <div className="text-3xl font-bold text-blue-600">95%</div>
             <p className="text-gray-600">Precisión diagnóstica</p>
           </div>
-          
+
           <div className="text-center">
             <div className="text-3xl font-bold text-blue-600">40%</div>
             <p className="text-gray-600">Reducción de tiempo</p>

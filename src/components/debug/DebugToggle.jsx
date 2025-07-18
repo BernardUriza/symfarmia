@@ -7,7 +7,9 @@ import React, { useState, useEffect } from 'react';
 import ProductionLogger from '../../utils/logger/ProductionLogger';
 
 const DebugToggle = () => {
-  const [isDebugEnabled, setIsDebugEnabled] = useState(ProductionLogger.debugEnabled);
+  const [isDebugEnabled, setIsDebugEnabled] = useState(
+    ProductionLogger.debugEnabled,
+  );
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -19,7 +21,7 @@ const DebugToggle = () => {
     // Listen for keyboard shortcut (Ctrl+Shift+D)
     const handleKeyDown = (event) => {
       if (event.ctrlKey && event.shiftKey && event.key === 'D') {
-        setIsVisible(prev => !prev);
+        setIsVisible((prev) => !prev);
       }
     };
 
@@ -31,7 +33,7 @@ const DebugToggle = () => {
     const newState = !isDebugEnabled;
     setIsDebugEnabled(newState);
     ProductionLogger.setDebugEnabled(newState);
-    
+
     // Log the state change
     if (newState) {
       ProductionLogger.debug('Debug logging enabled');
@@ -71,7 +73,7 @@ const DebugToggle = () => {
             ×
           </button>
         </div>
-        
+
         <div className="space-y-3">
           {/* Debug Toggle */}
           <div className="flex items-center justify-between">
@@ -106,7 +108,9 @@ const DebugToggle = () => {
               Reset
             </button>
             <button
-              onClick={() => console.log('[SYMFARMIA] Debug Config:', getLogConfig())}
+              onClick={() =>
+                console.log('[SYMFARMIA] Debug Config:', getLogConfig())
+              }
               className="text-xs bg-gray-700 hover:bg-gray-600 px-2 py-1 rounded transition-colors"
             >
               Log Config
@@ -159,7 +163,9 @@ export const withDebugToggle = (Component) => {
 
 // Hook for components that need debug state
 export const useDebugToggle = () => {
-  const [isDebugEnabled, setIsDebugEnabled] = useState(ProductionLogger.debugEnabled);
+  const [isDebugEnabled, setIsDebugEnabled] = useState(
+    ProductionLogger.debugEnabled,
+  );
 
   useEffect(() => {
     // Update state when debug mode changes
@@ -186,6 +192,6 @@ export const useDebugToggle = () => {
     disableDebug: () => {
       ProductionLogger.setDebugEnabled(false);
       setIsDebugEnabled(false);
-    }
+    },
   };
 };

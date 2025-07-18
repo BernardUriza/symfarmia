@@ -1,11 +1,11 @@
-import React from "react";
+import React from 'react';
 import {
   AlertDialog,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogAction,
-} from "../../ui/alert-dialog";
+} from '../../ui/alert-dialog';
 
 export function SimpleAlert({ open, onClose, text }) {
   return (
@@ -15,9 +15,7 @@ export function SimpleAlert({ open, onClose, text }) {
           {text}
         </AlertDialogDescription>
         <AlertDialogFooter>
-          <AlertDialogAction onClick={onClose}>
-            OK
-          </AlertDialogAction>
+          <AlertDialogAction onClick={onClose}>OK</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

@@ -1,100 +1,100 @@
-"use client";
+'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  Search, 
-  Filter, 
-  AlertTriangle, 
-  User, 
+import {
+  Search,
+  Filter,
+  AlertTriangle,
+  User,
   Calendar,
   Phone,
   Mail,
-  X
+  X,
 } from 'lucide-react';
 
 // Mock patient data - replace with actual API call
 const mockPatients = [
-    {
-      id: 'P001',
-      name: 'María González',
-      age: 35,
-      phone: '555-0123',
-      email: 'maria.gonzalez@email.com',
-      urgency: 'high',
-      status: 'active',
-      lastVisit: '2024-01-10',
-      condition: 'Hipertensión',
-      nextAppointment: '2024-01-15'
-    },
-    {
-      id: 'P002',
-      name: 'Carlos Rodríguez',
-      age: 42,
-      phone: '555-0456',
-      email: 'carlos.rodriguez@email.com',
-      urgency: 'medium',
-      status: 'active',
-      lastVisit: '2024-01-08',
-      condition: 'Diabetes Tipo 2',
-      nextAppointment: null
-    },
-    {
-      id: 'P003',
-      name: 'Ana Martínez',
-      age: 28,
-      phone: '555-0789',
-      email: 'ana.martinez@email.com',
-      urgency: 'low',
-      status: 'pending',
-      lastVisit: '2024-01-05',
-      condition: 'Control Rutinario',
-      nextAppointment: '2024-01-20'
-    },
-    {
-      id: 'P004',
-      name: 'José López',
-      age: 65,
-      phone: '555-0321',
-      email: 'jose.lopez@email.com',
-      urgency: 'high',
-      status: 'critical',
-      lastVisit: '2024-01-12',
-      condition: 'Cardiopatía',
-      nextAppointment: 'Urgente'
-    },
-    {
-      id: 'P005',
-      name: 'Laura Sánchez',
-      age: 31,
-      phone: '555-0654',
-      email: 'laura.sanchez@email.com',
-      urgency: 'medium',
-      status: 'active',
-      lastVisit: '2024-01-09',
-      condition: 'Embarazo',
-      nextAppointment: '2024-01-16'
-    }
+  {
+    id: 'P001',
+    name: 'María González',
+    age: 35,
+    phone: '555-0123',
+    email: 'maria.gonzalez@email.com',
+    urgency: 'high',
+    status: 'active',
+    lastVisit: '2024-01-10',
+    condition: 'Hipertensión',
+    nextAppointment: '2024-01-15',
+  },
+  {
+    id: 'P002',
+    name: 'Carlos Rodríguez',
+    age: 42,
+    phone: '555-0456',
+    email: 'carlos.rodriguez@email.com',
+    urgency: 'medium',
+    status: 'active',
+    lastVisit: '2024-01-08',
+    condition: 'Diabetes Tipo 2',
+    nextAppointment: null,
+  },
+  {
+    id: 'P003',
+    name: 'Ana Martínez',
+    age: 28,
+    phone: '555-0789',
+    email: 'ana.martinez@email.com',
+    urgency: 'low',
+    status: 'pending',
+    lastVisit: '2024-01-05',
+    condition: 'Control Rutinario',
+    nextAppointment: '2024-01-20',
+  },
+  {
+    id: 'P004',
+    name: 'José López',
+    age: 65,
+    phone: '555-0321',
+    email: 'jose.lopez@email.com',
+    urgency: 'high',
+    status: 'critical',
+    lastVisit: '2024-01-12',
+    condition: 'Cardiopatía',
+    nextAppointment: 'Urgente',
+  },
+  {
+    id: 'P005',
+    name: 'Laura Sánchez',
+    age: 31,
+    phone: '555-0654',
+    email: 'laura.sanchez@email.com',
+    urgency: 'medium',
+    status: 'active',
+    lastVisit: '2024-01-09',
+    condition: 'Embarazo',
+    nextAppointment: '2024-01-16',
+  },
 ];
 
 const urgencyLabels = {
   all: 'Todas las Urgencias',
   high: 'Alta Prioridad',
   medium: 'Prioridad Media',
-  low: 'Baja Prioridad'
+  low: 'Baja Prioridad',
 };
 
 const statusLabels = {
   all: 'Todos los Estados',
   active: 'Activo',
   pending: 'Pendiente',
-  critical: 'Crítico'
+  critical: 'Crítico',
 };
 
 const lastVisitLabels = {
   all: 'Cualquier Fecha',
   today: 'Hoy',
   week: 'Esta Semana',
-  month: 'Este Mes'
+  month: 'Este Mes',
 };
 
 const PatientQuickSearch = ({ onPatientSelect }) => {
@@ -104,7 +104,7 @@ const PatientQuickSearch = ({ onPatientSelect }) => {
   const [selectedFilters, setSelectedFilters] = useState({
     urgency: 'all',
     status: 'all',
-    lastVisit: 'all'
+    lastVisit: 'all',
   });
   const [showFilters, setShowFilters] = useState(false);
   const [showResults, setShowResults] = useState(false);
@@ -112,26 +112,33 @@ const PatientQuickSearch = ({ onPatientSelect }) => {
 
   useEffect(() => {
     const performSearch = (term) => {
-      let filtered = mockPatients.filter(patient => 
-        patient.name.toLowerCase().includes(term.toLowerCase()) ||
-        patient.id.toLowerCase().includes(term.toLowerCase()) ||
-        patient.phone.includes(term) ||
-        patient.condition.toLowerCase().includes(term.toLowerCase())
+      let filtered = mockPatients.filter(
+        (patient) =>
+          patient.name.toLowerCase().includes(term.toLowerCase()) ||
+          patient.id.toLowerCase().includes(term.toLowerCase()) ||
+          patient.phone.includes(term) ||
+          patient.condition.toLowerCase().includes(term.toLowerCase()),
       );
 
       // Apply filters
       if (selectedFilters.urgency !== 'all') {
-        filtered = filtered.filter(patient => patient.urgency === selectedFilters.urgency);
+        filtered = filtered.filter(
+          (patient) => patient.urgency === selectedFilters.urgency,
+        );
       }
       if (selectedFilters.status !== 'all') {
-        filtered = filtered.filter(patient => patient.status === selectedFilters.status);
+        filtered = filtered.filter(
+          (patient) => patient.status === selectedFilters.status,
+        );
       }
       if (selectedFilters.lastVisit !== 'all') {
         const today = new Date();
-        filtered = filtered.filter(patient => {
+        filtered = filtered.filter((patient) => {
           const visitDate = new Date(patient.lastVisit);
-          const daysDiff = Math.floor((today - visitDate) / (1000 * 60 * 60 * 24));
-          
+          const daysDiff = Math.floor(
+            (today - visitDate) / (1000 * 60 * 60 * 24),
+          );
+
           switch (selectedFilters.lastVisit) {
             case 'today':
               return daysDiff === 0;
@@ -162,15 +169,14 @@ const PatientQuickSearch = ({ onPatientSelect }) => {
     }
   }, [searchTerm, selectedFilters]);
 
-
   const handlePatientSelect = (patient) => {
     // Prevent double-clicks
     if (searchResults.length === 0) return;
-    
+
     // Clear results immediately to prevent re-selection
     setSearchResults([]);
     setShowResults(false);
-    
+
     // Call parent handler
     onPatientSelect(patient);
     setSearchTerm(patient.name);
@@ -210,7 +216,7 @@ const PatientQuickSearch = ({ onPatientSelect }) => {
   };
 
   const PatientCard = ({ patient }) => (
-    <div 
+    <div
       className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
       onClick={() => handlePatientSelect(patient)}
     >
@@ -227,15 +233,19 @@ const PatientQuickSearch = ({ onPatientSelect }) => {
           </div>
         </div>
         <div className="flex items-center space-x-2">
-          <span className={`px-2 py-1 text-xs rounded-full border ${getUrgencyColor(patient.urgency)}`}>
+          <span
+            className={`px-2 py-1 text-xs rounded-full border ${getUrgencyColor(patient.urgency)}`}
+          >
             {urgencyLabels[patient.urgency]}
           </span>
-          <span className={`px-2 py-1 text-xs rounded-full border ${getStatusColor(patient.status)}`}>
+          <span
+            className={`px-2 py-1 text-xs rounded-full border ${getStatusColor(patient.status)}`}
+          >
             {statusLabels[patient.status]}
           </span>
         </div>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
         <div className="flex items-center space-x-2 text-gray-600">
           <Phone className="h-4 w-4" />
@@ -243,7 +253,9 @@ const PatientQuickSearch = ({ onPatientSelect }) => {
         </div>
         <div className="flex items-center space-x-2 text-gray-600">
           <Calendar className="h-4 w-4" />
-          <span>Última visita: {new Date(patient.lastVisit).toLocaleDateString()}</span>
+          <span>
+            Última visita: {new Date(patient.lastVisit).toLocaleDateString()}
+          </span>
         </div>
         <div className="flex items-center space-x-2 text-gray-600">
           <Mail className="h-4 w-4" />
@@ -254,13 +266,16 @@ const PatientQuickSearch = ({ onPatientSelect }) => {
           <span>{patient.condition}</span>
         </div>
       </div>
-      
+
       {patient.nextAppointment && (
         <div className="mt-3 p-2 bg-blue-50 rounded border border-blue-200">
           <div className="flex items-center space-x-2 text-sm text-blue-700">
             <Calendar className="h-4 w-4" />
             <span>
-              Próxima cita: {patient.nextAppointment === 'Urgente' ? 'Urgente' : new Date(patient.nextAppointment).toLocaleDateString()}
+              Próxima cita:{' '}
+              {patient.nextAppointment === 'Urgente'
+                ? 'Urgente'
+                : new Date(patient.nextAppointment).toLocaleDateString()}
             </span>
           </div>
         </div>
@@ -314,8 +329,10 @@ const PatientQuickSearch = ({ onPatientSelect }) => {
       {/* Filters */}
       {showFilters && (
         <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-          <h4 className="font-medium text-gray-900 mb-3">Filtros de Búsqueda</h4>
-          
+          <h4 className="font-medium text-gray-900 mb-3">
+            Filtros de Búsqueda
+          </h4>
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -323,41 +340,62 @@ const PatientQuickSearch = ({ onPatientSelect }) => {
               </label>
               <select
                 value={selectedFilters.urgency}
-                onChange={(e) => setSelectedFilters(prev => ({ ...prev, urgency: e.target.value }))}
+                onChange={(e) =>
+                  setSelectedFilters((prev) => ({
+                    ...prev,
+                    urgency: e.target.value,
+                  }))
+                }
                 className="w-full p-2 border border-gray-300 rounded bg-white text-gray-900 text-sm"
               >
                 {Object.entries(urgencyLabels).map(([key, label]) => (
-                  <option key={key} value={key}>{label}</option>
+                  <option key={key} value={key}>
+                    {label}
+                  </option>
                 ))}
               </select>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Estado
               </label>
               <select
                 value={selectedFilters.status}
-                onChange={(e) => setSelectedFilters(prev => ({ ...prev, status: e.target.value }))}
+                onChange={(e) =>
+                  setSelectedFilters((prev) => ({
+                    ...prev,
+                    status: e.target.value,
+                  }))
+                }
                 className="w-full p-2 border border-gray-300 rounded bg-white text-gray-900 text-sm"
               >
                 {Object.entries(statusLabels).map(([key, label]) => (
-                  <option key={key} value={key}>{label}</option>
+                  <option key={key} value={key}>
+                    {label}
+                  </option>
                 ))}
               </select>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Última Visita
               </label>
               <select
                 value={selectedFilters.lastVisit}
-                onChange={(e) => setSelectedFilters(prev => ({ ...prev, lastVisit: e.target.value }))}
+                onChange={(e) =>
+                  setSelectedFilters((prev) => ({
+                    ...prev,
+                    lastVisit: e.target.value,
+                  }))
+                }
                 className="w-full p-2 border border-gray-300 rounded bg-white text-gray-900 text-sm"
               >
                 {Object.entries(lastVisitLabels).map(([key, label]) => (
-                  <option key={key} value={key}>{label}</option>
+                  <option key={key} value={key}>
+                    {label}
+                  </option>
                 ))}
               </select>
             </div>
@@ -369,9 +407,11 @@ const PatientQuickSearch = ({ onPatientSelect }) => {
       {showResults && (
         <div className="mt-4 max-h-96 overflow-y-auto">
           <div className="mb-2 text-sm text-gray-600">
-            {searchResults.length} resultado{searchResults.length !== 1 ? 's' : ''} encontrado{searchResults.length !== 1 ? 's' : ''}
+            {searchResults.length} resultado
+            {searchResults.length !== 1 ? 's' : ''} encontrado
+            {searchResults.length !== 1 ? 's' : ''}
           </div>
-          
+
           <div className="space-y-3">
             {searchResults.map((patient) => (
               <PatientCard key={patient.id} patient={patient} />
@@ -385,7 +425,9 @@ const PatientQuickSearch = ({ onPatientSelect }) => {
         <div className="mt-4 p-4 text-center text-gray-500">
           <Search className="h-12 w-12 mx-auto mb-2 opacity-50" />
           <p>No se encontraron pacientes con "{searchTerm}"</p>
-          <p className="text-sm mt-1">Intenta ajustar los filtros o crear un nuevo paciente</p>
+          <p className="text-sm mt-1">
+            Intenta ajustar los filtros o crear un nuevo paciente
+          </p>
         </div>
       )}
     </div>

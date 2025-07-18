@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import React from 'react';
 import { motion } from 'framer-motion';
 
@@ -17,38 +17,47 @@ export default function AboutSection() {
                 Sobre SYMFARMIA
               </h2>
               <p className="mt-4 text-lg text-gray-600">
-                Revolucionamos la medicina con inteligencia artificial avanzada, 
-                mejorando la precisión diagnóstica y optimizando el tiempo de consulta.
+                Revolucionamos la medicina con inteligencia artificial avanzada,
+                mejorando la precisión diagnóstica y optimizando el tiempo de
+                consulta.
               </p>
-              
+
               <div className="mt-8 space-y-6">
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900">Nuestra Misión</h3>
+                  <h3 className="text-xl font-bold text-gray-900">
+                    Nuestra Misión
+                  </h3>
                   <p className="mt-2 text-gray-600">
-                    Empoderar a los profesionales de la salud con tecnología de vanguardia 
-                    para brindar atención médica más precisa y eficiente.
+                    Empoderar a los profesionales de la salud con tecnología de
+                    vanguardia para brindar atención médica más precisa y
+                    eficiente.
                   </p>
                 </div>
-                
+
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900">Nuestra Visión</h3>
+                  <h3 className="text-xl font-bold text-gray-900">
+                    Nuestra Visión
+                  </h3>
                   <p className="mt-2 text-gray-600">
-                    Ser la plataforma líder mundial en asistencia médica inteligente, 
-                    transformando la manera en que se practica la medicina.
+                    Ser la plataforma líder mundial en asistencia médica
+                    inteligente, transformando la manera en que se practica la
+                    medicina.
                   </p>
                 </div>
-                
+
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900">Nuestros Valores</h3>
+                  <h3 className="text-xl font-bold text-gray-900">
+                    Nuestros Valores
+                  </h3>
                   <p className="mt-2 text-gray-600">
-                    Precisión, innovación, confidencialidad y compromiso con la excelencia 
-                    en el cuidado de la salud.
+                    Precisión, innovación, confidencialidad y compromiso con la
+                    excelencia en el cuidado de la salud.
                   </p>
                 </div>
               </div>
             </motion.div>
           </div>
-          
+
           <div className="mt-8 lg:mt-0">
             <motion.div
               initial={{ opacity: 0, x: 20 }}

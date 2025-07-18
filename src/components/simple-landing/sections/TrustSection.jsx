@@ -1,11 +1,11 @@
 import React from 'react';
 import { Heading, Text } from '../atoms/Typography';
 import FeatureCard from '../molecules/FeatureCard';
-import { 
-  ShieldCheckIcon, 
-  LockClosedIcon, 
-  ServerIcon, 
-  HeartIcon 
+import {
+  ShieldCheckIcon,
+  LockClosedIcon,
+  ServerIcon,
+  HeartIcon,
 } from '@heroicons/react/24/outline';
 
 const TrustSection = ({ t }) => {
@@ -14,26 +14,26 @@ const TrustSection = ({ t }) => {
       icon: LockClosedIcon,
       title: t('military_encryption'),
       description: t('military_encryption_desc'),
-      iconColor: 'text-teal-500'
+      iconColor: 'text-teal-500',
     },
     {
       icon: ShieldCheckIcon,
       title: t('cofepris_compliance'),
       description: t('cofepris_compliance_desc'),
-      iconColor: 'text-blue-500'
+      iconColor: 'text-blue-500',
     },
     {
       icon: ServerIcon,
       title: t('mexican_servers'),
       description: t('mexican_servers_desc'),
-      iconColor: 'text-green-500'
+      iconColor: 'text-green-500',
     },
     {
       icon: HeartIcon,
       title: t('trust_promise'),
       description: t('trust_promise_desc'),
-      iconColor: 'text-pink-500'
-    }
+      iconColor: 'text-pink-500',
+    },
   ];
 
   return (
@@ -47,14 +47,14 @@ const TrustSection = ({ t }) => {
               {t('sanctuary_title')}
             </Heading>
           </div>
-          
+
           <Text size="xl" color="light" className="mb-4 max-w-2xl mx-auto">
             {t('sanctuary_subtitle')}
           </Text>
-          
+
           <div className="w-24 h-1 bg-gradient-to-r from-teal-400 to-blue-400 mx-auto"></div>
         </div>
-        
+
         {/* Trust Features */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
           {trustFeatures.map((feature, index) => (
@@ -68,7 +68,7 @@ const TrustSection = ({ t }) => {
             />
           ))}
         </div>
-        
+
         {/* Trust Promise */}
         <div className="text-center">
           <div className="inline-flex items-center bg-teal-500/20 backdrop-blur-sm px-8 py-4 rounded-full border border-teal-400/30">

@@ -1,46 +1,49 @@
 import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  ShieldCheckIcon, 
-  LockClosedIcon, 
-  ServerIcon, 
-  HeartIcon 
+import {
+  ShieldCheckIcon,
+  LockClosedIcon,
+  ServerIcon,
+  HeartIcon,
 } from '@heroicons/react/24/outline';
 import ParticleField from './ParticleField';
 import SectionCard from './SectionCard';
 import { PARTICLE_CONFIGS, ANIMATION_DELAYS } from './constants/animations';
 
 const TrustSection = React.memo(({ t }) => {
-  const trustFeatures = useMemo(() => [
-    {
-      icon: LockClosedIcon,
-      title: t('military_encryption'),
-      description: t('military_encryption_desc'),
-      color: 'from-teal-400 to-blue-500',
-      delay: ANIMATION_DELAYS.SHORT
-    },
-    {
-      icon: ShieldCheckIcon,
-      title: t('cofepris_compliance'),
-      description: t('cofepris_compliance_desc'),
-      color: 'from-blue-400 to-indigo-500',
-      delay: ANIMATION_DELAYS.MEDIUM
-    },
-    {
-      icon: ServerIcon,
-      title: t('mexican_servers'),
-      description: t('mexican_servers_desc'),
-      color: 'from-green-400 to-teal-500',
-      delay: 0.6
-    },
-    {
-      icon: HeartIcon,
-      title: t('trust_promise'),
-      description: t('trust_promise_desc'),
-      color: 'from-pink-400 to-red-500',
-      delay: 0.8
-    }
-  ], [t]);
+  const trustFeatures = useMemo(
+    () => [
+      {
+        icon: LockClosedIcon,
+        title: t('military_encryption'),
+        description: t('military_encryption_desc'),
+        color: 'from-teal-400 to-blue-500',
+        delay: ANIMATION_DELAYS.SHORT,
+      },
+      {
+        icon: ShieldCheckIcon,
+        title: t('cofepris_compliance'),
+        description: t('cofepris_compliance_desc'),
+        color: 'from-blue-400 to-indigo-500',
+        delay: ANIMATION_DELAYS.MEDIUM,
+      },
+      {
+        icon: ServerIcon,
+        title: t('mexican_servers'),
+        description: t('mexican_servers_desc'),
+        color: 'from-green-400 to-teal-500',
+        delay: 0.6,
+      },
+      {
+        icon: HeartIcon,
+        title: t('trust_promise'),
+        description: t('trust_promise_desc'),
+        color: 'from-pink-400 to-red-500',
+        delay: 0.8,
+      },
+    ],
+    [t],
+  );
 
   return (
     <section className="relative min-h-screen flex items-center justify-center py-20 overflow-hidden">
@@ -49,15 +52,15 @@ const TrustSection = React.memo(({ t }) => {
         <div className="absolute inset-0 bg-gradient-to-t from-teal-900/30 via-transparent to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-900/20 to-transparent" />
       </div>
-      
+
       {/* Protective Light Emanation */}
       <div className="absolute inset-0 bg-gradient-radial from-teal-500/10 via-transparent to-transparent opacity-60" />
-      
+
       {/* Security Particles */}
       <motion.div className="absolute inset-0">
         <ParticleField {...PARTICLE_CONFIGS.LOW} />
       </motion.div>
-      
+
       <div className="relative z-10 max-w-6xl mx-auto px-4">
         <motion.div
           className="text-center mb-16"
@@ -75,7 +78,7 @@ const TrustSection = React.memo(({ t }) => {
           </p>
           <div className="w-24 h-1 bg-gradient-to-r from-teal-400 to-blue-400 mx-auto" />
         </motion.div>
-        
+
         {/* Security Features Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
           {trustFeatures.map((feature, index) => (
@@ -89,7 +92,7 @@ const TrustSection = React.memo(({ t }) => {
             />
           ))}
         </div>
-        
+
         {/* Trust Restoration Promise */}
         <motion.div
           className="text-center"

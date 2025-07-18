@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'react';
 
 const LandingSkeleton = () => {
   return (
@@ -9,7 +9,7 @@ const LandingSkeleton = () => {
         <div className="h-10 w-40 bg-gray-300 rounded mx-auto" />
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default LandingSkeleton
+export default LandingSkeleton;

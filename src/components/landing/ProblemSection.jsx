@@ -1,41 +1,44 @@
 import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  ExclamationTriangleIcon, 
-  ClockIcon, 
-  CurrencyDollarIcon, 
-  UserGroupIcon 
+import {
+  ExclamationTriangleIcon,
+  ClockIcon,
+  CurrencyDollarIcon,
+  UserGroupIcon,
 } from '@heroicons/react/24/outline';
 import ParticleField from './ParticleField';
 import SectionCard from './SectionCard';
 
 const ProblemSection = React.memo(({ t }) => {
-  const problemData = useMemo(() => [
-    {
-      icon: ClockIcon,
-      stat: t('medical_time_lost'),
-      color: 'from-red-500 to-orange-500',
-      delay: 0.2
-    },
-    {
-      icon: ExclamationTriangleIcon,
-      stat: t('burnout_rate'),
-      color: 'from-orange-500 to-yellow-500',
-      delay: 0.4
-    },
-    {
-      icon: CurrencyDollarIcon,
-      stat: t('annual_inefficiency'),
-      color: 'from-yellow-500 to-red-500',
-      delay: 0.6
-    },
-    {
-      icon: UserGroupIcon,
-      stat: t('human_contact_crisis'),
-      color: 'from-red-500 to-pink-500',
-      delay: 0.8
-    }
-  ], [t]);
+  const problemData = useMemo(
+    () => [
+      {
+        icon: ClockIcon,
+        stat: t('medical_time_lost'),
+        color: 'from-red-500 to-orange-500',
+        delay: 0.2,
+      },
+      {
+        icon: ExclamationTriangleIcon,
+        stat: t('burnout_rate'),
+        color: 'from-orange-500 to-yellow-500',
+        delay: 0.4,
+      },
+      {
+        icon: CurrencyDollarIcon,
+        stat: t('annual_inefficiency'),
+        color: 'from-yellow-500 to-red-500',
+        delay: 0.6,
+      },
+      {
+        icon: UserGroupIcon,
+        stat: t('human_contact_crisis'),
+        color: 'from-red-500 to-pink-500',
+        delay: 0.8,
+      },
+    ],
+    [t],
+  );
 
   return (
     <section className="relative min-h-screen flex items-center justify-center py-20 overflow-hidden">
@@ -43,12 +46,12 @@ const ProblemSection = React.memo(({ t }) => {
       <div className="absolute inset-0 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-700">
         <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-teal-900/20 to-transparent" />
       </div>
-      
+
       {/* Healing Particles */}
       <motion.div className="absolute inset-0">
         <ParticleField count={10} />
       </motion.div>
-      
+
       <div className="relative z-10 max-w-6xl mx-auto px-4">
         <motion.div
           className="text-center mb-16"
@@ -63,7 +66,7 @@ const ProblemSection = React.memo(({ t }) => {
           </h2>
           <div className="w-24 h-1 bg-gradient-to-r from-red-500 to-orange-500 mx-auto" />
         </motion.div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {problemData.map((item, index) => (
             <SectionCard
@@ -76,7 +79,7 @@ const ProblemSection = React.memo(({ t }) => {
             />
           ))}
         </div>
-        
+
         {/* Transition to Hope */}
         <motion.div
           className="text-center mt-16"

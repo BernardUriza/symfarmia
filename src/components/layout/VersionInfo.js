@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useState, useEffect } from 'react';
 
@@ -21,7 +21,7 @@ const VersionInfo = () => {
             gitHash: 'unknown',
             gitBranch: process.env.NODE_ENV || 'development',
             buildDate: new Date().toISOString(),
-            buildTimestamp: Date.now()
+            buildTimestamp: Date.now(),
           });
         }
       } catch (error) {
@@ -32,7 +32,7 @@ const VersionInfo = () => {
           gitHash: 'unknown',
           gitBranch: 'development',
           buildDate: new Date().toISOString(),
-          buildTimestamp: Date.now()
+          buildTimestamp: Date.now(),
         });
       }
     };
@@ -50,7 +50,7 @@ const VersionInfo = () => {
         month: '2-digit',
         day: '2-digit',
         hour: '2-digit',
-        minute: '2-digit'
+        minute: '2-digit',
       });
     } catch {
       return 'Fecha desconocida';
@@ -79,9 +79,10 @@ const VersionInfo = () => {
         className="version-info-trigger text-xs text-gray-500 hover:text-gray-700 transition-colors cursor-pointer select-none"
         title="Click para ver detalles de versión"
       >
-        v{versionInfo.version} • {versionInfo.gitHash} • {formatDate(versionInfo.buildDate)}
+        v{versionInfo.version} • {versionInfo.gitHash} •{' '}
+        {formatDate(versionInfo.buildDate)}
       </button>
-      
+
       {isExpanded && (
         <div className="version-info-details absolute bottom-full left-0 mb-2 p-3 bg-white border border-gray-200 rounded-lg shadow-lg text-xs z-50 min-w-64">
           <div className="space-y-2">
@@ -91,21 +92,31 @@ const VersionInfo = () => {
             </div>
             <div className="flex justify-between">
               <span className="font-medium text-gray-700">Git Hash:</span>
-              <span className="font-mono text-gray-900">{versionInfo.gitHash}</span>
+              <span className="font-mono text-gray-900">
+                {versionInfo.gitHash}
+              </span>
             </div>
             <div className="flex justify-between">
               <span className="font-medium text-gray-700">Rama:</span>
-              <span className={`font-medium ${getEnvironmentColor(versionInfo.gitBranch)}`}>
+              <span
+                className={`font-medium ${getEnvironmentColor(versionInfo.gitBranch)}`}
+              >
                 {versionInfo.gitBranch}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="font-medium text-gray-700">Última actualización:</span>
-              <span className="text-gray-900">{formatDate(versionInfo.gitDate || versionInfo.buildDate)}</span>
+              <span className="font-medium text-gray-700">
+                Última actualización:
+              </span>
+              <span className="text-gray-900">
+                {formatDate(versionInfo.gitDate || versionInfo.buildDate)}
+              </span>
             </div>
             <div className="flex justify-between">
               <span className="font-medium text-gray-700">Build:</span>
-              <span className="text-gray-900">{formatDate(versionInfo.buildDate)}</span>
+              <span className="text-gray-900">
+                {formatDate(versionInfo.buildDate)}
+              </span>
             </div>
             <div className="border-t pt-2 mt-2 text-center">
               <span className="text-gray-500">SYMFARMIA Medical System</span>

@@ -1,8 +1,8 @@
-"use client";
+'use client';
 /**
  * MEDICAL-GRADE HYDRATION SAFE WRAPPER
  * ====================================
- * 
+ *
  * 🏥 MEDICAL SOFTWARE RELIABILITY STANDARD
  * 🛡️ BULLETPROOF HYDRATION ERROR PREVENTION
  * ⚡ AUTOMATIC ERROR RECOVERY SYSTEM
@@ -13,18 +13,18 @@ import { useMedicalHydrationSafe } from '../../src/hooks/useMedicalHydrationSafe
 
 /**
  * MEDICAL-GRADE HYDRATION SAFE WRAPPER
- * 
+ *
  * Wraps critical medical components to prevent hydration errors
  * Uses the existing useMedicalHydrationSafe hook for maximum reliability
  */
-function HydrationSafeWrapper({ 
-  children, 
+function HydrationSafeWrapper({
+  children,
   fallback = null,
-  componentName = "HydrationSafeWrapper",
-  className = "",
+  componentName = 'HydrationSafeWrapper',
+  className = '',
   style = {},
   criticalComponent = false,
-  showLoadingState = false 
+  showLoadingState = false,
 }) {
   const { renderWhenSafe } = useMedicalHydrationSafe(componentName);
 
@@ -34,31 +34,31 @@ function HydrationSafeWrapper({
       <div className="flex items-center justify-center py-8">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         <span className="ml-3 text-gray-600">
-          {criticalComponent ? "Inicializando componente crítico..." : "Cargando componente..."}
+          {criticalComponent
+            ? 'Inicializando componente crítico...'
+            : 'Cargando componente...'}
         </span>
       </div>
     </div>
-  ) : fallback;
+  ) : (
+    fallback
+  );
 
   return renderWhenSafe(
     <div className={className} style={style}>
       {children}
     </div>,
-    loadingFallback
+    loadingFallback,
   );
 }
 
 /**
  * MEDICAL DASHBOARD SAFE WRAPPER
- * 
+ *
  * Specifically designed for dashboard components
  */
-function MedicalDashboardSafeWrapper({ 
-  children, 
-  className = "",
-  style = {} 
-}) {
-  const { renderWhenSafe } = useMedicalHydrationSafe("MedicalDashboard");
+function MedicalDashboardSafeWrapper({ children, className = '', style = {} }) {
+  const { renderWhenSafe } = useMedicalHydrationSafe('MedicalDashboard');
 
   const dashboardFallback = (
     <div className={`medical-dashboard-loading ${className}`} style={style}>
@@ -77,21 +77,21 @@ function MedicalDashboardSafeWrapper({
     <div className={className} style={style}>
       {children}
     </div>,
-    dashboardFallback
+    dashboardFallback,
   );
 }
 
 /**
  * MEDICAL TRANSCRIPTION SAFE WRAPPER
- * 
+ *
  * Specifically designed for transcription components
  */
-function MedicalTranscriptionSafeWrapper({ 
-  children, 
-  className = "",
-  style = {} 
+function MedicalTranscriptionSafeWrapper({
+  children,
+  className = '',
+  style = {},
 }) {
-  const { renderWhenSafe } = useMedicalHydrationSafe("MedicalTranscription");
+  const { renderWhenSafe } = useMedicalHydrationSafe('MedicalTranscription');
 
   const transcriptionFallback = (
     <div className={`medical-transcription-loading ${className}`} style={style}>
@@ -108,21 +108,21 @@ function MedicalTranscriptionSafeWrapper({
     <div className={className} style={style}>
       {children}
     </div>,
-    transcriptionFallback
+    transcriptionFallback,
   );
 }
 
 /**
  * MEDICAL PATIENT DATA SAFE WRAPPER
- * 
+ *
  * Specifically designed for patient data components
  */
-function MedicalPatientDataSafeWrapper({ 
-  children, 
-  className = "",
-  style = {} 
+function MedicalPatientDataSafeWrapper({
+  children,
+  className = '',
+  style = {},
 }) {
-  const { renderWhenSafe } = useMedicalHydrationSafe("MedicalPatientData");
+  const { renderWhenSafe } = useMedicalHydrationSafe('MedicalPatientData');
 
   const patientDataFallback = (
     <div className={`medical-patient-data-loading ${className}`} style={style}>
@@ -144,20 +144,20 @@ function MedicalPatientDataSafeWrapper({
     <div className={className} style={style}>
       {children}
     </div>,
-    patientDataFallback
+    patientDataFallback,
   );
 }
 
 /**
  * MEDICAL FORM SAFE WRAPPER
- * 
+ *
  * Specifically designed for medical forms with validation
  */
-function MedicalFormSafeWrapper({ 
-  children, 
-  formName = "Medical Form",
-  className = "",
-  style = {} 
+function MedicalFormSafeWrapper({
+  children,
+  formName = 'Medical Form',
+  className = '',
+  style = {},
 }) {
   const { renderWhenSafe } = useMedicalHydrationSafe(`MedicalForm-${formName}`);
 
@@ -179,22 +179,24 @@ function MedicalFormSafeWrapper({
     <div className={className} style={style}>
       {children}
     </div>,
-    formFallback
+    formFallback,
   );
 }
 
 /**
  * MEDICAL CHART SAFE WRAPPER
- * 
+ *
  * Specifically designed for medical charts and graphs
  */
-function MedicalChartSafeWrapper({ 
-  children, 
-  chartTitle = "Medical Chart",
-  className = "",
-  style = {} 
+function MedicalChartSafeWrapper({
+  children,
+  chartTitle = 'Medical Chart',
+  className = '',
+  style = {},
 }) {
-  const { renderWhenSafe } = useMedicalHydrationSafe(`MedicalChart-${chartTitle}`);
+  const { renderWhenSafe } = useMedicalHydrationSafe(
+    `MedicalChart-${chartTitle}`,
+  );
 
   const chartFallback = (
     <div className={`medical-chart-loading ${className}`} style={style}>
@@ -209,15 +211,15 @@ function MedicalChartSafeWrapper({
     <div className={className} style={style}>
       {children}
     </div>,
-    chartFallback
+    chartFallback,
   );
 }
 
 export default HydrationSafeWrapper;
-export { 
+export {
   MedicalDashboardSafeWrapper,
   MedicalTranscriptionSafeWrapper,
   MedicalPatientDataSafeWrapper,
   MedicalFormSafeWrapper,
-  MedicalChartSafeWrapper
+  MedicalChartSafeWrapper,
 };

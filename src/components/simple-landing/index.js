@@ -7,7 +7,7 @@ export { default as AnimatedWrapper } from './atoms/AnimatedWrapper';
 export { default as SafeParticles } from './atoms/SafeParticles';
 export { default as ProgressiveAnimation } from './atoms/ProgressiveAnimation';
 
-// Molecular components  
+// Molecular components
 export { default as FeatureCard } from './molecules/FeatureCard';
 export { default as StatCard } from './molecules/StatCard';
 export { default as TestimonialCard } from './molecules/TestimonialCard';
@@ -24,6 +24,11 @@ export { default as ContactSection } from './sections/ContactSection';
 export { default as Footer } from './sections/Footer';
 
 // Hooks and utilities
-export { useAnimations, useMouseTracking, useScrollTransforms, useInViewAnimation } from './hooks/useAnimations';
+export {
+  useAnimations,
+  useMouseTracking,
+  useScrollTransforms,
+  useInViewAnimation,
+} from './hooks/useAnimations';
 export { useAnimationErrorBoundary } from './hooks/useAnimationErrorBoundary';
 export * from './utils/animations';

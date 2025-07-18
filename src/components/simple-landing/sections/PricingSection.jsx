@@ -1,7 +1,10 @@
 import React from 'react';
 import { Heading, Text } from '../atoms/Typography';
 import PricingCard from '../molecules/PricingCard';
-import { CurrencyDollarIcon, ShieldCheckIcon } from '@heroicons/react/24/outline';
+import {
+  CurrencyDollarIcon,
+  ShieldCheckIcon,
+} from '@heroicons/react/24/outline';
 
 const PricingSection = ({ t }) => {
   const plans = [
@@ -13,10 +16,10 @@ const PricingSection = ({ t }) => {
         t('feature_5_consultations'),
         t('feature_basic_transcription'),
         t('feature_email_support'),
-        t('feature_basic_reports')
+        t('feature_basic_reports'),
       ],
       ctaText: t('start_free'),
-      popular: false
+      popular: false,
     },
     {
       name: t('plan_professional'),
@@ -29,10 +32,10 @@ const PricingSection = ({ t }) => {
         t('feature_priority_support'),
         t('feature_advanced_analytics'),
         t('feature_pdf_merger'),
-        t('feature_custom_templates')
+        t('feature_custom_templates'),
       ],
       ctaText: t('transform_now'),
-      popular: true
+      popular: true,
     },
     {
       name: t('plan_clinic'),
@@ -44,11 +47,11 @@ const PricingSection = ({ t }) => {
         t('feature_dedicated_support'),
         t('feature_custom_integration'),
         t('feature_training_included'),
-        t('feature_white_label')
+        t('feature_white_label'),
       ],
       ctaText: t('contact_sales'),
-      popular: false
-    }
+      popular: false,
+    },
   ];
 
   return (
@@ -62,14 +65,14 @@ const PricingSection = ({ t }) => {
               {t('transformation_plans')}
             </Heading>
           </div>
-          
+
           <Text size="xl" color="light" className="mb-4">
             {t('choose_transformation_level')}
           </Text>
-          
+
           <div className="w-24 h-1 bg-gradient-to-r from-teal-400 to-blue-400 mx-auto"></div>
         </div>
-        
+
         {/* Pricing Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
           {plans.map((plan, index) => (
@@ -85,7 +88,7 @@ const PricingSection = ({ t }) => {
             />
           ))}
         </div>
-        
+
         {/* Money Back Guarantee */}
         <div className="text-center">
           <div className="inline-flex items-center bg-teal-500/20 backdrop-blur-sm px-8 py-4 rounded-full border border-teal-400/30">

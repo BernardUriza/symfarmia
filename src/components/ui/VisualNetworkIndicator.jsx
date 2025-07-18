@@ -1,21 +1,21 @@
 /**
  * Visual Network Indicator
- * 
+ *
  * Shows doctors current transcription mode with clear status indicators
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { 
-  WifiIcon, 
-  CloudIcon, 
-  ComputerDesktopIcon, 
+import {
+  WifiIcon,
+  CloudIcon,
+  ComputerDesktopIcon,
   ExclamationTriangleIcon,
   CheckCircleIcon,
   XCircleIcon,
   SignalIcon,
   BoltIcon,
-  ArrowPathIcon
+  ArrowPathIcon,
 } from '@heroicons/react/24/outline';
 
 const VisualNetworkIndicator = ({
@@ -24,7 +24,7 @@ const VisualNetworkIndicator = ({
   medicalTranscriptionResilience,
   className = '',
   showDetails = true,
-  compact = false
+  compact = false,
 }) => {
   const [networkStatus, setNetworkStatus] = useState({
     isOnline: true,
@@ -33,7 +33,7 @@ const VisualNetworkIndicator = ({
     effectiveType: 'unknown',
     downlink: 0,
     rtt: 0,
-    medicalGrade: false
+    medicalGrade: false,
   });
 
   const [transcriptionMode, setTranscriptionMode] = useState('online');
@@ -41,14 +41,14 @@ const VisualNetworkIndicator = ({
     overallQuality: 0,
     networkLatency: 0,
     transcriptionAccuracy: 0,
-    audioQuality: 0
+    audioQuality: 0,
   });
 
   const [resilienceStatus, setResilienceStatus] = useState({
     isActive: false,
     continuity: 'maintained',
     emergencyMode: false,
-    mode: 'online'
+    mode: 'online',
   });
 
   const [isRecovering, setIsRecovering] = useState(false);
@@ -56,7 +56,11 @@ const VisualNetworkIndicator = ({
 
   // Initialize and setup listeners
   useEffect(() => {
-    if (!networkStatusDetector || !transcriptionQualityMonitor || !medicalTranscriptionResilience) {
+    if (
+      !networkStatusDetector ||
+      !transcriptionQualityMonitor ||
+      !medicalTranscriptionResilience
+    ) {
       return;
     }
 
@@ -66,11 +70,25 @@ const VisualNetworkIndicator = ({
     setResilienceStatus(medicalTranscriptionResilience.getCurrentStatus());
 
     // Setup listeners
-    const unsubscribeNetwork = networkStatusDetector.onStatusChange(handleNetworkStatusChange);
-    const unsubscribeQuality = transcriptionQualityMonitor.onEvent('qualityUpdated', handleQualityUpdate);
-    const unsubscribeMode = medicalTranscriptionResilience.onEvent('modeTransitionCompleted', handleModeTransition);
-    const unsubscribeRecovery = medicalTranscriptionResilience.onEvent('recoveryStarted', handleRecoveryStarted);
-    const unsubscribeRecoveryComplete = medicalTranscriptionResilience.onEvent('recoveryCompleted', handleRecoveryCompleted);
+    const unsubscribeNetwork = networkStatusDetector.onStatusChange(
+      handleNetworkStatusChange,
+    );
+    const unsubscribeQuality = transcriptionQualityMonitor.onEvent(
+      'qualityUpdated',
+      handleQualityUpdate,
+    );
+    const unsubscribeMode = medicalTranscriptionResilience.onEvent(
+      'modeTransitionCompleted',
+      handleModeTransition,
+    );
+    const unsubscribeRecovery = medicalTranscriptionResilience.onEvent(
+      'recoveryStarted',
+      handleRecoveryStarted,
+    );
+    const unsubscribeRecoveryComplete = medicalTranscriptionResilience.onEvent(
+      'recoveryCompleted',
+      handleRecoveryCompleted,
+    );
 
     return () => {
       unsubscribeNetwork?.();
@@ -79,7 +97,11 @@ const VisualNetworkIndicator = ({
       unsubscribeRecovery?.();
       unsubscribeRecoveryComplete?.();
     };
-  }, [networkStatusDetector, transcriptionQualityMonitor, medicalTranscriptionResilience]);
+  }, [
+    networkStatusDetector,
+    transcriptionQualityMonitor,
+    medicalTranscriptionResilience,
+  ]);
 
   const handleNetworkStatusChange = useCallback((status) => {
     setNetworkStatus(status);
@@ -109,13 +131,18 @@ const VisualNetworkIndicator = ({
     if (!networkStatus.isOnline) return 'text-red-500';
     if (resilienceStatus.emergencyMode) return 'text-red-600';
     if (isRecovering) return 'text-yellow-500';
-    
+
     switch (networkStatus.quality) {
-      case 'excellent': return 'text-green-500';
-      case 'good': return 'text-green-400';
-      case 'fair': return 'text-yellow-400';
-      case 'poor': return 'text-orange-500';
-      default: return 'text-gray-400';
+      case 'excellent':
+        return 'text-green-500';
+      case 'good':
+        return 'text-green-400';
+      case 'fair':
+        return 'text-yellow-400';
+      case 'poor':
+        return 'text-orange-500';
+      default:
+        return 'text-gray-400';
     }
   }, [networkStatus, resilienceStatus.emergencyMode, isRecovering]);
 
@@ -131,10 +158,12 @@ const VisualNetworkIndicator = ({
       case 'offline':
         return <ComputerDesktopIcon className="h-5 w-5" />;
       case 'hybrid':
-        return <div className="relative">
-          <CloudIcon className="h-5 w-5" />
-          <ComputerDesktopIcon className="h-3 w-3 absolute -bottom-1 -right-1" />
-        </div>;
+        return (
+          <div className="relative">
+            <CloudIcon className="h-5 w-5" />
+            <ComputerDesktopIcon className="h-3 w-3 absolute -bottom-1 -right-1" />
+          </div>
+        );
       case 'emergency':
         return <ExclamationTriangleIcon className="h-5 w-5" />;
       default:
@@ -149,25 +178,29 @@ const VisualNetworkIndicator = ({
     }
 
     const qualityIcons = {
-      'excellent': <CheckCircleIcon className="h-4 w-4 text-green-500" />,
-      'good': <CheckCircleIcon className="h-4 w-4 text-green-400" />,
-      'fair': <ExclamationTriangleIcon className="h-4 w-4 text-yellow-400" />,
-      'poor': <XCircleIcon className="h-4 w-4 text-orange-500" />
+      excellent: <CheckCircleIcon className="h-4 w-4 text-green-500" />,
+      good: <CheckCircleIcon className="h-4 w-4 text-green-400" />,
+      fair: <ExclamationTriangleIcon className="h-4 w-4 text-yellow-400" />,
+      poor: <XCircleIcon className="h-4 w-4 text-orange-500" />,
     };
 
-    return qualityIcons[networkStatus.quality] || <SignalIcon className="h-4 w-4 text-gray-400" />;
+    return (
+      qualityIcons[networkStatus.quality] || (
+        <SignalIcon className="h-4 w-4 text-gray-400" />
+      )
+    );
   }, [networkStatus]);
 
   // Get signal strength bars
   const getSignalStrength = useCallback(() => {
     if (!networkStatus.isOnline) return 0;
-    
+
     const qualityValues = {
-      'excellent': 5,
-      'good': 4,
-      'fair': 3,
-      'poor': 2,
-      'offline': 0
+      excellent: 5,
+      good: 4,
+      fair: 3,
+      poor: 2,
+      offline: 0,
     };
 
     return qualityValues[networkStatus.quality] || 1;
@@ -189,12 +222,12 @@ const VisualNetworkIndicator = ({
   // Get mode description
   const getModeDescription = useCallback(() => {
     if (isRecovering) return 'Recovering connection...';
-    
+
     const descriptions = {
-      'online': 'Cloud transcription active',
-      'offline': 'Local transcription active',
-      'hybrid': 'Hybrid mode - cloud with local backup',
-      'emergency': 'Emergency mode - maximum resilience'
+      online: 'Cloud transcription active',
+      offline: 'Local transcription active',
+      hybrid: 'Hybrid mode - cloud with local backup',
+      emergency: 'Emergency mode - maximum resilience',
     };
 
     return descriptions[transcriptionMode] || 'Transcription mode unknown';
@@ -206,7 +239,9 @@ const VisualNetworkIndicator = ({
       return (
         <div className="flex items-center space-x-1">
           <BoltIcon className="h-4 w-4 text-blue-500" />
-          <span className="text-xs font-medium text-blue-600">Medical Grade</span>
+          <span className="text-xs font-medium text-blue-600">
+            Medical Grade
+          </span>
         </div>
       );
     }
@@ -220,7 +255,8 @@ const VisualNetworkIndicator = ({
         <div className={`flex items-center space-x-1 ${getStatusColor()}`}>
           {getModeIcon()}
           <span className="text-sm font-medium">
-            {transcriptionMode.charAt(0).toUpperCase() + transcriptionMode.slice(1)}
+            {transcriptionMode.charAt(0).toUpperCase() +
+              transcriptionMode.slice(1)}
           </span>
         </div>
         {getNetworkQualityIndicator()}
@@ -231,20 +267,18 @@ const VisualNetworkIndicator = ({
 
   // Full view
   return (
-    <div className={`bg-white rounded-lg shadow-sm border border-gray-200 p-4 ${className}`}>
+    <div
+      className={`bg-white rounded-lg shadow-sm border border-gray-200 p-4 ${className}`}
+    >
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center space-x-2">
-          <div className={getStatusColor()}>
-            {getModeIcon()}
-          </div>
+          <div className={getStatusColor()}>{getModeIcon()}</div>
           <div>
             <h3 className="text-sm font-medium text-gray-900">
               Transcription Status
             </h3>
-            <p className="text-xs text-gray-500">
-              {getModeDescription()}
-            </p>
+            <p className="text-xs text-gray-500">{getModeDescription()}</p>
           </div>
         </div>
         {getMedicalGradeIndicator()}
@@ -301,7 +335,9 @@ const VisualNetworkIndicator = ({
           <div>
             <div className="text-xs text-gray-500">Latency</div>
             <div className="text-sm font-medium">
-              {formatLatency(networkStatus.rtt || qualityMetrics.networkLatency)}
+              {formatLatency(
+                networkStatus.rtt || qualityMetrics.networkLatency,
+              )}
             </div>
           </div>
           <div>
@@ -328,11 +364,10 @@ const VisualNetworkIndicator = ({
       {/* Connection Type */}
       <div className="flex items-center justify-between text-xs text-gray-500">
         <span>
-          Connection: {networkStatus.connectionType} ({networkStatus.effectiveType})
+          Connection: {networkStatus.connectionType} (
+          {networkStatus.effectiveType})
         </span>
-        <span>
-          Updated: {lastUpdate.toLocaleTimeString()}
-        </span>
+        <span>Updated: {lastUpdate.toLocaleTimeString()}</span>
       </div>
 
       {/* Emergency Mode Banner */}
@@ -396,7 +431,7 @@ VisualNetworkIndicator.propTypes = {
   medicalTranscriptionResilience: PropTypes.object,
   className: PropTypes.string,
   showDetails: PropTypes.bool,
-  compact: PropTypes.bool
+  compact: PropTypes.bool,
 };
 
 export default VisualNetworkIndicator;

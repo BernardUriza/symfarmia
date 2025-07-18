@@ -1,15 +1,17 @@
-"use client";
+'use client';
 import React, { Suspense, lazy } from 'react';
 import { useAnimations } from '../hooks/useAnimations';
 import { createScrollAnimation } from '../../../../utils/animations';
 
 // Lazy load framer-motion to avoid bundle bloat when animations are disabled
-const MotionDiv = lazy(() => 
-  import('framer-motion').then(module => ({ 
-    default: module.motion.div 
-  })).catch(() => ({ 
-    default: ({ children, ...props }) => <div {...props}>{children}</div>
-  }))
+const MotionDiv = lazy(() =>
+  import('framer-motion')
+    .then((module) => ({
+      default: module.motion.div,
+    }))
+    .catch(() => ({
+      default: ({ children, ...props }) => <div {...props}>{children}</div>,
+    })),
 );
 
 /**
@@ -37,18 +39,14 @@ const AnimatedWrapper = ({
   const animationProps = safeAnimate(createScrollAnimation(animation, delay));
 
   return (
-    <Suspense 
+    <Suspense
       fallback={
         <Fallback className={className} {...props}>
           {children}
         </Fallback>
       }
     >
-      <MotionDiv
-        className={className}
-        {...animationProps}
-        {...props}
-      >
+      <MotionDiv className={className} {...animationProps} {...props}>
         {children}
       </MotionDiv>
     </Suspense>

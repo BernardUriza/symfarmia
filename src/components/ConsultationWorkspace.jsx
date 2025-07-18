@@ -1,12 +1,15 @@
-"use client";
+'use client';
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Cog6ToothIcon,
   ArrowLeftIcon,
-  AdjustmentsHorizontalIcon
+  AdjustmentsHorizontalIcon,
 } from '@heroicons/react/24/outline';
-import { ConsultationProvider, useConsultation } from '../contexts/ConsultationContext';
+import {
+  ConsultationProvider,
+  useConsultation,
+} from '../contexts/ConsultationContext';
 import { useTranslation } from '../providers/I18nProvider';
 import { ConversationCapture } from './medical/ConversationCapture';
 import AIAssistantPanel from './consultation/AIAssistantPanel';
@@ -21,20 +24,20 @@ function ConsultationWorkspaceInner({ onExit }) {
     setAiMode,
     sessionDuration,
     startSession,
-    endSession
+    endSession,
   } = useConsultation();
 
   const { t } = useTranslation();
-  
+
   const [showSettings, setShowSettings] = useState(false);
   const [layout, setLayout] = useState('horizontal'); // 'horizontal' | 'vertical' | 'focused'
-  
+
   useEffect(() => {
     // Auto-start session when workspace mounts
     if (!isActive) {
       startSession();
     }
-    
+
     // Cleanup on unmount
     return () => {
       if (isActive) {
@@ -42,39 +45,47 @@ function ConsultationWorkspaceInner({ onExit }) {
       }
     };
   }, [isActive, startSession, endSession]);
-  
+
   const formatDuration = (seconds) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
-  
-  
+
   return (
     <div className="medical-assistant-container">
       {/* Header */}
       <header className="medical-header">
         <div className="header-content">
-          <button onClick={onExit} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+          <button
+            onClick={onExit}
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          >
             <ArrowLeftIcon className="w-5 h-5 text-gray-600" />
           </button>
           <div className="medical-icon" />
           <div className="session-info">
             <div className="title">{t('consultation_title')}</div>
             <div className="session-time">
-              {isActive ? `${t('session_active')}: ${formatDuration(sessionDuration)}` : t('session_inactive')}
+              {isActive
+                ? `${t('session_active')}: ${formatDuration(sessionDuration)}`
+                : t('session_inactive')}
             </div>
           </div>
           <div className="mode-toggle">
             <button
-              onClick={() => setAiMode(aiMode === 'basic' ? 'advanced' : 'basic')}
+              onClick={() =>
+                setAiMode(aiMode === 'basic' ? 'advanced' : 'basic')
+              }
               className="toggle-button"
             >
               {aiMode === 'basic' ? t('activate_advanced_ai') : t('basic_mode')}
             </button>
           </div>
           <button
-            onClick={() => setLayout(layout === 'horizontal' ? 'vertical' : 'horizontal')}
+            onClick={() =>
+              setLayout(layout === 'horizontal' ? 'vertical' : 'horizontal')
+            }
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
             title={t('change_layout')}
           >
@@ -88,13 +99,13 @@ function ConsultationWorkspaceInner({ onExit }) {
           </button>
         </div>
       </header>
-      
+
       {/* Main Content */}
       <main className="flex-1 p-6">
         {layout === 'vertical' ? (
           // Vertical Layout - Stacked
           <div className="flex flex-col gap-6 h-full">
-            <motion.div 
+            <motion.div
               className="flex-1"
               layout
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
@@ -117,20 +128,20 @@ function ConsultationWorkspaceInner({ onExit }) {
           </div>
         ) : (
           // Horizontal Layout - Dynamic Grid
-          <motion.div 
+          <motion.div
             className={`consultation-workspace-grid h-full ${aiMode === 'advanced' ? 'with-assistant' : ''}`}
             layout
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
           >
             {/* Main Transcription Area */}
-            <motion.div 
+            <motion.div
               className="transcription-section"
               layout
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
             >
               <ConversationCapture />
             </motion.div>
-            
+
             {/* AI Assistant Panel */}
             <AnimatePresence>
               {aiMode === 'advanced' && (
@@ -138,13 +149,13 @@ function ConsultationWorkspaceInner({ onExit }) {
                   initial={{ opacity: 0, width: 0, scale: 0.9 }}
                   animate={{ opacity: 1, width: 'auto', scale: 1 }}
                   exit={{ opacity: 0, width: 0, scale: 0.9 }}
-                  transition={{ 
-                    type: 'spring', 
-                    damping: 20, 
+                  transition={{
+                    type: 'spring',
+                    damping: 20,
                     stiffness: 150,
                     width: { duration: 0.4 },
                     opacity: { duration: 0.3 },
-                    scale: { duration: 0.3 }
+                    scale: { duration: 0.3 },
                   }}
                   className="ai-assistant-section"
                 >
@@ -155,12 +166,12 @@ function ConsultationWorkspaceInner({ onExit }) {
           </motion.div>
         )}
       </main>
-      
+
       {/* Bottom Panel - Documentation Output */}
       <div className="border-t border-white/50 bg-white/60 backdrop-blur-sm">
         <DocumentationOutput />
       </div>
-      
+
       {/* Settings Modal */}
       <AnimatePresence>
         {showSettings && (

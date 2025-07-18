@@ -13,14 +13,16 @@ export const useAnimations = (enabled = true) => {
     try {
       const supported = enabled && isAnimationSupported();
       setAnimationsEnabled(supported);
-      
+
       // Listen for reduced motion preference changes
       if (typeof window !== 'undefined' && window.matchMedia) {
-        const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+        const mediaQuery = window.matchMedia(
+          '(prefers-reduced-motion: reduce)',
+        );
         const handleChange = () => {
           setAnimationsEnabled(!mediaQuery.matches && enabled);
         };
-        
+
         mediaQuery.addEventListener('change', handleChange);
         return () => mediaQuery.removeEventListener('change', handleChange);
       }
@@ -31,24 +33,27 @@ export const useAnimations = (enabled = true) => {
     }
   }, [enabled]);
 
-  const safeAnimate = useCallback((animationConfig) => {
-    if (!animationsEnabled || hasError) {
-      return {};
-    }
-    
-    try {
-      return animationConfig;
-    } catch (error) {
-      console.warn('Animation configuration error:', error);
-      setHasError(true);
-      return {};
-    }
-  }, [animationsEnabled, hasError]);
+  const safeAnimate = useCallback(
+    (animationConfig) => {
+      if (!animationsEnabled || hasError) {
+        return {};
+      }
+
+      try {
+        return animationConfig;
+      } catch (error) {
+        console.warn('Animation configuration error:', error);
+        setHasError(true);
+        return {};
+      }
+    },
+    [animationsEnabled, hasError],
+  );
 
   return {
     animationsEnabled,
     hasError,
-    safeAnimate
+    safeAnimate,
   };
 };
 
@@ -59,24 +64,27 @@ export const useMouseTracking = (throttleMs = 100, enabled = true) => {
   const [mousePosition, setMousePosition] = useState({ x: 50, y: 50 });
   const { animationsEnabled } = useAnimations(enabled);
 
-  const handleMouseMove = useCallback((e) => {
-    if (!animationsEnabled) return;
-    
-    try {
-      setMousePosition({
-        x: (e.clientX / window.innerWidth) * 100,
-        y: (e.clientY / window.innerHeight) * 100
-      });
-    } catch (error) {
-      console.warn('Mouse tracking error:', error);
-    }
-  }, [animationsEnabled]);
+  const handleMouseMove = useCallback(
+    (e) => {
+      if (!animationsEnabled) return;
+
+      try {
+        setMousePosition({
+          x: (e.clientX / window.innerWidth) * 100,
+          y: (e.clientY / window.innerHeight) * 100,
+        });
+      } catch (error) {
+        console.warn('Mouse tracking error:', error);
+      }
+    },
+    [animationsEnabled],
+  );
 
   useEffect(() => {
     if (!animationsEnabled) return;
 
     let timeoutId;
-    
+
     const throttledMouseMove = (e) => {
       if (timeoutId) return;
       timeoutId = setTimeout(() => {
@@ -86,8 +94,10 @@ export const useMouseTracking = (throttleMs = 100, enabled = true) => {
     };
 
     try {
-      window.addEventListener('mousemove', throttledMouseMove, { passive: true });
-      
+      window.addEventListener('mousemove', throttledMouseMove, {
+        passive: true,
+      });
+
       return () => {
         window.removeEventListener('mousemove', throttledMouseMove);
         if (timeoutId) clearTimeout(timeoutId);
@@ -127,31 +137,34 @@ export const useInViewAnimation = (animationType = 'slideUp', options = {}) => {
   const [isInView, setIsInView] = useState(false);
   const [hasAnimated, setHasAnimated] = useState(false);
 
-  const elementRef = useCallback((node) => {
-    if (!animationsEnabled || !node) return;
+  const elementRef = useCallback(
+    (node) => {
+      if (!animationsEnabled || !node) return;
 
-    try {
-      const observer = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.isIntersecting && !hasAnimated) {
-            setIsInView(true);
-            setHasAnimated(true);
-          }
-        },
-        {
-          threshold: 0.3,
-          rootMargin: '-10%',
-          ...options
-        }
-      );
+      try {
+        const observer = new IntersectionObserver(
+          ([entry]) => {
+            if (entry.isIntersecting && !hasAnimated) {
+              setIsInView(true);
+              setHasAnimated(true);
+            }
+          },
+          {
+            threshold: 0.3,
+            rootMargin: '-10%',
+            ...options,
+          },
+        );
 
-      observer.observe(node);
-      return () => observer.disconnect();
-    } catch (error) {
-      console.warn('Intersection observer error:', error);
-      setIsInView(true); // Fallback to visible
-    }
-  }, [animationsEnabled, hasAnimated, options]);
+        observer.observe(node);
+        return () => observer.disconnect();
+      } catch (error) {
+        console.warn('Intersection observer error:', error);
+        setIsInView(true); // Fallback to visible
+      }
+    },
+    [animationsEnabled, hasAnimated, options],
+  );
 
   const animationProps = useMemo(() => {
     if (!animationsEnabled) {
@@ -163,22 +176,22 @@ export const useInViewAnimation = (animationType = 'slideUp', options = {}) => {
         style: {
           opacity: isInView ? 1 : 0,
           transform: `translateY(${isInView ? 0 : 30}px)`,
-          transition: 'opacity 0.6s ease-out, transform 0.6s ease-out'
-        }
+          transition: 'opacity 0.6s ease-out, transform 0.6s ease-out',
+        },
       },
       fadeIn: {
         style: {
           opacity: isInView ? 1 : 0,
-          transition: 'opacity 0.6s ease-out'
-        }
+          transition: 'opacity 0.6s ease-out',
+        },
       },
       scaleIn: {
         style: {
           opacity: isInView ? 1 : 0,
           transform: `scale(${isInView ? 1 : 0.9})`,
-          transition: 'opacity 0.5s ease-out, transform 0.5s ease-out'
-        }
-      }
+          transition: 'opacity 0.5s ease-out, transform 0.5s ease-out',
+        },
+      },
     };
 
     return animations[animationType] || animations.slideUp;
@@ -187,6 +200,6 @@ export const useInViewAnimation = (animationType = 'slideUp', options = {}) => {
   return {
     ref: elementRef,
     isInView,
-    ...animationProps
+    ...animationProps,
   };
 };

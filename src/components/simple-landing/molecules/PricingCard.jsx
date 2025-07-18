@@ -4,17 +4,17 @@ import Button from '../atoms/Button';
 import { Heading, Text } from '../atoms/Typography';
 import { CheckIcon } from '@heroicons/react/24/outline';
 
-const PricingCard = ({ 
+const PricingCard = ({
   name,
   price,
   period,
   features,
   ctaText,
   popular = false,
-  onSelect
+  onSelect,
 }) => {
   return (
-    <Card 
+    <Card
       className={`relative h-full ${popular ? 'ring-2 ring-teal-500 scale-105' : ''}`}
       variant={popular ? 'gradient' : 'default'}
     >
@@ -25,17 +25,15 @@ const PricingCard = ({
           </span>
         </div>
       )}
-      
+
       {/* Plan Header */}
       <div className="text-center mb-6">
         <Heading level={3} className="mb-2">
           {name}
         </Heading>
-        
+
         <div className="mb-4">
-          <span className="text-4xl font-bold text-teal-600">
-            {price}
-          </span>
+          <span className="text-4xl font-bold text-teal-600">{price}</span>
           {period && (
             <Text color="gray" className="ml-1">
               {period}
@@ -43,21 +41,19 @@ const PricingCard = ({
           )}
         </div>
       </div>
-      
+
       {/* Features List */}
       <div className="space-y-3 mb-8 flex-grow">
         {features.map((feature, index) => (
           <div key={index} className="flex items-start">
             <CheckIcon className="w-5 h-5 text-teal-500 mr-3 mt-0.5 flex-shrink-0" />
-            <Text size="sm">
-              {feature}
-            </Text>
+            <Text size="sm">{feature}</Text>
           </div>
         ))}
       </div>
-      
+
       {/* CTA Button */}
-      <Button 
+      <Button
         variant={popular ? 'primary' : 'outline'}
         size="large"
         className="w-full"

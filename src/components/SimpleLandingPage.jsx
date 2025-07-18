@@ -8,7 +8,7 @@ import {
   TestimonialsSection,
   PricingSection,
   ContactSection,
-  Footer
+  Footer,
 } from './simple-landing';
 
 const SimpleLandingPage = () => {

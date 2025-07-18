@@ -1,6 +1,6 @@
 /**
  * REVOLUTIONARY LANGUAGE SWITCHER COMPONENT
- * 
+ *
  * Visible UI component for language switching across all screens
  * Features:
  * - Modern, accessible design
@@ -15,7 +15,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { useI18n } from '@/domains/core';
-import { GlobeAltIcon, ChevronDownIcon, CheckIcon } from '@heroicons/react/24/outline';
+import {
+  GlobeAltIcon,
+  ChevronDownIcon,
+  CheckIcon,
+} from '@heroicons/react/24/outline';
 import { useTranslation } from '@/src/providers/I18nProvider';
 
 // 🌍 SUPPORTED LANGUAGES
@@ -26,7 +30,7 @@ const SUPPORTED_LANGUAGES = [
     nativeName: 'Español',
     flag: '🇪🇸',
     country: 'España',
-    medical: true
+    medical: true,
   },
   {
     code: 'en',
@@ -34,8 +38,8 @@ const SUPPORTED_LANGUAGES = [
     nativeName: 'English',
     flag: '🇺🇸',
     country: 'United States',
-    medical: true
-  }
+    medical: true,
+  },
 ];
 
 // 🎨 SWITCHER STYLES
@@ -43,56 +47,64 @@ const SWITCHER_STYLES = {
   // Compact style for headers/navigation
   compact: {
     container: 'relative inline-flex items-center',
-    button: 'flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200',
-    dropdown: 'absolute right-0 z-50 mt-2 w-48 origin-top-right bg-white border border-gray-200 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none',
-    item: 'flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 cursor-pointer transition-colors duration-150'
+    button:
+      'flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200',
+    dropdown:
+      'absolute right-0 z-50 mt-2 w-48 origin-top-right bg-white border border-gray-200 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none',
+    item: 'flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 cursor-pointer transition-colors duration-150',
   },
-  
+
   // Full style for settings/preferences
   full: {
     container: 'w-full max-w-md',
-    button: 'w-full flex items-center justify-between px-4 py-3 text-left text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200',
-    dropdown: 'absolute z-50 mt-2 w-full bg-white border border-gray-200 rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none',
-    item: 'flex items-center justify-between px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-900 cursor-pointer transition-colors duration-150'
+    button:
+      'w-full flex items-center justify-between px-4 py-3 text-left text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200',
+    dropdown:
+      'absolute z-50 mt-2 w-full bg-white border border-gray-200 rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none',
+    item: 'flex items-center justify-between px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-900 cursor-pointer transition-colors duration-150',
   },
-  
+
   // Floating style for overlay/quick access
   floating: {
     container: 'fixed bottom-4 right-4 z-50',
-    button: 'flex items-center px-4 py-3 text-sm font-medium text-white bg-blue-600 rounded-full shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 hover:scale-105',
-    dropdown: 'absolute bottom-full right-0 mb-2 w-64 bg-white border border-gray-200 rounded-lg shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none',
-    item: 'flex items-center justify-between px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-900 cursor-pointer transition-colors duration-150'
-  }
+    button:
+      'flex items-center px-4 py-3 text-sm font-medium text-white bg-blue-600 rounded-full shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 hover:scale-105',
+    dropdown:
+      'absolute bottom-full right-0 mb-2 w-64 bg-white border border-gray-200 rounded-lg shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none',
+    item: 'flex items-center justify-between px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-900 cursor-pointer transition-colors duration-150',
+  },
 };
 
 // 🎯 LANGUAGE SWITCHER COMPONENT
-const LanguageSwitcher = ({ 
-  style = 'compact', 
-  showFlag = true, 
+const LanguageSwitcher = ({
+  style = 'compact',
+  showFlag = true,
   showCountry = false,
   showMedicalIndicator = false,
-  className = ''
+  className = '',
 }) => {
-  const { locale, setLocale, } = useI18n();
+  const { locale, setLocale } = useI18n();
   const { t } = useTranslation('language_switcher');
   const [isOpen, setIsOpen] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState(null);
-  
+
   // Find current language
   useEffect(() => {
-    const current = SUPPORTED_LANGUAGES.find(lang => lang.code === locale);
+    const current = SUPPORTED_LANGUAGES.find((lang) => lang.code === locale);
     setSelectedLanguage(current || SUPPORTED_LANGUAGES[0]);
   }, [locale]);
-  
+
   // Handle language change
   const handleLanguageChange = (languageCode) => {
     setLocale(languageCode);
     setIsOpen(false);
-    
+
     // Announce change for accessibility (only in browser)
     if (typeof window !== 'undefined' && window.speechSynthesis) {
       try {
-        const currentLang = SUPPORTED_LANGUAGES.find(lang => lang.code === languageCode);
+        const currentLang = SUPPORTED_LANGUAGES.find(
+          (lang) => lang.code === languageCode,
+        );
         const announcement = `Language changed to ${currentLang?.name}`;
         const utterance = new SpeechSynthesisUtterance(announcement);
         utterance.volume = 0.1;
@@ -102,7 +114,7 @@ const LanguageSwitcher = ({
       }
     }
   };
-  
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -110,27 +122,27 @@ const LanguageSwitcher = ({
         setIsOpen(false);
       }
     };
-    
+
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen]);
-  
+
   // Handle keyboard navigation
   const handleKeyDown = (event) => {
     if (event.key === 'Escape') {
       setIsOpen(false);
     }
   };
-  
+
   // Get styles for current style variant
   const styles = SWITCHER_STYLES[style] || SWITCHER_STYLES.compact;
-  
+
   if (!selectedLanguage) {
     return null;
   }
-  
+
   return (
-    <div 
+    <div
       className={`${styles.container} ${className}`}
       data-language-switcher
       onKeyDown={handleKeyDown}
@@ -146,34 +158,40 @@ const LanguageSwitcher = ({
       >
         {/* Globe Icon */}
         <GlobeAltIcon className="w-4 h-4 mr-2 text-gray-500" />
-        
+
         {/* Flag */}
         {showFlag && (
-          <span className="mr-2 text-lg" role="img" aria-label={selectedLanguage.country}>
+          <span
+            className="mr-2 text-lg"
+            role="img"
+            aria-label={selectedLanguage.country}
+          >
             {selectedLanguage.flag}
           </span>
         )}
-        
+
         {/* Language Name */}
         <span className="font-medium">
-          {style === 'compact' ? selectedLanguage.code.toUpperCase() : selectedLanguage.name}
+          {style === 'compact'
+            ? selectedLanguage.code.toUpperCase()
+            : selectedLanguage.name}
         </span>
-        
+
         {/* Medical Indicator */}
         {showMedicalIndicator && selectedLanguage.medical && (
           <span className="ml-2 px-2 py-1 text-xs font-medium text-green-700 bg-green-100 rounded-full">
             {t('language_switcher.medical_certified')}
           </span>
         )}
-        
+
         {/* Dropdown Icon */}
-        <ChevronDownIcon 
+        <ChevronDownIcon
           className={`w-4 h-4 ml-2 text-gray-500 transform transition-transform duration-200 ${
             isOpen ? 'rotate-180' : ''
           }`}
         />
       </button>
-      
+
       {/* Dropdown Menu */}
       {isOpen && (
         <div className={styles.dropdown}>
@@ -183,7 +201,9 @@ const LanguageSwitcher = ({
                 key={language.code}
                 type="button"
                 className={`${styles.item} ${
-                  selectedLanguage.code === language.code ? 'bg-blue-50 text-blue-900' : ''
+                  selectedLanguage.code === language.code
+                    ? 'bg-blue-50 text-blue-900'
+                    : ''
                 }`}
                 role="menuitem"
                 onClick={() => handleLanguageChange(language.code)}
@@ -192,26 +212,34 @@ const LanguageSwitcher = ({
                 <div className="flex items-center">
                   {/* Flag */}
                   {showFlag && (
-                    <span className="mr-3 text-lg" role="img" aria-label={language.country}>
+                    <span
+                      className="mr-3 text-lg"
+                      role="img"
+                      aria-label={language.country}
+                    >
                       {language.flag}
                     </span>
                   )}
-                  
+
                   <div className="flex-1">
                     {/* Language Name */}
                     <div className="font-medium">{language.name}</div>
-                    
+
                     {/* Native Name */}
                     {language.name !== language.nativeName && (
-                      <div className="text-xs text-gray-500">{language.nativeName}</div>
+                      <div className="text-xs text-gray-500">
+                        {language.nativeName}
+                      </div>
                     )}
-                    
+
                     {/* Country */}
                     {showCountry && (
-                      <div className="text-xs text-gray-500">{language.country}</div>
+                      <div className="text-xs text-gray-500">
+                        {language.country}
+                      </div>
                     )}
                   </div>
-                  
+
                   {/* Medical Indicator */}
                   {showMedicalIndicator && language.medical && (
                     <span className="ml-2 px-2 py-1 text-xs font-medium text-green-700 bg-green-100 rounded-full">
@@ -219,7 +247,7 @@ const LanguageSwitcher = ({
                     </span>
                   )}
                 </div>
-                
+
                 {/* Selected Indicator */}
                 {selectedLanguage.code === language.code && (
                   <CheckIcon className="w-4 h-4 text-blue-600" />
@@ -227,7 +255,7 @@ const LanguageSwitcher = ({
               </button>
             ))}
           </div>
-          
+
           {/* Footer */}
           <div className="px-4 py-3 border-t border-gray-200 bg-gray-50">
             <div className="flex items-center justify-between">
@@ -251,7 +279,7 @@ const LanguageSwitcher = ({
 // 🎯 FLOATING LANGUAGE SWITCHER
 export const FloatingLanguageSwitcher = ({ className = '' }) => {
   return (
-    <LanguageSwitcher 
+    <LanguageSwitcher
       style="floating"
       showFlag={true}
       showMedicalIndicator={true}
@@ -263,18 +291,14 @@ export const FloatingLanguageSwitcher = ({ className = '' }) => {
 // 🎯 COMPACT LANGUAGE SWITCHER
 export const CompactLanguageSwitcher = ({ className = '' }) => {
   return (
-    <LanguageSwitcher 
-      style="compact"
-      showFlag={true}
-      className={className}
-    />
+    <LanguageSwitcher style="compact" showFlag={true} className={className} />
   );
 };
 
 // 🎯 FULL LANGUAGE SWITCHER
 export const FullLanguageSwitcher = ({ className = '' }) => {
   return (
-    <LanguageSwitcher 
+    <LanguageSwitcher
       style="full"
       showFlag={true}
       showCountry={true}
@@ -285,10 +309,13 @@ export const FullLanguageSwitcher = ({ className = '' }) => {
 };
 
 // 🎯 MEDICAL LANGUAGE SWITCHER
-export const MedicalLanguageSwitcher = ({ className = '', style = 'compact' }) => {
+export const MedicalLanguageSwitcher = ({
+  className = '',
+  style = 'compact',
+}) => {
   return (
     <div className={`${className} relative`}>
-      <LanguageSwitcher 
+      <LanguageSwitcher
         style={style}
         showFlag={true}
         showMedicalIndicator={true}

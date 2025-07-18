@@ -13,8 +13,8 @@ const HeroSection = ({ t }) => {
   return (
     <section className="relative min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-teal-600 text-white overflow-hidden">
       {/* Floating Particles */}
-      <AnimatedWrapper 
-        animation="fadeIn" 
+      <AnimatedWrapper
+        animation="fadeIn"
         delay={0.5}
         style={{ transform: `translateY(${particleY}px)` }}
         className="absolute inset-0"
@@ -29,7 +29,7 @@ const HeroSection = ({ t }) => {
           <LanguageToggle variant="prominent" />
         </header>
       </AnimatedWrapper>
-      
+
       {/* Hero Content */}
       <div className="flex items-center justify-center min-h-[80vh] px-4 relative z-10">
         <div className="text-center max-w-4xl mx-auto">
@@ -38,19 +38,23 @@ const HeroSection = ({ t }) => {
               {t('hero_title')}
             </Heading>
           </AnimatedWrapper>
-          
+
           <AnimatedWrapper animation="slideUp" delay={0.7}>
-            <Text size="xl" color="light" className="mb-8 max-w-3xl mx-auto leading-relaxed">
+            <Text
+              size="xl"
+              color="light"
+              className="mb-8 max-w-3xl mx-auto leading-relaxed"
+            >
               {t('hero_subtitle')}
             </Text>
           </AnimatedWrapper>
-          
+
           <AnimatedWrapper animation="slideUp" delay={0.9}>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
               <Button size="large" className="bg-teal-500 hover:bg-teal-600">
                 {t('hero_cta')}
               </Button>
-              
+
               <div className="flex items-center text-teal-200">
                 <div className="w-2 h-2 bg-teal-400 rounded-full mr-2 animate-pulse"></div>
                 <Text size="sm" color="light">
@@ -59,7 +63,7 @@ const HeroSection = ({ t }) => {
               </div>
             </div>
           </AnimatedWrapper>
-          
+
           {/* Scroll Indicator */}
           <AnimatedWrapper animation="fadeIn" delay={1.2}>
             <div className="text-center text-teal-300">

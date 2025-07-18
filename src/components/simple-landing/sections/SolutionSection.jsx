@@ -1,12 +1,12 @@
 import React from 'react';
 import { Heading, Text } from '../atoms/Typography';
 import FeatureCard from '../molecules/FeatureCard';
-import { 
-  SunIcon, 
-  DocumentTextIcon, 
-  ChartBarIcon, 
+import {
+  SunIcon,
+  DocumentTextIcon,
+  ChartBarIcon,
   ClipboardDocumentCheckIcon,
-  ArrowTrendingUpIcon 
+  ArrowTrendingUpIcon,
 } from '@heroicons/react/24/outline';
 import MedicalBrainIcon from '../../MedicalBrainIcon';
 
@@ -16,26 +16,26 @@ const SolutionSection = ({ t }) => {
       title: t('intelligent_transcription'),
       description: t('intelligent_transcription_desc'),
       icon: DocumentTextIcon,
-      iconColor: 'text-teal-500'
+      iconColor: 'text-teal-500',
     },
     {
       title: t('assisted_diagnosis'),
       description: t('assisted_diagnosis_desc'),
       icon: MedicalBrainIcon,
-      iconColor: 'text-blue-500'
+      iconColor: 'text-blue-500',
     },
     {
       title: t('automated_prescriptions'),
       description: t('automated_prescriptions_desc'),
       icon: ClipboardDocumentCheckIcon,
-      iconColor: 'text-purple-500'
+      iconColor: 'text-purple-500',
     },
     {
       title: t('medical_analytics'),
       description: t('medical_analytics_desc'),
       icon: ChartBarIcon,
-      iconColor: 'text-pink-500'
-    }
+      iconColor: 'text-pink-500',
+    },
   ];
 
   return (
@@ -51,7 +51,7 @@ const SolutionSection = ({ t }) => {
           </div>
           <div className="w-24 h-1 bg-gradient-to-r from-teal-400 to-blue-400 mx-auto"></div>
         </div>
-        
+
         {/* Features Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
           {features.map((feature, index) => (
@@ -65,7 +65,7 @@ const SolutionSection = ({ t }) => {
             />
           ))}
         </div>
-        
+
         {/* Progress Indicator */}
         <div className="text-center">
           <div className="inline-flex items-center bg-teal-500/20 backdrop-blur-sm px-6 py-3 rounded-full border border-teal-400/30">

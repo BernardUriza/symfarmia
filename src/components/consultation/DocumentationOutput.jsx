@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
+import {
   DocumentTextIcon,
   DocumentDuplicateIcon,
   ArrowDownTrayIcon,
@@ -8,7 +8,7 @@ import {
   CheckCircleIcon,
   SparklesIcon,
   ClockIcon,
-  UserIcon
+  UserIcon,
 } from '@heroicons/react/24/outline';
 import { useConsultation } from '../../contexts/ConsultationContext';
 
@@ -20,9 +20,9 @@ const DocumentationOutput = () => {
     updateSoapSection,
     logEvent,
     sessionDuration,
-    startTime
+    startTime,
   } = useConsultation();
-  
+
   const [editingSection, setEditingSection] = useState(null);
   const [showCopySuccess, setShowCopySuccess] = useState(false);
   const [autoGenerateEnabled, setAutoGenerateEnabled] = useState(true);
@@ -30,93 +30,114 @@ const DocumentationOutput = () => {
 
   const generateStructuredSOAP = useCallback(async (transcript) => {
     // Mock structured SOAP generation based on transcript analysis
-    await new Promise(resolve => setTimeout(resolve, 3000)); // Simulate AI processing
-    
+    await new Promise((resolve) => setTimeout(resolve, 3000)); // Simulate AI processing
+
     // Extract key information from transcript
     const patientInfo = extractPatientInfo(transcript);
     const symptoms = extractSymptoms(transcript);
     const examination = extractExaminationFindings(transcript);
-    
+
     return {
       subjective: generateSubjective(patientInfo, symptoms),
       objective: generateObjective(examination),
       assessment: generateAssessment(symptoms),
-      plan: generatePlan(symptoms)
+      plan: generatePlan(symptoms),
     };
   }, []);
-  
+
   const generateSOAPNotes = useCallback(async () => {
     if (!finalTranscript.trim()) return;
-    
+
     setGenerationProgress(0);
-    logEvent('soap_generation_started', { transcript_length: finalTranscript.length });
-    
+    logEvent('soap_generation_started', {
+      transcript_length: finalTranscript.length,
+    });
+
     try {
       // Simulate progressive generation
       const progressInterval = setInterval(() => {
-        setGenerationProgress(prev => Math.min(prev + 10, 90));
+        setGenerationProgress((prev) => Math.min(prev + 10, 90));
       }, 200);
-      
+
       // Generate each section
       const soapData = await generateStructuredSOAP(finalTranscript);
-      
+
       clearInterval(progressInterval);
       setGenerationProgress(100);
-      
+
       // Update each section
       Object.entries(soapData).forEach(([section, content]) => {
         updateSoapSection(section, content);
       });
-      
+
       setTimeout(() => setGenerationProgress(0), 1000);
-      
-      logEvent('soap_generation_completed', { 
+
+      logEvent('soap_generation_completed', {
         sections_generated: Object.keys(soapData).length,
-        total_length: Object.values(soapData).join('').length
+        total_length: Object.values(soapData).join('').length,
       });
-      
     } catch (error) {
       console.error('Error generating SOAP notes:', error);
       setGenerationProgress(0);
       logEvent('soap_generation_failed', { error: error.message });
     }
-
   }, [finalTranscript, updateSoapSection, logEvent, generateStructuredSOAP]);
 
   // Auto-generate SOAP notes when transcript is available
   useEffect(() => {
-    if (finalTranscript.length > 100 && autoGenerateEnabled && !isGeneratingSOAP) {
+    if (
+      finalTranscript.length > 100 &&
+      autoGenerateEnabled &&
+      !isGeneratingSOAP
+    ) {
       generateSOAPNotes();
     }
-  }, [finalTranscript, autoGenerateEnabled, isGeneratingSOAP, generateSOAPNotes]);
-  
+  }, [
+    finalTranscript,
+    autoGenerateEnabled,
+    isGeneratingSOAP,
+    generateSOAPNotes,
+  ]);
+
   const extractPatientInfo = (transcript) => {
     // Mock extraction - in real implementation, this would use NLP
     const ageMatch = transcript.match(/(\d+)\s+años?/);
     const genderMatch = transcript.match(/(masculino|femenino|hombre|mujer)/i);
-    
+
     return {
       age: ageMatch ? ageMatch[1] : 'no especificada',
-      gender: genderMatch ? genderMatch[1] : 'no especificado'
+      gender: genderMatch ? genderMatch[1] : 'no especificado',
     };
   };
-  
+
   const extractSymptoms = (transcript) => {
     const commonSymptoms = [
-      'dolor', 'fiebre', 'tos', 'fatiga', 'cefalea', 'náusea', 'vómito',
-      'diarrea', 'estreñimiento', 'mareo', 'palpitaciones'
+      'dolor',
+      'fiebre',
+      'tos',
+      'fatiga',
+      'cefalea',
+      'náusea',
+      'vómito',
+      'diarrea',
+      'estreñimiento',
+      'mareo',
+      'palpitaciones',
     ];
-    
-    return commonSymptoms.filter(symptom => 
-      transcript.toLowerCase().includes(symptom)
+
+    return commonSymptoms.filter((symptom) =>
+      transcript.toLowerCase().includes(symptom),
     );
   };
-  
+
   const extractExaminationFindings = (transcript) => {
     // Mock extraction of physical examination findings
     const findings = [];
-    
-    if (transcript.includes('presión arterial') || transcript.includes('tensión')) {
+
+    if (
+      transcript.includes('presión arterial') ||
+      transcript.includes('tensión')
+    ) {
       findings.push('Signos vitales registrados');
     }
     if (transcript.includes('auscultación') || transcript.includes('corazón')) {
@@ -125,75 +146,85 @@ const DocumentationOutput = () => {
     if (transcript.includes('palpación') || transcript.includes('abdomen')) {
       findings.push('Exploración abdominal');
     }
-    
+
     return findings;
   };
-  
+
   const generateSubjective = (patientInfo, symptoms) => {
-    const symptomsText = symptoms.length > 0 
-      ? `Paciente refiere ${symptoms.join(', ')}.`
-      : 'Paciente acude a consulta por molestias.';
-    
+    const symptomsText =
+      symptoms.length > 0
+        ? `Paciente refiere ${symptoms.join(', ')}.`
+        : 'Paciente acude a consulta por molestias.';
+
     return `Paciente de ${patientInfo.age} años, ${patientInfo.gender}. ${symptomsText} Consulta para evaluación médica y orientación terapéutica. Niega alergias medicamentosas conocidas.`;
   };
-  
+
   const generateObjective = (examination) => {
     let objective = 'Paciente consciente, orientado, colaborador. ';
-    
+
     if (examination.length > 0) {
       objective += `Exploración física: ${examination.join(', ')}. `;
     }
-    
+
     objective += 'Signos vitales estables. Aspecto general conservado.';
-    
+
     return objective;
   };
-  
+
   const generateAssessment = (symptoms) => {
     if (symptoms.length === 0) {
       return 'Evaluación clínica en proceso. Se requiere completar historia clínica y exploración física para establecer diagnóstico definitivo.';
     }
-    
+
     const primarySymptom = symptoms[0];
     const assessments = {
-      'dolor': 'Síndrome doloroso a determinar etiología. Considerar causas inflamatorias, mecánicas o neuropáticas.',
-      'fiebre': 'Síndrome febril. Evaluar foco infeccioso. Considerar proceso viral vs bacteriano.',
-      'tos': 'Síndrome tusígeno. Investigar etiología respiratoria alta vs baja.',
-      'fatiga': 'Astenia. Descartar causas metabólicas, infecciosas o hematológicas.'
+      dolor:
+        'Síndrome doloroso a determinar etiología. Considerar causas inflamatorias, mecánicas o neuropáticas.',
+      fiebre:
+        'Síndrome febril. Evaluar foco infeccioso. Considerar proceso viral vs bacteriano.',
+      tos: 'Síndrome tusígeno. Investigar etiología respiratoria alta vs baja.',
+      fatiga:
+        'Astenia. Descartar causas metabólicas, infecciosas o hematológicas.',
     };
-    
-    return assessments[primarySymptom] || 'Cuadro clínico en estudio. Requiere evaluación complementaria para diagnóstico diferencial.';
+
+    return (
+      assessments[primarySymptom] ||
+      'Cuadro clínico en estudio. Requiere evaluación complementaria para diagnóstico diferencial.'
+    );
   };
-  
+
   const generatePlan = (symptoms) => {
     let plan = '• Continuar con anamnesis dirigida\n';
     plan += '• Completar exploración física sistemática\n';
-    
+
     if (symptoms.includes('dolor')) {
       plan += '• Escala de dolor y características\n';
       plan += '• Considerar analgesia según intensidad\n';
     }
-    
+
     if (symptoms.includes('fiebre')) {
       plan += '• Laboratorios: BHC, QS, reactantes de fase aguda\n';
       plan += '• Antipirético según necesidad\n';
     }
-    
+
     plan += '• Seguimiento en 24-48 horas\n';
     plan += '• Regresar si empeoramiento o nuevos síntomas';
-    
+
     return plan;
   };
-  
+
   const handleSectionEdit = (section, newContent) => {
     updateSoapSection(section, newContent);
     setEditingSection(null);
-    logEvent('soap_section_edited', { section, content_length: newContent.length });
+    logEvent('soap_section_edited', {
+      section,
+      content_length: newContent.length,
+    });
   };
-  
+
   const copyToClipboard = async () => {
     const soapText = formatSOAPForExport();
-    
+
     try {
       await navigator.clipboard.writeText(soapText);
       setShowCopySuccess(true);
@@ -203,16 +234,18 @@ const DocumentationOutput = () => {
       console.error('Error copying to clipboard:', error);
     }
   };
-  
+
   const exportToPDF = () => {
     logEvent('pdf_export_requested');
     // Here you would implement PDF export functionality
     alert('Función de exportar PDF en desarrollo');
   };
-  
+
   const formatSOAPForExport = () => {
-    const timestamp = startTime ? startTime.toLocaleString() : new Date().toLocaleString();
-    
+    const timestamp = startTime
+      ? startTime.toLocaleString()
+      : new Date().toLocaleString();
+
     return `NOTA MÉDICA - ${timestamp}
 Duración de consulta: ${Math.floor(sessionDuration / 60)} minutos
 
@@ -232,39 +265,41 @@ ${soapNotes.plan || 'No generado'}
 Transcripción original disponible por separado.
 Generado con asistencia de IA médica - Revisar y validar contenido.`;
   };
-  
+
   const getSectionIcon = (section) => {
     const icons = {
       subjective: UserIcon,
       objective: CheckCircleIcon,
       assessment: SparklesIcon,
-      plan: DocumentTextIcon
+      plan: DocumentTextIcon,
     };
     return icons[section] || DocumentTextIcon;
   };
-  
+
   const getSectionTitle = (section) => {
     const titles = {
       subjective: 'SUBJETIVO',
-      objective: 'OBJETIVO', 
+      objective: 'OBJETIVO',
       assessment: 'ANÁLISIS',
-      plan: 'PLAN'
+      plan: 'PLAN',
     };
     return titles[section] || section.toUpperCase();
   };
-  
+
   const getSectionColor = (section) => {
     const colors = {
       subjective: 'border-blue-200 bg-blue-50',
       objective: 'border-green-200 bg-green-50',
       assessment: 'border-yellow-200 bg-yellow-50',
-      plan: 'border-purple-200 bg-purple-50'
+      plan: 'border-purple-200 bg-purple-50',
     };
     return colors[section] || 'border-gray-200 bg-gray-50';
   };
-  
-  const hasContent = Object.values(soapNotes).some(content => content && content.trim().length > 0);
-  
+
+  const hasContent = Object.values(soapNotes).some(
+    (content) => content && content.trim().length > 0,
+  );
+
   return (
     <div className="p-6">
       <div className="max-w-6xl mx-auto">
@@ -275,13 +310,15 @@ Generado con asistencia de IA médica - Revisar y validar contenido.`;
               <DocumentTextIcon className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h2 className="text-xl font-semibold text-gray-900">Documentación Médica</h2>
+              <h2 className="text-xl font-semibold text-gray-900">
+                Documentación Médica
+              </h2>
               <p className="text-sm text-gray-600">
                 Notas SOAP generadas automáticamente
               </p>
             </div>
           </div>
-          
+
           <div className="flex items-center space-x-3 flex-wrap gap-2">
             <div className="flex items-center space-x-3">
               {/* Auto-generate toggle */}
@@ -328,7 +365,7 @@ Generado con asistencia de IA médica - Revisar y validar contenido.`;
             )}
           </div>
         </div>
-        
+
         {/* Generation Progress */}
         <AnimatePresence>
           {generationProgress > 0 && generationProgress < 100 && (
@@ -339,8 +376,12 @@ Generado con asistencia de IA médica - Revisar y validar contenido.`;
               className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4"
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-blue-800">Generando notas SOAP...</span>
-                <span className="text-sm text-blue-600">{generationProgress}%</span>
+                <span className="text-sm font-medium text-blue-800">
+                  Generando notas SOAP...
+                </span>
+                <span className="text-sm text-blue-600">
+                  {generationProgress}%
+                </span>
               </div>
               <div className="w-full bg-blue-200 rounded-full h-2">
                 <motion.div
@@ -353,14 +394,14 @@ Generado con asistencia de IA médica - Revisar y validar contenido.`;
             </motion.div>
           )}
         </AnimatePresence>
-        
+
         {/* SOAP Sections */}
         {hasContent ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {Object.entries(soapNotes).map(([section, content]) => {
               const Icon = getSectionIcon(section);
               const isEditing = editingSection === section;
-              
+
               return (
                 <details
                   key={section}
@@ -370,7 +411,9 @@ Generado con asistencia de IA médica - Revisar y validar contenido.`;
                   <summary className="p-4 border-b border-current border-opacity-20 cursor-pointer flex items-center justify-between list-none">
                     <div className="flex items-center space-x-2">
                       <Icon className="w-5 h-5" />
-                      <h3 className="font-semibold">{getSectionTitle(section)}</h3>
+                      <h3 className="font-semibold">
+                        {getSectionTitle(section)}
+                      </h3>
                     </div>
                     <button
                       type="button"
@@ -392,7 +435,9 @@ Generado con asistencia de IA médica - Revisar y validar contenido.`;
                           defaultValue={content}
                           className="w-full h-32 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                           placeholder={`Contenido ${getSectionTitle(section).toLowerCase()}...`}
-                          onBlur={(e) => handleSectionEdit(section, e.target.value)}
+                          onBlur={(e) =>
+                            handleSectionEdit(section, e.target.value)
+                          }
                           autoFocus
                         />
                         <div className="flex justify-end space-x-2">
@@ -430,10 +475,9 @@ Generado con asistencia de IA médica - Revisar y validar contenido.`;
               No hay documentación disponible
             </h3>
             <p className="text-gray-400 mb-4">
-              {finalTranscript.length === 0 
+              {finalTranscript.length === 0
                 ? 'Inicia la grabación para generar notas SOAP automáticamente'
-                : 'Las notas SOAP se generarán cuando haya suficiente contenido transcrito'
-              }
+                : 'Las notas SOAP se generarán cuando haya suficiente contenido transcrito'}
             </p>
             {finalTranscript.length > 0 && (
               <button
@@ -446,16 +490,21 @@ Generado con asistencia de IA médica - Revisar y validar contenido.`;
             )}
           </div>
         )}
-        
+
         {/* Session Info */}
         <div className="mt-6 flex items-center justify-between text-sm text-gray-500 bg-gray-50 rounded-lg p-4">
           <div className="flex items-center space-x-4">
             <span className="flex items-center">
               <ClockIcon className="w-4 h-4 mr-1" />
-              Duración: {Math.floor(sessionDuration / 60)}:{(sessionDuration % 60).toString().padStart(2, '0')}
+              Duración: {Math.floor(sessionDuration / 60)}:
+              {(sessionDuration % 60).toString().padStart(2, '0')}
             </span>
             <span>
-              Palabras transcritas: {finalTranscript.split(' ').filter(word => word.length > 0).length}
+              Palabras transcritas:{' '}
+              {
+                finalTranscript.split(' ').filter((word) => word.length > 0)
+                  .length
+              }
             </span>
           </div>
           <div className="text-xs">
@@ -463,7 +512,7 @@ Generado con asistencia de IA médica - Revisar y validar contenido.`;
           </div>
         </div>
       </div>
-      
+
       {/* Copy Success Notification */}
       <AnimatePresence>
         {showCopySuccess && (

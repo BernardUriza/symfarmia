@@ -3,9 +3,9 @@
  * Animación perfecta sin audio real, todo simulado
  */
 
-"use client";
-import React, { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+'use client';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   PlayIcon,
   StopIcon,
@@ -14,13 +14,13 @@ import {
   ArrowPathIcon,
   BeakerIcon,
   ChevronDownIcon,
-} from "@heroicons/react/24/outline";
-import { CheckIcon } from "@heroicons/react/24/solid";
-import { useTranslation } from "../../providers/I18nProvider";
-import { useDemoTranscription } from "@/domains/demo";
+} from '@heroicons/react/24/outline';
+import { CheckIcon } from '@heroicons/react/24/solid';
+import { useTranslation } from '../../providers/I18nProvider';
+import { useDemoTranscription } from '@/domains/demo';
 import { useRouter } from 'next/navigation';
 
-const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
+const DemoTranscriptionPanel = ({ strategy = 'general_medicine' }) => {
   const { t } = useTranslation();
   const router = useRouter();
   const {
@@ -64,7 +64,7 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
       setIsDropdownOpen(false);
       setIsStrategyOpen(false);
     };
-    
+
     return () => {
       // Force cleanup on unmount
       cleanup();
@@ -87,16 +87,16 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
       // Handle specialty confirmation
       if (
         showSpecialtyConfirmation &&
-        !event.target.closest(".specialty-confirmation-container")
+        !event.target.closest('.specialty-confirmation-container')
       ) {
         // Don't close automatically - require explicit action
       }
-      
+
       // Handle dropdown
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsDropdownOpen(false);
       }
-      
+
       // Handle strategy dropdown
       if (strategyRef.current && !strategyRef.current.contains(event.target)) {
         setIsStrategyOpen(false);
@@ -104,28 +104,29 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
     };
 
     // Only add listener if any dropdown is open
-    const shouldAddListener = showSpecialtyConfirmation || isDropdownOpen || isStrategyOpen;
-    
+    const shouldAddListener =
+      showSpecialtyConfirmation || isDropdownOpen || isStrategyOpen;
+
     if (shouldAddListener) {
-      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener('mousedown', handleClickOutside);
     }
 
     // Cleanup function always removes the listener
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [showSpecialtyConfirmation, isDropdownOpen, isStrategyOpen]);
 
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
   const getConfidenceColor = () => {
-    if (confidence >= 0.9) return "text-green-600";
-    if (confidence >= 0.8) return "text-blue-600";
-    return "text-yellow-600";
+    if (confidence >= 0.9) return 'text-green-600';
+    if (confidence >= 0.8) return 'text-blue-600';
+    return 'text-yellow-600';
   };
 
   const getAudioLevelBars = () => {
@@ -135,7 +136,7 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
     for (let i = 0; i < 5; i++) {
       // Animación simulada de niveles de audio - SOLO CLIENT SIDE
       const height =
-        typeof window !== "undefined" && Math.random() > 0.5 ? "h-6" : "h-2";
+        typeof window !== 'undefined' && Math.random() > 0.5 ? 'h-6' : 'h-2';
       bars.push(
         <motion.div
           key={i}
@@ -184,7 +185,7 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
       <div className="bg-white rounded-xl shadow-sm border border-gray-100">
         <div className="p-6">
           <div className="text-center text-gray-500">
-            {t("transcription.title") || "Transcripción en Tiempo Real"}
+            {t('transcription.title') || 'Transcripción en Tiempo Real'}
           </div>
         </div>
       </div>
@@ -202,7 +203,7 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
             </div>
             <div>
               <div className="font-semibold text-gray-900">
-                {t("transcription.title")}
+                {t('transcription.title')}
               </div>
               <div className="text-sm text-gray-500">Demo: {strategyName}</div>
             </div>
@@ -217,7 +218,7 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
             )}
             <motion.div
               className={`w-3 h-3 rounded-full ${
-                isRecording ? "bg-red-500" : "bg-gray-300"
+                isRecording ? 'bg-red-500' : 'bg-gray-300'
               }`}
               animate={{
                 scale: isRecording ? [1, 1.2, 1] : 1,
@@ -260,7 +261,7 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
                 </span>
                 <ChevronDownIcon
                   className={`w-4 h-4 text-gray-500 transition-transform duration-200 ml-2 ${
-                    isDropdownOpen ? "transform rotate-180" : ""
+                    isDropdownOpen ? 'transform rotate-180' : ''
                   }`}
                 />
               </motion.button>
@@ -284,7 +285,7 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
                             setIsDropdownOpen(false);
                           }}
                           className="w-full px-3 py-2 text-left hover:bg-gray-50 flex items-center space-x-2 transition-colors border-b border-gray-100 last:border-b-0"
-                          whileHover={{ backgroundColor: "#f9fafb" }}
+                          whileHover={{ backgroundColor: '#f9fafb' }}
                         >
                           <div className="text-lg">{specialty.icon}</div>
                           <div className="flex-1 min-w-0">
@@ -360,7 +361,7 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
               <div className="flex items-center space-x-2">
                 <BeakerIcon className="w-4 h-4 text-purple-600" />
                 <span className="text-sm font-medium text-purple-800">
-                  {availableSpecialties[selectedSpecialty]?.icon}{" "}
+                  {availableSpecialties[selectedSpecialty]?.icon}{' '}
                   {availableSpecialties[selectedSpecialty]?.name}
                 </span>
               </div>
@@ -449,8 +450,8 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
                   disabled={!selectedSpecialty}
                   className={`inline-flex items-center space-x-2 font-semibold py-3 px-6 rounded-lg transition-colors shadow-md ${
                     selectedSpecialty
-                      ? "bg-blue-600 hover:bg-blue-700 text-white"
-                      : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   }`}
                   whileHover={{ scale: selectedSpecialty ? 1.05 : 1 }}
                   whileTap={{ scale: selectedSpecialty ? 0.95 : 1 }}
@@ -458,10 +459,10 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
                   <PlayIcon className="w-5 h-5" />
                   <span>
                     {consultationGenerated
-                      ? "Continuar Grabando"
+                      ? 'Continuar Grabando'
                       : selectedSpecialty
-                        ? t("transcription.start_recording")
-                        : "Selecciona Especialidad Primero"}
+                        ? t('transcription.start_recording')
+                        : 'Selecciona Especialidad Primero'}
                   </span>
                 </motion.button>
               )}
@@ -475,7 +476,7 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
                 whileTap={{ scale: 0.95 }}
               >
                 <StopIcon className="w-5 h-5" />
-                <span>{t("transcription.stop_recording")}</span>
+                <span>{t('transcription.stop_recording')}</span>
               </motion.button>
 
               <div className="text-sm text-gray-600">
@@ -484,7 +485,7 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
                   animate={{ opacity: [1, 0.5, 1] }}
                   transition={{ duration: 1.5, repeat: Infinity }}
                 >
-                  🔴 Simulando consulta de{" "}
+                  🔴 Simulando consulta de{' '}
                   {availableSpecialties[selectedSpecialty]?.name}...
                 </motion.span>
               </div>
@@ -500,7 +501,7 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
               className="inline-flex items-center space-x-1 text-sm text-gray-500 hover:text-gray-700"
             >
               <ArrowPathIcon className="w-4 h-4" />
-              <span>{t("transcription.reset_demo")}</span>
+              <span>{t('transcription.reset_demo')}</span>
             </button>
           </div>
         )}
@@ -517,7 +518,7 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
               <div className="bg-gray-50 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="text-sm font-medium text-gray-700">
-                    {t("transcription.final_transcript")}
+                    {t('transcription.final_transcript')}
                   </h3>
                   {confidence > 0 && (
                     <div className="flex items-center space-x-1">
@@ -677,10 +678,10 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
       <div className="px-6 py-3 bg-gray-50 border-t border-gray-100 rounded-b-xl">
         <div className="flex items-center justify-between text-sm text-gray-600">
           <div className="flex items-center space-x-4">
-            <span>{t("transcription.service_label")}: Demo Simulado</span>
+            <span>{t('transcription.service_label')}: Demo Simulado</span>
             <span className="flex items-center">
               <SparklesIcon className="w-4 h-4 mr-1 text-purple-500" />
-              {t("transcription.medical_ai_active")}
+              {t('transcription.medical_ai_active')}
             </span>
           </div>
           <div className="flex items-center space-x-2">
@@ -695,7 +696,7 @@ const DemoTranscriptionPanel = ({ strategy = "general_medicine" }) => {
             {demoText && (
               <span className="flex items-center">
                 <CheckCircleIcon className="w-4 h-4 mr-1 text-green-500" />
-                {demoText.split(" ").length} {t("transcription.words_count")}
+                {demoText.split(' ').length} {t('transcription.words_count')}
               </span>
             )}
           </div>

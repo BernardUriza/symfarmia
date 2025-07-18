@@ -1,47 +1,50 @@
 import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  SunIcon, 
-  DocumentTextIcon, 
-  ChartBarIcon, 
+import {
+  SunIcon,
+  DocumentTextIcon,
+  ChartBarIcon,
   ClipboardDocumentCheckIcon,
-  ArrowTrendingUpIcon 
+  ArrowTrendingUpIcon,
 } from '@heroicons/react/24/outline';
 import MedicalBrainIcon from '../MedicalBrainIcon';
 import ParticleField from './ParticleField';
 import SectionCard from './SectionCard';
 
 const SolutionSection = React.memo(({ t }) => {
-  const solutionData = useMemo(() => [
-    {
-      title: t('intelligent_transcription'),
-      description: t('intelligent_transcription_desc'),
-      icon: DocumentTextIcon,
-      color: 'from-teal-400 to-blue-500',
-      delay: 0.2
-    },
-    {
-      title: t('assisted_diagnosis'),
-      description: t('assisted_diagnosis_desc'),
-      icon: MedicalBrainIcon,
-      color: 'from-blue-400 to-purple-500',
-      delay: 0.4
-    },
-    {
-      title: t('automated_prescriptions'),
-      description: t('automated_prescriptions_desc'),
-      icon: ClipboardDocumentCheckIcon,
-      color: 'from-purple-400 to-pink-500',
-      delay: 0.6
-    },
-    {
-      title: t('medical_analytics'),
-      description: t('medical_analytics_desc'),
-      icon: ChartBarIcon,
-      color: 'from-pink-400 to-teal-500',
-      delay: 0.8
-    }
-  ], [t]);
+  const solutionData = useMemo(
+    () => [
+      {
+        title: t('intelligent_transcription'),
+        description: t('intelligent_transcription_desc'),
+        icon: DocumentTextIcon,
+        color: 'from-teal-400 to-blue-500',
+        delay: 0.2,
+      },
+      {
+        title: t('assisted_diagnosis'),
+        description: t('assisted_diagnosis_desc'),
+        icon: MedicalBrainIcon,
+        color: 'from-blue-400 to-purple-500',
+        delay: 0.4,
+      },
+      {
+        title: t('automated_prescriptions'),
+        description: t('automated_prescriptions_desc'),
+        icon: ClipboardDocumentCheckIcon,
+        color: 'from-purple-400 to-pink-500',
+        delay: 0.6,
+      },
+      {
+        title: t('medical_analytics'),
+        description: t('medical_analytics_desc'),
+        icon: ChartBarIcon,
+        color: 'from-pink-400 to-teal-500',
+        delay: 0.8,
+      },
+    ],
+    [t],
+  );
 
   return (
     <section className="relative min-h-screen flex items-center justify-center py-20 overflow-hidden">
@@ -49,12 +52,12 @@ const SolutionSection = React.memo(({ t }) => {
       <div className="absolute inset-0 bg-gradient-to-br from-slate-800 via-teal-900 to-blue-900">
         <div className="absolute inset-0 bg-gradient-to-t from-transparent via-teal-500/10 to-transparent" />
       </div>
-      
+
       {/* Healing Energy Particles */}
       <motion.div className="absolute inset-0">
         <ParticleField count={15} />
       </motion.div>
-      
+
       <div className="relative z-10 max-w-7xl mx-auto px-4">
         <motion.div
           className="text-center mb-16"
@@ -69,7 +72,7 @@ const SolutionSection = React.memo(({ t }) => {
           </h2>
           <div className="w-24 h-1 bg-gradient-to-r from-teal-400 to-blue-400 mx-auto" />
         </motion.div>
-        
+
         {/* Connected Hope Nodes */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative">
           {/* Connection Lines */}
@@ -96,7 +99,7 @@ const SolutionSection = React.memo(({ t }) => {
               </linearGradient>
             </defs>
           </svg>
-          
+
           {solutionData.map((node, index) => (
             <SectionCard
               key={index}
@@ -108,7 +111,7 @@ const SolutionSection = React.memo(({ t }) => {
             />
           ))}
         </div>
-        
+
         {/* Transformation Promise */}
         <motion.div
           className="text-center mt-16"

@@ -1,6 +1,6 @@
 /**
  * GLOBAL LANGUAGE SWITCHER
- * 
+ *
  * Universal language switcher that can be integrated into any layout
  * Automatically adapts to the current page context
  */
@@ -9,87 +9,96 @@
 
 import React, { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { 
-  CompactLanguageSwitcher, 
-  FloatingLanguageSwitcher, 
+import {
+  CompactLanguageSwitcher,
+  FloatingLanguageSwitcher,
   MedicalLanguageSwitcher,
-  FullLanguageSwitcher 
+  FullLanguageSwitcher,
 } from '../ui/LanguageSwitcher';
 
 // 🎯 PAGE CONTEXT DETECTION
 const getPageContext = (pathname) => {
   // Medical/clinical pages
-  if (pathname.includes('/consultation') || 
-      pathname.includes('/medical') || 
-      pathname.includes('/clinical') ||
-      pathname.includes('/orders') ||
-      pathname.includes('/patient')) {
+  if (
+    pathname.includes('/consultation') ||
+    pathname.includes('/medical') ||
+    pathname.includes('/clinical') ||
+    pathname.includes('/orders') ||
+    pathname.includes('/patient')
+  ) {
     return 'medical';
   }
-  
+
   // Admin/settings pages
-  if (pathname.includes('/admin') || 
-      pathname.includes('/settings') ||
-      pathname.includes('/preferences')) {
+  if (
+    pathname.includes('/admin') ||
+    pathname.includes('/settings') ||
+    pathname.includes('/preferences')
+  ) {
     return 'admin';
   }
-  
+
   // Landing/marketing pages
-  if (pathname === '/' || 
-      pathname.includes('/landing') ||
-      pathname.includes('/demo') ||
-      pathname.includes('/features')) {
+  if (
+    pathname === '/' ||
+    pathname.includes('/landing') ||
+    pathname.includes('/demo') ||
+    pathname.includes('/features')
+  ) {
     return 'marketing';
   }
-  
+
   // Default application context
   return 'app';
 };
 
 // 🎯 GLOBAL LANGUAGE SWITCHER
-const GlobalLanguageSwitcher = ({ 
+const GlobalLanguageSwitcher = ({
   forceStyle = null,
   showFloating = true,
   className = '',
-  position = 'header'
+  position = 'header',
 }) => {
   const pathname = usePathname();
   const [pageContext, setPageContext] = useState('app');
   const [showFloatingButton, setShowFloatingButton] = useState(false);
-  
+
   // Detect page context
   useEffect(() => {
     const context = getPageContext(pathname);
     setPageContext(context);
   }, [pathname]);
-  
+
   // Show floating button on scroll or when no header switcher is visible
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    
+
     const handleScroll = () => {
-      const headerSwitcher = document.querySelector('[data-header-language-switcher]');
+      const headerSwitcher = document.querySelector(
+        '[data-header-language-switcher]',
+      );
       if (headerSwitcher) {
         const rect = headerSwitcher.getBoundingClientRect();
-        const isHeaderVisible = rect.top >= 0 && rect.bottom <= window.innerHeight;
+        const isHeaderVisible =
+          rect.top >= 0 && rect.bottom <= window.innerHeight;
         setShowFloatingButton(!isHeaderVisible);
       } else {
         setShowFloatingButton(true);
       }
     };
-    
+
     if (showFloating) {
       window.addEventListener('scroll', handleScroll);
       handleScroll(); // Initial check
     }
-    
+
     return () => {
       if (showFloating) {
         window.removeEventListener('scroll', handleScroll);
       }
     };
   }, [showFloating]);
-  
+
   // Return appropriate switcher based on context and position
   const renderSwitcher = () => {
     // Force specific style if requested
@@ -107,41 +116,45 @@ const GlobalLanguageSwitcher = ({
           return <CompactLanguageSwitcher className={className} />;
       }
     }
-    
+
     // Auto-select based on context and position
     if (position === 'floating') {
       return <FloatingLanguageSwitcher className={className} />;
     }
-    
+
     switch (pageContext) {
       case 'medical':
-        return position === 'header' ? 
-          <MedicalLanguageSwitcher className={className} style="compact" /> :
-          <MedicalLanguageSwitcher className={className} style="full" />;
-      
+        return position === 'header' ? (
+          <MedicalLanguageSwitcher className={className} style="compact" />
+        ) : (
+          <MedicalLanguageSwitcher className={className} style="full" />
+        );
+
       case 'admin':
-        return position === 'header' ? 
-          <CompactLanguageSwitcher className={className} /> :
-          <FullLanguageSwitcher className={className} />;
-      
+        return position === 'header' ? (
+          <CompactLanguageSwitcher className={className} />
+        ) : (
+          <FullLanguageSwitcher className={className} />
+        );
+
       case 'marketing':
         return <CompactLanguageSwitcher className={className} />;
-      
+
       default:
         return <CompactLanguageSwitcher className={className} />;
     }
   };
-  
+
   return (
     <>
       {/* Main switcher */}
-      <div 
+      <div
         className={`${className} ${position === 'header' ? 'data-header-language-switcher' : ''}`}
         data-header-language-switcher={position === 'header'}
       >
         {renderSwitcher()}
       </div>
-      
+
       {/* Floating switcher (when enabled and appropriate) */}
       {showFloating && showFloatingButton && position === 'header' && (
         <FloatingLanguageSwitcher />
@@ -153,7 +166,7 @@ const GlobalLanguageSwitcher = ({
 // 🎯 HEADER LANGUAGE SWITCHER
 export const HeaderLanguageSwitcher = ({ className = '' }) => {
   return (
-    <GlobalLanguageSwitcher 
+    <GlobalLanguageSwitcher
       position="header"
       showFloating={true}
       className={className}
@@ -164,7 +177,7 @@ export const HeaderLanguageSwitcher = ({ className = '' }) => {
 // 🎯 SIDEBAR LANGUAGE SWITCHER
 export const SidebarLanguageSwitcher = ({ className = '' }) => {
   return (
-    <GlobalLanguageSwitcher 
+    <GlobalLanguageSwitcher
       position="sidebar"
       showFloating={false}
       className={className}
@@ -175,7 +188,7 @@ export const SidebarLanguageSwitcher = ({ className = '' }) => {
 // 🎯 MEDICAL HEADER LANGUAGE SWITCHER
 export const MedicalHeaderLanguageSwitcher = ({ className = '' }) => {
   return (
-    <GlobalLanguageSwitcher 
+    <GlobalLanguageSwitcher
       forceStyle="medical"
       position="header"
       showFloating={true}
@@ -187,7 +200,7 @@ export const MedicalHeaderLanguageSwitcher = ({ className = '' }) => {
 // 🎯 SETTINGS LANGUAGE SWITCHER
 export const SettingsLanguageSwitcher = ({ className = '' }) => {
   return (
-    <GlobalLanguageSwitcher 
+    <GlobalLanguageSwitcher
       forceStyle="full"
       position="settings"
       showFloating={false}

@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import React from 'react';
 import Link from 'next/link';
@@ -17,11 +17,11 @@ class RouteErrorBoundary extends React.Component {
   componentDidCatch(error, errorInfo) {
     // Log the error to console in production
     console.error('Route Error Boundary caught an error:', error, errorInfo);
-    
+
     // Store error details
     this.setState({
       error,
-      errorInfo
+      errorInfo,
     });
 
     // Log to medical error tracking (if available)
@@ -31,7 +31,7 @@ class RouteErrorBoundary extends React.Component {
         error: error.toString(),
         stack: errorInfo.componentStack,
         timestamp: new Date().toISOString(),
-        userAgent: navigator.userAgent
+        userAgent: navigator.userAgent,
       });
     }
   }
@@ -51,8 +51,8 @@ class RouteErrorBoundary extends React.Component {
                 Error de Navegación
               </h1>
               <p className="text-lg text-gray-600">
-                Ocurrió un error al cargar esta página. 
-                {process.env.NODE_ENV === 'production' 
+                Ocurrió un error al cargar esta página.
+                {process.env.NODE_ENV === 'production'
                   ? ' Por favor, intente nuevamente.'
                   : ` Error: ${this.state.error?.toString()}`}
               </p>
@@ -65,7 +65,7 @@ class RouteErrorBoundary extends React.Component {
               >
                 Intentar de Nuevo
               </button>
-              
+
               <Link
                 href="/"
                 className="block w-full px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"

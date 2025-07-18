@@ -1,11 +1,11 @@
 import React from 'react';
 import { Heading, Text } from '../atoms/Typography';
 import StatCard from '../molecules/StatCard';
-import { 
-  ExclamationTriangleIcon, 
-  ClockIcon, 
-  CurrencyDollarIcon, 
-  UserGroupIcon 
+import {
+  ExclamationTriangleIcon,
+  ClockIcon,
+  CurrencyDollarIcon,
+  UserGroupIcon,
 } from '@heroicons/react/24/outline';
 
 const ProblemSection = ({ t }) => {
@@ -13,23 +13,23 @@ const ProblemSection = ({ t }) => {
     {
       icon: ClockIcon,
       stat: t('medical_time_lost'),
-      description: "Tiempo perdido en tareas administrativas"
+      description: 'Tiempo perdido en tareas administrativas',
     },
     {
       icon: ExclamationTriangleIcon,
       stat: t('burnout_rate'),
-      description: "Médicos reportan agotamiento profesional"
+      description: 'Médicos reportan agotamiento profesional',
     },
     {
       icon: CurrencyDollarIcon,
       stat: t('annual_inefficiency'),
-      description: "Pérdidas anuales por ineficiencia"
+      description: 'Pérdidas anuales por ineficiencia',
     },
     {
       icon: UserGroupIcon,
       stat: t('human_contact_crisis'),
-      description: "Reducción en tiempo con pacientes"
-    }
+      description: 'Reducción en tiempo con pacientes',
+    },
   ];
 
   return (
@@ -45,7 +45,7 @@ const ProblemSection = ({ t }) => {
           </div>
           <div className="w-24 h-1 bg-gradient-to-r from-red-500 to-orange-500 mx-auto"></div>
         </div>
-        
+
         {/* Problem Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
           {problems.map((problem, index) => (
@@ -58,7 +58,7 @@ const ProblemSection = ({ t }) => {
             />
           ))}
         </div>
-        
+
         {/* Transition Message */}
         <div className="text-center">
           <Text size="xl" color="light" className="italic">

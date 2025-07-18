@@ -10,7 +10,7 @@ import {
   ContactSection,
   Footer,
   useAnimationErrorBoundary,
-  monitorAnimationPerformance
+  monitorAnimationPerformance,
 } from './simple-landing';
 
 // Import CSS animations for fallbacks
@@ -36,7 +36,7 @@ const EnhancedLandingPage = () => {
   useEffect(() => {
     if (typeof document !== 'undefined') {
       const root = document.documentElement;
-      
+
       if (shouldDisableAnimations) {
         root.classList.add('low-performance-mode');
       } else {

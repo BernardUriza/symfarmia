@@ -2,12 +2,12 @@ import React from 'react';
 import Card from '../atoms/Card';
 import { Heading, Text } from '../atoms/Typography';
 
-const StatCard = ({ 
-  number, 
-  label, 
+const StatCard = ({
+  number,
+  label,
   description,
   icon: Icon,
-  variant = 'default'
+  variant = 'default',
 }) => {
   return (
     <Card variant={variant} className="text-center">
@@ -16,15 +16,15 @@ const StatCard = ({
           <Icon className="w-8 h-8 text-red-500" />
         </div>
       )}
-      
+
       <Heading level={2} color="teal" className="mb-2">
         {number}
       </Heading>
-      
+
       <Text weight="semibold" className="mb-2">
         {label}
       </Text>
-      
+
       {description && (
         <Text size="sm" color="gray">
           {description}

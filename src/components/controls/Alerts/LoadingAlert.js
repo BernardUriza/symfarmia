@@ -1,6 +1,6 @@
-import React from "react";
-import { useLoading } from "@/src/providers/LoadingContext";
-import { Progress } from "../../ui/progress";
+import React from 'react';
+import { useLoading } from '@/src/providers/LoadingContext';
+import { Progress } from '../../ui/progress';
 
 export default function LoadingAlert() {
   const { loadingState } = useLoading();
@@ -11,9 +11,7 @@ export default function LoadingAlert() {
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
       <div className="bg-background rounded-lg border p-6 shadow-lg w-[350px] space-y-4">
         <Progress value={loadingState?.progress} className="h-2" />
-        <p className="text-center text-sm text-muted-foreground">
-          Cargando...
-        </p>
+        <p className="text-center text-sm text-muted-foreground">Cargando...</p>
       </div>
     </div>
   );

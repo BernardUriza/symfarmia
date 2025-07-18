@@ -1,14 +1,18 @@
-"use client";
+'use client';
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { EnvelopeIcon, PhoneIcon, MapPinIcon } from '@heroicons/react/24/outline';
+import {
+  EnvelopeIcon,
+  PhoneIcon,
+  MapPinIcon,
+} from '@heroicons/react/24/outline';
 
 export default function ContactSection() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     subject: '',
-    message: ''
+    message: '',
   });
 
   const handleChange = (e) => {
@@ -44,7 +48,7 @@ export default function ContactSection() {
             <h3 className="text-2xl font-bold text-gray-900 mb-6">
               Información de Contacto
             </h3>
-            
+
             <div className="space-y-6">
               <div className="flex items-center">
                 <EnvelopeIcon className="h-6 w-6 text-blue-500 mr-4" />
@@ -53,7 +57,7 @@ export default function ContactSection() {
                   <p className="text-gray-600">contacto@symfarmia.com</p>
                 </div>
               </div>
-              
+
               <div className="flex items-center">
                 <PhoneIcon className="h-6 w-6 text-blue-500 mr-4" />
                 <div>
@@ -61,13 +65,14 @@ export default function ContactSection() {
                   <p className="text-gray-600">+1 (555) 123-4567</p>
                 </div>
               </div>
-              
+
               <div className="flex items-center">
                 <MapPinIcon className="h-6 w-6 text-blue-500 mr-4" />
                 <div>
                   <p className="font-medium text-gray-900">Dirección</p>
                   <p className="text-gray-600">
-                    123 Medical Plaza<br />
+                    123 Medical Plaza
+                    <br />
                     Ciudad de México, México
                   </p>
                 </div>
@@ -95,7 +100,10 @@ export default function ContactSection() {
           >
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="name"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Nombre
                 </label>
                 <input
@@ -110,7 +118,10 @@ export default function ContactSection() {
               </div>
 
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Email
                 </label>
                 <input
@@ -125,7 +136,10 @@ export default function ContactSection() {
               </div>
 
               <div>
-                <label htmlFor="subject" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="subject"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Asunto
                 </label>
                 <input
@@ -140,7 +154,10 @@ export default function ContactSection() {
               </div>
 
               <div>
-                <label htmlFor="message" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="message"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Mensaje
                 </label>
                 <textarea

@@ -22,7 +22,9 @@ export default function ReportStatusBadge({ status }) {
   const key = statusKeyMap[status] || status;
   const cls = statusClasses[key] || 'bg-gray-100 text-gray-800';
   return (
-    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${cls}`}>
+    <span
+      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${cls}`}
+    >
       {t(key)}
     </span>
   );

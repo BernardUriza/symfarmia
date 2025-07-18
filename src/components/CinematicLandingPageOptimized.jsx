@@ -26,30 +26,32 @@ const CinematicLandingPageOptimized = () => {
   return (
     <div className="relative bg-slate-900 text-white overflow-hidden">
       <Suspense fallback={<SectionSkeleton />}>
-        <HeroSection 
-          t={t} 
-          textY={textY} 
-          particleY={particleY} 
-          mousePosition={mousePosition} 
+        <HeroSection
+          t={t}
+          textY={textY}
+          particleY={particleY}
+          mousePosition={mousePosition}
         />
       </Suspense>
-      
+
       <Suspense fallback={<SectionSkeleton />}>
         <ProblemSection t={t} />
       </Suspense>
-      
+
       <Suspense fallback={<SectionSkeleton />}>
         <SolutionSection t={t} />
       </Suspense>
-      
+
       <Suspense fallback={<SectionSkeleton />}>
         <TrustSection t={t} />
       </Suspense>
-      
+
       {/* Placeholder for remaining sections */}
       <div className="min-h-screen bg-slate-800 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-4xl font-bold text-white mb-4">Performance Optimized! ⚡</h2>
+          <h2 className="text-4xl font-bold text-white mb-4">
+            Performance Optimized! ⚡
+          </h2>
           <p className="text-teal-200">
             ✅ Lazy loading • ✅ Memoized components • ✅ Optimized animations
           </p>

@@ -143,4 +143,3 @@ export const GlobeAltIcon = (props) => (
     />
   </svg>
 );
-

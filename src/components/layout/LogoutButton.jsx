@@ -1,19 +1,18 @@
-"use client";
+'use client';
 
 import React from 'react';
 import { LogOut } from 'lucide-react';
 
 const LogoutButton = ({ className = '' }) => {
-  
   const handleLogout = () => {
     // Clear any local storage items
     localStorage.removeItem('medicalAIDemoPatient');
     localStorage.removeItem('theme');
-    
+
     // Redirect to Auth0 logout
     window.location.href = '/auth/logout';
   };
-  
+
   return (
     <button
       onClick={handleLogout}

@@ -1,7 +1,11 @@
 import React from 'react';
 import Logo from '../atoms/Logo';
 import { Text } from '../atoms/Typography';
-import { ShieldCheckIcon, LockClosedIcon, ServerIcon } from '@heroicons/react/24/outline';
+import {
+  ShieldCheckIcon,
+  LockClosedIcon,
+  ServerIcon,
+} from '@heroicons/react/24/outline';
 
 const Footer = ({ t }) => {
   return (
@@ -11,11 +15,11 @@ const Footer = ({ t }) => {
           {/* Brand Section */}
           <div className="md:col-span-2">
             <Logo size="medium" variant="white" />
-            
+
             <Text color="gray" className="mb-6 max-w-md mt-4">
               {t('footer_description')}
             </Text>
-            
+
             <div className="flex space-x-4">
               <div className="w-8 h-8 bg-teal-500 rounded-full flex items-center justify-center">
                 <ShieldCheckIcon className="w-4 h-4 text-white" />
@@ -28,44 +32,62 @@ const Footer = ({ t }) => {
               </div>
             </div>
           </div>
-          
+
           {/* Product Links */}
           <div>
             <Text color="white" weight="semibold" className="mb-4">
               {t('product')}
             </Text>
             <div className="space-y-2">
-              <a href="#" className="block text-gray-400 hover:text-teal-400 transition-colors">
+              <a
+                href="#"
+                className="block text-gray-400 hover:text-teal-400 transition-colors"
+              >
                 {t('features')}
               </a>
-              <a href="#" className="block text-gray-400 hover:text-teal-400 transition-colors">
+              <a
+                href="#"
+                className="block text-gray-400 hover:text-teal-400 transition-colors"
+              >
                 {t('pricing')}
               </a>
-              <a href="#" className="block text-gray-400 hover:text-teal-400 transition-colors">
+              <a
+                href="#"
+                className="block text-gray-400 hover:text-teal-400 transition-colors"
+              >
                 {t('security')}
               </a>
             </div>
           </div>
-          
+
           {/* Support Links */}
           <div>
             <Text color="white" weight="semibold" className="mb-4">
               {t('support')}
             </Text>
             <div className="space-y-2">
-              <a href="#" className="block text-gray-400 hover:text-teal-400 transition-colors">
+              <a
+                href="#"
+                className="block text-gray-400 hover:text-teal-400 transition-colors"
+              >
                 {t('documentation')}
               </a>
-              <a href="#" className="block text-gray-400 hover:text-teal-400 transition-colors">
+              <a
+                href="#"
+                className="block text-gray-400 hover:text-teal-400 transition-colors"
+              >
                 {t('contact')}
               </a>
-              <a href="#" className="block text-gray-400 hover:text-teal-400 transition-colors">
+              <a
+                href="#"
+                className="block text-gray-400 hover:text-teal-400 transition-colors"
+              >
                 {t('privacy')}
               </a>
             </div>
           </div>
         </div>
-        
+
         {/* Copyright */}
         <div className="border-t border-slate-800 mt-12 pt-8 text-center">
           <Text color="gray">

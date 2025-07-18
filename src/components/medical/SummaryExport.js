@@ -1,10 +1,19 @@
-"use client";
+'use client';
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import { ChevronLeft, Download, FileText, Mail, Printer, Share2, Clock, User } from 'lucide-react';
+import {
+  ChevronLeft,
+  Download,
+  FileText,
+  Mail,
+  Printer,
+  Share2,
+  Clock,
+  User,
+} from 'lucide-react';
 
 const medicalSummary = {
   patientInfo: {
@@ -13,7 +22,7 @@ const medicalSummary = {
     gender: 'Femenino',
     id: '12345678',
     date: new Date().toLocaleDateString('es-ES'),
-    time: '10:30 AM'
+    time: '10:30 AM',
   },
   chiefComplaint: 'Dolor de cabeza persistente durante 3 días',
   assessment: 'Cefalea, no especificada (R51) - Probable migraña',
@@ -22,14 +31,14 @@ const medicalSummary = {
     'Intensidad 6-7/10',
     'Náuseas y fotofobia asociadas',
     'Rigidez cervical leve',
-    'Sin fiebre ni cambios visuales'
+    'Sin fiebre ni cambios visuales',
   ],
   orders: [
     'Ibuprofeno 400mg cada 6 horas según necesidad x 5 días',
     'TAC de cráneo simple para descartar patología intracraneal',
-    'Interconsulta con Neurología para evaluación especializada'
+    'Interconsulta con Neurología para evaluación especializada',
   ],
-  followUp: 'Control en 1 semana si síntomas persisten o empeoran'
+  followUp: 'Control en 1 semana si síntomas persisten o empeoran',
 };
 
 export function SummaryExport({ onPrevious }) {
@@ -48,8 +57,12 @@ export function SummaryExport({ onPrevious }) {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="text-center mb-6">
-        <h1 className="text-2xl text-slate-900 mb-2">Resumen Final de Consulta</h1>
-        <p className="text-slate-600">Reporte completo generado por IA listo para exportar</p>
+        <h1 className="text-2xl text-slate-900 mb-2">
+          Resumen Final de Consulta
+        </h1>
+        <p className="text-slate-600">
+          Reporte completo generado por IA listo para exportar
+        </p>
       </div>
 
       {/* Información del Paciente */}
@@ -64,19 +77,28 @@ export function SummaryExport({ onPrevious }) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <p className="text-sm text-slate-500">Nombre</p>
-              <p className="font-medium text-slate-900">{medicalSummary.patientInfo.name}</p>
+              <p className="font-medium text-slate-900">
+                {medicalSummary.patientInfo.name}
+              </p>
             </div>
             <div>
               <p className="text-sm text-slate-500">Edad</p>
-              <p className="font-medium text-slate-900">{medicalSummary.patientInfo.age} años</p>
+              <p className="font-medium text-slate-900">
+                {medicalSummary.patientInfo.age} años
+              </p>
             </div>
             <div>
               <p className="text-sm text-slate-500">ID Paciente</p>
-              <p className="font-medium text-slate-900">{medicalSummary.patientInfo.id}</p>
+              <p className="font-medium text-slate-900">
+                {medicalSummary.patientInfo.id}
+              </p>
             </div>
             <div>
               <p className="text-sm text-slate-500">Fecha de Consulta</p>
-              <p className="font-medium text-slate-900">{medicalSummary.patientInfo.date} - {medicalSummary.patientInfo.time}</p>
+              <p className="font-medium text-slate-900">
+                {medicalSummary.patientInfo.date} -{' '}
+                {medicalSummary.patientInfo.time}
+              </p>
             </div>
           </div>
         </CardContent>
@@ -93,17 +115,27 @@ export function SummaryExport({ onPrevious }) {
         <CardContent>
           <div className="space-y-4">
             <div>
-              <h4 className="font-medium text-slate-900 mb-2">Motivo de Consulta</h4>
-              <p className="text-slate-700 bg-slate-50 p-3 rounded-lg">{medicalSummary.chiefComplaint}</p>
-            </div>
-            
-            <div>
-              <h4 className="font-medium text-slate-900 mb-2">Impresión Diagnóstica</h4>
-              <p className="text-slate-700 bg-slate-50 p-3 rounded-lg">{medicalSummary.assessment}</p>
+              <h4 className="font-medium text-slate-900 mb-2">
+                Motivo de Consulta
+              </h4>
+              <p className="text-slate-700 bg-slate-50 p-3 rounded-lg">
+                {medicalSummary.chiefComplaint}
+              </p>
             </div>
 
             <div>
-              <h4 className="font-medium text-slate-900 mb-2">Hallazgos Clave</h4>
+              <h4 className="font-medium text-slate-900 mb-2">
+                Impresión Diagnóstica
+              </h4>
+              <p className="text-slate-700 bg-slate-50 p-3 rounded-lg">
+                {medicalSummary.assessment}
+              </p>
+            </div>
+
+            <div>
+              <h4 className="font-medium text-slate-900 mb-2">
+                Hallazgos Clave
+              </h4>
               <ul className="space-y-2">
                 {medicalSummary.keyFindings.map((finding, index) => (
                   <li key={index} className="flex items-start gap-2">
@@ -115,7 +147,9 @@ export function SummaryExport({ onPrevious }) {
             </div>
 
             <div>
-              <h4 className="font-medium text-slate-900 mb-2">Órdenes Médicas</h4>
+              <h4 className="font-medium text-slate-900 mb-2">
+                Órdenes Médicas
+              </h4>
               <ul className="space-y-2">
                 {medicalSummary.orders.map((order, index) => (
                   <li key={index} className="flex items-start gap-2">
@@ -128,7 +162,9 @@ export function SummaryExport({ onPrevious }) {
 
             <div>
               <h4 className="font-medium text-slate-900 mb-2">Seguimiento</h4>
-              <p className="text-slate-700 bg-slate-50 p-3 rounded-lg">{medicalSummary.followUp}</p>
+              <p className="text-slate-700 bg-slate-50 p-3 rounded-lg">
+                {medicalSummary.followUp}
+              </p>
             </div>
           </div>
         </CardContent>
@@ -149,13 +185,15 @@ export function SummaryExport({ onPrevious }) {
               <TabsTrigger value="docx">Word</TabsTrigger>
               <TabsTrigger value="email">Email</TabsTrigger>
             </TabsList>
-            
+
             <TabsContent value="pdf" className="mt-4">
               <div className="space-y-4">
-                <p className="text-sm text-slate-600">Exportar como documento PDF para imprimir o compartir</p>
+                <p className="text-sm text-slate-600">
+                  Exportar como documento PDF para imprimir o compartir
+                </p>
                 <div className="flex gap-2">
-                  <Button 
-                    onClick={() => handleExport('pdf')} 
+                  <Button
+                    onClick={() => handleExport('pdf')}
                     disabled={isExporting}
                     className="flex items-center gap-2"
                   >
@@ -169,12 +207,14 @@ export function SummaryExport({ onPrevious }) {
                 </div>
               </div>
             </TabsContent>
-            
+
             <TabsContent value="docx" className="mt-4">
               <div className="space-y-4">
-                <p className="text-sm text-slate-600">Exportar como documento Word para editar</p>
-                <Button 
-                  onClick={() => handleExport('docx')} 
+                <p className="text-sm text-slate-600">
+                  Exportar como documento Word para editar
+                </p>
+                <Button
+                  onClick={() => handleExport('docx')}
                   disabled={isExporting}
                   className="flex items-center gap-2"
                 >
@@ -183,10 +223,12 @@ export function SummaryExport({ onPrevious }) {
                 </Button>
               </div>
             </TabsContent>
-            
+
             <TabsContent value="email" className="mt-4">
               <div className="space-y-4">
-                <p className="text-sm text-slate-600">Enviar resumen por correo electrónico</p>
+                <p className="text-sm text-slate-600">
+                  Enviar resumen por correo electrónico
+                </p>
                 <div className="flex gap-2">
                   <Button className="flex items-center gap-2">
                     <Mail className="h-4 w-4" />
@@ -233,7 +275,11 @@ export function SummaryExport({ onPrevious }) {
 
       {/* Navegación */}
       <div className="flex justify-between items-center pt-4">
-        <Button variant="outline" onClick={onPrevious} className="flex items-center gap-2">
+        <Button
+          variant="outline"
+          onClick={onPrevious}
+          className="flex items-center gap-2"
+        >
           <ChevronLeft className="h-4 w-4" />
           Volver a Órdenes
         </Button>

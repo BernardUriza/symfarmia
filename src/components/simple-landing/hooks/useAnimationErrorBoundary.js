@@ -16,25 +16,30 @@ export const useAnimationErrorBoundary = () => {
   }, []);
 
   // Handle animation errors with progressive fallbacks
-  const handleError = useCallback((error, context = 'animation') => {
-    console.warn(`Animation error in ${context}:`, error);
-    
-    setErrorCount(prev => prev + 1);
-    setHasError(true);
-    
-    // Progressive error handling
-    if (errorCount >= 3) {
-      // Disable animations completely after 3 errors
-      console.warn('Multiple animation errors detected, disabling animations');
-      localStorage.setItem('symfarmia_animations_disabled', 'true');
-    } else if (errorCount >= 1) {
-      // Try recovery after first error
-      setIsRecovering(true);
-      setTimeout(() => {
-        setIsRecovering(false);
-      }, 1000);
-    }
-  }, [errorCount]);
+  const handleError = useCallback(
+    (error, context = 'animation') => {
+      console.warn(`Animation error in ${context}:`, error);
+
+      setErrorCount((prev) => prev + 1);
+      setHasError(true);
+
+      // Progressive error handling
+      if (errorCount >= 3) {
+        // Disable animations completely after 3 errors
+        console.warn(
+          'Multiple animation errors detected, disabling animations',
+        );
+        localStorage.setItem('symfarmia_animations_disabled', 'true');
+      } else if (errorCount >= 1) {
+        // Try recovery after first error
+        setIsRecovering(true);
+        setTimeout(() => {
+          setIsRecovering(false);
+        }, 1000);
+      }
+    },
+    [errorCount],
+  );
 
   // Check if animations should be disabled
   const shouldDisableAnimations = useCallback(() => {
@@ -47,18 +52,21 @@ export const useAnimationErrorBoundary = () => {
   }, [hasError, errorCount]);
 
   // Safe animation wrapper
-  const wrapAnimation = useCallback((animationFn, fallback = {}) => {
-    if (shouldDisableAnimations()) {
-      return fallback;
-    }
+  const wrapAnimation = useCallback(
+    (animationFn, fallback = {}) => {
+      if (shouldDisableAnimations()) {
+        return fallback;
+      }
 
-    try {
-      return animationFn();
-    } catch (error) {
-      handleError(error, 'animation wrapper');
-      return fallback;
-    }
-  }, [shouldDisableAnimations, handleError]);
+      try {
+        return animationFn();
+      } catch (error) {
+        handleError(error, 'animation wrapper');
+        return fallback;
+      }
+    },
+    [shouldDisableAnimations, handleError],
+  );
 
   // Monitor performance and disable on poor performance
   useEffect(() => {
@@ -68,27 +76,31 @@ export const useAnimationErrorBoundary = () => {
 
     let frameCount = 0;
     let lastTime = performance.now();
-    
+
     const checkPerformance = () => {
       frameCount++;
       const currentTime = performance.now();
-      
-      if (frameCount % 60 === 0) { // Check every 60 frames
+
+      if (frameCount % 60 === 0) {
+        // Check every 60 frames
         const fps = 1000 / ((currentTime - lastTime) / 60);
-        
-        if (fps < 30) { // If FPS drops below 30
-          console.warn('Poor animation performance detected, reducing animations');
+
+        if (fps < 30) {
+          // If FPS drops below 30
+          console.warn(
+            'Poor animation performance detected, reducing animations',
+          );
           handleError(new Error('Poor performance'), 'performance monitor');
         }
-        
+
         lastTime = currentTime;
       }
-      
+
       requestAnimationFrame(checkPerformance);
     };
 
     const animationId = requestAnimationFrame(checkPerformance);
-    
+
     return () => {
       if (animationId) {
         cancelAnimationFrame(animationId);
@@ -103,6 +115,6 @@ export const useAnimationErrorBoundary = () => {
     shouldDisableAnimations: shouldDisableAnimations(),
     handleError,
     resetError,
-    wrapAnimation
+    wrapAnimation,
   };
 };
