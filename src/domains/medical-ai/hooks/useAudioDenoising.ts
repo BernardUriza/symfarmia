@@ -232,7 +232,7 @@ export function useAudioDenoising(
       setError(e.message || 'Error starting audio capture')
       return null
     }
-  }, [isRecording, startProc])
+  }, [isRecording, startProc, stop])
 
   /** Detiene captura y procesamiento */
   const stop = useCallback(async (): Promise<void> => {
