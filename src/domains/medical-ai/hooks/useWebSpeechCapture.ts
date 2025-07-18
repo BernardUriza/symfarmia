@@ -10,6 +10,11 @@ interface UseWebSpeechCaptureReturn {
   clearTranscript: () => void;
   restartCount: number;
   lastRestartTime: Date | null;
+  isListening: boolean;
+  confidence: number;
+  language: string;
+  setLanguage: (lang: string) => void;
+  partialTranscripts: string[];
 }
 
 // Audit log for medical debugging
@@ -27,12 +32,18 @@ export const useWebSpeechCapture = (): UseWebSpeechCaptureReturn => {
   const [error, setError] = useState<string | null>(null);
   const [restartCount, setRestartCount] = useState(0);
   const [lastRestartTime, setLastRestartTime] = useState<Date | null>(null);
+  const [isListening, setIsListening] = useState(false);
+  const [confidence, setConfidence] = useState(0);
+  const [language, setLanguage] = useState('es-MX');
+  const [partialTranscripts, setPartialTranscripts] = useState<string[]>([]);
   
   const recognitionRef = useRef<any>(null);
   const watchdogTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const sessionStartTimeRef = useRef<Date | null>(null);
   const auditLogRef = useRef<WebSpeechAuditLog[]>([]);
   const isIntentionalStopRef = useRef(false);
+  const lastTranscriptRef = useRef('');
+  const confidenceAccumulatorRef = useRef<number[]>([]);
   
   // Watchdog configuration
   const WATCHDOG_TIMEOUT = 13000; // 13 seconds
@@ -128,14 +139,46 @@ export const useWebSpeechCapture = (): UseWebSpeechCaptureReturn => {
       const recognition = new SpeechRecognition();
       recognition.continuous = true;
       recognition.interimResults = true;
-      recognition.lang = 'es-MX';
+      recognition.lang = language;
+      recognition.maxAlternatives = 1;
       
       recognition.onresult = (event: any) => {
         const results = Array.from(event.results);
-        const transcript = results
-          .map((result: any) => result[0].transcript)
-          .join('');
-        setTranscript(transcript);
+        let finalTranscript = '';
+        let interimTranscript = '';
+        let totalConfidence = 0;
+        let confCount = 0;
+        
+        for (let i = event.resultIndex; i < results.length; i++) {
+          const result = results[i];
+          const alternative = result[0];
+          
+          if (result.isFinal) {
+            finalTranscript += alternative.transcript;
+            // Save partial transcript
+            setPartialTranscripts(prev => [...prev, alternative.transcript]);
+          } else {
+            interimTranscript += alternative.transcript;
+          }
+          
+          if (alternative.confidence) {
+            totalConfidence += alternative.confidence;
+            confCount++;
+          }
+        }
+        
+        const fullTranscript = finalTranscript || interimTranscript;
+        if (fullTranscript !== lastTranscriptRef.current) {
+          lastTranscriptRef.current = fullTranscript;
+          setTranscript(fullTranscript);
+        }
+        
+        // Update average confidence
+        if (confCount > 0) {
+          const avgConfidence = totalConfidence / confCount;
+          confidenceAccumulatorRef.current.push(avgConfidence);
+          setConfidence(avgConfidence);
+        }
         
         // Reset watchdog on activity
         resetWatchdog();
@@ -143,7 +186,13 @@ export const useWebSpeechCapture = (): UseWebSpeechCaptureReturn => {
       
       recognition.onspeechstart = () => {
         console.log('[WebSpeech] Speech detected');
+        setIsListening(true);
         resetWatchdog();
+      };
+      
+      recognition.onspeechend = () => {
+        console.log('[WebSpeech] Speech ended');
+        setIsListening(false);
       };
       
       recognition.onsoundstart = () => {
@@ -277,6 +326,10 @@ export const useWebSpeechCapture = (): UseWebSpeechCaptureReturn => {
   const clearTranscript = useCallback(() => {
     setTranscript('');
     setError(null);
+    setPartialTranscripts([]);
+    lastTranscriptRef.current = '';
+    confidenceAccumulatorRef.current = [];
+    setConfidence(0);
   }, []);
 
   return {
@@ -289,5 +342,10 @@ export const useWebSpeechCapture = (): UseWebSpeechCaptureReturn => {
     clearTranscript,
     restartCount,
     lastRestartTime,
+    isListening,
+    confidence,
+    language,
+    setLanguage,
+    partialTranscripts,
   };
 };

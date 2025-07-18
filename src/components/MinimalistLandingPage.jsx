@@ -332,10 +332,10 @@ const MinimalistLandingPage = ({ isDemo = false }) => {
         <div className="max-w-4xl mx-auto px-6">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">
-              🎙️ {t('demo_transcription_title', 'Prueba la Tecnología')}
+              🎙️ {t('demo.demo_transcription_title', 'Prueba la Tecnología')}
             </h2>
             <p className="text-lg text-gray-600 dark:text-gray-300">
-              {t('demo_transcription_subtitle', 'Experimenta la transcripción médica en tiempo real con IA')}
+              {t('demo.demo_transcription_subtitle', 'Experimenta la transcripción médica en tiempo real con IA')}
             </p>
           </div>
           <div className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-3xl shadow-xl border border-white/50 dark:border-slate-700/50 p-8">
