@@ -39,7 +39,7 @@ export const useRecordingManager = ({
   stateHandlers,
   callbacks
 }: UseRecordingManagerProps): TranscriptionHandlers => {
-  const audioDataRef = useRef<Float32Array | null>(null);
+  const audioDataRef = useRef<Float32Array>(new Float32Array());
 
   // Process diarization after recording
   const processDiarization = useCallback(async () => {
@@ -65,7 +65,7 @@ export const useRecordingManager = ({
         transcriptionState.webSpeechText
       );
       
-      if (!audioDataRef.current) {
+      if (audioDataRef.current.length === 0) {
         throw new Error('No audio data available for diarization');
       }
       
@@ -153,7 +153,7 @@ export const useRecordingManager = ({
 
   const onReset = useCallback(() => {
     transcriptionService.resetTranscription();
-    audioDataRef.current = null;
+    audioDataRef.current = new Float32Array();
     if (webSpeechService.error) {
       console.clear();
     }

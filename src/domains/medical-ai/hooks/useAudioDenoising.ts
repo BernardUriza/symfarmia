@@ -62,8 +62,8 @@ export function useAudioDenoising(
   const [audioChunks, setAudioChunks] = useState<UseAudioDenoisingReturn['audioChunks']>([])
   const [audioLevel, setAudioLevel] = useState(0)
   const [recordingTime, setRecordingTime] = useState(0)
-  const recordingStartRef = useRef<number | null>(null)
-  const recordingIntervalRef = useRef<number | null>(null)
+  const recordingStartRef = useRef<number>(0)
+  const recordingIntervalRef = useRef<number>(0)
 
   // Estadísticas internas
   const statsRef = useRef({ totalChunks: 0, denoisedChunks: 0, fallbackChunks: 0, totalTime: 0 })
@@ -77,21 +77,6 @@ export function useAudioDenoising(
   const chunkIdRef = useRef(0)
   const allChunksRef = useRef<Float32Array[]>([])
 
-  // RNNoise denoising module (singleton)
-  const rnnoiseRef = useRef<any>(null)
-  const rnnoiseReady = useRef(false)
-
-  // Initialize RNNoise once
-  useEffect(() => {
-    ;(async () => {
-      try {
-        rnnoiseRef.current = await RnnoiseModule()
-        rnnoiseReady.current = true
-      } catch (err) {
-        console.error('Error initializing RNNoise module', err)
-      }
-    })()
-  }, [])
 
   // Convert Float32Array (Web Audio) to Int16Array (RNNoise)
   const float32ToInt16 = (input: Float32Array): Int16Array => {
@@ -139,17 +124,17 @@ export function useAudioDenoising(
       setAudioLevel(Math.round(peak * 255))
       // Paso de denoising con RNNoise (pre-Whisper)
       let denoisedChunk: Float32Array = chunk
-      if (rnnoiseReady.current && rnnoiseRef.current) {
+      if (RnnoiseModule) {
         try {
           const int16 = float32ToInt16(chunk)
-          const out16 = rnnoiseRef.current.process(int16)
+          const out16 = RnnoiseModule.current.process(int16)
           denoisedChunk = int16ToFloat32(out16)
         } catch (err) {
           console.warn('RNNoise processing failed, using original chunk', err)
         }
       }
-      const id = chunkIdRef.current++
-      allChunksRef.current.push(denoisedChunk)
+      const id = chunkIdRef.current!++
+      allChunksRef.current!.push(denoisedChunk)
       setIsProcessing(true)
       const startTime = Date.now()
       try {
@@ -164,15 +149,15 @@ export function useAudioDenoising(
           activeFilters: result.denoisingResult ? Object.keys(result.denoisingResult.activeFilters) : [],
           fallbackMode: !!result.fallbackMode,
         }
-        statsRef.current.totalChunks++
-        if (metadata.denoisingUsed) statsRef.current.denoisedChunks++
-        if (metadata.fallbackMode) statsRef.current.fallbackChunks++
-        statsRef.current.totalTime += metadata.processingTime
+        statsRef.current!.totalChunks++
+        if (metadata.denoisingUsed) statsRef.current!.denoisedChunks++
+        if (metadata.fallbackMode) statsRef.current!.fallbackChunks++
+        statsRef.current!.totalTime += metadata.processingTime
         setProcessingStats({
-          totalChunks: statsRef.current.totalChunks,
-          denoisedChunks: statsRef.current.denoisedChunks,
-          fallbackChunks: statsRef.current.fallbackChunks,
-          averageProcessingTime: statsRef.current.totalTime / statsRef.current.totalChunks,
+          totalChunks: statsRef.current!.totalChunks,
+          denoisedChunks: statsRef.current!.denoisedChunks,
+          fallbackChunks: statsRef.current!.fallbackChunks,
+          averageProcessingTime: statsRef.current!.totalTime / statsRef.current!.totalChunks,
         })
         setAudioChunks((prev) => [...prev, { id, data: result.processedAudio, metadata }])
         onChunkReady?.(result.processedAudio, metadata)
@@ -186,13 +171,13 @@ export function useAudioDenoising(
           processingTime: Date.now() - startTime,
           fallbackMode: true,
         }
-        statsRef.current.totalChunks++
-        statsRef.current.fallbackChunks++
+        statsRef.current!.totalChunks++
+        statsRef.current!.fallbackChunks++
         setProcessingStats({
-          totalChunks: statsRef.current.totalChunks,
-          denoisedChunks: statsRef.current.denoisedChunks,
-          fallbackChunks: statsRef.current.fallbackChunks,
-          averageProcessingTime: statsRef.current.totalTime / statsRef.current.totalChunks,
+          totalChunks: statsRef.current!.totalChunks,
+          denoisedChunks: statsRef.current!.denoisedChunks,
+          fallbackChunks: statsRef.current!.fallbackChunks,
+          averageProcessingTime: statsRef.current!.totalTime / statsRef.current!.totalChunks,
         })
         setAudioChunks((prev) => [...prev, { id, data: chunk, metadata }])
         onChunkReady?.(chunk, metadata)
@@ -212,9 +197,9 @@ export function useAudioDenoising(
     // Clear recording timer and reset levels
     if (recordingIntervalRef.current) {
       clearInterval(recordingIntervalRef.current)
-      recordingIntervalRef.current = null
+      recordingIntervalRef.current = 0
     }
-    recordingStartRef.current = null
+    recordingStartRef.current = 0
     setRecordingTime(0)
     setAudioLevel(0)
     // Clean residual data and stats
@@ -258,10 +243,10 @@ export function useAudioDenoising(
 
   /** Devuelve todo el audio concatenado */
   const getCompleteAudio = useCallback((): Float32Array => {
-    const total = allChunksRef.current.reduce((sum, c) => sum + c.length, 0)
+    const total = allChunksRef.current!.reduce((sum, c) => sum + c.length, 0)
     const buf = new Float32Array(total)
     let offset = 0
-    for (const c of allChunksRef.current) {
+    for (const c of allChunksRef.current!) {
       buf.set(c, offset)
       offset += c.length
     }
@@ -286,9 +271,9 @@ export function useAudioDenoising(
     // Reset audio level and recording timer
     if (recordingIntervalRef.current) {
       clearInterval(recordingIntervalRef.current)
-      recordingIntervalRef.current = null
+      recordingIntervalRef.current = 0
     }
-    recordingStartRef.current = null
+    recordingStartRef.current = 0
     setRecordingTime(0)
     setAudioLevel(0)
   }, [])

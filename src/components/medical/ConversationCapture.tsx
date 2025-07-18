@@ -81,7 +81,7 @@ export const ConversationCapture = ({
   // **Other state**
   const [showTranscriptPopup, setShowTranscriptPopup] = useState(false);
   const chunkCountRef = useRef(0);
-  const audioDataRef = useRef<Float32Array | null>(null);
+  const audioDataRef = useRef<Float32Array>(new Float32Array());
 
   // **Model Debug**
   useEffect(() => {
@@ -164,9 +164,14 @@ export const ConversationCapture = ({
     try {
       const denoisedTranscriptionText = allMinutesText || "";
       const mergedText = DiarizationUtils.mergeTranscriptions(denoisedTranscriptionText, transcriptionState.webSpeechText);
-      if (completeAudio) audioDataRef.current = completeAudio;
-      if (!audioDataRef.current) throw new Error("No audio for diarization");
-      const result = await diarizationService.diarizeAudio(audioDataRef.current);
+      if (completeAudio) {
+        audioDataRef.current = completeAudio;
+      }
+      const audioData = audioDataRef.current;
+      if (!audioData || audioData.length === 0) {
+        throw new Error("No audio for diarization");
+      }
+      const result = await diarizationService.diarizeAudio(audioData);
       diarizationState.setDiarizationResult(result);
     } catch (err) {
       diarizationState.setDiarizationError(err instanceof Error ? err.message : "Unknown error");
@@ -237,7 +242,7 @@ export const ConversationCapture = ({
     resetTranscription();
     transcriptionState.resetTranscriptionState();
     diarizationState.resetDiarization();
-    audioDataRef.current = null;
+    audioDataRef.current = new Float32Array();
     chunkCountRef.current = 0;
   }, [resetTranscription, transcriptionState, diarizationState]);
 
@@ -269,7 +274,7 @@ export const ConversationCapture = ({
         </Button>
       </div>
       <div className="flex items-center justify-center gap-4 mt-4">
-        <Badge variant={uiState.isManualMode ? "secondary" : "default"}>
+        <Badge className="" variant={uiState.isManualMode ? "secondary" : "default"}>
           {uiState.isManualMode
             ? t("conversation.capture.mode.manual")
             : t("conversation.capture.mode.voice")}
@@ -319,10 +324,10 @@ export const ConversationCapture = ({
         </div>
         <p className="text-sm">{t("conversation.capture.form.hint")}</p>
         <div className="flex justify-end space-x-2">
-          <Button onClick={handleReset} variant="outline" size="sm">
+          <Button className="" onClick={handleReset} variant="outline" size="sm">
             {t("conversation.capture.form.buttons.clear")}
           </Button>
-          <Button onClick={handleCopy} variant="outline" size="sm" disabled={!transcriptionState.manualTranscript}>
+          <Button className="" onClick={handleCopy} variant="outline" size="sm" disabled={!transcriptionState.manualTranscript}>
             {uiState.copySuccess
               ? t("conversation.capture.form.buttons.copied")
               : t("conversation.capture.form.buttons.copy")}
