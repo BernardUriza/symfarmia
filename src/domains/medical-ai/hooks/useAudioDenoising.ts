@@ -51,9 +51,9 @@ export function useAudioDenoising(
 
   const recordingStartRef = useRef<number>(0);
   const recordingIntervalRef = useRef<number>(0);
-  const chunkIdRef = useRef(0);
+  const chunkIdRef = useRef<number>(0);
   const allChunksRef = useRef<Float32Array[]>([]);
-  const statsRef = useRef({ totalChunks: 0, denoisedChunks: 0, fallbackChunks: 0, totalTime: 0 });
+  const statsRef = useRef<{ totalChunks: number; denoisedChunks: number; fallbackChunks: number; totalTime: number }>({ totalChunks: 0, denoisedChunks: 0, fallbackChunks: 0, totalTime: 0 });
 
   const [processingStats, setProcessingStats] = useState({
     totalChunks: 0,
@@ -133,7 +133,7 @@ export function useAudioDenoising(
       workletNodeRef.current.port.onmessage = (e: MessageEvent) => {
         if (e.data.type === 'denoised') {
           setIsProcessing(true);
-          const chunkId = chunkIdRef.current++;
+          const chunkId = chunkIdRef.current!++;
           const floatData = new Float32Array(e.data.data);
           const peak = floatData.reduce((max, v) => Math.max(max, Math.abs(v)), 0);
           setAudioLevel(Math.round(peak * 255));
@@ -145,15 +145,19 @@ export function useAudioDenoising(
             denoisingUsed: true,
             processingTime: Date.now() - startTime,
           };
-          allChunksRef.current.push(floatData);
-          statsRef.current.totalChunks++;
-          statsRef.current.denoisedChunks++;
-          statsRef.current.totalTime += metadata.processingTime;
+          
+          // Use local reference to stats to avoid multiple null checks
+          const stats = statsRef.current!;
+          allChunksRef.current!.push(floatData);
+          stats.totalChunks++;
+          stats.denoisedChunks++;
+          stats.totalTime += metadata.processingTime;
+          
           setProcessingStats({
-            totalChunks: statsRef.current.totalChunks,
-            denoisedChunks: statsRef.current.denoisedChunks,
-            fallbackChunks: statsRef.current.fallbackChunks,
-            averageProcessingTime: statsRef.current.totalTime / statsRef.current.totalChunks,
+            totalChunks: stats.totalChunks,
+            denoisedChunks: stats.denoisedChunks,
+            fallbackChunks: stats.fallbackChunks,
+            averageProcessingTime: stats.totalTime / stats.totalChunks,
           });
           setAudioChunks(prev => [...prev, { id: chunkId, data: floatData, metadata }]);
           onChunkReady?.(floatData, metadata);
@@ -161,10 +165,10 @@ export function useAudioDenoising(
         }
       };
 
-      recordingStartRef.current = Date.now();
+      recordingStartRef.current! = Date.now();
       setRecordingTime(0);
       if (recordingIntervalRef.current) clearInterval(recordingIntervalRef.current);
-      recordingIntervalRef.current = window.setInterval(() => {
+      recordingIntervalRef.current! = window.setInterval(() => {
         const startTime = recordingStartRef.current || Date.now();
         setRecordingTime(Math.floor((Date.now() - startTime) / 1000));
       }, 1000);
@@ -183,7 +187,7 @@ export function useAudioDenoising(
     audioCtxRef.current?.suspend();
     if (recordingIntervalRef.current) {
       clearInterval(recordingIntervalRef.current);
-      recordingIntervalRef.current = 0;
+      recordingIntervalRef.current! = 0;
     }
     setRecordingTime(0);
     setAudioLevel(0);
@@ -208,14 +212,14 @@ export function useAudioDenoising(
     setError('');
     setAudioChunks([]);
     setProcessingStats({ totalChunks: 0, denoisedChunks: 0, fallbackChunks: 0, averageProcessingTime: 0 });
-    statsRef.current = { totalChunks: 0, denoisedChunks: 0, fallbackChunks: 0, totalTime: 0 };
-    allChunksRef.current = [];
-    chunkIdRef.current = 0;
+    statsRef.current! = { totalChunks: 0, denoisedChunks: 0, fallbackChunks: 0, totalTime: 0 };
+    allChunksRef.current! = [];
+    chunkIdRef.current! = 0;
     setIsProcessing(false);
     setIsRecording(false);
     if (recordingIntervalRef.current) {
       clearInterval(recordingIntervalRef.current);
-      recordingIntervalRef.current = 0;
+      recordingIntervalRef.current! = 0;
     }
     setRecordingTime(0);
     setAudioLevel(0);
