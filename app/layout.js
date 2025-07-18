@@ -55,7 +55,7 @@ const MedicalCriticalCSS = `
   
   /* BULLETPROOF THEME STYLES WITH P3 COLORS */
   [data-theme="light"] {
-    --medical-bg: #ffffff;
+    --medical-bg: #F8FAFC; /* Reduced glare */
     --medical-text: #1f2937;
     --medical-border: #e5e7eb;
     color-scheme: light;
