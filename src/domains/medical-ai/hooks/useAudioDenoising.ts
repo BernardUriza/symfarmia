@@ -203,6 +203,27 @@ export function useAudioDenoising(
     [onChunkReady]
   )
 
+  /** Detiene captura y procesamiento */
+  const stop = useCallback(async (): Promise<void> => {
+    if (!isRecording) return
+    // Ensure audio processor resources are fully released
+    await stopProc()
+    setIsRecording(false)
+    // Clear recording timer and reset levels
+    if (recordingIntervalRef.current) {
+      clearInterval(recordingIntervalRef.current)
+      recordingIntervalRef.current = null
+    }
+    recordingStartRef.current = null
+    setRecordingTime(0)
+    setAudioLevel(0)
+    // Clean residual data and stats
+    allChunksRef.current = []
+    statsRef.current = { totalChunks: 0, denoisedChunks: 0, fallbackChunks: 0, totalTime: 0 }
+    setAudioChunks([])
+    setProcessingStats({ totalChunks: 0, denoisedChunks: 0, fallbackChunks: 0, averageProcessingTime: 0 })
+  }, [isRecording, stopProc])
+
   /** Inicia captura y procesamiento unificado */
   const start = useCallback(async (): Promise<MediaStream | null> => {
     if (isRecording) {
@@ -234,27 +255,6 @@ export function useAudioDenoising(
       return null
     }
   }, [isRecording, startProc, stop])
-
-  /** Detiene captura y procesamiento */
-  const stop = useCallback(async (): Promise<void> => {
-    if (!isRecording) return
-    // Ensure audio processor resources are fully released
-    await stopProc()
-    setIsRecording(false)
-    // Clear recording timer and reset levels
-    if (recordingIntervalRef.current) {
-      clearInterval(recordingIntervalRef.current)
-      recordingIntervalRef.current = null
-    }
-    recordingStartRef.current = null
-    setRecordingTime(0)
-    setAudioLevel(0)
-    // Clean residual data and stats
-    allChunksRef.current = []
-    statsRef.current = { totalChunks: 0, denoisedChunks: 0, fallbackChunks: 0, totalTime: 0 }
-    setAudioChunks([])
-    setProcessingStats({ totalChunks: 0, denoisedChunks: 0, fallbackChunks: 0, averageProcessingTime: 0 })
-  }, [isRecording, stopProc])
 
   /** Devuelve todo el audio concatenado */
   const getCompleteAudio = useCallback((): Float32Array => {
