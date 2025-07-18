@@ -18,63 +18,77 @@ const { t } = useTranslation();
 const [activeTab, setActiveTab] = useState('audio');
 
 const [settings, setSettings] = useState({
-  // Audio settings audioSource: 'primary',
-  // 'primary' | 'bluetooth' | 'system' audioQuality: 'high',
-  // 'low' | 'medium' | 'high' | 'ultra' noiseSuppression: true,
+  // Audio settings
+  audioSource: 'primary', // 'primary' | 'bluetooth' | 'system'
+  audioQuality: 'high', // 'low' | 'medium' | 'high' | 'ultra'
+  noiseSuppression: true,
   echoCancellation: true,
   medicalVoiceFilter: true,
-  sensitivity: 75,
-  // 0-100 // Transcription settings language: 'es-MX',
-  // Changed to Mexican Spanish for medical context transcriptionService: 'browser',
-  confidenceThreshold: 75,
-  // Changed from 100% to 75% (more realistic) realtimeMode: true,
+  sensitivity: 75, // 0-100
+  
+  // Transcription settings
+  language: 'es-MX', // Changed to Mexican Spanish for medical context
+  transcriptionService: 'browser',
+  confidenceThreshold: 75, // Changed from 100% to 75% (more realistic)
+  realtimeMode: true,
   medicalTerminology: true,
   clinicalAbbreviations: true,
   drugNames: true,
-  // AI Assistant settings medicalSpecialty: 'general',
-  // 'general' | 'cardiology' | 'pediatrics' | 'emergency' aiAssistanceLevel: 'intermediate',
-  // 'basic' | 'intermediate' | 'advanced' clinicalAlerts: true,
+  
+  // AI Assistant settings
+  medicalSpecialty: 'general', // 'general' | 'cardiology' | 'pediatrics' | 'emergency'
+  aiAssistanceLevel: 'intermediate', // 'basic' | 'intermediate' | 'advanced'
+  clinicalAlerts: true,
   emergencyAlerts: true,
   drugInteractionChecks: true,
   redFlags: true,
-  notesFormat: 'soap',
-  // 'soap' | 'narrative' | 'hybrid' // Presets activePreset: 'general' // 'general' | 'emergency' | 'night' | 'custom'
+  notesFormat: 'soap', // 'soap' | 'narrative' | 'hybrid'
+  
+  // Presets
+  activePreset: 'general' // 'general' | 'emergency' | 'night' | 'custom'
 });
 
-const tabs = [ {
+const tabs = [
+  {
   id: 'audio',
   label: '🎤 Audio',
   icon: MicrophoneIcon,
   component: AudioSettings,
   description: 'Micrófono y calidad de grabación'
-}, {
+}, 
+  {
   id: 'transcription',
   label: '📝 Transcripción',
   icon: DocumentTextIcon,
   component: TranscriptionSettings,
   description: 'Idioma y precisión de texto'
-}, {
+}, 
+  {
   id: 'ai',
   label: '🤖 Asistente IA',
   icon: SparklesIcon,
   component: AISettings,
   description: 'Especialidad y nivel de asistencia'
-}, {
+}, 
+  {
   id: 'presets',
   label: '⚡ Presets',
   icon: BoltIcon,
   component: QuickPresets,
   description: 'Configuraciones rápidas'
-} ];
+}
+];
 
 const handleSettingChange = (key, value) => {
    setSettings(prev => ({ ...prev, [key]: value }));
 };
 
 const handleSave = () => {
-   // Save settings to localStorage localStorage.setItem('consultationSettings', JSON.stringify(settings));
-// Show success feedback console.log('⚙️ Configuración guardada:', settings);
-onClose();
+  // Save settings to localStorage
+  localStorage.setItem('consultationSettings', JSON.stringify(settings));
+  // Show success feedback
+  console.log('⚙️ Configuración guardada:', settings);
+  onClose();
 };
 
 const handleReset = () => {
@@ -106,30 +120,36 @@ const handlePresetSelect = (presetName) => {
   
 
 const presets = {
-  general: { audioQuality: 'high',
-  aiAssistanceLevel: 'intermediate',
-  confidenceThreshold: 75,
-  language: 'es-MX',
-  medicalTerminology: true,
-  clinicalAlerts: true,
-  notesFormat: 'soap'
-}, emergency: {
-  audioQuality: 'ultra',
-  aiAssistanceLevel: 'advanced',
-  confidenceThreshold: 70,
-  realtimeMode: true,
-  emergencyAlerts: true,
-  redFlags: true,
-  clinicalAlerts: true
-}, night: {
-  noiseSuppression: true,
-  medicalVoiceFilter: true,
-  sensitivity: 85,
-  clinicalAlerts: false,
-  emergencyAlerts: true
-} };
-if (presets[presetName]) { setSettings(prev => ({ ...prev, ...presets[presetName], activePreset: presetName }));
-} };
+  general: {
+    audioQuality: 'high',
+    aiAssistanceLevel: 'intermediate',
+    confidenceThreshold: 75,
+    language: 'es-MX',
+    medicalTerminology: true,
+    clinicalAlerts: true,
+    notesFormat: 'soap'
+  },
+  emergency: {
+    audioQuality: 'ultra',
+    aiAssistanceLevel: 'advanced',
+    confidenceThreshold: 70,
+    realtimeMode: true,
+    emergencyAlerts: true,
+    redFlags: true,
+    clinicalAlerts: true
+  },
+  night: {
+    noiseSuppression: true,
+    medicalVoiceFilter: true,
+    sensitivity: 85,
+    clinicalAlerts: false,
+    emergencyAlerts: true
+  }
+};
+if (presets[presetName]) {
+  setSettings(prev => ({ ...prev, ...presets[presetName], activePreset: presetName }));
+}
+};
 const ActiveTabComponent = tabs.find(tab => tab.id === activeTab)?.component;
 return ( <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"> <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden" > {/* Header */} <div className="flex items-center justify-between p-6 border-b border-gray-200 "> <div className="flex items-center space-x-3"> <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center"> <Cog6ToothIcon className="w-6 h-6 text-white" /> </div> <div> <h2 className="text-xl font-semibold text-gray-900 "> {t('consultation_settings') || 'Configuración de Consulta'} </h2> <p className="text-sm text-gray-600 "> {t('customize_experience') || 'Personaliza tu experiencia médica'} </p> </div> </div> <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition-colors" > <XMarkIcon className="w-5 h-5 text-gray-500" /> </button> </div> {/* Tab Navigation */} <div className="border-b border-gray-200 "> <nav className="flex space-x-1 p-2"> {tabs.map((tab) => {
   

@@ -88,16 +88,169 @@ const handlePresetSelect = (presetId) => {
 const isCurrentPreset = (presetId) => {
    return settings.activePreset === presetId;
 };
-return ( <div className="space-y-8"> {/* Header */} <div className="text-center"> <h3 className="text-lg font-semibold text-gray-900 mb-2"> ⚡ Configuraciones Rápidas </h3> <p className="text-sm text-gray-600 "> Selecciona el tipo de consulta para aplicar configuraciones optimizadas </p> </div> {/* Current Preset Indicator */} <div className="p-4 bg-blue-50 rounded-lg"> <div className="flex items-center space-x-3"> <CheckCircleIcon className="w-5 h-5 text-blue-600" /> <div> <div className="text-sm font-medium text-blue-800 "> Preset Activo: {presets.find(p => p.id === settings.activePreset)?.name || 'Personalizado'} </div> <div className="text-sm text-blue-700 "> {presets.find(p => p.id === settings.activePreset)?.description || 'Configuración ajustada manualmente'} </div> </div> </div> </div> {/* Preset Cards */} <div className="space-y-6"> {presets.map((preset) => {
+return (
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="text-center">
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+          ⚡ Configuraciones Rápidas
+        </h3>
+        <p className="text-sm text-gray-600 ">
+          Selecciona el tipo de consulta para aplicar configuraciones optimizadas
+        </p>
+      </div>
+
+      {/* Current Preset Indicator */}
+      <div className="p-4 bg-blue-50 rounded-lg">
+        <div className="flex items-center space-x-3">
+          <CheckCircleIcon className="w-5 h-5 text-blue-600" />
+          <div>
+            <div className="text-sm font-medium text-blue-800 ">
+              Preset Activo: {presets.find(p => p.id === settings.activePreset)?.name || 'Personalizado'}
+            </div>
+            <div className="text-sm text-blue-700 ">
+              {presets.find(p => p.id === settings.activePreset)?.description || 'Configuración ajustada manualmente'}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Preset Cards */}
+      <div className="space-y-6">
+        {presets.map((preset) => {
   
 
 const IconComponent = preset.iconComponent;
 
 const isSelected = isCurrentPreset(preset.id);
-return ( <motion.div key={preset.id} className={`rounded-xl border-2 transition-all overflow-hidden ${ getColorClasses(preset.color, isSelected) }`} whileHover={{ scale: 1.02 }} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: presets.indexOf(preset) * 0.1 }} > <div className="p-6"> <div className="flex items-start justify-between"> <div className="flex items-start space-x-4"> <div className={`p-3 rounded-xl ${preset.color === 'gray' ? 'bg-gray-100 ' : `bg-${preset.color}-100 <span className="text-2xl">{preset.icon}</span> </div> <div className="flex-1"> <div className="flex items-center space-x-2 mb-2"> <h4 className="text-lg font-semibold text-gray-900 "> {preset.name} </h4> {isSelected && ( <span className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full font-medium"> Activo </span> )} </div> <p className="text-sm text-gray-600 mb-4"> {preset.description} </p> {/* Features Grid */} <div className="grid grid-cols-2 gap-2 mb-4"> {preset.features.map((feature, index) => ( <div key={index} className="flex items-center space-x-2 text-sm"> <div className={`w-1.5 h-1.5 rounded-full bg-${preset.color}-500`} /> <span className="text-gray-700 ">{feature}</span> </div> ))} </div> {/* Best For */} <div className="p-3 bg-gray-100 rounded-lg"> <div className="text-xs font-medium text-gray-600 mb-1"> Ideal para: </div> <div className="text-sm text-gray-800 "> {preset.bestFor} </div> </div> </div> </div> {/* Action Button */} <div className="flex flex-col items-end space-y-2"> {preset.id !== 'custom' ? ( <motion.button onClick={() => handlePresetSelect(preset.id)} disabled={isSelected} className={`px-4 py-2 rounded-lg text-white font-medium transition-colors ${ isSelected ? 'bg-gray-400 cursor-not-allowed' : getButtonColorClasses(preset.color) }`} whileHover={!isSelected ? { scale: 1.05 } : {}} whileTap={!isSelected ? { scale: 0.95 } : {}} > {isSelected ? 'Aplicado' : 'Aplicar'} </motion.button> ) : ( <div className="px-4 py-2 rounded-lg bg-gray-100 text-gray-600 font-medium text-sm"> Manual </div> )} <IconComponent className={`w-5 h-5 text-${preset.color}-600`} /> </div> </div> </div> {/* Preview of Settings (expanded when selected) */} {isSelected && preset.id !== 'custom' && ( <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="border-t border-gray-200 bg-gray-50 " > <div className="p-4"> <div className="text-sm font-medium text-gray-700 mb-3"> Configuraciones Aplicadas: </div> <div className="grid grid-cols-2 gap-3 text-sm"> {Object.entries(preset.settings).map(([key, value]) => ( <div key={key} className="flex justify-between"> <span className="text-gray-600 capitalize"> {key.replace(/([A-Z])/g, ' $1').trim()}: </span> <span className="text-gray-800 font-medium"> {typeof value === 'boolean' ? (value ? 'Sí' : 'No') : value} </span> </div> ))} </div> </div> </motion.div> )} </motion.div> );
-})} </div> {/* Usage Tips */} <div className="p-4 bg-yellow-50 rounded-lg"> <div className="flex items-start space-x-3"> <BoltIcon className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" /> <div> <div className="text-sm font-medium text-yellow-800 "> 💡 Consejos de Uso </div> <div className="text-sm text-yellow-700 mt-1 space-y-1"> <div>• Consulta General: Para el 80% de consultas rutinarias</div> <div>• Emergencia: Cuando cada segundo cuenta</div> <div>• Nocturna: Para guardias y ambientes silenciosos</div> <div>• Personalizada: Ajusta configuraciones específicas en otras tabs</div> </div> </div> </div> </div> </div> );
+          return (
+            <motion.div
+              key={preset.id}
+              className={`rounded-xl border-2 transition-all overflow-hidden ${
+                getColorClasses(preset.color, isSelected)
+              }`}
+              whileHover={{ scale: 1.02 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: presets.indexOf(preset) * 0.1 }}
+            >
+              <div className="p-6">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start space-x-4">
+                    <div className={`p-3 rounded-xl ${preset.color === 'gray' ? 'bg-gray-100 ' : `bg-${preset.color}-100 `}`}>
+                      <span className="text-2xl">{preset.icon}</span>
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-2 mb-2">
+                        <h4 className="text-lg font-semibold text-gray-900 ">
+                          {preset.name}
+                        </h4>
+                        {isSelected && (
+                          <span className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full font-medium">
+                            Activo
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-600 mb-4">
+                        {preset.description}
+                      </p>
+                      {/* Features Grid */}
+                      <div className="grid grid-cols-2 gap-2 mb-4">
+                        {preset.features.map((feature, index) => (
+                          <div key={index} className="flex items-center space-x-2 text-sm">
+                            <div className={`w-1.5 h-1.5 rounded-full bg-${preset.color}-500`} />
+                            <span className="text-gray-700 ">{feature}</span>
+                          </div>
+                        ))}
+                      </div>
+                      {/* Best For */}
+                      <div className="p-3 bg-gray-100 rounded-lg">
+                        <div className="text-xs font-medium text-gray-600 mb-1">
+                          Ideal para:
+                        </div>
+                        <div className="text-sm text-gray-800 ">
+                          {preset.bestFor}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  {/* Action Button */}
+                  <div className="flex flex-col items-end space-y-2">
+                    {preset.id !== 'custom' ? (
+                      <motion.button
+                        onClick={() => handlePresetSelect(preset.id)}
+                        disabled={isSelected}
+                        className={`px-4 py-2 rounded-lg text-white font-medium transition-colors ${
+                          isSelected
+                            ? 'bg-gray-400 cursor-not-allowed'
+                            : getButtonColorClasses(preset.color)
+                        }`}
+                        whileHover={!isSelected ? { scale: 1.05 } : {}}
+                        whileTap={!isSelected ? { scale: 0.95 } : {}}
+                      >
+                        {isSelected ? 'Aplicado' : 'Aplicar'}
+                      </motion.button>
+                    ) : (
+                      <div className="px-4 py-2 rounded-lg bg-gray-100 text-gray-600 font-medium text-sm">
+                        Manual
+                      </div>
+                    )}
+                    <IconComponent className={`w-5 h-5 text-${preset.color}-600`} />
+                  </div>
+                </div>
+              </div>
+              {/* Preview of Settings (expanded when selected) */}
+              {isSelected && preset.id !== 'custom' && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="border-t border-gray-200 bg-gray-50 "
+                >
+                  <div className="p-4">
+                    <div className="text-sm font-medium text-gray-700 mb-3">
+                      Configuraciones Aplicadas:
+                    </div>
+                    <div className="grid grid-cols-2 gap-3 text-sm">
+                      {Object.entries(preset.settings).map(([key, value]) => (
+                        <div key={key} className="flex justify-between">
+                          <span className="text-gray-600 capitalize">
+                            {key.replace(/([A-Z])/g, ' $1').trim()}:
+                          </span>
+                          <span className="text-gray-800 font-medium">
+                            {typeof value === 'boolean' ? (value ? 'Sí' : 'No') : value}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </motion.div>
+          );
+        })}
+      </div>
+
+      {/* Usage Tips */}
+      <div className="p-4 bg-yellow-50 rounded-lg">
+        <div className="flex items-start space-x-3">
+          <BoltIcon className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+          <div>
+            <div className="text-sm font-medium text-yellow-800 ">
+              💡 Consejos de Uso
+            </div>
+            <div className="text-sm text-yellow-700 mt-1 space-y-1">
+              <div>• Consulta General: Para el 80% de consultas rutinarias</div>
+              <div>• Emergencia: Cuando cada segundo cuenta</div>
+              <div>• Nocturna: Para guardias y ambientes silenciosos</div>
+              <div>• Personalizada: Ajusta configuraciones específicas en otras tabs</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
 };
 
 export default QuickPresets;
-}}
