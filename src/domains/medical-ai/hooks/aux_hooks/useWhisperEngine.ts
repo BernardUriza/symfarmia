@@ -35,14 +35,14 @@ export function useWhisperEngine({
           setStatus('processing')
           break
         case 'CHUNK_PROCESSED':
-          const { chunkId, text, processingTime } = msg
+          const { chunkId, text, confidence, processingTime } = msg
           const chunk: TranscriptionChunk = {
             id: `chunk_${chunkId}`,
             text,
             timestamp: Date.now()
           }
           chunksRef.current.push(chunk)
-          confidenceRef.current = 0.8 // Default confidence
+          confidenceRef.current = confidence || 0.8
           processingTimeRef.current = processingTime
           onChunkProcessed?.(text, chunkId)
           onChunkProgress?.(chunkId, 100)
