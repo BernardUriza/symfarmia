@@ -91,3 +91,9 @@
 .dark ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.3);
 }
+
+/* Asegura el contraste del texto en el botón de parar grabación */
+.flex.justify-center button.bg-red-600.text-white,
+.bg-red-600.text-white {
+  color: white !important;
+}

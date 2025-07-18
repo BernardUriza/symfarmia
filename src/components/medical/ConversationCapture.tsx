@@ -99,9 +99,22 @@ export const ConversationCapture = ({
   // **Whisper + WebSpeech**
   const whisperService = useSimpleWhisper(TRANSCRIPTION_CONFIG);
   const {
-    transcription, status, error, engineStatus: whisperEngineStatus, audioLevel, recordingTime,
-    audioUrl, audioBlob, getCompleteAudio, startTranscription, stopTranscription, resetTranscription
+    transcription,
+    status,
+    error,
+    engineStatus: whisperEngineStatus,
+    audioLevel: _audioLevelRaw,
+    recordingTime: _recordingTimeRaw,
+    audioUrl,
+    audioBlob,
+    getCompleteAudio,
+    startTranscription,
+    stopTranscription,
+    resetTranscription
   } = whisperService;
+  // Evitar valores NaN o undefined
+  const audioLevel = _audioLevelRaw ?? 0;
+  const recordingTime = _recordingTimeRaw || 0;
 
   const webSpeechService = useWebSpeechCapture();
   const {

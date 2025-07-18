@@ -68,7 +68,7 @@ export function useAudioProcessor({
     }
   }, [isProcessing, bufferSize, sampleRate, onAudioData]);
 
-  const stop = useCallback(() => {
+  const stop = useCallback(async (): Promise<void> => {
     if (!isProcessing) return;
 
     // Disconnect nodes
@@ -82,9 +82,9 @@ export function useAudioProcessor({
       streamRef.current.getTracks().forEach(track => track.stop());
     }
 
-    // Close audio context
+    // Close audio context and await cleanup
     if (audioContextRef.current) {
-      audioContextRef.current.close();
+      await audioContextRef.current.close();
     }
 
     // Clear references
