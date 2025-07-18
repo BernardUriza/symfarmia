@@ -13,7 +13,7 @@ import {
   Target
 } from 'lucide-react';
 
-const TimeTracker = () => {
+function DashboardTimeTracker() {
   const [currentSession, setCurrentSession] = useState({
     isActive: false,
     startTime: null,
@@ -320,6 +320,6 @@ const TimeTracker = () => {
       </div>
     </div>
   );
-};
+}
 
-export default TimeTracker;
+export { DashboardTimeTracker };

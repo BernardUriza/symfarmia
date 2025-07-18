@@ -89,7 +89,7 @@ interface AuditEntry {
   configVersion: string;
 }
 
-export default function AudioDenoisingDashboard() {
+export function AudioDenoisingDashboard() {
   const [status, setStatus] = useState<SystemStatus | null>(null);
   const [metrics, setMetrics] = useState<DenoisingMetrics | null>(null);
   const [config, setConfig] = useState<DenoisingConfig | null>(null);

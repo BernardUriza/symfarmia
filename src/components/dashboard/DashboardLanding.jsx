@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState } from 'react';
-import MedicalProductivityMetrics from './MedicalProductivityMetrics';
-import DashboardMetrics from './DashboardMetrics';
-import EfficiencyChart from './EfficiencyChart';
-import QuickActions from './QuickActions';
+import { MedicalProductivityMetrics } from './MedicalProductivityMetrics';
+import { DashboardMetrics } from './DashboardMetrics';
+import { EfficiencyChart } from './EfficiencyChart';
+import { QuickActions } from './QuickActions';
 import PatientWorkflow from '../patient/PatientWorkflow';
 import { useI18n } from '@/domains/core';
 import { Activity } from 'lucide-react';
@@ -18,7 +18,7 @@ const WhisperPreloaderGlobal = dynamic(
   { ssr: false }
 );
 
-const DashboardLanding = () => {
+function DashboardLanding() {
   const { t } = useI18n();
   const [activeView, setActiveView] = useState('workflow');
 
@@ -133,6 +133,6 @@ const DashboardLanding = () => {
       <WhisperPreloaderGlobal />
     </div>
   );
-};
+}
 
-export default DashboardLanding;
+export { DashboardLanding };

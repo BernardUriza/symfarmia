@@ -17,18 +17,18 @@ import { DemoResetButton } from '../../src/domains/demo';
 import { useDemoPatients } from '../../src/domains/demo/hooks/useDemoPatients';
 
 // EXACT Figma workflow steps as specified
-const MedicalWorkflowSteps = (t) => ([
+const getMedicalWorkflowSteps = (t: any) => [
   { id: 'escuchar', label: t('workflow.steps.listen'), icon: Mic, component: ConversationCapture },
   { id: 'revisar', label: t('workflow.steps.review'), icon: MessageSquare, component: DialogueFlow },
   { id: 'notas', label: t('workflow.steps.notes'), icon: FileText, component: ClinicalNotes },
   { id: 'ordenes', label: t('workflow.steps.orders'), icon: ClipboardList, component: OrderEntry },
   { id: 'resumen', label: t('workflow.steps.summary'), icon: Download, component: SummaryExport },
-]);
+];
 
-export default function MedicalAIDemo() {
+function MedicalAIDemo() {
   console.log('[MedicalAIDemo] Component rendering at', new Date().toISOString());
   
-  const { t, translations } = useTranslation();
+  const { t, translations, isLoadingTranslations } = useTranslation();
   const { patients, selectPatient, getSelectedPatient } = useDemoPatients();
   
   console.log('[MedicalAIDemo] Hooks called successfully');
@@ -43,7 +43,9 @@ export default function MedicalAIDemo() {
   // Check if patient translations are loaded
   console.log('[MedicalAIDemo] Patient translations loaded:', {
     hasTranslations: !!translations,
-    patientKeys: Object.keys(translations || {}).filter(key => key.startsWith('patient.'))
+    patientKeys: Object.keys(translations || {}).filter(key => key.startsWith('patient.')),
+    isLoadingTranslations,
+    translationCount: Object.keys(translations || {}).length
   });
   
   // Log Whisper status on mount
@@ -62,7 +64,7 @@ export default function MedicalAIDemo() {
   const [externalPatient, setExternalPatient] = useState(null);
   
   const [showPatientSelector, setShowPatientSelector] = useState(true);
-  const steps = MedicalWorkflowSteps(t);
+  const steps = getMedicalWorkflowSteps(t);
   const [currentStep, setCurrentStep] = useState('escuchar');
   const [isRecording, setIsRecording] = useState(false);
   const [encounterTime] = useState('00:08:23');
@@ -97,6 +99,18 @@ export default function MedicalAIDemo() {
   }, [externalPatient]);
 
   // No need for loading state since localStorage is synchronous
+  
+  // Show loading skeleton while translations are loading
+  if (isLoadingTranslations) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-foreground/60">Loading translations...</p>
+        </div>
+      </div>
+    );
+  }
   
   if (showPatientSelector) {
     return (
@@ -403,3 +417,5 @@ export default function MedicalAIDemo() {
     </div>
   );
 }
+
+export default MedicalAIDemo;

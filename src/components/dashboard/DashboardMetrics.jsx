@@ -79,7 +79,7 @@ const MetricCard = ({
   );
 };
 
-const DashboardMetrics = () => {
+function DashboardMetrics() {
   const { t } = useTranslation();
   const [metrics, setMetrics] = useState({
     pendingConsultations: 0,
@@ -234,4 +234,4 @@ const DashboardMetrics = () => {
   );
 };
 
-export default DashboardMetrics;
+export { DashboardMetrics };

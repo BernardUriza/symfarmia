@@ -206,7 +206,7 @@ const EconomicImpact = ({ metrics }) => {
 /**
  * Main Medical Productivity Metrics Component
  */
-const MedicalProductivityMetrics = ({ timeRange = 'today', showEconomicMetrics = true }) => {
+function MedicalProductivityMetrics({ timeRange = 'today', showEconomicMetrics = true }) {
   const { t } = useI18n();
   const [metrics, setMetrics] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -385,6 +385,6 @@ const MedicalProductivityMetrics = ({ timeRange = 'today', showEconomicMetrics =
       </div>
     </div>
   );
-};
+}
 
-export default MedicalProductivityMetrics;
+export { MedicalProductivityMetrics };

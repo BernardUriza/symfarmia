@@ -46,3 +46,6 @@ export {
   BraveCacheBuster,
   GlobalLanguageSwitcher
 } from './layout';
+
+// Re-export TranslationGuard for preventing race conditions
+export { TranslationGuard, useTranslationsReady } from './TranslationGuard';

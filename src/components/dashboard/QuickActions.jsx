@@ -78,7 +78,7 @@ const QuickActionButton = ({
   );
 };
 
-const QuickActions = ({ onStartWorkflow }) => {
+function QuickActions({ onStartWorkflow }) {
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
   const [pendingCount] = useState(23);
   const [urgentCount] = useState(5);
@@ -270,6 +270,6 @@ const QuickActions = ({ onStartWorkflow }) => {
       <EmergencyModal />
     </div>
   );
-};
+}
 
-export default QuickActions;
+export { QuickActions };

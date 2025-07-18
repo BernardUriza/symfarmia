@@ -19,7 +19,7 @@ interface ModelItem {
   [key: string]: string | number;
 }
 
-export default function ModelManager({ endpoint, fields, title }: Props) {
+export function ModelManager({ endpoint, fields, title }: Props) {
   const [items, setItems] = useState<ModelItem[]>([]);
   const [form, setForm] = useState<Record<string, string | number | boolean>>({});
   const [editingId, setEditingId] = useState<number | null>(null);

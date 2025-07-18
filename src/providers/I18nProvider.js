@@ -261,12 +261,16 @@ export function I18nProvider({ children, initialLocale = 'es', initialTranslatio
       if (!translation) {
         const isDevelopment = process.env.NODE_ENV === 'development';
         
-        if (isDevelopment) {
+        // Don't log missing translations while still loading or if translations are empty
+        if (isDevelopment && Object.keys(translations).length > 0) {
           console.error(`🚨 MISSING TRANSLATION: ${key} (${locale})`);
           if (Object.keys(params).length > 0) {
             console.error(`🔍 Context:`, params);
           }
           translation = `🚨MISSING:${key}🚨`;
+        } else if (isDevelopment && Object.keys(translations).length === 0) {
+          // Translations haven't loaded yet, just return the key
+          translation = key;
         } else {
           // Production: use intelligent fallback
           translation = getIntelligentFallback(key, locale);

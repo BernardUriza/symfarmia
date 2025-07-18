@@ -339,11 +339,11 @@ const ChartStatistics = ({ data, chartType }) => {
 /**
  * Main Efficiency Chart Component
  */
-const EfficiencyChart = ({ 
+function EfficiencyChart({ 
   dataType = 'consultations', 
   timeRange = 'month', 
   showStatistics = true 
-}) => {
+}) {
   const { t } = useI18n();
   const [chartType, setChartType] = useState(dataType);
   const [chartData, setChartData] = useState([]);
@@ -468,6 +468,6 @@ const EfficiencyChart = ({
       )}
     </div>
   );
-};
+}
 
-export default EfficiencyChart;
+export { EfficiencyChart };
