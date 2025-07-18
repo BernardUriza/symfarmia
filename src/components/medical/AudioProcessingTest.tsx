@@ -6,12 +6,19 @@ import { useMedicalTranslation } from '@/src/domains/medical-ai/hooks/useMedical
 interface ChunkData {
   text: string;
   chunkNumber: number;
+  timestamp?: number;
 }
 
-const AudioProcessingTest = () => {
+interface ChunkWithProgress {
+  text: string;
+  number: number;
+  progress?: number;
+}
+
+const AudioProcessingTest = React.memo(() => {
   const { t } = useMedicalTranslation();
   const [chunks, setChunks] = useState<ChunkData[]>([]);
-  const [currentChunk, setCurrentChunk] = useState<{ text: string; number: number } | null>(null);
+  const [currentChunk, setCurrentChunk] = useState<ChunkWithProgress | null>(null);
   const [chunkProgress, setChunkProgress] = useState<{ [key: number]: number }>({});
 
   const {
@@ -31,7 +38,7 @@ const AudioProcessingTest = () => {
     sampleRate: 16000,
     onChunkProcessed: (text, chunkNumber) => {
       console.log(`[AudioTest] Chunk ${chunkNumber} processed: "${text}"`);
-      const newChunk: ChunkData = { text, chunkNumber };
+      const newChunk: ChunkData = { text, chunkNumber, timestamp: Date.now() };
       setChunks(prev => [...prev, newChunk]);
       setCurrentChunk({ text, number: chunkNumber });
     },
@@ -51,21 +58,35 @@ const AudioProcessingTest = () => {
       setChunks([]);
       setCurrentChunk(null);
       setChunkProgress({});
-    await startTranscription();
-  } catch (err) {
-    console.warn('Error starting transcription:', err);
+      const success = await startTranscription();
+      if (!success) {
+        console.error('Failed to start transcription');
+      }
+    } catch (err) {
+      console.error('Error starting transcription:', err);
     }
   };
 
   const handleStop = async () => {
-    await stopTranscription();
+    try {
+      const success = await stopTranscription();
+      if (!success) {
+        console.error('Failed to stop transcription');
+      }
+    } catch (err) {
+      console.error('Error stopping transcription:', err);
+    }
   };
 
   const handleReset = () => {
-    resetTranscription();
-    setChunks([]);
-    setCurrentChunk(null);
-    setChunkProgress({});
+    try {
+      resetTranscription();
+      setChunks([]);
+      setCurrentChunk(null);
+      setChunkProgress({});
+    } catch (err) {
+      console.error('Error resetting transcription:', err);
+    }
   };
 
   const formatTime = (seconds: number) => {
@@ -209,19 +230,19 @@ const AudioProcessingTest = () => {
       {/* Transcripción en tiempo real separada por chunks */}
       {(chunks.length > 0 || isRecording) && (
         <div className="bg-white border border-gray-200 rounded-lg p-4">
-          <h3 className="font-semibold mb-3 text-gray-900 ">
-            Transcripción en tiempo real:
+          <h3 className="font-semibold mb-3 text-gray-900">
+            {t('transcription.realtime_transcription')}:
           </h3>
 
           <div className="space-y-3 max-h-64 overflow-y-auto">
             {chunks.length === 0 && isRecording ? (
-              <p className="text-gray-400 italic">Esperando transcripción...</p>
+              <p className="text-gray-400 italic">{t('transcription.waiting_transcription')}</p>
             ) : (
               chunks.map((chunk, index) => (
                 <div key={index} className="border-l-4 border-blue-500 pl-3">
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-xs text-blue-600 font-medium">
-                      Chunk #{chunk.chunkNumber}
+                      {t('transcription.chunk_number')}{chunk.chunkNumber}
                     </span>
                     {chunkProgress[chunk.chunkNumber] !== undefined && 
                      chunkProgress[chunk.chunkNumber] < 100 && (
@@ -230,22 +251,22 @@ const AudioProcessingTest = () => {
                       </span>
                     )}
                     {chunkProgress[chunk.chunkNumber] === 100 && (
-                      <span className="text-xs text-green-600 ">
-                        ✓ Completado
+                      <span className="text-xs text-green-600">
+                        ✓ {t('transcription.completed')}
                       </span>
                     )}
                   </div>
-                  <div className="text-gray-700 ">
-                    {chunk.text || <em className="text-gray-400">{'<vacío>'}</em>}
+                  <div className="text-gray-700">
+                    {chunk.text || <em className="text-gray-400">{t('transcription.empty_placeholder')}</em>}
                   </div>
                 </div>
               ))
             )}
           </div>
 
-          <div className="mt-3 pt-3 border-t border-gray-200 ">
-            <p className="text-sm text-gray-500 ">
-              Total: {chunks.reduce((acc, chunk) => acc + chunk.text.split(' ').filter(w => w).length, 0)} palabras en {chunks.length} chunks
+          <div className="mt-3 pt-3 border-t border-gray-200">
+            <p className="text-sm text-gray-500">
+              {t('transcription.total_words')}: {chunks.reduce((acc, chunk) => acc + chunk.text.split(' ').filter(w => w).length, 0)} {t('transcription.words_in_chunks')} {chunks.length} {t('transcription.chunks_text')}
             </p>
           </div>
         </div>
@@ -254,16 +275,16 @@ const AudioProcessingTest = () => {
       {/* Transcripción final */}
       {transcription && !isRecording && (
         <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-          <h3 className="font-semibold mb-2 text-green-900 ">
-            Transcripción completa:
+          <h3 className="font-semibold mb-2 text-green-900">
+            {t('transcription.complete_transcription')}:
           </h3>
-          <p className="text-gray-700 ">
+          <p className="text-gray-700">
             {transcription.text}
           </p>
           {transcription.medicalTerms && transcription.medicalTerms.length > 0 && (
             <div className="mt-3">
               <p className="text-sm text-gray-600 mb-1">
-                Términos médicos detectados:
+                {t('transcription.detected_medical_terms')}:
               </p>
               <div className="flex flex-wrap gap-1">
                 {transcription.medicalTerms.map((term, i) => (
