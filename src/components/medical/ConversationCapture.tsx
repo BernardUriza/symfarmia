@@ -175,11 +175,7 @@ export const ConversationCapture = ({
       const denoisedTranscriptionText = allMinutesText || '';
       const mergedText = DiarizationUtils.mergeTranscriptions(denoisedTranscriptionText, transcriptionState.webSpeechText);
       
-      // Usar audio denoisado si está disponible
-      if (completeAudio && completeAudio.length > 0) {
-        audioDataRef.current = completeAudio;
-        console.log(`[ConversationCapture] Usando audio denoisado para diarización: ${completeAudio.length} samples`);
-      }
+      // Audio is handled internally by useSimpleWhisper
       
       console.log('[ConversationCapture] Texto fusionado:', {
         denoisedLength: denoisedTranscriptionText.length,
@@ -234,18 +230,15 @@ export const ConversationCapture = ({
     savePartialMinuteTranscription();
     
     const success = await stopTranscription();
-    if (success && transcription?.text && onTranscriptionComplete) {
-      onTranscriptionComplete(transcription.text);
-    }
     
-    // Process diarization after stopping
-    await processDiarization();
-    
-    // BRUTAL: Audit transcript with ChatGPT
-    if (transcription?.text) {
-      console.log('[ConversationCapture] Iniciando auditoría con ChatGPT...');
-      // Show popup when transcription is complete
+    if (success && transcription?.text) {
+      // Process diarization first
+      await processDiarization();
+      
+      // Show popup with loading state
       setShowTranscriptPopup(true);
+      
+      console.log('[ConversationCapture] Iniciando auditoría con ChatGPT...');
       
       try {
         const llmResult = await auditTranscript({
@@ -263,12 +256,17 @@ export const ConversationCapture = ({
         });
         console.log('[ConversationCapture] Auditoría ChatGPT completada:', llmResult);
         
-        // Update transcription with audited result
-        if (llmResult.mergedTranscript && onTranscriptionComplete) {
-          onTranscriptionComplete(llmResult.mergedTranscript);
+        // Call onTranscriptionComplete ONLY ONCE with the best available text
+        const finalText = llmResult.mergedTranscript || transcription.text;
+        if (onTranscriptionComplete) {
+          onTranscriptionComplete(finalText);
         }
       } catch (err) {
         console.error('[ConversationCapture] Error en auditoría ChatGPT:', err);
+        // On error, still provide the raw transcription
+        if (onTranscriptionComplete) {
+          onTranscriptionComplete(transcription.text);
+        }
       }
     }
     
@@ -276,7 +274,7 @@ export const ConversationCapture = ({
   }, [stopLiveTranscription, savePartialMinuteTranscription, stopTranscription, 
       transcription, onTranscriptionComplete, processDiarization, auditTranscript,
       transcriptionState.webSpeechText, diarizationState.diarizationResult,
-      setShowTranscriptPopup]);
+      setShowTranscriptPopup, partialTranscripts, confidence, language]);
 
   // Main toggle recording function
   const toggleRecording = async () => {
@@ -305,17 +303,18 @@ export const ConversationCapture = ({
     diarizationState.resetDiarization();
     audioDataRef.current = null;
     chunkCountRef.current = 0;
-    // Clear any WebSpeech error
+    // Log WebSpeech error reset without clearing console
     if (webSpeechError) {
-      console.clear();
+      console.log('[ConversationCapture] WebSpeech error cleared on reset');
     }
   }, [resetTranscription, transcriptionState, diarizationState, webSpeechError]);
 
-  const toggleMode = useCallback(() => {
-    uiState.toggleMode();
+  const toggleMode = useCallback(async () => {
     if (isRecording) {
-      toggleRecording();
+      // Stop recording before changing mode
+      await toggleRecording();
     }
+    uiState.toggleMode();
   }, [uiState, isRecording, toggleRecording]);
 
   // UI Rendering Methods
