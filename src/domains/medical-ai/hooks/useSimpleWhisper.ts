@@ -18,7 +18,7 @@ import type { UseSimpleWhisperOptions, UseSimpleWhisperReturn, Status, EngineSta
 export function useSimpleWhisper({
   autoPreload = false,
   processingMode = "direct",
-  chunkSize = 160000,
+  chunkSize = 16384,
   sampleRate = 16000,
   preloadPriority = "auto",
   preloadDelay = 2000,

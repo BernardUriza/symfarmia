@@ -27,7 +27,7 @@ const AudioProcessingTest = () => {
   } = useSimpleWhisper({
     autoPreload: true,
     processingMode: 'streaming', // Cambiar a streaming para ver el progreso
-    chunkSize: 160000, // 10 segundos a 16kHz
+    chunkSize: 16384, // Must be a power of 2 between 256 and 16384 for createScriptProcessor
     onChunkProcessed: (text, chunkNumber) => {
       console.log(`[AudioTest] Chunk ${chunkNumber} procesado: "${text}"`);
       const newChunk: ChunkData = { text, chunkNumber };

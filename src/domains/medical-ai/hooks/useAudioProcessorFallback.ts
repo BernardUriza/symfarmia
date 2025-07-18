@@ -73,7 +73,7 @@ export function useAudioProcessorFallback({
       
       if (intervalRef.current) clearInterval(intervalRef.current);
       intervalRef.current = window.setInterval(() => {
-        setRecordingTime(Math.floor((Date.now() - startTimeRef.current) / 1000));
+        setRecordingTime(Math.floor((Date.now() - startTimeRef.current!) / 1000));
       }, 1000);
 
       setIsProcessing(true);
@@ -137,9 +137,9 @@ export function useAudioProcessorFallback({
     setRecordingTime(0);
   }, []);
 
-  return { 
-    start, 
-    stop, 
+  return {
+    start,
+    stop,
     isProcessing,
     isRecording: isProcessing,
     audioLevel,
@@ -147,7 +147,6 @@ export function useAudioProcessorFallback({
     getCompleteAudio,
     reset,
     error: '',
-    isProcessing: false,
     audioChunks: [],
     processingStats: {
       totalChunks: 0,
