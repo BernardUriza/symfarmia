@@ -53,16 +53,8 @@ Summary of the unified audio capture and worker pipeline.
 
 ### 📚 [Dev Notes](./dev-notes/)
 Daily development logs and notes:
-- [Claudio Notes](./dev-notes/claudo.md) - AI assistant development logs
-- [Codex Notes](./dev-notes/codex.md) - Code generation assistant logs
-- [Collaboration Format](./dev-notes/collaboration-format.md) - Team collaboration guidelines
-- [Shared Context](./dev-notes/shared-context.md) - Shared development context
-- [Migration History](./dev-notes/migration-history-2025-01-08.md) - Migration tracking
-- [Theme Audit](./dev-notes/theme-contrast-audit-2025-01-08.md) - UI theme analysis
-
-### 📜 [Chronicles](./chronicles/)
-Development history and sync logs:
-- [Dev Sync Alert Migration](./chronicles/dev-sync-alert-migration.md) - Alert system migration
+- [Development Diary](./dev-notes/diary.md) - condensed log of major work
+- [July 8 Summary](./dev-notes/claudo-diary-2025-07-08.md) - modular architecture fix
 
 ## 🔗 Related Documentation
 
