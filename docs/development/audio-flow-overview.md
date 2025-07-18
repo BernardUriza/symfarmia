@@ -8,4 +8,9 @@ This document summarizes the new audio capture architecture.
 4. **useWhisperWorker** subscribes to the cache, sends chunks for processing and gathers results.
 5. **useSimpleWhisper** provides high-level controls via its React hook interface (no context wrapper).
 
+## Legacy Prototypes
+
+- `useUnifiedAudioCapture.ts` (prototipo de captura unificada, reemplazado por useAudioDenoising)
+- `TestWhisperWorker.tsx` (componente de prueba para useSimpleWhisper, ahora eliminado)
+
 With this flow, audio moves cleanly from capture to transcription, reducing the risk of stack overflows from recursive listeners.

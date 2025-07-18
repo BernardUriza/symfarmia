@@ -123,5 +123,21 @@
   "conversation.capture.title": "Conversation Capture",
   "conversation.capture.subtitle": "Press record to start medical transcription",
   "medical.transcription.start": "Start Recording",
-  "medical.transcription.stop": "Stop Recording"
+  "medical.transcription.stop": "Stop Recording",
+  "conversation.capture.next": "TODO",
+  "conversation.capture.error_toggling_recording": "TODO",
+  "conversation.capture.actions.change_to_voice": "TODO",
+  "conversation.capture.actions.manual_mode": "TODO",
+  "conversation.capture.mode.manual": "TODO",
+  "conversation.capture.mode.voice": "TODO",
+  "conversation.capture.toggle_language_title": "TODO",
+  "conversation.capture.actions.dashboard": "TODO",
+  "conversation.capture.form.manual_input_label": "TODO",
+  "conversation.capture.form.placeholder": "TODO",
+  "conversation.capture.form.hint": "TODO",
+  "conversation.capture.form.buttons.clear": "TODO",
+  "conversation.capture.form.buttons.copy": "TODO",
+  "conversation.capture.form.buttons.copied": "TODO",
+  "conversation.capture.realtime_unavailable.title": "TODO",
+  "conversation.capture.realtime_unavailable.description": "TODO"
 }

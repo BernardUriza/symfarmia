@@ -488,14 +488,26 @@ export class MedicalAudioPersistence {
    */
   async calculateChecksum(data) {
     try {
-      const dataBuffer = data instanceof ArrayBuffer ? data : await data.arrayBuffer();
+      let dataBuffer;
+      if (data instanceof ArrayBuffer) {
+        dataBuffer = data;
+      } else if (ArrayBuffer.isView(data)) {
+        // TypedArray (including Buffer) view on ArrayBuffer
+        const { buffer, byteOffset, byteLength } = data;
+        dataBuffer = buffer.slice(byteOffset, byteOffset + byteLength);
+      } else if (typeof data.arrayBuffer === 'function') {
+        dataBuffer = await data.arrayBuffer();
+      } else {
+        throw new TypeError('Unsupported data type for checksum');
+      }
       const hashBuffer = await window.crypto.subtle.digest('SHA-256', dataBuffer);
       const hashArray = Array.from(new Uint8Array(hashBuffer));
       return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
       
-    } catch (error) {
-      console.error('Failed to calculate checksum:', error);
-      return null;
+    } catch (err) {
+      // Brutal error handling
+      console.error('calculateChecksum failed:', err);
+      throw err;
     }
   }
 

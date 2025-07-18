@@ -25,6 +25,7 @@ import {
 import {
   PermissionDialog, RecordingCard, TranscriptionResult, ErrorDisplay, ProcessingStatus, FloatingTranscriptPopup
 } from "@/src/components/medical/conversation-capture/components";
+import { WhisperDiagnosticTool } from "@/src/domains/medical-ai/components/WhisperDiagnosticTool";
 import { AudioDenoisingDashboard } from "@/src/components/medical/AudioDenoisingDashboard";
 import { SOAPNotesManager } from "@/src/components/medical/SOAPNotesManager";
 
@@ -37,8 +38,8 @@ import { diarizationService, DiarizationUtils } from "@/src/domains/medical-ai/s
 // **CONFIG**
 const TRANSCRIPTION_CONFIG = {
   autoPreload: true,
-  processingMode: "direct",
-  chunkSize: 32000,
+  processingMode: "direct" as const,
+  chunkSize: 16384, // Must be a power of 2 between 256 and 16384 for createScriptProcessor
   onChunkProcessed: (text, chunkNumber) => {
     console.log(`[ConversationCapture] Chunk #${chunkNumber}:`, text);
   }
@@ -67,7 +68,7 @@ export const ConversationCapture = ({
   className = ""
 }: ConversationCaptureProps) => {
   // **Translation + Language**
-  const { t, language: currentLanguage } = useI18n();
+  const { t, locale: currentLanguage } = useI18n();
 
   // **State hooks**
   const uiState = useUIState();
@@ -241,12 +242,24 @@ export const ConversationCapture = ({
           <p className="text-foreground/60">{t("conversation.capture.subtitle")}</p>
         </div>
         <Button onClick={toggleMode} variant="outline" size="sm" className="flex items-center gap-2">
-          {uiState.isManualMode ? <><Mic className="w-4 h-4" />Cambiar a voz</> : <><PenTool className="w-4 h-4" />Modo manual</>}
+          {uiState.isManualMode ? (
+            <>
+              <Mic className="w-4 h-4" />
+              {t("conversation.capture.actions.change_to_voice")}
+            </>
+          ) : (
+            <>
+              <PenTool className="w-4 h-4" />
+              {t("conversation.capture.actions.manual_mode")}
+            </>
+          )}
         </Button>
       </div>
       <div className="flex items-center justify-center gap-4 mt-4">
         <Badge variant={uiState.isManualMode ? "secondary" : "default"}>
-          {uiState.isManualMode ? "Modo Manual" : "Modo Voz"}
+          {uiState.isManualMode
+            ? t("conversation.capture.mode.manual")
+            : t("conversation.capture.mode.voice")}
         </Badge>
         {!uiState.isManualMode && (
           <div className="flex items-center gap-2">
@@ -254,7 +267,7 @@ export const ConversationCapture = ({
               <button
                 onClick={() => setLanguage(language === "es-MX" ? "en-US" : "es-MX")}
                 className="flex items-center gap-2 px-3 py-1 rounded-md text-sm bg-secondary/10 text-secondary hover:bg-secondary/20"
-                title="Cambiar idioma de reconocimiento"
+                title={t("conversation.capture.toggle_language_title")}
               >
                 <span className="text-xs">{language === "es-MX" ? "🇪🇸" : "🇺🇸"}</span>
                 <span>{language === "es-MX" ? "ES" : "EN"}</span>
@@ -266,7 +279,7 @@ export const ConversationCapture = ({
                 uiState.showDenoisingDashboard ? "bg-primary/10 text-primary" : "bg-muted/50 text-muted-foreground hover:bg-muted/70"
               }`}
             >
-              <Settings className="w-4 h-4" /> Dashboard
+              <Settings className="w-4 h-4" /> {t("conversation.capture.actions.dashboard")}
             </button>
           </div>
         )}
@@ -279,21 +292,27 @@ export const ConversationCapture = ({
     <Card>
       <CardContent className="p-6 space-y-4">
         <div>
-          <label className="block text-sm font-medium text-foreground/70 mb-2">Escribe la conversación manualmente:</label>
+          <label className="block text-sm font-medium text-foreground/70 mb-2">
+            {t("conversation.capture.form.manual_input_label")}
+          </label>
           <textarea
             value={transcriptionState.manualTranscript}
             onChange={e => transcriptionState.updateManualTranscript(e.target.value)}
             className="w-full px-4 py-3 border border-border/50 rounded-lg resize-none bg-background/50 text-foreground"
             rows={8}
-            placeholder="Escribe o pega la transcripción aquí..."
+            placeholder={t("conversation.capture.form.placeholder")}
             autoFocus
           />
         </div>
-        <p className="text-sm">Puedes escribir o pegar texto desde otra fuente.</p>
+        <p className="text-sm">{t("conversation.capture.form.hint")}</p>
         <div className="flex justify-end space-x-2">
-          <Button onClick={handleReset} variant="outline" size="sm">Limpiar</Button>
+          <Button onClick={handleReset} variant="outline" size="sm">
+            {t("conversation.capture.form.buttons.clear")}
+          </Button>
           <Button onClick={handleCopy} variant="outline" size="sm" disabled={!transcriptionState.manualTranscript}>
-            {uiState.copySuccess ? "Copiado!" : "Copiar"}
+            {uiState.copySuccess
+              ? t("conversation.capture.form.buttons.copied")
+              : t("conversation.capture.form.buttons.copy")}
           </Button>
         </div>
       </CardContent>
@@ -302,7 +321,7 @@ export const ConversationCapture = ({
 
   const renderActionButtons = () => !onNext ? null : (
     <div className="mt-6 flex justify-center">
-      <Button onClick={() => {
+      <Button className="" onClick={() => {
         if (currentTranscript && onTranscriptionComplete) onTranscriptionComplete(currentTranscript);
         onNext();
       }} size="lg" variant="default">
@@ -316,6 +335,7 @@ export const ConversationCapture = ({
     <div className={`max-w-4xl mx-auto space-y-6 ${className} fade-in`}>
       <PermissionDialog isOpen={uiState.showPermissionDialog} onClose={() => uiState.setShowPermissionDialog(false)} />
       {renderHeader()}
+      <WhisperDiagnosticTool />
       {!isWebSpeechAvailable && !uiState.isManualMode && (
         <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 mb-4">
           <div className="flex items-start">
@@ -323,8 +343,12 @@ export const ConversationCapture = ({
               <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
             </svg>
             <div className="text-sm text-primary/80">
-              <p className="font-medium mb-1">Transcripción en tiempo real no disponible</p>
-              <p className="text-primary/60">La transcripción final estará disponible al detener la grabación.</p>
+              <p className="font-medium mb-1">
+                {t("conversation.capture.realtime_unavailable.title")}
+              </p>
+              <p className="text-primary/60">
+                {t("conversation.capture.realtime_unavailable.description")}
+              </p>
             </div>
           </div>
         </div>
