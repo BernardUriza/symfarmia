@@ -76,14 +76,17 @@ export function useAudioDenoising(
         console.log('[useAudioDenoising] AudioWorklet loaded');
         
         const workletNode = new window.AudioWorkletNode(ctx, 'audio-denoiser-processor');
+        console.log('[useAudioDenoising] WorkletNode created, setting up message handler...');
         
         // Wait for worklet to initialize RNNoise
         await new Promise<void>((resolve, reject) => {
           const timeout = setTimeout(() => {
             reject(new Error('Timeout waiting for RNNoise initialization'));
-          }, 5000);
+          }, 10000); // Increased timeout to 10s
           
           workletNode.port.onmessage = (event) => {
+            console.log('[useAudioDenoising] Received message from worklet:', event.data.type);
+            
             if (event.data.type === 'init-complete') {
               clearTimeout(timeout);
               console.log('[useAudioDenoising] RNNoise initialized in worklet');
@@ -93,6 +96,10 @@ export function useAudioDenoising(
               reject(new Error(`RNNoise init error: ${event.data.error}`));
             }
           };
+          
+          // Send init message to worklet after handler is set up
+          console.log('[useAudioDenoising] Sending init message to worklet...');
+          workletNode.port.postMessage({ type: 'init' });
         });
         
         if (!cancelled) {

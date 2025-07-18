@@ -21,7 +21,7 @@ class AudioDenoiserProcessor extends AudioWorkletProcessor {
   constructor() {
     super();
     this.port.onmessage = this.handleMessage.bind(this);
-    this.initializeRNNoise();
+    console.log('[Worklet] AudioDenoiserProcessor created, waiting for init message...');
   }
 
   async initializeRNNoise() {
@@ -74,7 +74,10 @@ class AudioDenoiserProcessor extends AudioWorkletProcessor {
   }
 
   handleMessage(event) {
-    // Keep for any additional messages if needed
+    if (event.data.type === 'init') {
+      console.log('[Worklet] Received init message');
+      this.initializeRNNoise();
+    }
   }
 
   process(inputs) {
