@@ -7,7 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { MedicalSpecialtyService } from '@/src/services/MedicalSpecialtyService.js';
-import Logger from '@/src/utils/logger.js';
+import Logger from '@/src/utils/logger';
 
 interface SpecialtyRequest {
   specialty: string;

@@ -61,6 +61,9 @@ export async function POST(request: NextRequest) {
       })
     }
 
+    // Extract additional context from request
+    const { partialTranscripts, confidence, language } = body
+    
     const userContent = `
 TRANSCRIPCIÓN PRINCIPAL (Whisper):
 ${transcript}
@@ -70,6 +73,13 @@ ${webSpeech}` : ''}
 
 ${diarization && diarization.length > 0 ? `DATOS DE DIARIZACIÓN:
 ${JSON.stringify(diarization, null, 2)}` : ''}
+
+${partialTranscripts && partialTranscripts.length > 0 ? `TRANSCRIPCIONES PARCIALES:
+${partialTranscripts.join('\n')}` : ''}
+
+${confidence ? `CONFIANZA WEBSPEECH: ${confidence}` : ''}
+
+IDIOMA: ${language || 'es-MX'}
 
 TAREA: ${task === 'diarize' ? 'Enfócate en asignar speakers correctamente' : 'Audita y mejora la transcripción'}
 `

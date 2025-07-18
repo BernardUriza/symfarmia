@@ -101,7 +101,11 @@
       "Bash(netlify dev:*)",
       "Bash(tail:*)",
       "Bash(git fetch:*)",
-      "Bash(git stash:*)"
+      "Bash(git stash:*)",
+      "Bash(npm ci:*)",
+      "Bash(nvm list:*)",
+      "Bash(nvm:*)",
+      "Bash(npx netlify:*)"
     ],
     "deny": []
   }
