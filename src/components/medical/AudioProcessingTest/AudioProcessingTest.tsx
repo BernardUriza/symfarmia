@@ -2,7 +2,7 @@
 
 import React, { useMemo } from 'react';
 import { useMedicalTranslation } from '@/src/domains/medical-ai/hooks/useMedicalTranslation';
-import { useSimpleWhisper } from '@/src/domains/medical-ai/hooks/useSimpleWhisper';
+import { useSimpleWhisperHybrid } from '@/src/domains/medical-ai/hooks/useSimpleWhisperHybrid';
 
 // Local imports
 import { useAudioProcessingState } from './hooks/useAudioProcessingState';
@@ -61,8 +61,13 @@ const AudioProcessingTest: React.FC<AudioProcessingTestProps> = ({
     onChunkProgress: handleChunkProgress,
   }), [handleChunkProcessed, handleChunkProgress]);
 
-  // Whisper hook integration
-  const whisperHook = useSimpleWhisper(audioConfig);
+  // Whisper hook integration - hybrid approach
+  const whisperHook = useSimpleWhisperHybrid({
+    autoPreload: true,
+    preferWorker: true,
+    retryCount: 3,
+    retryDelay: 1000
+  });
   
   const {
     transcription,

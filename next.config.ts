@@ -123,6 +123,15 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      {
+        source: "/workers/(.*)",
+        headers: [
+          {
+            key: "Cross-Origin-Resource-Policy", 
+            value: "cross-origin",
+          },
+        ],
+      },
     ];
   },
 };

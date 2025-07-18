@@ -8,6 +8,7 @@ interface AudioRecordingPanelProps {
   transcription?: Transcription | null;
   recordingTime: number;
   isRecording: boolean;
+  audioBlob?: Blob;
   onAudioDownload?: (url: string) => void;
 }
 
@@ -16,6 +17,7 @@ export const AudioRecordingPanel: React.FC<AudioRecordingPanelProps> = ({
   transcription,
   recordingTime,
   isRecording,
+  audioBlob,
   onAudioDownload,
 }) => {
   const { t } = useMedicalTranslation();

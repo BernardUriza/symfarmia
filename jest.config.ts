@@ -29,7 +29,7 @@ const customJestConfig: Config = {
     },
     {
       displayName: 'AI Integration',
-      testMatch: ['<rootDir>/tests/ai-integration/**/*.test.js'],
+      testMatch: ['<rootDir>/tests/ai-integration/**/*.test.{js,ts}'],
     },
     {
       displayName: 'HIPAA Compliance',

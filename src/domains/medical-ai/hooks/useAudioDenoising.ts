@@ -171,7 +171,7 @@ export function useAudioDenoising(
           const chunkId = chunkIdRef.current!++;
           const floatData = new Float32Array(e.data.data);
           const peak = floatData.reduce((max, v) => Math.max(max, Math.abs(v)), 0);
-          setAudioLevel(Math.round(peak * 255));
+          setAudioLevel(Math.round(peak * 100));
           const startTime = Date.now();
           const metadata: ProcessingMetadata = {
             chunkId,
