@@ -28,10 +28,23 @@ const MedicalWorkflowSteps = (t) => ([
 export default function MedicalAIDemo() {
   console.log('[MedicalAIDemo] Component rendering at', new Date().toISOString());
   
-  const { t } = useTranslation();
+  const { t, translations } = useTranslation();
   const { patients, selectPatient, getSelectedPatient } = useDemoPatients();
   
   console.log('[MedicalAIDemo] Hooks called successfully');
+  
+  // Debug patient translations
+  console.log('[MedicalAIDemo] Testing patient translations:', {
+    'patient.info': t('patient.info'),
+    'patient.view_full_history': t('patient.view_full_history'),
+    'patient.medical_history': t('patient.medical_history')
+  });
+  
+  // Check if patient translations are loaded
+  console.log('[MedicalAIDemo] Patient translations loaded:', {
+    hasTranslations: !!translations,
+    patientKeys: Object.keys(translations || {}).filter(key => key.startsWith('patient.'))
+  });
   
   // Log Whisper status on mount
   useEffect(() => {

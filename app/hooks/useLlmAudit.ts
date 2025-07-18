@@ -1,32 +1,10 @@
 import { useState, useCallback } from 'react'
-
-export interface DiarizationSegment {
-  start: number
-  end: number
-  speaker?: string
-  text?: string
-}
-
-export interface LLMAuditRequest {
-  transcript: string
-  webSpeech?: string
-  diarization?: DiarizationSegment[]
-  task?: 'audit-transcript' | 'diarize'
-}
-
-export interface SpeakerSegment {
-  start: number
-  end: number
-  speaker: string
-  text: string
-}
-
-export interface LLMAuditResult {
-  mergedTranscript: string
-  speakers: SpeakerSegment[]
-  summary?: string
-  gptLogs?: string[]
-}
+import { 
+  LLMAuditRequest, 
+  LLMAuditResult, 
+  LLMAuditResponse,
+  DiarizationSegment 
+} from '@/app/types/llm-audit'
 
 interface UseLlmAuditReturn {
   auditTranscript: (params: LLMAuditRequest) => Promise<LLMAuditResult>
@@ -63,18 +41,18 @@ export function useLlmAudit(): UseLlmAuditReturn {
         }),
       })
 
-      const data = await response.json()
+      const data: LLMAuditResponse = await response.json()
 
       if (!response.ok) {
         throw new Error(data.error || `HTTP error! status: ${response.status}`)
       }
 
-      if (!data.success || !data.result) {
-        throw new Error('Invalid response from server')
+      if (!data.success || !data.data) {
+        throw new Error(data.error || 'Invalid response from server')
       }
 
-      setResult(data.result)
-      return data.result
+      setResult(data.data)
+      return data.data
 
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to audit transcript'

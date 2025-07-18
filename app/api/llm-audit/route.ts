@@ -1,31 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
-
-interface DiarizationSegment {
-  start: number
-  end: number
-  speaker?: string
-  text?: string
-}
-
-interface LLMAuditRequest {
-  transcript: string
-  webSpeech?: string
-  diarization?: DiarizationSegment[]
-  task: 'audit-transcript' | 'diarize'
-}
-
-interface LLMAuditResult {
-  mergedTranscript: string
-  speakers: Array<{
-    start: number
-    end: number
-    speaker: string
-    text: string
-  }>
-  summary?: string
-  gptLogs?: string[]
-}
+import { LLMAuditRequest, LLMAuditResponse, LLMAuditResult } from '@/app/types/llm-audit'
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
@@ -58,11 +33,17 @@ export async function POST(request: NextRequest) {
     const { transcript, webSpeech, diarization, task } = body
 
     if (!transcript) {
-      return NextResponse.json({ error: 'Transcript is required' }, { status: 400 })
+      return NextResponse.json<LLMAuditResponse>({
+        success: false,
+        error: 'Transcript is required'
+      }, { status: 400 })
     }
 
     if (!process.env.OPENAI_API_KEY) {
-      return NextResponse.json({ error: 'OpenAI API key not configured' }, { status: 500 })
+      return NextResponse.json<LLMAuditResponse>({
+        success: false,
+        error: 'OpenAI API key not configured'
+      }, { status: 500 })
     }
 
     const userContent = `
@@ -101,26 +82,24 @@ TAREA: ${task === 'diarize' ? 'Enfócate en asignar speakers correctamente' : 'A
       throw new Error('Invalid response structure from OpenAI')
     }
 
-    return NextResponse.json({
+    return NextResponse.json<LLMAuditResponse>({
       success: true,
-      result,
-      usage: completion.usage
+      data: result
     })
 
   } catch (error) {
     console.error('LLM Audit Error:', error)
     
     if (error instanceof OpenAI.APIError) {
-      return NextResponse.json({
-        error: 'OpenAI API Error',
-        details: error.message,
-        code: error.status
+      return NextResponse.json<LLMAuditResponse>({
+        success: false,
+        error: `OpenAI API Error: ${error.message}`
       }, { status: error.status || 500 })
     }
 
-    return NextResponse.json({
-      error: 'Failed to audit transcript',
-      details: error instanceof Error ? error.message : 'Unknown error'
+    return NextResponse.json<LLMAuditResponse>({
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to audit transcript'
     }, { status: 500 })
   }
 }
