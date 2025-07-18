@@ -50,6 +50,8 @@ export function useSimpleWhisper({
   const [transcription, setTranscription] = useState<Transcription | null>(null);
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<string | null>(null);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
 
   // --- Hooks de ciclo de vida ---
   useEffect(() => {
@@ -114,17 +116,20 @@ export function useSimpleWhisper({
     audio.reset();
     engine.reset();
   }, [audio, engine]);
-
   // --- API brutal y clara ---
+  // Si el modelo ya fue preloaded, consideramos el engine listo inmediatamente
+  const engineStatusDerived: EngineStatus = preload.isLoaded ? 'ready' : engine.status;
   return {
     transcription,
     status,
     isRecording: audio.isRecording,
     error,
-    engineStatus: engine.status,
+    engineStatus: engineStatusDerived,
     loadProgress: preload.progress,
     audioLevel: audio.audioLevel,
     recordingTime: audio.recordingTime,
+    audioUrl,
+    audioBlob,
     startTranscription,
     stopTranscription,
     resetTranscription,

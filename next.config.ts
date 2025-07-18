@@ -34,6 +34,36 @@ const nextConfig: NextConfig = {
       path: false,
       crypto: false,
     };
+    // Apply split-chunks and persistent cache for faster builds (client-only)
+    if (!isServer) {
+      config.cache = {
+        type: 'filesystem',
+        buildDependencies: {
+          config: [__filename],
+        },
+      };
+      config.optimization = {
+        ...config.optimization,
+        splitChunks: {
+          chunks: 'all',
+          maxInitialRequests: 5,
+          maxAsyncRequests: 7,
+          cacheGroups: {
+            vendors: {
+              test: /[\\/]node_modules[\\/]/,
+              name: 'vendors',
+              priority: -10,
+            },
+            commons: {
+              test: /[\\/]src[\\/]components[\\/]/,
+              name: 'commons',
+              minChunks: 2,
+              priority: -20,
+            },
+          },
+        },
+      };
+    }
     // Remove custom CSS rules that conflict with Next.js built-in CSS support
     return config;
   },

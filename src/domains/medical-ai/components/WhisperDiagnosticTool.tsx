@@ -25,7 +25,7 @@ export function WhisperDiagnosticTool() {
   const whisper = useSimpleWhisper({
     autoPreload: false,
     processingMode: 'direct' as const,
-    chunkSize: 32000,
+    chunkSize: 16384, // Must be a power of 2 between 256 and 16384
     onChunkProcessed: (text, chunkNumber) => {
       const timing = Date.now();
       chunkTimingsRef.current.push(timing);

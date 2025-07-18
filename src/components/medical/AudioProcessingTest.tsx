@@ -51,12 +51,9 @@ const AudioProcessingTest = () => {
       setChunks([]);
       setCurrentChunk(null);
       setChunkProgress({});
-      const success = await startTranscription();
-      if (!success) {
-        console.error('Failed to start transcription');
-      }
-    } catch (err) {
-      console.error('Error starting:', err);
+    await startTranscription();
+  } catch (err) {
+    console.warn('Error starting transcription:', err);
     }
   };
 
