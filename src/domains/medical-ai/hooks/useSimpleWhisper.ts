@@ -75,13 +75,6 @@ export function useSimpleWhisper({
   const usingFallback = audioDenoising.error.includes('Failed to load denoiser');
   const audio = usingFallback ? audioFallback : audioDenoising;
   
-  useEffect(() => {
-    if (usingFallback) {
-      logger.log("[useSimpleWhisper] Using fallback audio processor (no denoising)");
-    } else {
-      logger.log("[useSimpleWhisper] Using audio denoising processor");
-    }
-  }, [usingFallback, logger]);
 
   // --- Estado local minimalista ---
   const [transcription, setTranscription] = useState<Transcription | null>(null);

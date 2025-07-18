@@ -1,7 +1,8 @@
-// audioProcessingWorker.js - Local implementation without CDN dependencies
+// audioProcessingWorker.js - Real Whisper implementation with Transformers.js
 let pipeline = null;
 let modelInitialized = false;
 let initializationPromise = null;
+let createPipeline = null;
 
 self.addEventListener('message', async (event) => {
   const { type, data } = event.data;
@@ -20,6 +21,39 @@ self.addEventListener('message', async (event) => {
       break;
   }
 });
+
+async function loadTransformers() {
+  try {
+    console.log('[Worker] Loading Transformers.js...');
+    // Try multiple CDN sources
+    const cdnUrls = [
+      'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/dist/transformers.min.js',
+      'https://unpkg.com/@xenova/transformers@2.17.2/dist/transformers.min.js',
+      'https://esm.sh/@xenova/transformers@2.17.2/dist/transformers.min.js'
+    ];
+    
+    for (const url of cdnUrls) {
+      try {
+        console.log(`[Worker] Trying CDN: ${url}`);
+        importScripts(url);
+        
+        if (typeof Transformers !== 'undefined') {
+          createPipeline = Transformers.pipeline;
+          console.log(`[Worker] Transformers.js loaded successfully from ${url}`);
+          return true;
+        }
+      } catch (error) {
+        console.warn(`[Worker] Failed to load from ${url}:`, error);
+        continue;
+      }
+    }
+    
+    throw new Error('Failed to load Transformers.js from any CDN');
+  } catch (error) {
+    console.error('[Worker] Failed to load Transformers.js:', error);
+    return false;
+  }
+}
 
 async function initializeModel() {
   // If already initialized, just notify ready
@@ -44,25 +78,55 @@ async function initializeModel() {
 
 async function performInitialization() {
   try {
-    console.log('[Worker] Starting local model initialization');
+    console.log('[Worker] Starting Whisper model initialization');
+    
+    // Load Transformers.js if not already loaded
+    if (!createPipeline) {
+      const loaded = await loadTransformers();
+      if (!loaded) {
+        throw new Error('Failed to load Transformers.js');
+      }
+    }
+    
+    // Configure Transformers settings
+    if (typeof Transformers !== 'undefined' && Transformers.env) {
+      Transformers.env.allowLocalModels = true;
+      Transformers.env.localURL = '/models/';
+      Transformers.env.backends.onnx.wasm.proxy = false;
+    }
     
     // Send loading updates
     self.postMessage({ 
       type: 'MODEL_LOADING_PROGRESS', 
       progress: 0, 
-      status: 'Initializing local transcription service...' 
+      status: 'Initializing Whisper model...' 
     });
     
-    // Create a local transcription pipeline
-    pipeline = createLocalPipeline();
+    // Create the pipeline with progress callback
+    pipeline = await createPipeline(
+      'automatic-speech-recognition',
+      'Xenova/whisper-base',
+      {
+        progress_callback: (progress) => {
+          if (progress.status === 'progress' && progress.progress) {
+            const percent = Math.round(progress.progress);
+            self.postMessage({ 
+              type: 'MODEL_LOADING_PROGRESS', 
+              progress: percent,
+              status: `Downloading Whisper model: ${percent}%`
+            });
+          }
+        }
+      }
+    );
     
     modelInitialized = true;
-    console.log('[Worker] Local model initialized successfully');
+    console.log('[Worker] Whisper model initialized successfully');
     self.postMessage({ type: 'MODEL_READY' });
     
     return pipeline;
   } catch (error) {
-    console.error('[Worker] Failed to initialize model:', error);
+    console.error('[Worker] Failed to initialize Whisper model:', error);
     self.postMessage({ 
       type: 'MODEL_ERROR', 
       error: error.message 
@@ -71,77 +135,12 @@ async function performInitialization() {
   }
 }
 
-function createLocalPipeline() {
-  console.log('[Worker] Creating local audio transcription pipeline');
-  
-  return async (audioData, processingOptions = {}) => {
-    console.log(`[Worker] Processing audio: ${audioData.length} samples`);
-    
-    // Simulate processing time
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    // Generate a realistic transcription response
-    const duration = audioData.length / 16000; // Assuming 16kHz
-    const language = processingOptions.language || 'es';
-    
-    // Calculate audio characteristics
-    let peak = 0;
-    let rms = 0;
-    for (let i = 0; i < audioData.length; i++) {
-      const sample = Math.abs(audioData[i]);
-      peak = Math.max(peak, sample);
-      rms += sample * sample;
-    }
-    rms = Math.sqrt(rms / audioData.length);
-    
-    // Determine if audio has speech content
-    const hasSignificantAudio = peak > 0.01 && rms > 0.005;
-    
-    let transcriptionText = '';
-    if (hasSignificantAudio) {
-      // Generate contextual transcription based on audio characteristics
-      if (language === 'es') {
-        const phrases = [
-          'El paciente presenta síntomas',
-          'Se observa una mejoría significativa',
-          'Los resultados del examen muestran',
-          'El diagnóstico preliminar indica',
-          'Se recomienda continuar con el tratamiento',
-          'La evolución del paciente es favorable'
-        ];
-        transcriptionText = phrases[Math.floor(Math.random() * phrases.length)];
-      } else {
-        const phrases = [
-          'The patient shows symptoms',
-          'Significant improvement observed',
-          'Examination results show',
-          'Preliminary diagnosis indicates',
-          'Recommend continuing treatment',
-          'Patient evolution is favorable'
-        ];
-        transcriptionText = phrases[Math.floor(Math.random() * phrases.length)];
-      }
-    } else {
-      transcriptionText = ''; // Silent audio
-    }
-    
-    console.log(`[Worker] Generated transcription: "${transcriptionText}"`);
-    
-    return {
-      text: transcriptionText,
-      language: language,
-      duration: duration,
-      confidence: hasSignificantAudio ? 0.85 : 0.0
-    };
-  };
-}
-
 async function processAudioChunk(data) {
   if (!pipeline || !modelInitialized) {
-    console.error('[Worker] Model not initialized');
+    console.error('[Worker] Whisper model not initialized');
     self.postMessage({ 
       type: 'CHUNK_ERROR', 
-      error: 'Model not initialized',
+      error: 'Whisper model not initialized',
       chunkId: data.chunkId 
     });
     return;
@@ -150,7 +149,7 @@ async function processAudioChunk(data) {
   try {
     const { audioData, chunkId, metadata } = data;
     
-    console.log(`[Worker] Processing chunk ${chunkId}, samples: ${audioData.length}`);
+    console.log(`[Worker] Processing chunk ${chunkId} with Whisper, samples: ${audioData.length}`);
     
     // Start processing
     self.postMessage({ 
@@ -160,16 +159,18 @@ async function processAudioChunk(data) {
     
     const startTime = performance.now();
     
-    // Process with local pipeline
+    // Process with real Whisper model using Spanish language
     const result = await pipeline(audioData, {
       language: 'es',
-      task: 'transcribe'
+      task: 'transcribe',
+      chunk_length_s: 30,
+      stride_length_s: 5
     });
     
     const processingTime = performance.now() - startTime;
     
-    console.log(`[Worker] Chunk ${chunkId} processed in ${processingTime.toFixed(2)}ms`);
-    console.log(`[Worker] Transcription: "${result.text}"`);
+    console.log(`[Worker] Whisper processed chunk ${chunkId} in ${processingTime.toFixed(2)}ms`);
+    console.log(`[Worker] Whisper transcription: "${result.text}"`);
     
     // Send the result
     self.postMessage({
@@ -182,7 +183,7 @@ async function processAudioChunk(data) {
     });
     
   } catch (error) {
-    console.error(`[Worker] Error processing chunk ${data.chunkId}:`, error);
+    console.error(`[Worker] Whisper error processing chunk ${data.chunkId}:`, error);
     self.postMessage({ 
       type: 'CHUNK_ERROR', 
       error: error.message,
@@ -192,10 +193,10 @@ async function processAudioChunk(data) {
 }
 
 function reset() {
-  console.log('[Worker] Resetting state');
+  console.log('[Worker] Resetting Whisper worker state');
   // Keep the model loaded, just notify reset complete
   self.postMessage({ type: 'RESET_COMPLETE' });
 }
 
 // Log worker start
-console.log('[Worker] Local audio processing worker started');
+console.log('[Worker] Real Whisper audio processing worker started');

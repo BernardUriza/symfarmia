@@ -26,11 +26,8 @@ export function useWhisperEngine({
   useEffect(() => {
     // Use global worker to prevent multiple instances
     if (!globalWorker) {
-      console.log('[WhisperEngine] Creating single global worker instance');
       globalWorker = new Worker(WhisperWorkerPath);
       globalWorkerInitialized = false;
-    } else {
-      console.log('[WhisperEngine] Using existing global worker instance');
     }
     
     workerRef.current = globalWorker;
@@ -72,14 +69,13 @@ export function useWhisperEngine({
     
     // Only initialize once
     if (!globalWorkerInitialized) {
-      console.log('[WhisperEngine] Initializing global worker model');
       worker.postMessage({ type: 'INIT' });
       globalWorkerInitialized = true;
     }
     
     // Don't terminate the global worker on unmount
     return () => {
-      console.log('[WhisperEngine] Component unmounting, keeping global worker alive');
+      // Silent cleanup - worker stays alive
     }
   }, [logger, onChunkProcessed, onChunkProgress])
 

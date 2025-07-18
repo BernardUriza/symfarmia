@@ -21,14 +21,6 @@ const AudioProcessingTest = React.memo(() => {
   const [currentChunk, setCurrentChunk] = useState<ChunkWithProgress | null>(null);
   const [chunkProgress, setChunkProgress] = useState<{ [key: number]: number }>({});
 
-  // Debug component lifecycle
-  React.useEffect(() => {
-    console.log('[AudioProcessingTest] Component mounted');
-    return () => {
-      console.log('[AudioProcessingTest] Component unmounting');
-    };
-  }, []);
-
   const {
     transcription,
     isRecording,
@@ -36,6 +28,8 @@ const AudioProcessingTest = React.memo(() => {
     engineStatus,
     audioLevel,
     recordingTime,
+    audioUrl,
+    audioBlob,
     startTranscription,
     stopTranscription,
     resetTranscription,
@@ -45,13 +39,11 @@ const AudioProcessingTest = React.memo(() => {
     chunkSize: 16384,
     sampleRate: 16000,
     onChunkProcessed: (text, chunkNumber) => {
-      console.log(`[AudioTest] Chunk ${chunkNumber} processed: "${text}"`);
       const newChunk: ChunkData = { text, chunkNumber, timestamp: Date.now() };
       setChunks(prev => [...prev, newChunk]);
       setCurrentChunk({ text, number: chunkNumber });
     },
     onChunkProgress: (chunkNumber, progress) => {
-      console.log(`[AudioTest] Chunk ${chunkNumber} progress: ${progress}%`);
       setChunkProgress(prev => ({ ...prev, [chunkNumber]: progress }));
       setCurrentChunk(curr => 
         curr && curr.number === chunkNumber 
@@ -60,11 +52,6 @@ const AudioProcessingTest = React.memo(() => {
       );
     }
   });
-
-  // Debug audio level changes
-  React.useEffect(() => {
-    console.log('[AudioProcessingTest] Audio level changed:', audioLevel);
-  }, [audioLevel]);
 
   const handleStart = async () => {
     try {
@@ -308,6 +295,54 @@ const AudioProcessingTest = React.memo(() => {
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Audio grabado */}
+      {audioUrl && !isRecording && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <h3 className="font-semibold mb-3 text-blue-900">
+            🎵 {t('transcription.recorded_audio')}:
+          </h3>
+          
+          <div className="space-y-4">
+            {/* Audio Player */}
+            <div className="bg-white rounded-lg p-3 border border-blue-200">
+              <audio 
+                controls 
+                src={audioUrl}
+                className="w-full"
+                preload="metadata"
+              >
+                Your browser does not support the audio element.
+              </audio>
+            </div>
+
+            {/* Download Button */}
+            <div className="flex justify-center">
+              <a
+                href={audioUrl}
+                download={`medical-recording-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.wav`}
+                className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200"
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                </svg>
+                {t('transcription.download_audio')}
+              </a>
+            </div>
+
+            {/* Audio Info */}
+            <div className="text-sm text-gray-600 text-center">
+              <p>{t('transcription.audio_format')}: WAV • {t('transcription.duration')}: {formatTime(recordingTime)}</p>
+              {transcription && (
+                <p className="mt-1">
+                  {t('transcription.processing_time')}: {transcription.processingTime || 0}ms • 
+                  {t('transcription.confidence')}: {Math.round((transcription.confidence || 0) * 100)}%
+                </p>
+              )}
+            </div>
+          </div>
         </div>
       )}
     </div>

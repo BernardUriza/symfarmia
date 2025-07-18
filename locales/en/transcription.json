@@ -51,6 +51,12 @@
     "words_in_chunks": "words in",
     "chunks_text": "chunks",
     "complete_transcription": "Complete transcription",
-    "detected_medical_terms": "Detected medical terms"
+    "detected_medical_terms": "Detected medical terms",
+    "recorded_audio": "Recorded Audio",
+    "download_audio": "Download Audio",
+    "audio_format": "Format",
+    "duration": "Duration",
+    "processing_time": "Processing Time",
+    "confidence": "Confidence"
   }
 }

@@ -53,7 +53,6 @@ export function useAudioChunkAccumulator({
     bufferRef.current.push(downsampled);
     accumulatedSamplesRef.current += downsampled.length;
     
-    console.log(`[AudioChunkAccumulator] Added chunk ${metadata.chunkId}, downsampled from ${audioData.length} to ${downsampled.length} samples`);
     
     // If we've accumulated enough samples, send them for processing
     if (accumulatedSamplesRef.current >= minChunkSize) {
@@ -74,7 +73,6 @@ export function useAudioChunkAccumulator({
         processingTime: Date.now()
       };
       
-      console.log(`[AudioChunkAccumulator] Sending accumulated chunk ${newMetadata.chunkId} with ${totalLength} samples`);
       onAccumulatedChunk(combinedBuffer, newMetadata);
       
       // Clear the buffer
@@ -102,7 +100,6 @@ export function useAudioChunkAccumulator({
       processingTime: Date.now()
     };
     
-    console.log(`[AudioChunkAccumulator] Flushing final chunk ${metadata.chunkId} with ${totalLength} samples`);
     onAccumulatedChunk(combinedBuffer, metadata);
     
     bufferRef.current = [];
@@ -113,7 +110,6 @@ export function useAudioChunkAccumulator({
     bufferRef.current = [];
     accumulatedSamplesRef.current = 0;
     chunkIdRef.current = 0;
-    console.log('[AudioChunkAccumulator] Reset');
   }, []);
 
   return {
