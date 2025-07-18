@@ -111,7 +111,9 @@ export const ConversationCapture = ({
     isAvailable: isWebSpeechAvailable,
     error: webSpeechError,
     startRecording: startLiveTranscription,
-    stopRecording: stopLiveTranscription
+    stopRecording: stopLiveTranscription,
+    restartCount: webSpeechRestartCount,
+    lastRestartTime: webSpeechLastRestart
   } = webSpeechService;
   
   // Unified engine status
@@ -476,6 +478,21 @@ export const ConversationCapture = ({
             <div className="text-sm text-foreground/70">
               La transcripción completa estará disponible al finalizar.
             </div>
+            
+            {/* Web Speech restart feedback */}
+            {webSpeechRestartCount > 0 && (
+              <div className="mt-3 flex items-center gap-2 text-xs">
+                <div className="animate-pulse w-2 h-2 bg-amber-500 rounded-full"></div>
+                <span className="text-amber-600 dark:text-amber-400">
+                  Web Speech reconectado automáticamente ({webSpeechRestartCount} {webSpeechRestartCount === 1 ? 'vez' : 'veces'})
+                </span>
+                {webSpeechLastRestart && (
+                  <span className="text-muted-foreground">
+                    - hace {Math.round((new Date().getTime() - webSpeechLastRestart.getTime()) / 1000)}s
+                  </span>
+                )}
+              </div>
+            )}
           </div>
         </div>
       )}
