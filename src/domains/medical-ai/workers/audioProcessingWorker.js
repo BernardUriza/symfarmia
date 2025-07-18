@@ -1,10 +1,9 @@
-import { pipeline as createPipeline } from '@xenova/transformers';
-import { configureTransformers } from '../config/transformersConfig';
-
+// audioProcessingWorker.js - Simplified version without ES6 imports
 // Global cache for the pipeline model
 let pipeline = null;
 let modelInitialized = false;
 let initializationPromise = null;
+let createPipeline = null;
 
 self.addEventListener('message', async (event) => {
   const { type, data } = event.data;
@@ -23,6 +22,38 @@ self.addEventListener('message', async (event) => {
       break;
   }
 });
+
+async function loadTransformers() {
+  try {
+    console.log('[Worker] Loading Transformers.js...');
+    // Load Transformers.js from CDN
+    importScripts('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/dist/transformers.min.js');
+    
+    if (typeof Transformers !== 'undefined') {
+      createPipeline = Transformers.pipeline;
+      console.log('[Worker] Transformers.js loaded successfully');
+      return true;
+    } else {
+      console.error('[Worker] Transformers global not found after loading');
+      return false;
+    }
+  } catch (error) {
+    console.error('[Worker] Failed to load Transformers.js:', error);
+    // Try alternative CDN
+    try {
+      console.log('[Worker] Trying alternative CDN...');
+      importScripts('https://unpkg.com/@xenova/transformers@2.17.2/dist/transformers.min.js');
+      if (typeof Transformers !== 'undefined') {
+        createPipeline = Transformers.pipeline;
+        console.log('[Worker] Transformers.js loaded from alternative CDN');
+        return true;
+      }
+    } catch (altError) {
+      console.error('[Worker] Alternative CDN also failed:', altError);
+    }
+    return false;
+  }
+}
 
 async function initializeModel() {
   // If already initialized, just notify ready
@@ -48,216 +79,123 @@ async function initializeModel() {
 async function performInitialization() {
   try {
     console.log('[Worker] Starting model initialization');
-    self.postMessage({ type: 'MODEL_LOADING', progress: 0 });
     
-    // Use global transformers configuration
-    await configureTransformers();
+    // Load Transformers.js if not already loaded
+    if (!createPipeline) {
+      const loaded = await loadTransformers();
+      if (!loaded) {
+        throw new Error('Failed to load Transformers.js');
+      }
+    }
     
+    // Configure Transformers settings
+    if (typeof Transformers !== 'undefined' && Transformers.env) {
+      Transformers.env.allowLocalModels = true;
+      Transformers.env.localURL = '/models/';
+      Transformers.env.backends.onnx.wasm.proxy = false;
+    }
+    
+    // Send loading updates
+    self.postMessage({ 
+      type: 'MODEL_LOADING_PROGRESS', 
+      progress: 0, 
+      status: 'Initializing Whisper model...' 
+    });
+    
+    // Create the pipeline with progress callback
     pipeline = await createPipeline(
       'automatic-speech-recognition',
       'Xenova/whisper-base',
       {
         progress_callback: (progress) => {
-          self.postMessage({ 
-            type: 'MODEL_LOADING', 
-            progress: progress.progress || 0 
-          });
-        },
-        revision: 'main'
+          if (progress.status === 'progress' && progress.progress) {
+            const percent = Math.round(progress.progress);
+            self.postMessage({ 
+              type: 'MODEL_LOADING_PROGRESS', 
+              progress: percent,
+              status: `Downloading model: ${percent}%`
+            });
+          }
+        }
       }
     );
     
     modelInitialized = true;
     console.log('[Worker] Model initialized successfully');
     self.postMessage({ type: 'MODEL_READY' });
+    
+    return pipeline;
   } catch (error) {
     console.error('[Worker] Failed to initialize model:', error);
-    initializationPromise = null;
     self.postMessage({ 
-      type: 'ERROR', 
-      error: `Failed to initialize model: ${error.message}` 
+      type: 'MODEL_ERROR', 
+      error: error.message 
     });
     throw error;
   }
 }
 
 async function processAudioChunk(data) {
-  try {
-    if (!pipeline) {
-      throw new Error('Model not initialized');
-    }
-
-    const { audioData, chunkId } = data;
-    
-    // Validar tamaño del chunk - MÍNIMO 2 SEGUNDOS PARA MEJOR CALIDAD HQ
-    const minChunkSize = 32000; // 2 segundos a 16kHz - mejor contexto para HQ
-    if (!audioData || audioData.length < minChunkSize) {
-      console.warn(`[Worker] Chunk muy pequeño: ${audioData?.length || 0} samples (mínimo: ${minChunkSize})`);
-      self.postMessage({ 
-        type: 'CHUNK_TOO_SMALL',
-        chunkId,
-        size: audioData?.length || 0,
-        minSize: minChunkSize,
-        error: `Chunk de audio muy pequeño para procesar. Recibido: ${audioData?.length || 0} samples, mínimo requerido: ${minChunkSize} (2 segundos)`
-      });
-      return;
-    }
-    
-    console.log(`[Worker] Procesando chunk ${chunkId}: ${audioData.length} samples`);
-    
-    // Debug: Check audio data - avoid spread operator for large arrays
-    let min = Infinity;
-    let max = -Infinity;
-    let sum = 0;
-    let silentSamples = 0;
-    
-    for (let i = 0; i < audioData.length; i++) {
-      const sample = audioData[i];
-      if (sample < min) min = sample;
-      if (sample > max) max = sample;
-      sum += Math.abs(sample);
-      if (Math.abs(sample) < 0.001) silentSamples++;
-    }
-    
-    const audioStats = {
-      length: audioData.length,
-      min: min,
-      max: max,
-      avg: sum / audioData.length,
-      silent: silentSamples === audioData.length
-    };
-    
-    console.log(`[Worker] Audio stats for ${chunkId}:`, audioStats);
-    
-    if (audioStats.silent) {
-      console.warn(`[Worker] AUDIO SILENCIOSO DETECTADO - chunk ${chunkId}`);
-    }
-    
+  if (!pipeline || !modelInitialized) {
+    console.error('[Worker] Model not initialized');
     self.postMessage({ 
-      type: 'PROCESSING_START', 
+      type: 'CHUNK_ERROR', 
+      error: 'Model not initialized',
+      chunkId: data.chunkId 
+    });
+    return;
+  }
+
+  try {
+    const { audioData, chunkId, metadata } = data;
+    
+    console.log(`[Worker] Processing chunk ${chunkId}, samples: ${audioData.length}`);
+    
+    // Start processing
+    self.postMessage({ 
+      type: 'CHUNK_PROCESSING_START', 
       chunkId 
     });
-
-    // Send initial progress
-    self.postMessage({ 
-      type: 'CHUNK_PROGRESS', 
-      chunkId,
-      progress: 5
-    });
-
-    console.log(`[Worker] Llamando a pipeline para chunk ${chunkId} en español (es)...`);
     
-    // Simulate progress during processing
-    let currentProgress = 5;
-    const progressInterval = setInterval(() => {
-      currentProgress = Math.min(90, currentProgress + Math.random() * 15 + 5);
-      try {
-        self.postMessage({ 
-          type: 'CHUNK_PROGRESS', 
-          chunkId,
-          progress: Math.round(currentProgress)
-        });
-      } catch (error) {
-        // Worker might be terminating, clear interval
-        console.log('[Worker] Error posting progress, likely terminating');
-        clearInterval(progressInterval);
-      }
-    }, 500);
-
+    const startTime = performance.now();
+    
+    // Process with Whisper using Spanish language
     const result = await pipeline(audioData, {
-      return_timestamps: false,
-      chunk_length_s: 60, // chunks más largos para mejor contexto HQ
-      stride_length_s: 10, // mayor solapamiento
-      // Use ISO 639-1 language code for Spanish ('es' not 'spanish')
-      // This ensures Whisper transcribes in Spanish instead of defaulting to English
       language: 'es',
-      // Lower the minimum speech probability threshold
-      no_speech_threshold: 0.3,
-      // Asegurar que NO traduzca - solo transcriba en español
-      task: 'transcribe'
+      task: 'transcribe',
+      chunk_length_s: 30,
+      stride_length_s: 5
     });
-
-    // Clear progress interval
-    clearInterval(progressInterval);
     
-    // Send final progress
-    try {
-      self.postMessage({ 
-        type: 'CHUNK_PROGRESS', 
-        chunkId,
-        progress: 100
-      });
-    } catch (error) {
-      console.log('[Worker] Error posting final progress, worker might be terminating');
-    }
-
-    let transcribedText = result.text || '';
-    console.log(`[Worker] TRANSCRIPCIÓN OBTENIDA para chunk ${chunkId}: "${transcribedText}" (${transcribedText.length} caracteres)`);
+    const processingTime = performance.now() - startTime;
     
-    // Log language detection info if available
-    if (result.language) {
-      console.log(`[Worker] Idioma detectado: ${result.language}`);
-    }
+    console.log(`[Worker] Chunk ${chunkId} processed in ${processingTime.toFixed(2)}ms`);
+    console.log(`[Worker] Transcription: "${result.text}"`);
     
-    // Filtro adicional para palabras en español - solo mantener caracteres españoles
-    if (transcribedText) {
-      const spanishWordFilter = /^[a-záéíóúñü\s.,;:!¡?¿\-()]+$/i;
-      const words = transcribedText.split(' ');
-      const filteredWords = words.filter(word => {
-        // Permitir palabras vacías y puntuación
-        if (!word.trim()) return true;
-        // Filtrar solo palabras con caracteres españoles
-        return spanishWordFilter.test(word.trim());
-      });
-      
-      if (filteredWords.length !== words.length) {
-        console.log(`[Worker] Filtro español aplicado: ${words.length} -> ${filteredWords.length} palabras`);
-      }
-      
-      transcribedText = filteredWords.join(' ').trim();
-    }
-
-    if (!transcribedText || transcribedText.length === 0) {
-      console.warn(`[Worker] CHUNK ${chunkId} NO GENERÓ TEXTO - posible audio silencioso`);
-      // Enviar resultado vacío para que el sistema sepa que fue procesado
-      try {
-        self.postMessage({ 
-          type: 'CHUNK_PROCESSED', 
-          chunkId,
-          text: '',
-          timestamp: Date.now(),
-          warning: 'No text generated - possible silent audio'
-        });
-      } catch (error) {
-        console.log('[Worker] Error posting empty chunk result, worker might be terminating');
-      }
-    } else {
-      console.log(`[Worker] ENVIANDO TRANSCRIPCIÓN: "${transcribedText}"`);
-      try {
-        self.postMessage({ 
-          type: 'CHUNK_PROCESSED', 
-          chunkId,
-          text: transcribedText,
-          timestamp: Date.now()
-        });
-      } catch (error) {
-        console.log('[Worker] Error posting chunk result, worker might be terminating');
-      }
-    }
+    // Send the result
+    self.postMessage({
+      type: 'CHUNK_PROCESSED',
+      chunkId,
+      text: result.text || '',
+      processingTime,
+      metadata
+    });
+    
   } catch (error) {
-    console.error('[Worker] Processing error:', error);
-    try {
-      self.postMessage({ 
-        type: 'PROCESSING_ERROR', 
-        error: error.message || 'Unknown processing error',
-        chunkId: data.chunkId || 'unknown'
-      });
-    } catch (postError) {
-      console.log('[Worker] Error posting error message, worker might be terminating');
-    }
+    console.error(`[Worker] Error processing chunk ${data.chunkId}:`, error);
+    self.postMessage({ 
+      type: 'CHUNK_ERROR', 
+      error: error.message,
+      chunkId: data.chunkId 
+    });
   }
 }
 
 function reset() {
+  console.log('[Worker] Resetting state');
+  // Keep the model loaded, just notify reset complete
   self.postMessage({ type: 'RESET_COMPLETE' });
 }
+
+// Log worker start
+console.log('[Worker] Audio processing worker started');

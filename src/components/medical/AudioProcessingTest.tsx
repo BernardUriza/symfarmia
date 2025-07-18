@@ -1,7 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import { useSimpleWhisper } from '@/src/domains/medical-ai/hooks/useSimpleWhisper';
-// import { useI18n } from '@/src/domains/core/hooks/useI18n';
+import { useMedicalTranslation } from '@/src/domains/medical-ai/hooks/useMedicalTranslation';
 
 interface ChunkData {
   text: string;
@@ -9,7 +9,7 @@ interface ChunkData {
 }
 
 const AudioProcessingTest = () => {
-  // const { t } = useI18n();
+  const { t } = useMedicalTranslation();
   const [chunks, setChunks] = useState<ChunkData[]>([]);
   const [currentChunk, setCurrentChunk] = useState<{ text: string; number: number } | null>(null);
   const [chunkProgress, setChunkProgress] = useState<{ [key: number]: number }>({});
@@ -26,18 +26,18 @@ const AudioProcessingTest = () => {
     resetTranscription,
   } = useSimpleWhisper({
     autoPreload: true,
-    processingMode: 'streaming', // Cambiar a streaming para ver el progreso
-    chunkSize: 16384, // Must be a power of 2 between 256 and 16384 for createScriptProcessor
+    processingMode: 'direct', // Use direct mode for better chunk processing
+    chunkSize: 16384,
+    sampleRate: 16000,
     onChunkProcessed: (text, chunkNumber) => {
-      console.log(`[AudioTest] Chunk ${chunkNumber} procesado: "${text}"`);
+      console.log(`[AudioTest] Chunk ${chunkNumber} processed: "${text}"`);
       const newChunk: ChunkData = { text, chunkNumber };
       setChunks(prev => [...prev, newChunk]);
       setCurrentChunk({ text, number: chunkNumber });
     },
     onChunkProgress: (chunkNumber, progress) => {
-      console.log(`[AudioTest] Chunk ${chunkNumber} progreso: ${progress}%`);
+      console.log(`[AudioTest] Chunk ${chunkNumber} progress: ${progress}%`);
       setChunkProgress(prev => ({ ...prev, [chunkNumber]: progress }));
-      // Update current chunk progress if it's the active one
       setCurrentChunk(curr => 
         curr && curr.number === chunkNumber 
           ? { ...curr, progress } 
@@ -77,11 +77,11 @@ const AudioProcessingTest = () => {
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-6">
       <div className="text-center">
-        <h2 className="text-2xl font-bold mb-2 text-gray-900 ">
-          Prueba de Transcripción en Tiempo Real
+        <h2 className="text-2xl font-bold mb-2 text-gray-900">
+          {t('transcription.test_title')}
         </h2>
-        <p className="text-gray-600 ">
-          Modo Direct - Procesamiento por chunks de 10 segundos
+        <p className="text-gray-600">
+          {t('transcription.test_description')}
         </p>
       </div>
 
@@ -91,28 +91,28 @@ const AudioProcessingTest = () => {
           {/* Columna izquierda - Estado */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <span>Motor Whisper:</span>
+              <span>{t('transcription.whisper_engine')}:</span>
               <span className={`font-medium ${
                 engineStatus === 'ready' ? 'text-green-600' : 
                 engineStatus === 'loading' ? 'text-yellow-600' : 
                 'text-red-600'
               }`}>
-                {engineStatus === 'ready' ? '✅ Listo' : 
-                 engineStatus === 'loading' ? '⏳ Cargando...' : 
-                 '❌ Error'}
+                {engineStatus === 'ready' ? `✅ ${t('transcription.ready')}` : 
+                 engineStatus === 'loading' ? `⏳ ${t('transcription.loading')}` : 
+                 `❌ ${t('transcription.error')}`}
               </span>
             </div>
 
             <div className="flex items-center justify-between">
-              <span>Estado:</span>
+              <span>{t('transcription.status')}:</span>
               <span className="font-medium flex items-center gap-2">
                 {isRecording ? (
                   <>
                     <span className="animate-pulse">🔴</span>
-                    Grabando
+                    {t('transcription.recording_active')}
                   </>
                 ) : (
-                  <>⚪ Detenido</>
+                  <>⚪ {t('transcription.stopped')}</>
                 )}
               </span>
             </div>
@@ -120,12 +120,12 @@ const AudioProcessingTest = () => {
             {isRecording && (
               <>
                 <div className="flex items-center justify-between">
-                  <span>Tiempo:</span>
+                  <span>{t('transcription.time')}:</span>
                   <span className="font-mono">{formatTime(recordingTime)}</span>
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <span>Nivel de audio:</span>
+                  <span>{t('transcription.audio_level')}:</span>
                   <div className="flex-1 mx-4 bg-gray-200 rounded-full h-2">
                     <div 
                       className="bg-blue-500 h-2 rounded-full transition-all duration-100"
@@ -138,18 +138,18 @@ const AudioProcessingTest = () => {
           </div>
 
           {/* Columna derecha - Chunk actual */}
-          <div className="bg-white rounded-lg p-3 border border-gray-200 ">
+          <div className="bg-white rounded-lg p-3 border border-gray-200">
             <div className="text-sm font-medium text-gray-600 mb-1">
-              Chunk actual:
+              {t('transcription.current_chunk')}:
             </div>
             {currentChunk ? (
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs text-blue-600 ">
-                    Chunk #{currentChunk.number}
+                  <span className="text-xs text-blue-600">
+                    {t('transcription.chunk_number')}{currentChunk.number}
                   </span>
                   {chunkProgress[currentChunk.number] !== undefined && (
-                    <span className="text-xs font-medium text-gray-600 ">
+                    <span className="text-xs font-medium text-gray-600">
                       {chunkProgress[currentChunk.number]}%
                     </span>
                   )}
@@ -166,20 +166,20 @@ const AudioProcessingTest = () => {
                   {currentChunk.text || (
                     <em className="text-gray-400">
                       {chunkProgress[currentChunk.number] === 100 
-                        ? 'Procesando texto...' 
-                        : 'Analizando audio...'}
+                        ? t('transcription.processing_text')
+                        : t('transcription.analyzing_audio')}
                     </em>
                   )}
                 </div>
               </div>
             ) : (
               <div className="text-sm text-gray-400 italic">
-                {isRecording ? 'Esperando audio...' : 'Sin datos'}
+                {isRecording ? t('transcription.waiting_for_audio') : t('transcription.no_data')}
               </div>
             )}
           </div>
         </div>
-        {error && <p className="text-red-500 text-sm mt-2">Error: {error}</p>}
+        {error && <p className="text-red-500 text-sm mt-2">{t('transcription.error')}: {error}</p>}
       </div>
 
       {/* Controles */}
@@ -195,14 +195,14 @@ const AudioProcessingTest = () => {
                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
           }`}
         >
-          {isRecording ? '⏹️ Detener' : '🎤 Iniciar'} Grabación
+          {isRecording ? `⏹️ ${t('transcription.stop_recording_btn')}` : `🎤 ${t('transcription.start_recording_btn')}`}
         </button>
 
         <button
           onClick={handleReset}
           className="px-4 py-3 rounded-lg font-medium bg-gray-200 hover:bg-gray-300 transition-all duration-200 transform hover:scale-105"
         >
-          🔄 Limpiar
+          🔄 {t('transcription.clear_btn')}
         </button>
       </div>
 

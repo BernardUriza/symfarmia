@@ -72,8 +72,7 @@ class WhisperModelCache {
         if (!this.worker) {
           console.log('[WhisperCache] Creating new worker instance');
           this.worker = new Worker(
-            new URL('../workers/audioProcessingWorker.js', import.meta.url),
-            { type: 'module' }
+            new URL('../workers/audioProcessingWorker.js', import.meta.url)
           );
           
           // Persist to global cache
@@ -91,6 +90,12 @@ class WhisperModelCache {
               }
               console.log('[WhisperCache] Model loaded successfully');
               resolve();
+            }
+            
+            // Handle model error
+            if (event.data.type === 'MODEL_ERROR') {
+              console.error('[WhisperCache] Model initialization error:', event.data.error);
+              reject(new Error(event.data.error));
             }
             
             // Forward to all listeners - use a copy to prevent modification during iteration
