@@ -49,10 +49,14 @@ export function useSimpleWhisper({
   });
 
   // Use fallback if denoising fails
+  const fallbackChunkIdRef = useRef(0);
   const audioFallback = useAudioProcessorFallback({
     sampleRate,
     bufferSize: chunkSize,
-    onAudioData: engine.processAudioChunk,
+    onAudioData: (audioData) => {
+      const chunkId = fallbackChunkIdRef.current!++;
+      engine.processAudioChunk(audioData, { chunkId });
+    },
   });
 
   // Select which audio processor to use based on denoising status
@@ -113,9 +117,9 @@ export function useSimpleWhisper({
       const medicalTerms = extractMedicalTermsFromText(fullText).map(t => t.term);
       setTranscription({
         text: fullText,
-        confidence: engine.confidence,
+        confidence: engine.confidence ?? 0,
         medicalTerms,
-        processingTime: engine.processingTime,
+        processingTime: engine.processingTime ?? 0,
         timestamp: Date.now(),
         chunks: engine.getChunks()
       });
@@ -144,13 +148,13 @@ export function useSimpleWhisper({
     transcription,
     status,
     isRecording: audio.isRecording,
-    error,
+    error: error ?? '',
     engineStatus: engineStatusDerived,
     loadProgress: preload.progress,
     audioLevel: audio.audioLevel,
     recordingTime: audio.recordingTime,
-    audioUrl,
-    audioBlob,
+    audioUrl: audioUrl ?? '',
+    audioBlob: audioBlob ?? new Blob(),
     startTranscription,
     stopTranscription,
     resetTranscription,
