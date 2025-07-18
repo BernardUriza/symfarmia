@@ -5,6 +5,7 @@
  */
 
 export { ConversationCapture } from './ConversationCapture';
+export { ConversationCaptureWrapper } from './ConversationCaptureWrapper';
 export { SOAPNotesManager } from './SOAPNotesManager';
 export { AudioDenoisingDashboard } from './AudioDenoisingDashboard';
 export { DialogueFlow } from './DialogueFlow';

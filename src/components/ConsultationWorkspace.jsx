@@ -11,7 +11,7 @@ import {
   useConsultation,
 } from '../contexts/ConsultationContext';
 import { useTranslation } from '../providers/I18nProvider';
-import { ConversationCapture } from './medical/ConversationCapture';
+import { ConversationCaptureWrapper } from './medical/ConversationCaptureWrapper';
 import AIAssistantPanel from './consultation/AIAssistantPanel';
 import DocumentationOutput from './consultation/DocumentationOutput';
 import ConsultationSettings from './consultation/ConsultationSettings';
@@ -110,7 +110,7 @@ function ConsultationWorkspaceInner({ onExit }) {
               layout
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
             >
-              <ConversationCapture />
+              <ConversationCaptureWrapper />
             </motion.div>
             <AnimatePresence>
               {aiMode === 'advanced' && (
@@ -139,7 +139,7 @@ function ConsultationWorkspaceInner({ onExit }) {
               layout
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
             >
-              <ConversationCapture />
+              <ConversationCaptureWrapper />
             </motion.div>
 
             {/* AI Assistant Panel */}
