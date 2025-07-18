@@ -1,10 +1,12 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef, useState, useEffect } from "react";
 
 interface AudioRecordingOptions {
   sampleRate: number;
   chunkSize: number;
   onAudioChunk: (audio: Float32Array, meta: { chunkId: number }) => void;
 }
+
+import { audioPipelineIntegration } from '../../services/AudioPipelineIntegration';
 
 export function useAudioRecording({ sampleRate, chunkSize, onAudioChunk }: AudioRecordingOptions) {
   const [isRecording, setIsRecording] = useState(false);
@@ -16,6 +18,7 @@ export function useAudioRecording({ sampleRate, chunkSize, onAudioChunk }: Audio
   const chunksRef = useRef<Float32Array[]>([]);
   const chunkIdRef = useRef<number>(0);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+
   
   // --- Start recording ---
   const start = useCallback(async () => {

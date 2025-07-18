@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useWhisperPreload } from "./useWhisperPreload";
 import { useWhisperEngine } from "./aux_hooks/useWhisperEngine";
-import { useAudioRecording } from "./aux_hooks/useAudioRecording";
+import { useAudioDenoising } from "./aux_hooks/useAudioDenoising";
 import { extractMedicalTermsFromText } from "../utils/medicalTerms";
 import { DefaultLogger } from "../utils/LoggerStrategy";
 
@@ -40,18 +40,16 @@ export function useSimpleWhisper({
     onChunkProgress: restOptions.onChunkProgress
   });
 
-  const audio = useAudioRecording({
+  const audio = useAudioDenoising({
     sampleRate,
     chunkSize,
-    onAudioChunk: engine.processAudioChunk
+    onChunkReady: engine.processAudioChunk,
   });
 
   // --- Estado local minimalista ---
   const [transcription, setTranscription] = useState<Transcription | null>(null);
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<string | null>(null);
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
-  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
 
   // --- Hooks de ciclo de vida ---
   useEffect(() => {
@@ -66,12 +64,6 @@ export function useSimpleWhisper({
     }
   }, [preload.isLoaded, preload.status, engine.status, logger]);
 
-  // --- Limpieza de audioUrl ---
-  useEffect(() => {
-    return () => {
-      if (audioUrl) URL.revokeObjectURL(audioUrl);
-    };
-  }, [audioUrl]);
 
   // --- Acciones principales ---
   const startTranscription = useCallback(async () => {
@@ -105,12 +97,6 @@ export function useSimpleWhisper({
         chunks: engine.getChunks()
       });
       setStatus("completed");
-      // Generar blob y url solo si hay audio
-      if (audio.getAudioData) {
-        const wav = audio.createWavBlob();
-        setAudioBlob(wav);
-        setAudioUrl(URL.createObjectURL(wav));
-      }
       return true;
     } catch (e) {
       setStatus("error");
@@ -139,13 +125,11 @@ export function useSimpleWhisper({
     loadProgress: preload.progress,
     audioLevel: audio.audioLevel,
     recordingTime: audio.recordingTime,
-    audioUrl,
-    audioBlob,
     startTranscription,
     stopTranscription,
     resetTranscription,
     preloadModel: preload.forcePreload,
-    getCompleteAudio: audio.getAudioData,
+    getCompleteAudio: audio.getCompleteAudio,
     preloadStatus: preload.status,
     preloadProgress: preload.progress,
     isPreloaded: preload.isLoaded,

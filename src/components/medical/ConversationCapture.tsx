@@ -146,6 +146,7 @@ export const ConversationCapture = ({
     }
     diarizationState.setDiarizationProcessing(true);
     diarizationState.setDiarizationError(null);
+    console.log("[ConversationCapture] About to process diarization...");
     try {
       const denoisedTranscriptionText = allMinutesText || "";
       const mergedText = DiarizationUtils.mergeTranscriptions(denoisedTranscriptionText, transcriptionState.webSpeechText);

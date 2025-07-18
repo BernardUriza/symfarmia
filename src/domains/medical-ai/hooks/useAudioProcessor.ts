@@ -1,4 +1,6 @@
-import { useRef, useCallback, useState } from 'react';
+import { useRef, useCallback, useState, useEffect } from 'react';
+
+import { audioPipelineIntegration } from '../services/AudioPipelineIntegration';
 
 interface UseAudioProcessorOptions {
   onAudioData?: (audioData: Float32Array) => void;
@@ -16,6 +18,7 @@ export function useAudioProcessor({
   const sourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
   const processorRef = useRef<ScriptProcessorNode | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
+
 
   const start = useCallback(async (): Promise<MediaStream | null> => {
     if (isProcessing) return null;
