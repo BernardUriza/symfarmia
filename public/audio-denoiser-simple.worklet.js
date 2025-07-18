@@ -13,11 +13,9 @@ class AudioDenoiserProcessor extends AudioWorkletProcessor {
     
     if (event.data.type === 'init') {
       console.log('[SimpleWorklet] Processing init message');
-      // Simulate successful initialization
-      setTimeout(() => {
-        console.log('[SimpleWorklet] Sending init-complete');
-        this.port.postMessage({ type: 'init-complete' });
-      }, 100);
+      // Send immediate response since AudioWorklet doesn't have setTimeout
+      console.log('[SimpleWorklet] Sending init-complete');
+      this.port.postMessage({ type: 'init-complete' });
     }
   }
 

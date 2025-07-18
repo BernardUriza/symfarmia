@@ -61,7 +61,7 @@ export function useSimpleWhisper({
   
   useEffect(() => {
     if (usingFallback) {
-      logger.warn("[useSimpleWhisper] Using fallback audio processor (no denoising)");
+      logger.log("[useSimpleWhisper] Using fallback audio processor (no denoising)");
     } else {
       logger.log("[useSimpleWhisper] Using audio denoising processor");
     }
