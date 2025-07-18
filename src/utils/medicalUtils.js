@@ -349,7 +349,7 @@ export const mockMedicalAI = {
           let errorData = {};
           try {
             errorData = JSON.parse(errorText);
-          } catch (_) {
+          } catch {
             // ignore JSON parse errors
           }
 
