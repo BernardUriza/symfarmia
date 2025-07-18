@@ -76,66 +76,84 @@ import {
 
 } // Constants for configuration (DRY)
 const TRANSCRIPTION_CONFIG = {
- autoPreload: true, processingMode: 'direct' as const, chunkSize: 32000, // 2 segundos onChunkProcessed: (text: string, chunkNumber: number) => {
-
- console.log(`[ConversationCapture] Real transcription chunk #${
-chunkNumber
-}: ${
-text
-}`);
- 
-}
+  autoPreload: true,
+  processingMode: 'direct' as const,
+  chunkSize: 32000, // 2 segundos
+  onChunkProcessed: (text: string, chunkNumber: number) => {
+    console.log(`[ConversationCapture] Real transcription chunk #${chunkNumber}: ${text}`);
+  }
 };
- const SOAP_CONFIG = {
- autoGenerate: false, style: 'detailed' as const, includeTimestamps: true, includeConfidence: true, medicalTerminology: 'mixed' as const
+const SOAP_CONFIG = {
+  autoGenerate: false,
+  style: 'detailed' as const,
+  includeTimestamps: true,
+  includeConfidence: true,
+  medicalTerminology: 'mixed' as const
 };
- export const ConversationCapture = ({
- onNext, onTranscriptionComplete, onSoapGenerated, className = ''
-
+export const ConversationCapture = ({
+  onNext,
+  onTranscriptionComplete,
+  onSoapGenerated,
+  className = ''
 }: ConversationCaptureProps) => {
 
  
-const {
- t, currentLanguage 
-} = useI18n();
- // Use custom hooks for state management (SRP) const uiState = useUIState();
- const transcriptionState = useTranscriptionState();
- const diarizationState = useDiarizationState();
- // LLM Audit hook for ChatGPT integration 
-const {
- auditTranscript, isLoading: isAuditLoading, error: auditError, result: auditResult 
-} = useLlmAudit();
- // State for popup const [showTranscriptPopup, setShowTranscriptPopup] = useState(false);
- // Refs const chunkCountRef = useRef(0);
- const audioDataRef = useRef<Float32Array | null>(null);
- // Log model status before using the hook useEffect(() => {
-
- if (typeof window !== 'undefined') {
- const globalWindow = window as Window & {
- __WHISPER_WORKER_INSTANCE__?: unknown;
- __WHISPER_MODEL_LOADED__?: unknown;
- __WHISPER_PRELOAD_STATE__?: unknown;
- __WHISPER_MODEL_CACHE__?: unknown;
- };
- console.log('[ConversationCapture] Global cache status:', {
- whisperWorker: !!globalWindow.__WHISPER_WORKER_INSTANCE__, whisperModelLoaded: !!globalWindow.__WHISPER_MODEL_LOADED__, whisperPreloadState: !!globalWindow.__WHISPER_PRELOAD_STATE__, whisperModelCache: !!globalWindow.__WHISPER_MODEL_CACHE__ });
- 
-} }, []);
- // BRUTAL BAZAR: Real transcription via useSimpleWhisper (already denoised) const whisperService = useSimpleWhisper(TRANSCRIPTION_CONFIG);
- 
-const {
- transcription, status, error, engineStatus: whisperEngineStatus, audioLevel, recordingTime, audioUrl, audioBlob, getCompleteAudio, startTranscription, stopTranscription, resetTranscription 
-} = whisperService;
- // Solo mantener WebSpeech para transcripción en tiempo real (no accede al micrófono directamente) const webSpeechService = useWebSpeechCapture();
- 
-const {
- transcript: liveTranscriptData, isAvailable: isWebSpeechAvailable, error: webSpeechError, startRecording: startLiveTranscription, stopRecording: stopLiveTranscription, restartCount: webSpeechRestartCount, lastRestartTime: webSpeechLastRestart, isListening, confidence, language, setLanguage, partialTranscripts 
-} = webSpeechService;
- // Unified engine status const engineStatus = {
- whisper: whisperEngineStatus, webSpeech: isWebSpeechAvailable ? 'ready' : 'unavailable' };
- // Variables derivadas (DRY) const isRecording = status === 'recording';
- const hasTranscription = !!(transcription || (uiState.isManualMode && transcriptionState.manualTranscript));
- const currentTranscript = uiState.isManualMode ? transcriptionState.manualTranscript : transcription?.text;
+  const { t, language: currentLanguage } = useI18n();
+  
+  // Use custom hooks for state management (SRP)
+  const uiState = useUIState();
+  const transcriptionState = useTranscriptionState();
+  const diarizationState = useDiarizationState();
+  
+  // LLM Audit hook for ChatGPT integration
+  const {
+    auditTranscript, isLoading: isAuditLoading, error: auditError, result: auditResult
+  } = useLlmAudit();
+  
+  // State for popup
+  const [showTranscriptPopup, setShowTranscriptPopup] = useState(false);
+  
+  // Refs
+  const chunkCountRef = useRef(0);
+  const audioDataRef = useRef<Float32Array | null>(null);
+  // Log model status before using the hook
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const globalWindow = window as Window & {
+        __WHISPER_WORKER_INSTANCE__?: unknown;
+        __WHISPER_MODEL_LOADED__?: unknown;
+        __WHISPER_PRELOAD_STATE__?: unknown;
+        __WHISPER_MODEL_CACHE__?: unknown;
+      };
+      console.log('[ConversationCapture] Global cache status:', {
+        whisperWorker: !!globalWindow.__WHISPER_WORKER_INSTANCE__,
+        whisperModelLoaded: !!globalWindow.__WHISPER_MODEL_LOADED__,
+        whisperPreloadState: !!globalWindow.__WHISPER_PRELOAD_STATE__,
+        whisperModelCache: !!globalWindow.__WHISPER_MODEL_CACHE__
+      });
+    }
+  }, []);
+  // BRUTAL BAZAR: Real transcription via useSimpleWhisper (already denoised)
+  const whisperService = useSimpleWhisper(TRANSCRIPTION_CONFIG);
+  
+  const {
+    transcription, status, error, engineStatus: whisperEngineStatus, audioLevel, recordingTime, audioUrl, audioBlob, getCompleteAudio, startTranscription, stopTranscription, resetTranscription
+  } = whisperService;
+  // Solo mantener WebSpeech para transcripción en tiempo real (no accede al micrófono directamente)
+  const webSpeechService = useWebSpeechCapture();
+  
+  const {
+    transcript: liveTranscriptData, isAvailable: isWebSpeechAvailable, error: webSpeechError, startRecording: startLiveTranscription, stopRecording: stopLiveTranscription, restartCount: webSpeechRestartCount, lastRestartTime: webSpeechLastRestart, isListening, confidence, language, setLanguage, partialTranscripts
+  } = webSpeechService;
+  // Unified engine status
+  const engineStatus = {
+    whisper: whisperEngineStatus,
+    webSpeech: isWebSpeechAvailable ? 'ready' : 'unavailable'
+  };
+  // Variables derivadas (DRY)
+  const isRecording = status === 'recording';
+  const hasTranscription = !!(transcription || (uiState.isManualMode && transcriptionState.manualTranscript));
+  const currentTranscript = uiState.isManualMode ? transcriptionState.manualTranscript : transcription?.text;
  useEffect(() => {
 
  if (liveTranscriptData) {
