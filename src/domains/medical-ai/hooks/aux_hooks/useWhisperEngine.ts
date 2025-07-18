@@ -4,11 +4,8 @@
 import { useRef, useState, useCallback, useEffect } from 'react'
 import type { EngineStatus, TranscriptionChunk, WhisperEngineOptions } from './types'
 
-// Import the updated worker
-const WhisperWorkerUrl = new URL(
-  '../../workers/audioProcessingWorker.js',
-  import.meta.url
-)
+// Import the updated worker - use relative path for Next.js compatibility
+const WhisperWorkerPath = '/workers/audioProcessingWorker.js'
 
 export function useWhisperEngine({
   logger,
@@ -23,7 +20,7 @@ export function useWhisperEngine({
 
   // Iniciar worker y suscribirse a mensajes
   useEffect(() => {
-    const worker = new Worker(WhisperWorkerUrl)
+    const worker = new Worker(WhisperWorkerPath)
     workerRef.current = worker
     worker.onmessage = ({ data: msg }) => {
       switch (msg.type) {

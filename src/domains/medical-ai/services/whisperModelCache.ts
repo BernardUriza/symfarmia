@@ -71,9 +71,7 @@ class WhisperModelCache {
         // Create worker only once
         if (!this.worker) {
           console.log('[WhisperCache] Creating new worker instance');
-          this.worker = new Worker(
-            new URL('../workers/audioProcessingWorker.js', import.meta.url)
-          );
+          this.worker = new Worker('/workers/audioProcessingWorker.js');
           
           // Persist to global cache
           if (typeof window !== 'undefined') {
