@@ -22,5 +22,6 @@
     "ecmaFeatures": {
       "jsx": true
     }
-  }
+  },
+  "ignorePatterns": ["src/components/simple-landing/**"]
 }

@@ -46,7 +46,7 @@ export const useAnimationErrorBoundary = () => {
     try {
       const disabled = localStorage.getItem('symfarmia_animations_disabled');
       return disabled === 'true' || hasError || errorCount >= 3;
-    } catch (error) {
+    } catch (_error) {
       return true; // Fallback to disabled if localStorage fails
     }
   }, [hasError, errorCount]);

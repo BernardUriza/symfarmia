@@ -1,5 +1,30 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 
+/**
+ * Attempt to load the appropriate audio denoiser worklet by auto-detecting available modules.
+ * If both candidates fail, throws an error with "You shall not pass!" message.
+ */
+const loadWorklet = async (ctx: AudioContext): Promise<string> => {
+  const candidates = [
+    '/audio-denoiser-simple.worklet.js',
+    '/audio-denoiser.worklet.js',
+  ];
+
+  for (const path of candidates) {
+    try {
+      console.log(`[useAudioDenoising] Trying to load worklet from: ${path}`);
+      await ctx.audioWorklet.addModule(path + `?v=${Date.now()}`);
+      console.log(`[useAudioDenoising] AudioWorklet loaded from: ${path}`);
+      return path;
+    } catch (e) {
+      console.warn(`[useAudioDenoising] Failed to load worklet from: ${path}`, e);
+    }
+  }
+  const msg = "[useAudioDenoising] Could not load any audio denoiser worklet. You shall not pass!";
+  console.error(msg);
+  throw new Error(msg);
+};
+
 export interface ProcessingMetadata {
   chunkId: number;
   originalLength: number;
@@ -72,12 +97,9 @@ export function useAudioDenoising(
       try {
         console.log('[useAudioDenoising] Initializing audio denoiser...');
         const ctx = new window.AudioContext({ sampleRate });
-        // Temporarily use simple worklet for testing
-        // Add cache-busting parameter to force reload of updated worklet
-        const workletUrl = `/audio-denoiser-simple.worklet.js?v=${Date.now()}`;
-        console.log('[useAudioDenoising] Loading worklet from:', workletUrl);
-        await ctx.audioWorklet.addModule(workletUrl);
-        console.log('[useAudioDenoising] AudioWorklet loaded');
+        // Auto-detect and load the correct denoiser worklet (simple or full)
+        const workletPath = await loadWorklet(ctx);
+        console.log(`[useAudioDenoising] Proceeding with worklet: ${workletPath}`);
         
         const workletNode = new window.AudioWorkletNode(ctx, 'audio-denoiser-processor');
         console.log('[useAudioDenoising] WorkletNode created, setting up message handler...');
