@@ -21,6 +21,7 @@ import type { SOAPNotes } from '@/src/types/medical';
 import { diarizationService, DiarizationUtils, DiarizationResult } from '@/src/domains/medical-ai/services/DiarizationService';
 import AudioDenoisingDashboard from '@/src/components/medical/AudioDenoisingDashboard';
 import { SOAPNotesManager } from '@/src/components/medical/SOAPNotesManager';
+import { useLlmAudit } from '@/app/hooks/useLlmAudit';
 
 // Custom hooks for better state management
 import { useUIState } from './conversation-capture/hooks/useUIState';
@@ -64,6 +65,9 @@ export const ConversationCapture = ({
   const uiState = useUIState();
   const transcriptionState = useTranscriptionState();
   const diarizationState = useDiarizationState();
+  
+  // LLM Audit hook for ChatGPT integration
+  const { auditTranscript, isLoading: isAuditLoading, error: auditError, result: auditResult } = useLlmAudit();
   
   // Refs
   const chunkCountRef = useRef(0);
@@ -215,6 +219,27 @@ export const ConversationCapture = ({
     
     // Process diarization after stopping
     await processDiarization();
+    
+    // BRUTAL: Audit transcript with ChatGPT
+    if (transcription?.text) {
+      console.log('[ConversationCapture] Iniciando auditoría con ChatGPT...');
+      try {
+        const llmResult = await auditTranscript({
+          transcript: transcription.text,
+          webSpeech: transcriptionState.webSpeechText,
+          diarization: diarizationState.diarizationResult?.segments || [],
+          task: 'audit-transcript'
+        });
+        console.log('[ConversationCapture] Auditoría ChatGPT completada:', llmResult);
+        
+        // Update transcription with audited result
+        if (llmResult.mergedTranscript && onTranscriptionComplete) {
+          onTranscriptionComplete(llmResult.mergedTranscript);
+        }
+      } catch (err) {
+        console.error('[ConversationCapture] Error en auditoría ChatGPT:', err);
+      }
+    }
     
     return success;
   }, [stopLiveTranscription, savePartialMinuteTranscription, stopTranscription, 

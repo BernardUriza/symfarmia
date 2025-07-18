@@ -26,8 +26,12 @@ export class MedicalAudioPersistence {
     this.dataClassification = 'PHI'; // Protected Health Information
     this.accessLog = [];
     this.maxAuditEntries = 1000;
+    this.isBrowser = typeof window !== 'undefined' && typeof indexedDB !== 'undefined';
     
-    this.initialize();
+    // Only initialize in browser environment
+    if (this.isBrowser) {
+      this.initialize();
+    }
   }
 
   /**
@@ -67,8 +71,8 @@ export class MedicalAudioPersistence {
     try {
       if (!this.encryptionEnabled) return;
       
-      // Check for Web Crypto API support
-      if (!window.crypto || !window.crypto.subtle) {
+      // Check for browser environment and Web Crypto API support
+      if (!this.isBrowser || !window.crypto || !window.crypto.subtle) {
         throw new Error('Web Crypto API not supported');
       }
       
@@ -127,6 +131,11 @@ export class MedicalAudioPersistence {
    */
   openDatabase() {
     return new Promise((resolve, reject) => {
+      if (!this.isBrowser) {
+        reject(new Error('IndexedDB not available in non-browser environment'));
+        return;
+      }
+      
       const request = indexedDB.open(this.dbName, this.dbVersion);
       
       request.onerror = () => reject(request.error);
@@ -839,4 +848,24 @@ export class MedicalAudioPersistence {
 }
 
 // Export singleton instance
-export const medicalAudioPersistence = new MedicalAudioPersistence();
+let medicalAudioPersistenceInstance = null;
+
+export const medicalAudioPersistence = (() => {
+  if (typeof window !== 'undefined') {
+    if (!medicalAudioPersistenceInstance) {
+      medicalAudioPersistenceInstance = new MedicalAudioPersistence();
+    }
+    return medicalAudioPersistenceInstance;
+  }
+  // Return a stub for server-side rendering
+  return {
+    isInitialized: false,
+    encryptionEnabled: false,
+    compressionEnabled: false,
+    save: async () => ({ success: false, error: 'Not available on server' }),
+    retrieve: async () => null,
+    delete: async () => ({ success: false, error: 'Not available on server' }),
+    clear: async () => ({ success: false, error: 'Not available on server' }),
+    getStatus: () => ({ initialized: false, environment: 'server' })
+  };
+})();

@@ -18,7 +18,7 @@ import { clinicalAudioEnhancer } from '@/src/domains/medical-ai/services/Clinica
 
 export async function GET(request, { params }) {
   try {
-    const { param } = params;
+    const { param } = await params;
     const endpoint = param?.[0] || 'status';
     
     switch (endpoint) {
@@ -54,7 +54,7 @@ export async function GET(request, { params }) {
 
 export async function POST(request, { params }) {
   try {
-    const { param } = params;
+    const { param } = await params;
     const endpoint = param?.[0] || 'process';
     
     switch (endpoint) {
