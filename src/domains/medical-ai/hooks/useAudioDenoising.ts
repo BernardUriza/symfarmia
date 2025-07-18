@@ -72,7 +72,10 @@ export function useAudioDenoising(
       try {
         console.log('[useAudioDenoising] Initializing audio denoiser...');
         const ctx = new window.AudioContext({ sampleRate });
-        await ctx.audioWorklet.addModule('/audio-denoiser.worklet.js');
+        // Temporarily use simple worklet for testing
+        const workletUrl = '/audio-denoiser-simple.worklet.js';
+        console.log('[useAudioDenoising] Loading worklet from:', workletUrl);
+        await ctx.audioWorklet.addModule(workletUrl);
         console.log('[useAudioDenoising] AudioWorklet loaded');
         
         const workletNode = new window.AudioWorkletNode(ctx, 'audio-denoiser-processor');

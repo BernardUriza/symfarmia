@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useWhisperPreload } from "./useWhisperPreload";
 import { useWhisperEngine } from "./aux_hooks/useWhisperEngine";
 import { useAudioDenoising } from "./useAudioDenoising";
+import { useAudioProcessorFallback } from "./useAudioProcessorFallback";
 import { extractMedicalTermsFromText } from "../utils/medicalTerms";
 import { DefaultLogger } from "../utils/LoggerStrategy";
 
@@ -40,11 +41,31 @@ export function useSimpleWhisper({
     onChunkProgress: restOptions.onChunkProgress
   });
 
-  const audio = useAudioDenoising({
+  // Try to use audio denoising first
+  const audioDenoising = useAudioDenoising({
     sampleRate,
     chunkSize,
     onChunkReady: engine.processAudioChunk,
   });
+
+  // Use fallback if denoising fails
+  const audioFallback = useAudioProcessorFallback({
+    sampleRate,
+    bufferSize: chunkSize,
+    onAudioData: engine.processAudioChunk,
+  });
+
+  // Select which audio processor to use based on denoising status
+  const usingFallback = audioDenoising.error.includes('Failed to load denoiser');
+  const audio = usingFallback ? audioFallback : audioDenoising;
+  
+  useEffect(() => {
+    if (usingFallback) {
+      logger.warn("[useSimpleWhisper] Using fallback audio processor (no denoising)");
+    } else {
+      logger.log("[useSimpleWhisper] Using audio denoising processor");
+    }
+  }, [usingFallback, logger]);
 
   // --- Estado local minimalista ---
   const [transcription, setTranscription] = useState<Transcription | null>(null);
