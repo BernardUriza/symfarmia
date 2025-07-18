@@ -4,12 +4,11 @@ import './conversation-capture/styles.css';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useSimpleWhisper } from '@/src/domains/medical-ai/hooks/useSimpleWhisper';
 import { useWebSpeechCapture } from '@/src/domains/medical-ai/hooks/useWebSpeechCapture';
-import { extractMedicalTermsFromText } from '@/src/domains/medical-ai/utils/medicalTerms';
 import { Button } from '@/src/components/ui/button';
 import { useI18n } from '@/src/domains/core/hooks/useI18n';
 import { Badge } from '@/src/components/ui/badge';
 import { Card, CardContent } from '@/src/components/ui/card';
-import { PenTool, Keyboard, Settings, Mic } from 'lucide-react';
+import { PenTool, Settings, Mic } from 'lucide-react';
 import {
   PermissionDialog,
   RecordingCard,
@@ -19,7 +18,7 @@ import {
   FloatingTranscriptPopup
 } from '@/src/components/medical/conversation-capture/components';
 import type { SOAPNotes } from '@/src/types/medical';
-import { diarizationService, DiarizationUtils, DiarizationResult } from '@/src/domains/medical-ai/services/DiarizationService';
+import { diarizationService, DiarizationUtils } from '@/src/domains/medical-ai/services/DiarizationService';
 import { AudioDenoisingDashboard } from '@/src/components/medical/AudioDenoisingDashboard';
 import { SOAPNotesManager } from '@/src/components/medical/SOAPNotesManager';
 import { useLlmAudit } from '@/app/hooks/useLlmAudit';
@@ -60,7 +59,7 @@ export const ConversationCapture = ({
   onSoapGenerated,
   className = ''
 }: ConversationCaptureProps) => {  
-  const { t } = useI18n();
+  const { t, currentLanguage } = useI18n();
   
   // Use custom hooks for state management (SRP)
   const uiState = useUIState();
@@ -113,7 +112,12 @@ export const ConversationCapture = ({
     startRecording: startLiveTranscription,
     stopRecording: stopLiveTranscription,
     restartCount: webSpeechRestartCount,
-    lastRestartTime: webSpeechLastRestart
+    lastRestartTime: webSpeechLastRestart,
+    isListening,
+    confidence,
+    language,
+    setLanguage,
+    partialTranscripts
   } = webSpeechService;
   
   // Unified engine status
@@ -133,7 +137,18 @@ export const ConversationCapture = ({
     if (liveTranscriptData) {
       transcriptionState.updateLiveTranscript(liveTranscriptData);
     }
-  }, [liveTranscriptData, transcriptionState.updateLiveTranscript]);
+  }, [liveTranscriptData, transcriptionState]);
+
+  // Sync Web Speech language with i18n language
+  useEffect(() => {
+    if (currentLanguage && setLanguage) {
+      const webSpeechLang = currentLanguage === 'es' ? 'es-MX' : 'en-US';
+      if (language !== webSpeechLang) {
+        setLanguage(webSpeechLang);
+        console.log(`[ConversationCapture] Web Speech language synced to: ${webSpeechLang}`);
+      }
+    }
+  }, [currentLanguage, language, setLanguage]);
 
 
   // Extract partial minute transcription logic
@@ -161,7 +176,7 @@ export const ConversationCapture = ({
       const mergedText = DiarizationUtils.mergeTranscriptions(denoisedTranscriptionText, transcriptionState.webSpeechText);
       
       // Usar audio denoisado si está disponible
-      if (completeAudio) {
+      if (completeAudio && completeAudio.length > 0) {
         audioDataRef.current = completeAudio;
         console.log(`[ConversationCapture] Usando audio denoisado para diarización: ${completeAudio.length} samples`);
       }
@@ -236,7 +251,14 @@ export const ConversationCapture = ({
         const llmResult = await auditTranscript({
           transcript: transcription.text,
           webSpeech: transcriptionState.webSpeechText,
-          diarization: diarizationState.diarizationResult?.segments || [],
+          diarization: diarizationState.diarizationResult?.segments.map(seg => ({
+            start: seg.startTime,
+            end: seg.endTime,
+            speaker: seg.speaker
+          })) || [],
+          partialTranscripts: partialTranscripts,
+          confidence: confidence,
+          language: language,
           task: 'audit-transcript'
         });
         console.log('[ConversationCapture] Auditoría ChatGPT completada:', llmResult);
@@ -330,23 +352,40 @@ export const ConversationCapture = ({
       
       {/* Mode Indicator & Denoising Controls - BAZAR MODE */}
       <div className="flex items-center justify-center gap-4 mt-4">
-        <Badge variant={uiState.isManualMode ? 'secondary' : 'default'}>
+        <Badge variant={uiState.isManualMode ? 'secondary' : 'default'} className="">
           {uiState.isManualMode ? 'Modo Manual' : 'Modo Voz'}
         </Badge>
         
-        {/* DENOISING DASHBOARD TOGGLE */}
+        {/* CONTROLS SECTION */}
         {!uiState.isManualMode && (
-          <button
-            onClick={uiState.toggleDenoisingDashboard}
-            className={`flex items-center gap-2 px-3 py-1 rounded-md text-sm transition-colors ${
-              uiState.showDenoisingDashboard 
-                ? 'bg-primary/10 text-primary dark:bg-primary/20' 
-                : 'bg-muted/50 text-muted-foreground hover:bg-muted/70'
-            }`}
-          >
-            <Settings className="w-4 h-4" />
-            Dashboard
-          </button>
+          <div className="flex items-center gap-2">
+            {/* Language toggle for Web Speech */}
+            {isWebSpeechAvailable && (
+              <button
+                onClick={() => setLanguage(language === 'es-MX' ? 'en-US' : 'es-MX')}
+                className="flex items-center gap-2 px-3 py-1 rounded-md text-sm transition-colors bg-secondary/10 text-secondary hover:bg-secondary/20"
+                title="Cambiar idioma de reconocimiento"
+              >
+                <span className="text-xs">
+                  {language === 'es-MX' ? '🇪🇸' : '🇺🇸'}
+                </span>
+                <span>{language === 'es-MX' ? 'ES' : 'EN'}</span>
+              </button>
+            )}
+            
+            {/* DENOISING DASHBOARD TOGGLE */}
+            <button
+              onClick={uiState.toggleDenoisingDashboard}
+              className={`flex items-center gap-2 px-3 py-1 rounded-md text-sm transition-colors ${
+                uiState.showDenoisingDashboard 
+                  ? 'bg-primary/10 text-primary dark:bg-primary/20' 
+                  : 'bg-muted/50 text-muted-foreground hover:bg-muted/70'
+              }`}
+            >
+              <Settings className="w-4 h-4" />
+              Dashboard
+            </button>
+          </div>
         )}
       </div>
       
@@ -381,6 +420,7 @@ export const ConversationCapture = ({
             onClick={handleReset}
             variant="outline"
             size="sm"
+            className=""
           >
             Limpiar
           </Button>
@@ -389,6 +429,7 @@ export const ConversationCapture = ({
             variant="outline"
             size="sm"
             disabled={!transcriptionState.manualTranscript}
+            className=""
           >
             {uiState.copySuccess ? 'Copiado!' : 'Copiar'}
           </Button>
@@ -412,6 +453,7 @@ export const ConversationCapture = ({
           }} 
           size="lg" 
           variant="default"
+          className=""
         >
           {t('conversation.capture.next')}
         </Button>
@@ -475,21 +517,85 @@ export const ConversationCapture = ({
             <p className="text-sm text-primary dark:text-primary/80 mb-2">
               🎙️ Grabando audio con denoising activo...
             </p>
+            
+            {/* Live transcript preview */}
+            {liveTranscriptData && liveTranscriptData.length > 0 && (
+              <div className="mt-3 p-3 bg-background/50 rounded border border-border/50">
+                <div className="text-xs text-muted-foreground mb-1 flex items-center gap-2">
+                  <span>Transcripción en tiempo real:</span>
+                  {confidence > 0 && (
+                    <span className="text-primary">({Math.round(confidence * 100)}% confianza)</span>
+                  )}
+                </div>
+                <p className="text-sm text-foreground italic">"{liveTranscriptData}"</p>
+              </div>
+            )}
+            
             <div className="text-sm text-foreground/70">
               La transcripción completa estará disponible al finalizar.
             </div>
             
-            {/* Web Speech restart feedback */}
-            {webSpeechRestartCount > 0 && (
-              <div className="mt-3 flex items-center gap-2 text-xs">
-                <div className="animate-pulse w-2 h-2 bg-amber-500 rounded-full"></div>
-                <span className="text-amber-600 dark:text-amber-400">
-                  Web Speech reconectado automáticamente ({webSpeechRestartCount} {webSpeechRestartCount === 1 ? 'vez' : 'veces'})
-                </span>
-                {webSpeechLastRestart && (
-                  <span className="text-muted-foreground">
-                    - hace {Math.round((new Date().getTime() - webSpeechLastRestart.getTime()) / 1000)}s
-                  </span>
+            {/* Web Speech live status and feedback */}
+            {isWebSpeechAvailable && (
+              <div className="mt-3 space-y-2">
+                {/* Listening status with confidence */}
+                <div className="flex items-center gap-3 text-xs">
+                  <div className={`flex items-center gap-2 px-2 py-1 rounded ${
+                    isListening 
+                      ? 'bg-green-500/10 text-green-600 dark:text-green-400' 
+                      : 'bg-muted/50 text-muted-foreground'
+                  }`}>
+                    <div className={`w-2 h-2 rounded-full ${
+                      isListening ? 'bg-green-500 animate-pulse' : 'bg-muted-foreground/50'
+                    }`}></div>
+                    <span>{isListening ? 'Escuchando' : 'En pausa'}</span>
+                  </div>
+                  
+                  {/* Confidence meter */}
+                  {confidence > 0 && (
+                    <div className="flex items-center gap-2 px-2 py-1 rounded bg-primary/10 text-primary">
+                      <span>Confianza:</span>
+                      <div className="flex items-center gap-1">
+                        <div className="w-8 h-1 bg-muted/30 rounded overflow-hidden">
+                          <div 
+                            className="h-full bg-primary transition-all duration-300" 
+                            style={{ width: `${confidence * 100}%` }}
+                          ></div>
+                        </div>
+                        <span className="text-xs">{Math.round(confidence * 100)}%</span>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Language indicator */}
+                  <div className="px-2 py-1 rounded bg-secondary/10 text-secondary text-xs">
+                    {language === 'es-MX' ? '🇪🇸 ES' : '🇺🇸 EN'}
+                  </div>
+                </div>
+                
+                {/* Restart feedback */}
+                {webSpeechRestartCount > 0 && (
+                  <div className="flex items-center gap-2 text-xs">
+                    <div className="animate-pulse w-2 h-2 bg-amber-500 rounded-full"></div>
+                    <span className="text-amber-600 dark:text-amber-400">
+                      Web Speech reconectado automáticamente ({webSpeechRestartCount} {webSpeechRestartCount === 1 ? 'vez' : 'veces'})
+                    </span>
+                    {webSpeechLastRestart && (
+                      <span className="text-muted-foreground">
+                        - hace {Math.round((new Date().getTime() - webSpeechLastRestart.getTime()) / 1000)}s
+                      </span>
+                    )}
+                  </div>
+                )}
+                
+                {/* Partial transcripts preview */}
+                {partialTranscripts.length > 0 && (
+                  <div className="text-xs text-muted-foreground">
+                    <span>Fragmentos capturados: {partialTranscripts.length}</span>
+                    {partialTranscripts.slice(-1)[0] && (
+                      <span className="ml-2 italic">"...{partialTranscripts.slice(-1)[0].slice(-30)}"</span>
+                    )}
+                  </div>
                 )}
               </div>
             )}
@@ -578,7 +684,14 @@ export const ConversationCapture = ({
             await auditTranscript({
               transcript: transcription.text,
               webSpeech: transcriptionState.webSpeechText,
-              diarization: diarizationState.diarizationResult?.segments || [],
+              diarization: diarizationState.diarizationResult?.segments.map(seg => ({
+                start: seg.startTime,
+                end: seg.endTime,
+                speaker: seg.speaker
+              })) || [],
+              partialTranscripts: partialTranscripts,
+              confidence: confidence,
+              language: language,
               task: 'audit-transcript'
             });
           }

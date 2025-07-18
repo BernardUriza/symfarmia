@@ -1,13 +1,7 @@
 export interface DiarizationSegment {
   start: number
   end: number
-  speaker: string
-}
-
-export interface SpeakerSegment {
-  start: number
-  end: number
-  speaker: 'Paciente' | 'Doctor' | 'Unknown'
+  speaker?: string
   text?: string
 }
 
@@ -15,7 +9,17 @@ export interface LLMAuditRequest {
   transcript: string
   webSpeech?: string
   diarization?: DiarizationSegment[]
-  task: 'audit-transcript' | 'diarize'
+  task?: 'audit-transcript' | 'diarize'
+  partialTranscripts?: string[]
+  confidence?: number
+  language?: string
+}
+
+export interface SpeakerSegment {
+  start: number
+  end: number
+  speaker: string
+  text: string
 }
 
 export interface LLMAuditResult {
@@ -23,11 +27,15 @@ export interface LLMAuditResult {
   speakers: SpeakerSegment[]
   summary?: string
   gptLogs?: string[]
-  error?: string
 }
 
 export interface LLMAuditResponse {
   success: boolean
   data?: LLMAuditResult
   error?: string
+  usage?: {
+    prompt_tokens: number
+    completion_tokens: number
+    total_tokens: number
+  }
 }
