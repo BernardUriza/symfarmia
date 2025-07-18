@@ -5,10 +5,97 @@
  * Corrects common medical terms and improves accuracy
  */
 
-import { MedicalCategory } from '../types';
+// Note: This import needs to be updated once types are migrated
+// import { MedicalCategory } from '../types';
+
+// Temporary enum until types are migrated
+enum MedicalCategory {
+  DIAGNOSIS = 'diagnosis',
+  SYMPTOM = 'symptom',
+  TREATMENT = 'treatment',
+  PROCEDURE = 'procedure',
+  ANATOMY = 'anatomy'
+}
+
+// TypeScript interfaces
+export interface MedicalTerm {
+  term: string;
+  variants: string[];
+  category: MedicalCategory;
+}
+
+export interface ExtractedTerm {
+  term: string;
+  definition: string;
+  category: MedicalCategory;
+  confidence: number;
+  synonyms: string[];
+  foundAs: string;
+  occurrences: number;
+}
+
+export interface ContextualRule {
+  pattern: RegExp;
+  context: string;
+  correction: (match: string) => string;
+}
+
+export interface CommonError {
+  wrong: string;
+  correct: string;
+}
+
+export interface Standardization {
+  pattern: RegExp;
+  replacement: string;
+}
+
+export interface MedicalDictionary {
+  diagnosticos: MedicalTerm[];
+  sintomas: MedicalTerm[];
+  tratamientos: MedicalTerm[];
+  procedimientos: MedicalTerm[];
+  anatomia: MedicalTerm[];
+}
+
+export interface ValidationResult {
+  isMedical: boolean;
+  confidence: number;
+  indicators: string[];
+}
+
+export interface TermSuggestion {
+  term: string;
+  category: MedicalCategory;
+  variant: string;
+  confidence: number;
+}
+
+export interface EnhancementStats {
+  originalLength: number;
+  enhancedLength: number;
+  originalTermsCount: number;
+  enhancedTermsCount: number;
+  improvement: number;
+  confidence: number;
+}
+
+export interface EnhancerConfig {
+  language?: string;
+  confidenceThreshold?: number;
+  enableSpellCheck?: boolean;
+  enableContextualCorrection?: boolean;
+  [key: string]: any;
+}
 
 export class MedicalTerminologyEnhancer {
-  constructor(config = {}) {
+  private config: EnhancerConfig;
+  private medicalDictionary: MedicalDictionary | null;
+  private contextualRules: ContextualRule[] | null;
+  private commonErrors: CommonError[] | null;
+  private isInitialized: boolean;
+
+  constructor(config: EnhancerConfig = {}) {
     this.config = {
       language: config.language || 'es-MX',
       confidenceThreshold: config.confidenceThreshold || 0.7,
@@ -26,7 +113,7 @@ export class MedicalTerminologyEnhancer {
   /**
    * Initialize medical terminology enhancer
    */
-  async initialize() {
+  async initialize(): Promise<void> {
     try {
       // Load medical dictionary
       this.medicalDictionary = await this.loadMedicalDictionary();
@@ -49,7 +136,7 @@ export class MedicalTerminologyEnhancer {
   /**
    * Load medical dictionary for Spanish
    */
-  async loadMedicalDictionary() {
+  private async loadMedicalDictionary(): Promise<MedicalDictionary> {
     return {
       // Diagnósticos
       diagnosticos: [
@@ -126,32 +213,32 @@ export class MedicalTerminologyEnhancer {
   /**
    * Load contextual correction rules
    */
-  async loadContextualRules() {
+  private async loadContextualRules(): Promise<ContextualRule[]> {
     return [
       {
         pattern: /dolor de (cabeza|estómago|espalda|pecho)/gi,
         context: 'symptom',
-        correction: (match) => match.toLowerCase()
+        correction: (match: string) => match.toLowerCase()
       },
       {
         pattern: /presión (alta|baja|arterial)/gi,
         context: 'vital_signs',
-        correction: (match) => match.toLowerCase()
+        correction: (match: string) => match.toLowerCase()
       },
       {
         pattern: /análisis de (sangre|orina|heces)/gi,
         context: 'procedure',
-        correction: (match) => match.toLowerCase()
+        correction: (match: string) => match.toLowerCase()
       },
       {
         pattern: /medicamento para (la|el) (.+)/gi,
         context: 'treatment',
-        correction: (match) => match.toLowerCase()
+        correction: (match: string) => match.toLowerCase()
       },
       {
         pattern: /dolor en (el|la) (.+)/gi,
         context: 'symptom_location',
-        correction: (match) => match.toLowerCase()
+        correction: (match: string) => match.toLowerCase()
       }
     ];
   }
@@ -159,7 +246,7 @@ export class MedicalTerminologyEnhancer {
   /**
    * Load common transcription errors
    */
-  async loadCommonErrors() {
+  private async loadCommonErrors(): Promise<CommonError[]> {
     return [
       // Pronunciation-based errors
       { wrong: 'hipertensión', correct: 'hipertensión' },
@@ -194,16 +281,16 @@ export class MedicalTerminologyEnhancer {
   /**
    * Extract medical terms from text
    */
-  async extractTerms(text, _language = 'es-MX') {
+  async extractTerms(text: string, _language: string = 'es-MX'): Promise<ExtractedTerm[]> {
     if (!this.isInitialized) {
       await this.initialize();
     }
 
-    const terms = [];
+    const terms: ExtractedTerm[] = [];
     const normalizedText = text.toLowerCase();
 
     // Extract terms from all categories
-    for (const category of Object.values(this.medicalDictionary)) {
+    for (const category of Object.values(this.medicalDictionary!)) {
       for (const termData of category) {
         const allVariants = [termData.term, ...termData.variants];
         
@@ -234,7 +321,7 @@ export class MedicalTerminologyEnhancer {
   /**
    * Enhance text with medical terminology corrections
    */
-  async enhanceText(text, _language = 'es-MX') {
+  async enhanceText(text: string, _language: string = 'es-MX'): Promise<string> {
     if (!this.isInitialized) {
       await this.initialize();
     }
@@ -260,10 +347,10 @@ export class MedicalTerminologyEnhancer {
   /**
    * Correct common transcription errors
    */
-  correctCommonErrors(text) {
+  private correctCommonErrors(text: string): string {
     let correctedText = text;
 
-    for (const error of this.commonErrors) {
+    for (const error of this.commonErrors!) {
       const regex = new RegExp(`\\b${error.wrong}\\b`, 'gi');
       correctedText = correctedText.replace(regex, error.correct);
     }
@@ -274,10 +361,10 @@ export class MedicalTerminologyEnhancer {
   /**
    * Apply contextual corrections
    */
-  applyContextualCorrections(text) {
+  private applyContextualCorrections(text: string): string {
     let correctedText = text;
 
-    for (const rule of this.contextualRules) {
+    for (const rule of this.contextualRules!) {
       correctedText = correctedText.replace(rule.pattern, rule.correction);
     }
 
@@ -287,11 +374,11 @@ export class MedicalTerminologyEnhancer {
   /**
    * Standardize medical terms
    */
-  standardizeMedicalTerms(text) {
+  private standardizeMedicalTerms(text: string): string {
     let standardizedText = text;
 
     // Standardize common medical expressions
-    const standardizations = [
+    const standardizations: Standardization[] = [
       { pattern: /dolor de cabeza/gi, replacement: 'cefalea' },
       { pattern: /presión alta/gi, replacement: 'hipertensión' },
       { pattern: /azúcar alta/gi, replacement: 'diabetes' },
@@ -314,9 +401,9 @@ export class MedicalTerminologyEnhancer {
   /**
    * Remove duplicate terms
    */
-  removeDuplicateTerms(terms) {
-    const seen = new Set();
-    const unique = [];
+  private removeDuplicateTerms(terms: ExtractedTerm[]): ExtractedTerm[] {
+    const seen = new Set<string>();
+    const unique: ExtractedTerm[] = [];
 
     for (const term of terms) {
       const key = `${term.term}-${term.category}`;
@@ -332,7 +419,7 @@ export class MedicalTerminologyEnhancer {
   /**
    * Validate medical context
    */
-  validateMedicalContext(text) {
+  validateMedicalContext(text: string): ValidationResult {
     const medicalIndicators = [
       'doctor', 'médico', 'paciente', 'consulta', 'síntoma', 'diagnóstico',
       'tratamiento', 'medicamento', 'dolor', 'fiebre', 'análisis', 'examen'
@@ -353,13 +440,13 @@ export class MedicalTerminologyEnhancer {
   /**
    * Get medical term suggestions
    */
-  getMedicalTermSuggestions(partialTerm, maxSuggestions = 5) {
+  getMedicalTermSuggestions(partialTerm: string, maxSuggestions: number = 5): TermSuggestion[] {
     if (!this.isInitialized) return [];
 
-    const suggestions = [];
+    const suggestions: TermSuggestion[] = [];
     const normalizedInput = partialTerm.toLowerCase();
 
-    for (const category of Object.values(this.medicalDictionary)) {
+    for (const category of Object.values(this.medicalDictionary!)) {
       for (const termData of category) {
         const allVariants = [termData.term, ...termData.variants];
         
@@ -384,7 +471,7 @@ export class MedicalTerminologyEnhancer {
   /**
    * Calculate similarity between strings
    */
-  calculateSimilarity(str1, str2) {
+  private calculateSimilarity(str1: string, str2: string): number {
     const longer = str1.length > str2.length ? str1 : str2;
     const shorter = str1.length > str2.length ? str2 : str1;
     
@@ -395,8 +482,8 @@ export class MedicalTerminologyEnhancer {
   /**
    * Calculate Levenshtein distance
    */
-  levenshteinDistance(str1, str2) {
-    const matrix = [];
+  private levenshteinDistance(str1: string, str2: string): number {
+    const matrix: number[][] = [];
 
     for (let i = 0; i <= str2.length; i++) {
       matrix[i] = [i];
@@ -426,9 +513,9 @@ export class MedicalTerminologyEnhancer {
   /**
    * Get enhancement statistics
    */
-  getEnhancementStats(originalText, enhancedText) {
-    const originalTerms = this.extractTerms(originalText);
-    const enhancedTerms = this.extractTerms(enhancedText);
+  async getEnhancementStats(originalText: string, enhancedText: string): Promise<EnhancementStats> {
+    const originalTerms = await this.extractTerms(originalText);
+    const enhancedTerms = await this.extractTerms(enhancedText);
 
     return {
       originalLength: originalText.length,
@@ -443,7 +530,7 @@ export class MedicalTerminologyEnhancer {
   /**
    * Cleanup enhancer
    */
-  async cleanup() {
+  async cleanup(): Promise<void> {
     this.medicalDictionary = null;
     this.contextualRules = null;
     this.commonErrors = null;

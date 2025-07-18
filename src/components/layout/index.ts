@@ -11,3 +11,4 @@ export { default as RouteErrorBoundary } from './RouteErrorBoundary';
 export { default as VersionInfo } from './VersionInfo';
 export { default as DemoLoginModal } from './DemoLoginModal';
 export { default as LogoutButton } from './LogoutButton';
+export { default as MedicalMonitoringScript } from './MedicalMonitoringScript';
