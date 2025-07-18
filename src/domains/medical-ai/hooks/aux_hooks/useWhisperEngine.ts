@@ -4,9 +4,9 @@
 import { useRef, useState, useCallback, useEffect } from 'react'
 import type { EngineStatus, TranscriptionChunk, WhisperEngineOptions } from './types'
 
-// Importa como Worker ESModule (Next.js compatible)
+// Import the updated worker
 const WhisperWorkerUrl = new URL(
-  '../../workers/enhancedAudioProcessingWorker.js',
+  '../../workers/audioProcessingWorker.js',
   import.meta.url
 )
 
@@ -23,7 +23,7 @@ export function useWhisperEngine({
 
   // Iniciar worker y suscribirse a mensajes
   useEffect(() => {
-    const worker = new Worker(WhisperWorkerUrl, { type: 'module' })
+    const worker = new Worker(WhisperWorkerUrl)
     workerRef.current = worker
     worker.onmessage = ({ data: msg }) => {
       switch (msg.type) {
@@ -31,30 +31,28 @@ export function useWhisperEngine({
           setStatus('ready')
           logger.log('[WhisperEngine] Modelo listo')
           break
-        case 'MODEL_LOADING':
+        case 'MODEL_LOADING_PROGRESS':
           setStatus('loading')
           break
-        case 'PROCESSING_START':
+        case 'CHUNK_PROCESSING_START':
           setStatus('processing')
           break
-        case 'CHUNK_PROGRESS':
-          onChunkProgress?.(msg.chunkId, msg.progress)
-          break
         case 'CHUNK_PROCESSED':
-          const { chunkId, text, confidence, processingTime } = msg
+          const { chunkId, text, processingTime } = msg
           const chunk: TranscriptionChunk = {
             id: `chunk_${chunkId}`,
             text,
             timestamp: Date.now()
           }
           chunksRef.current.push(chunk)
-          confidenceRef.current = confidence
+          confidenceRef.current = 0.8 // Default confidence
           processingTimeRef.current = processingTime
           onChunkProcessed?.(text, chunkId)
           onChunkProgress?.(chunkId, 100)
           logger.log(`[WhisperEngine] Chunk ${chunkId} procesado`)
           break
-        case 'ERROR':
+        case 'MODEL_ERROR':
+        case 'CHUNK_ERROR':
           setStatus('error')
           logger.error('[WhisperEngine] Error:', msg.error)
           break
@@ -69,7 +67,10 @@ export function useWhisperEngine({
   const processAudioChunk = useCallback(
     (audioData: Float32Array, meta: { chunkId: number }) => {
       setStatus('processing')
-      workerRef.current?.postMessage({ type: 'PROCESS_CHUNK', data: { audioData, chunkId: meta.chunkId } })
+      workerRef.current?.postMessage({ 
+        type: 'PROCESS_CHUNK', 
+        data: { audioData, chunkId: meta.chunkId, metadata: meta } 
+      })
     },
     []
   )
