@@ -201,7 +201,6 @@ export const ConversationCapture = ({
     }
     return started;
   }, [startTranscription, error, isWebSpeechAvailable, startLiveTranscription, webSpeechError]);
-
   // Handle recording stop
   const handleStopRecording = useCallback(async () => {
     stopLiveTranscription();
@@ -447,14 +446,22 @@ export const ConversationCapture = ({
         </div>
       )}
       
-      {/* Mostrar transcripción final cuando termine */}
-      {hasTranscription && !isRecording && (
+      {/* BAZAR: Show transcription IMMEDIATELY when available (including during collecting-residues) */}
+      {hasTranscription && (status === 'collecting-residues' || status === 'completed') && (
         <>
-          {console.log('[ConversationCapture] MOSTRANDO TRANSCRIPCIÓN FINAL:', transcription)}
+          {console.log('[ConversationCapture] MOSTRANDO TRANSCRIPCIÓN:', transcription, 'Status:', status)}
           <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-              Transcripción completa
-            </h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                {status === 'collecting-residues' ? 'Transcripción parcial' : 'Transcripción completa'}
+              </h3>
+              {/* BAZAR: Show warning badge if there's a residue error */}
+              {status === 'completed' && error && error.includes('último fragmento') && (
+                <Badge variant="secondary" className="bg-amber-100 text-amber-800">
+                  ⚠️ Completado con advertencia
+                </Badge>
+              )}
+            </div>
             {uiState.isManualMode ? (
               <Card>
                 <CardContent className="p-4">
@@ -472,6 +479,17 @@ export const ConversationCapture = ({
                 isDiarizationProcessing={diarizationState.isDiarizationProcessing}
                 diarizationError={diarizationState.diarizationError}
               />
+            )}
+            {/* BAZAR: Show residue warning if applicable */}
+            {status === 'completed' && error && error.includes('último fragmento') && (
+              <div className="mt-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3">
+                <div className="flex items-start">
+                  <svg className="w-5 h-5 text-amber-600 mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  <p className="text-sm text-amber-800 dark:text-amber-200">{error}</p>
+                </div>
+              </div>
             )}
           </div>
         </>
@@ -491,7 +509,7 @@ export const ConversationCapture = ({
 
       <ErrorDisplay error={error} />
 
-      <ProcessingStatus isProcessing={status === 'processing'} />
+      <ProcessingStatus status={status === 'processing' || status === 'collecting-residues' ? status : null} />
 
       {/* Action buttons */}
       {hasTranscription && !isRecording && renderActionButtons()}

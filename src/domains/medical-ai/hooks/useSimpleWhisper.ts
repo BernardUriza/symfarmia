@@ -55,7 +55,7 @@ interface Transcription {
   chunks?: { id: string; text: string; timestamp: number }[];
 }
 
-type Status = 'idle' | 'recording' | 'processing' | 'completed' | 'error';
+type Status = 'idle' | 'recording' | 'processing' | 'collecting-residues' | 'completed' | 'error';
 type EngineStatus = 'loading' | 'ready' | 'error';
 type ProcessingMode = 'streaming' | 'direct' | 'enhanced';
 
@@ -486,17 +486,16 @@ export function useSimpleWhisper({
     }
   }, [processingMode, isWorkerReady, isPreloaded, startAudioCapture, setupAudioMonitoring, logger]);
   
-  // Stop transcription
+  // Stop transcription - BAZAR: Immediate partial results, then residues
   const stopTranscription = useCallback(async (): Promise<boolean> => {
     try {
       if (!isRecording) return false;
       
-      setStatus('processing');
+      // BAZAR Step 1: Show partial transcription IMMEDIATELY
+      logger.log('[BAZAR] Stopping recording - showing partial results FIRST');
       
-      // Stop denoising gateway
+      // Stop audio capture
       stopAudioCapture();
-      
-      // Recording state is managed by the denoising hook
       
       // Cleanup audio monitoring
       if (animationFrameRef.current) {
@@ -506,53 +505,24 @@ export function useSimpleWhisper({
         audioContextRef.current.close();
       }
       
-      // Wait for final processing
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // BAZAR: Compile partial transcription NOW
+      const partialChunks = Object.entries(transcriptPartsRef.current)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([, text]) => text);
       
-      // Generate combined audio from all chunks
-      const combinedAudioData = getCombinedAudio();
-      if (combinedAudioData) {
-        console.log(`[useSimpleWhisper] Generando audio completo: ${combinedAudioData.length} muestras`);
-        
-        // Convert Float32Array to WAV format
-        const wavBlob = createWavBlob(combinedAudioData, sampleRate);
-        setAudioBlob(wavBlob);
-        
-        // Create URL for the audio
-        const url = URL.createObjectURL(wavBlob);
-        setAudioUrl(url);
-        
-        const durationSeconds = combinedAudioData.length / sampleRate;
-        console.log(`[useSimpleWhisper] Audio generado: ${durationSeconds.toFixed(2)} segundos`);
-      }
+      const partialText = partialChunks.join(' ').trim();
       
-      // Get transcript based on mode
-      let finalText = '';
-      let processingTime = 0;
-      
-      console.log(`[useSimpleWhisper] Obteniendo transcripción en modo: ${processingMode}`);
-      
-      // Both modes now use the same transcript collection method
-      if (processingMode === 'streaming' || processingMode === 'direct') {
-        // Combine all transcript parts
-        const sortedChunks = Object.entries(transcriptPartsRef.current)
-          .sort(([a], [b]) => a.localeCompare(b))
-          .map(([, text]) => text);
+      if (partialText) {
+        // BAZAR: Show partial result IMMEDIATELY
+        const medicalTerms = extractMedicalTermsFromText(partialText).map(t => t.term);
         
-        finalText = sortedChunks.join(' ').trim();
-        processingTime = processingTimeRef.current ? Date.now() - processingTimeRef.current : 0;
-      }
-      
-      if (finalText) {
-        const medicalTerms = extractMedicalTermsFromText(finalText).map(t => t.term);
-        
-        console.log(`[useSimpleWhisper] ACTUALIZANDO ESTADO CON TRANSCRIPCIÓN: "${finalText}"`);
+        logger.log(`[BAZAR] Showing partial transcription: "${partialText}"`);
         
         setTranscription({
-          text: finalText,
-          confidence: 0.95,
+          text: partialText,
+          confidence: 0.85, // Lower confidence for partial
           medicalTerms,
-          processingTime,
+          processingTime: Date.now() - startTimeRef.current,
           timestamp: Date.now(),
           chunks: Object.entries(transcriptPartsRef.current).map(([id, text]) => ({
             id,
@@ -560,35 +530,77 @@ export function useSimpleWhisper({
             timestamp: Date.now()
           }))
         });
+      }
+      
+      // BAZAR Step 2: Enter residue collection phase
+      setStatus('collecting-residues');
+      logger.log('[BAZAR] Entering residue collection phase...');
+      
+      try {
+        // Wait for any pending chunks to process
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Generate combined audio from all chunks
+        const combinedAudioData = getCombinedAudio();
+        if (combinedAudioData) {
+          logger.log(`[BAZAR] Generating complete audio: ${combinedAudioData.length} samples`);
+          
+          const wavBlob = createWavBlob(combinedAudioData, sampleRate);
+          setAudioBlob(wavBlob);
+          
+          const url = URL.createObjectURL(wavBlob);
+          setAudioUrl(url);
+          
+          const durationSeconds = combinedAudioData.length / sampleRate;
+          logger.log(`[BAZAR] Audio generated: ${durationSeconds.toFixed(2)} seconds`);
+        }
+        
+        // Check for any new chunks that arrived during residue collection
+        const finalChunks = Object.entries(transcriptPartsRef.current)
+          .sort(([a], [b]) => a.localeCompare(b))
+          .map(([, text]) => text);
+        
+        const finalText = finalChunks.join(' ').trim();
+        const hasNewContent = finalText.length > partialText.length;
+        
+        if (hasNewContent) {
+          // BAZAR: Update with complete transcription including residues
+          const medicalTerms = extractMedicalTermsFromText(finalText).map(t => t.term);
+          
+          logger.log(`[BAZAR] Updating with final transcription (${finalText.length - partialText.length} new chars)`);
+          
+          setTranscription({
+            text: finalText,
+            confidence: 0.95,
+            medicalTerms,
+            processingTime: Date.now() - startTimeRef.current,
+            timestamp: Date.now(),
+            chunks: Object.entries(transcriptPartsRef.current).map(([id, text]) => ({
+              id,
+              text,
+              timestamp: Date.now()
+            }))
+          });
+        }
         
         setStatus('completed');
-        logger.log(`[${processingMode}] Transcription completed: ${finalText}`);
-        console.log('[useSimpleWhisper] Estado actualizado - La UI debería mostrar la transcripción ahora');
-      } else {
-        // Check if we had chunks but no text
-        const totalChunks = Object.keys(transcriptPartsRef.current).length;
-        const emptyChunks = Object.values(transcriptPartsRef.current).filter(text => !text).length;
+        logger.log('[BAZAR] Transcription completed successfully');
         
-        console.warn(`[useSimpleWhisper] Sin transcripción final - Total chunks: ${totalChunks}, Vacíos: ${emptyChunks}`);
-        
-        if (totalChunks > 0 && emptyChunks === totalChunks) {
-          setError('No se detectó voz clara. Intenta hablar más cerca del micrófono o en un ambiente más silencioso.');
-        } else if (totalChunks === 0) {
-          setError('Grabación muy corta. Mantén presionado al menos 5 segundos.');
-        } else {
-          setError('No se pudo obtener transcripción completa.');
-        }
-        setStatus('completed'); // Still mark as completed to show any partial results
+      } catch (residueError) {
+        // BAZAR: If residue collection fails, keep partial result and show warning
+        logger.error('[BAZAR] Error collecting residues:', residueError);
+        setError('Advertencia: El último fragmento no pudo procesarse completamente.');
+        setStatus('completed'); // Still mark as completed - user has partial data
       }
       
       return true;
     } catch (err) {
-      logger.error(`[${processingMode}] Error stopping transcription:`, err);
+      logger.error(`[BAZAR] Critical error stopping transcription:`, err);
       setError('Error al detener la grabación');
       setStatus('error');
       return false;
     }
-  }, [isRecording, processingMode, stopAudioCapture, logger, getCombinedAudio, sampleRate]);
+  }, [isRecording, processingMode, stopAudioCapture, logger, getCombinedAudio, sampleRate, startTimeRef]);
   
   // Reset transcription
   const resetTranscription = useCallback(() => {
