@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useWhisperPreload } from "./useWhisperPreload";
 import { useWhisperEngine } from "./aux_hooks/useWhisperEngine";
-import { useAudioDenoising } from "./aux_hooks/useAudioDenoising";
+import { useAudioDenoising } from "./useAudioDenoising";
 import { extractMedicalTermsFromText } from "../utils/medicalTerms";
 import { DefaultLogger } from "../utils/LoggerStrategy";
 
