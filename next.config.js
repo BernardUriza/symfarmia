@@ -11,8 +11,6 @@ const nextConfig = {
   experimental: {
     webpackMemoryOptimizations: true,
     cpus: 1,
-    // Allow cross-origin requests from 127.0.0.1
-    allowedOrigins: ['http://127.0.0.1:3000', 'http://localhost:3000'],
   },
 
   // Dev server configuration
