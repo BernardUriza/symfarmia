@@ -124,7 +124,7 @@ const {
  // BRUTAL BAZAR: Real transcription via useSimpleWhisper (already denoised) const whisperService = useSimpleWhisper(TRANSCRIPTION_CONFIG);
  
 const {
- transcription, status, error, engineStatus: whisperEngineStatus, audioLevel, recordingTime, audioUrl, startTranscription, stopTranscription, resetTranscription 
+ transcription, status, error, engineStatus: whisperEngineStatus, audioLevel, recordingTime, audioUrl, audioBlob, getCompleteAudio, startTranscription, stopTranscription, resetTranscription 
 } = whisperService;
  // Solo mantener WebSpeech para transcripción en tiempo real (no accede al micrófono directamente) const webSpeechService = useWebSpeechCapture();
  
@@ -158,8 +158,9 @@ webSpeechLang
  // BAZAR: Función de diarización completamente auditable const processDiarization = useCallback(async () => {
 
  console.log('[ConversationCapture] Iniciando diarización BAZAR...');
- // Usar audio del useSimpleWhisper (ya denoisado) const completeAudio = null;
- // useSimpleWhisper handles audio internally const allMinutesText = transcriptionState.minuteTranscriptions.map(m => m.text).join(' ').trim();
+ // Get audio data from whisper service
+    const completeAudio = getCompleteAudio();
+ const allMinutesText = transcriptionState.minuteTranscriptions.map(m => m.text).join(' ').trim();
  if (!completeAudio && !audioBlob && !allMinutesText && !transcriptionState.webSpeechText) {
  console.warn('[ConversationCapture] No hay audio ni texto para diarizar');
  return;
@@ -190,7 +191,7 @@ webSpeechLang
 } finally {
  diarizationState.setDiarizationProcessing(false);
  
-} }, [transcriptionState.minuteTranscriptions, transcriptionState.webSpeechText, diarizationState]);
+} }, [transcriptionState.minuteTranscriptions, transcriptionState.webSpeechText, diarizationState, audioBlob, getCompleteAudio]);
  // Handle recording start const handleStartRecording = useCallback(async () => {
 
  console.log('[ConversationCapture] Starting real transcription with denoised audio');

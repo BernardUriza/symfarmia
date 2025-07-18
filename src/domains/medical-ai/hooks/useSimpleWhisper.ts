@@ -116,6 +116,7 @@ interface UseSimpleWhisperReturn {
   stopTranscription: () => Promise<boolean>;
   resetTranscription: () => void;
   preloadModel: () => Promise<void>;
+  getCompleteAudio: () => Float32Array | null;
   
   // Enhanced preload info (from Enhanced version)
   preloadStatus: 'idle' | 'loading' | 'loaded' | 'failed';
@@ -672,6 +673,7 @@ export function useSimpleWhisper({
     stopTranscription,
     resetTranscription,
     preloadModel,
+    getCompleteAudio: getCombinedAudio,
     
     // Enhanced preload info
     preloadStatus,
