@@ -1,5 +1,52 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 
+// Type declarations for Web Speech API
+interface SpeechRecognitionAlternative {
+  transcript: string;
+  confidence: number;
+}
+
+interface SpeechRecognitionResult {
+  isFinal: boolean;
+  [index: number]: SpeechRecognitionAlternative;
+  length: number;
+}
+
+interface SpeechRecognitionResultList {
+  [index: number]: SpeechRecognitionResult;
+  length: number;
+}
+
+interface SpeechRecognitionEvent extends Event {
+  resultIndex: number;
+  results: SpeechRecognitionResultList;
+}
+
+interface SpeechRecognition extends EventTarget {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  maxAlternatives: number;
+  start(): void;
+  stop(): void;
+  abort(): void;
+  onresult: ((event: SpeechRecognitionEvent) => void) | null;
+  onstart: (() => void) | null;
+  onend: (() => void) | null;
+  onerror: ((event: any) => void) | null;
+  onspeechstart: (() => void) | null;
+  onspeechend: (() => void) | null;
+  onaudiostart: (() => void) | null;
+  onaudioend: (() => void) | null;
+}
+
+declare global {
+  interface Window {
+    SpeechRecognition: new () => SpeechRecognition;
+    webkitSpeechRecognition: new () => SpeechRecognition;
+  }
+}
+
 interface UseWebSpeechCaptureReturn {
   isRecording: boolean;
   transcript: string;
@@ -37,7 +84,7 @@ export const useWebSpeechCapture = (): UseWebSpeechCaptureReturn => {
   const [language, setLanguage] = useState('es-MX');
   const [partialTranscripts, setPartialTranscripts] = useState<string[]>([]);
   
-  const recognitionRef = useRef<any>(null);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
   const watchdogTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const sessionStartTimeRef = useRef<Date | null>(null);
   const auditLogRef = useRef<WebSpeechAuditLog[]>([]);
@@ -142,7 +189,7 @@ export const useWebSpeechCapture = (): UseWebSpeechCaptureReturn => {
       recognition.lang = language;
       recognition.maxAlternatives = 1;
       
-      recognition.onresult = (event: any) => {
+      recognition.onresult = (event: SpeechRecognitionEvent) => {
         const results = Array.from(event.results);
         let finalTranscript = '';
         let interimTranscript = '';
@@ -150,7 +197,7 @@ export const useWebSpeechCapture = (): UseWebSpeechCaptureReturn => {
         let confCount = 0;
         
         for (let i = event.resultIndex; i < results.length; i++) {
-          const result = results[i];
+          const result = results[i] as SpeechRecognitionResult;
           const alternative = result[0];
           
           if (result.isFinal) {
@@ -176,7 +223,9 @@ export const useWebSpeechCapture = (): UseWebSpeechCaptureReturn => {
         // Update average confidence
         if (confCount > 0) {
           const avgConfidence = totalConfidence / confCount;
-          confidenceAccumulatorRef.current.push(avgConfidence);
+          if (confidenceAccumulatorRef.current) {
+            confidenceAccumulatorRef.current.push(avgConfidence);
+          }
           setConfidence(avgConfidence);
         }
         
@@ -319,7 +368,7 @@ export const useWebSpeechCapture = (): UseWebSpeechCaptureReturn => {
       duration: sessionDuration,
       restartCount,
       transcriptLength: transcript.length,
-      auditLogs: auditLogRef.current.length
+      auditLogs: auditLogRef.current?.length ?? 0
     });
   }, [clearWatchdog, addAuditLog, restartCount, transcript]);
 

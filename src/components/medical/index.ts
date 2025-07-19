@@ -7,7 +7,7 @@
 export { ConversationCapture } from './ConversationCapture';
 export { ConversationCaptureWrapper } from './ConversationCaptureWrapper';
 export { SOAPNotesManager } from './SOAPNotesManager';
-export { AudioDenoisingDashboard } from './AudioDenoisingDashboard';
+// export { AudioDenoisingDashboard } from './AudioDenoisingDashboard';
 export { DialogueFlow } from './DialogueFlow';
 export { ClinicalNotes } from './ClinicalNotes';
 export { OrderEntry } from './OrderEntry';
@@ -15,7 +15,7 @@ export { SummaryExport } from './SummaryExport';
 export { VoiceReactiveRings } from './VoiceReactiveRings';
 export { MedicalAssistantWrapper } from './MedicalAssistantWrapper';
 export { ModelManager } from './ModelManager';
-export { WhisperDebugPanel } from './WhisperDebugPanel';
+// export { WhisperDebugPanel } from './WhisperDebugPanel';
 
 // Re-export types for convenience
 export type { SOAPNotes, SOAPConfig } from '@/src/types/medical';

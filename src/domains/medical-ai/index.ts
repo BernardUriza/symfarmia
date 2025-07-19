@@ -15,19 +15,10 @@ export { MedicalConfidenceIndicator } from './components/MedicalConfidenceIndica
 export { StrategySelector } from './components/StrategySelector';
 
 // Hooks
-export { useSimpleWhisper } from './hooks/useSimpleWhisper';
-export { useWhisperPreload } from './hooks/useWhisperPreload';
 export { useMedicalAI } from './hooks/useMedicalAI';
 export { useMedicalValidation } from './hooks/useMedicalValidation';
 export { useMedicalTranslation } from './hooks/useMedicalTranslation';
-export { useTranscription } from './hooks/useTranscription';
-export { useWebSpeechCapture } from './hooks/useWebSpeechCapture'; // Chrome-specific WebSpeech hook
-
-// Legacy Hooks (deprecated - will be removed in future versions)
-export { useAudioCapture } from './hooks/legacy/useAudioCapture';
-export { useMicrophoneDiagnostics } from './hooks/legacy/useMicrophoneDiagnostics';
-export { useModelDownload } from './hooks/legacy/useModelDownload';
-export { useDemoTranscription } from './hooks/legacy/useDemoTranscription';
+export { useWebSpeechCapture } from './hooks/useWebSpeechCapture';
 // Services
 export { medicalAIService } from './services/medicalAIService';
 export { medicalValidationService } from './services/medicalValidationService';

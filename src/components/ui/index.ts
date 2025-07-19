@@ -18,7 +18,7 @@ export { default as LanguageSwitcher } from './LanguageSwitcher';
 
 // Enhanced Transcription UI Components
 export { VoiceReactiveMicrophone } from './VoiceReactiveMicrophone';
-export { AudioSpectrum } from './AudioSpectrum';
+// export { AudioSpectrum } from './AudioSpectrum';
 export { LiveTranscriptionDisplay } from './LiveTranscriptionDisplay';
 export { TranscriptionModelInfo } from './TranscriptionModelInfo';
 

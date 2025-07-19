@@ -103,7 +103,7 @@ export const ConversationCapture = ({
 
   // **Unified Status**
   const engineStatus = {
-    whisper: "disabled",
+    transcription: "disabled",
     webSpeech: isWebSpeechAvailable ? "ready" : "unavailable"
   };
 

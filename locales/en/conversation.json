@@ -32,7 +32,7 @@
       "next": "Next",
       "close": "Close",
       "error_toggling_recording": "Error toggling recording",
-      "processing_with_whisper": "Processing audio with Whisper...",
+      "processing": "Processing audio...",
       "powered_by_ai": "Powered by AI",
       "review_dialog_flow": "Review Dialog Flow",
       "start": "Start Recording",

@@ -32,7 +32,7 @@
       "next": "Siguiente",
       "close": "Cerrar",
       "error_toggling_recording": "Error al cambiar el estado de grabación",
-      "processing_with_whisper": "Procesando audio con Whisper...",
+      "processing": "Procesando audio...",
       "powered_by_ai": "Impulsado por IA",
       "review_dialog_flow": "Revisar Flujo de Diálogo",
       "start": "Iniciar Grabación",

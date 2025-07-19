@@ -18,7 +18,7 @@ import {
   BraveCacheBuster,
   MedicalMonitoringScript
 } from "@/src/components/layout";
-import WhisperPreloaderGlobal from "@/src/domains/medical-ai/components/WhisperPreloaderGlobal";
+// import WhisperPreloaderGlobal from "@/src/domains/medical-ai/components/WhisperPreloaderGlobal";
 import { MedicalAssistantWrapper as MedicalAssistant } from "@/src/components/medical";
 import { ThemeProvider } from "@/src/providers/ThemeProviderBulletproof";
 import { Auth0Provider } from "@auth0/nextjs-auth0";
@@ -283,7 +283,7 @@ export default function RootLayout({ children }) {
 
                           {/* WHISPER PRELOAD */}
                           <MedicalErrorBoundary context="Whisper Preload" medicalWorkflow="Model Preloading">
-                            <WhisperPreloaderGlobal />
+                            {/* <WhisperPreloaderGlobal /> */}
                           </MedicalErrorBoundary>
 
                           {/* MAIN CONTENT AREA */}

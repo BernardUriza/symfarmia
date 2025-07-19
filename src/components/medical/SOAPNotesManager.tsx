@@ -15,7 +15,7 @@ import {
   Edit3,
   Save
 } from 'lucide-react';
-import { medicalAIService } from '@/src/domains/medical-ai/services/medicalAIService';
+import { medicalAIService } from '@/src/services/MedicalAIService';
 import type { SOAPNotes, SOAPConfig } from '@/src/types/medical';
 
 interface SOAPNotesManagerProps {

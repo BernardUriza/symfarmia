@@ -12,10 +12,6 @@ import {
 } from "@heroicons/react/24/outline";
 import dynamic from "next/dynamic";
 const DemoLoginModal = dynamic(() => import("./layout/DemoLoginModal"));
-const AudioProcessingTest = dynamic(
-  () => import("./medical/AudioProcessingTest"),
-  { ssr: false }
-);
 const DemoModeBanner = dynamic(() => import("./layout/DemoModeBanner"), {
   ssr: false,
 });
@@ -340,9 +336,6 @@ const MinimalistLandingPage = ({ isDemo = false }) => {
                 "Experimenta la transcripción médica en tiempo real con IA"
               )}
             </p>
-          </div>
-          <div className="bg-white/70 backdrop-blur-sm rounded-3xl shadow-xl border border-white/50 p-8">
-            <AudioProcessingTest />
           </div>
         </div>
       </section>

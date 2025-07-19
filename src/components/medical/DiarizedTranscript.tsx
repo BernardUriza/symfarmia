@@ -21,7 +21,28 @@ import { Card, CardContent } from '@/src/components/ui/card';
 import { Button } from '@/src/components/ui/button';
 import { Badge } from '@/src/components/ui/badge';
 import { Edit2, Play, Pause, Download, Save, Clock } from 'lucide-react';
-import { DIARIZATION_CONFIG, DiarizationSegment } from '@/src/domains/medical-ai/services/DiarizationService';
+import { DiarizationSegment } from '@/src/domains/medical-ai/services/DiarizationService';
+
+// CONFIGURACIÓN DIARIZATION - PÚBLICA Y MODIFICABLE
+export const DIARIZATION_CONFIG = {
+  speakers: {
+    DOCTOR: {
+      label: 'Doctor',
+      avatar: '👨‍⚕️',
+      color: '#3B82F6'
+    },
+    PATIENT: {
+      label: 'Paciente',
+      avatar: '👤',
+      color: '#10B981'
+    },
+    UNKNOWN: {
+      label: 'Desconocido',
+      avatar: '❓',
+      color: '#6B7280'
+    }
+  }
+};
 
 // ESQUEMAS PÚBLICOS - MODIFICABLES POR CUALQUIER DEV
 export const SPEAKER_SCHEMAS = {
