@@ -80,7 +80,7 @@ export async function GET(request: NextRequest) {
     const event = searchParams.get('event');
     const specialty = searchParams.get('specialty');
     
-    let whereClause: Record<string, string> = {};
+    const whereClause: Record<string, string> = {};
     
     if (sessionId) whereClause.sessionId = sessionId;
     if (event) whereClause.event = event;

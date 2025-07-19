@@ -98,23 +98,6 @@ This repository uses two cooperating agents: **Claudio** and **Codex**. To keep 
 - Document synchronization errors in `docs/development/chronicles/dev-sync.md`.
 - Start each Claude session with `claude --resume` and save context using `Save your current context to a file`.
 
-## Audio Transcription Configuration
-
-### Whisper Model Architecture
-The audio transcription system uses a centralized architecture with a single model instance:
-- **Model**: `Xenova/whisper-base` (not whisper-tiny)
-- **Loading Strategy**: Model is loaded ONCE in the Web Worker (`audioProcessingWorker.js`)
-- **Cache**: Uses `whisperModelCache` singleton to manage the worker instance
-- **Language**: Spanish transcription using ISO 639-1 code `'es'`
-
-#### Important Architecture Notes:
-1. **Single Model Instance**: The model is loaded only in the worker to prevent duplicate downloads
-2. **WhisperPreloadManager**: Now only manages preload state, does NOT load its own model
-3. **audioProcessingService**: Provides direct (non-worker) access but should be avoided to prevent duplicate loading
-4. **transformersConfig**: Global configuration for caching and model settings
-
-Important: Always use the worker-based approach via `whisperModelCache` for audio transcription. The model should never be loaded multiple times.
-
 ## Loop Synchronization
 
 After Codex pushes new commits to `dev`, Claudio should run:

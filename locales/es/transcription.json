@@ -24,7 +24,7 @@
     "processing": "Procesando...",
     "press_record_to_start": "Presiona el botón de grabación para iniciar",
     "test_title": "Prueba de Transcripción en Tiempo Real",
-    "test_description": "Procesamiento por chunks con denoising de audio",
+    "test_description": "Procesamiento en tiempo real",
     "whisper_engine": "Motor Whisper",
     "ready": "Listo",
     "loading": "Cargando...",

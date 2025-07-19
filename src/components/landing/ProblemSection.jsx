@@ -89,7 +89,7 @@ const ProblemSection = React.memo(({ t }) => {
           viewport={{ once: true }}
         >
           <p className="text-xl text-teal-200 font-light italic">
-            "{t('finding_hope_again')}"
+            &ldquo;{t('finding_hope_again')}&rdquo;
           </p>
           <div className="mt-4 w-32 h-px bg-gradient-to-r from-transparent via-teal-400 to-transparent mx-auto" />
         </motion.div>

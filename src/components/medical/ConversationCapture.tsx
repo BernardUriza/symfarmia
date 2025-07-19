@@ -5,7 +5,6 @@ import './conversation-capture/styles.css';
 import React, { useState, useEffect, useRef, useCallback } from "react";
 
 // **Hooks**
-import { useSimpleWhisperHybrid } from "@/src/domains/medical-ai/hooks/useSimpleWhisperHybrid";
 import { useWebSpeechCapture } from "@/src/domains/medical-ai/hooks/useWebSpeechCapture";
 import { useI18n } from "@/src/domains/core/hooks/useI18n";
 import { useLlmAudit } from "@/app/hooks/useLlmAudit";
@@ -34,12 +33,6 @@ import type { SOAPNotes } from "@/src/types/medical";
 import { diarizationService, DiarizationUtils } from "@/src/domains/medical-ai/services/DiarizationService";
 
 // **CONFIG**
-const TRANSCRIPTION_CONFIG = {
-  autoPreload: true,
-  preferWorker: true,
-  retryCount: 3,
-  retryDelay: 1000
-};
 const SOAP_CONFIG = {
   autoGenerate: false,
   style: "detailed",
@@ -76,41 +69,29 @@ export const ConversationCapture = ({
 
   // **Other state**
   const [showTranscriptPopup, setShowTranscriptPopup] = useState(false);
-  const chunkCountRef = useRef(0);
-  const audioDataRef = useRef<Float32Array>(new Float32Array());
 
-  // **Model Debug**
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const g = window as any;
-      console.log("[ConversationCapture] Model cache:", {
-        whisperWorker: !!g.__WHISPER_WORKER_INSTANCE__,
-        whisperModelLoaded: !!g.__WHISPER_MODEL_LOADED__,
-        whisperPreloadState: !!g.__WHISPER_PRELOAD_STATE__,
-        whisperModelCache: !!g.__WHISPER_MODEL_CACHE__,
-      });
-    }
-  }, []);
 
-  // **Whisper + WebSpeech**
-  const whisperService = useSimpleWhisperHybrid(TRANSCRIPTION_CONFIG);
-  const {
-    transcription,
-    status,
-    error,
-    engineStatus: whisperEngineStatus,
-    audioLevel: _audioLevelRaw,
-    recordingTime: _recordingTimeRaw,
-    audioUrl,
-    audioBlob,
-    getCompleteAudio,
-    startTranscription,
-    stopTranscription,
-    resetTranscription
-  } = whisperService;
-  // Evitar valores NaN o undefined
-  const audioLevel = _audioLevelRaw ?? 0;
-  const recordingTime = _recordingTimeRaw || 0;
+  // **Recording State (to be replaced with new audio package)**
+  const [status, setStatus] = useState<"idle" | "recording" | "processing" | "collecting-residues">("idle");
+  const [error, setError] = useState<string | null>(null);
+  const [transcription, setTranscription] = useState<{text: string} | null>(null);
+  const [audioLevel] = useState(0);
+  const [recordingTime] = useState(0);
+  
+  // Placeholder functions until new audio package is integrated
+  const startTranscription = async () => {
+    console.warn("Audio recording not implemented - waiting for new package");
+    return false;
+  };
+  const stopTranscription = async () => {
+    console.warn("Audio recording not implemented - waiting for new package");
+    return false;
+  };
+  const resetTranscription = () => {
+    setTranscription(null);
+    setError(null);
+    setStatus("idle");
+  };
 
   const webSpeechService = useWebSpeechCapture();
   const {
@@ -122,7 +103,7 @@ export const ConversationCapture = ({
 
   // **Unified Status**
   const engineStatus = {
-    whisper: whisperEngineStatus,
+    whisper: "disabled",
     webSpeech: isWebSpeechAvailable ? "ready" : "unavailable"
   };
 
@@ -148,10 +129,9 @@ export const ConversationCapture = ({
 
   // **Diarization logic**
   const processDiarization = useCallback(async () => {
-    const completeAudio = getCompleteAudio();
     const allMinutesText = transcriptionState.minuteTranscriptions.map(m => m.text).join(" ").trim();
-    if (!completeAudio && !audioBlob && !allMinutesText && !transcriptionState.webSpeechText) {
-      console.warn("[ConversationCapture] No audio/text for diarization");
+    if (!allMinutesText && !transcriptionState.webSpeechText) {
+      console.warn("[ConversationCapture] No text for diarization");
       return;
     }
     diarizationState.setDiarizationProcessing(true);
@@ -160,15 +140,9 @@ export const ConversationCapture = ({
     try {
       const denoisedTranscriptionText = allMinutesText || "";
       const mergedText = DiarizationUtils.mergeTranscriptions(denoisedTranscriptionText, transcriptionState.webSpeechText);
-      if (completeAudio) {
-        audioDataRef.current = completeAudio;
-      }
-      const audioData = audioDataRef.current;
-      if (!audioData || audioData.length === 0) {
-        throw new Error("No audio for diarization");
-      }
-      const result = await diarizationService.diarizeAudio(audioData);
-      diarizationState.setDiarizationResult(result);
+      // Diarization now works with text only until audio package is integrated
+      console.warn("Audio-based diarization disabled - waiting for new package");
+      diarizationState.setDiarizationResult(null);
     } catch (err) {
       diarizationState.setDiarizationError(err instanceof Error ? err.message : "Unknown error");
     } finally {
@@ -176,7 +150,7 @@ export const ConversationCapture = ({
     }
   }, [
     transcriptionState.minuteTranscriptions, transcriptionState.webSpeechText,
-    diarizationState, audioBlob, getCompleteAudio
+    diarizationState
   ]);
 
   // **Handlers**
@@ -238,8 +212,6 @@ export const ConversationCapture = ({
     resetTranscription();
     transcriptionState.resetTranscriptionState();
     diarizationState.resetDiarization();
-    audioDataRef.current = new Float32Array();
-    chunkCountRef.current = 0;
   }, [resetTranscription, transcriptionState, diarizationState]);
 
   const toggleMode = useCallback(async () => {

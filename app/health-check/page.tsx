@@ -1,5 +1,7 @@
 "use client";
 
+import Link from 'next/link';
+
 export default function HealthCheckPage() {
   return (
     <div className="min-h-screen p-8">
@@ -13,9 +15,9 @@ export default function HealthCheckPage() {
         <li>✅ Routes: All medical routes present</li>
       </ul>
       <div className="mt-8 space-y-4">
-        <a href="/" className="block p-4 bg-primary text-white rounded hover:bg-primary/90">
+        <Link href="/" className="block p-4 bg-primary text-white rounded hover:bg-primary/90">
           Go to Landing Page
-        </a>
+        </Link>
         <a href="/dashboard" className="block p-4 bg-green-600 text-white rounded hover:bg-green-700">
           Go to Medical Dashboard
         </a>

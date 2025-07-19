@@ -24,7 +24,7 @@
     "processing": "Processing...",
     "press_record_to_start": "Press the record button to start",
     "test_title": "Real-Time Transcription Test",
-    "test_description": "Chunk processing with audio denoising",
+    "test_description": "Real-time processing",
     "whisper_engine": "Whisper Engine",
     "ready": "Ready",
     "loading": "Loading...",
