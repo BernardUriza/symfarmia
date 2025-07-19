@@ -8,7 +8,17 @@ import {
   AlertDialogCancel,
 } from '../../ui/alert-dialog';
 
-export default function ConfirmAlert({ confirmation }) {
+interface ConfirmationData {
+  text: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+}
+
+interface ConfirmAlertProps {
+  confirmation: ConfirmationData | null;
+}
+
+export default function ConfirmAlert({ confirmation }: ConfirmAlertProps) {
   const { text, onConfirm, onCancel } = confirmation || {};
 
   return (

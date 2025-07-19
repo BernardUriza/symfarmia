@@ -25,8 +25,6 @@ import {
 import {
   PermissionDialog, RecordingCard, TranscriptionResult, ErrorDisplay, ProcessingStatus, FloatingTranscriptPopup
 } from "@/src/components/medical/conversation-capture/components";
-import { WhisperDiagnosticTool } from "@/src/domains/medical-ai/components/WhisperDiagnosticTool";
-import { AudioDenoisingDashboard } from "@/src/components/medical/AudioDenoisingDashboard";
 import { SOAPNotesManager } from "@/src/components/medical/SOAPNotesManager";
 
 // **Types**
@@ -289,18 +287,9 @@ export const ConversationCapture = ({
                 <span>{language === "es-MX" ? "ES" : "EN"}</span>
               </button>
             )}
-            <button
-              onClick={uiState.toggleDenoisingDashboard}
-              className={`flex items-center gap-2 px-3 py-1 rounded-md text-sm ${
-                uiState.showDenoisingDashboard ? "bg-primary/10 text-primary" : "bg-muted/50 text-muted-foreground hover:bg-muted/70"
-              }`}
-            >
-              <Settings className="w-4 h-4" /> {t("conversation.capture.actions.dashboard")}
-            </button>
           </div>
         )}
       </div>
-      {uiState.showDenoisingDashboard && !uiState.isManualMode && <AudioDenoisingDashboard />}
     </div>
   );
 
@@ -351,7 +340,6 @@ export const ConversationCapture = ({
     <div className={`max-w-4xl mx-auto space-y-6 ${className} fade-in`}>
       <PermissionDialog isOpen={uiState.showPermissionDialog} onClose={() => uiState.setShowPermissionDialog(false)} />
       {renderHeader()}
-      <WhisperDiagnosticTool />
       {!isWebSpeechAvailable && !uiState.isManualMode && (
         <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 mb-4">
           <div className="flex items-start">

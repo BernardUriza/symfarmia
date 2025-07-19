@@ -1,21 +1,29 @@
 'use client';
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, ButtonHTMLAttributes, ReactNode } from 'react';
 import { useAnimations } from '../hooks/useAnimations';
+import { MotionProps } from 'framer-motion';
 
 // Lazy load motion for performance
 const MotionButton = lazy(() =>
   import('framer-motion')
     .then((module) => ({
-      default: module.motion.button,
+      default: module.motion.button as React.ComponentType<ButtonHTMLAttributes<HTMLButtonElement> & MotionProps>,
     }))
     .catch(() => ({
-      default: ({ children, ...props }) => (
+      default: ({ children, ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { children?: ReactNode }) => (
         <button {...props}>{children}</button>
       ),
     })),
 );
 
-const Button = ({
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  children: ReactNode;
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
+  size?: 'small' | 'medium' | 'large';
+  animated?: boolean;
+}
+
+const Button: React.FC<ButtonProps> = ({
   children,
   variant = 'primary',
   size = 'medium',
@@ -29,7 +37,7 @@ const Button = ({
   const baseClasses =
     'font-semibold rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2';
 
-  const variants = {
+  const variants: Record<NonNullable<ButtonProps['variant']>, string> = {
     primary: 'bg-teal-600 text-white hover:bg-teal-700 focus:ring-teal-500',
     secondary:
       'bg-white text-teal-600 border border-teal-600 hover:bg-teal-50 focus:ring-teal-500',
@@ -38,14 +46,14 @@ const Button = ({
     ghost: 'text-gray-600 hover:text-gray-900 hover:bg-gray-100',
   };
 
-  const sizes = {
+  const sizes: Record<NonNullable<ButtonProps['size']>, string> = {
     small: 'px-3 py-2 text-sm',
     medium: 'px-4 py-2 text-base',
     large: 'px-6 py-3 text-lg',
   };
 
   const disabledClasses = disabled ? 'opacity-50 cursor-not-allowed' : '';
-  const fullClassName = `${baseClasses} ${variants[variant]} ${sizes[size]} ${disabledClasses} ${className}`;
+  const fullClassName = `${baseClasses} ${variants[variant!]} ${sizes[size!]} ${disabledClasses} ${className}`;
 
   // Animation properties
   const animationProps = safeAnimate({

@@ -16,8 +16,12 @@ import {
   FullLanguageSwitcher,
 } from '../ui/LanguageSwitcher';
 
+type PageContext = 'medical' | 'admin' | 'marketing' | 'app';
+type SwitcherStyle = 'compact' | 'full' | 'medical' | 'floating';
+type Position = 'header' | 'sidebar' | 'settings' | 'floating';
+
 // 🎯 PAGE CONTEXT DETECTION
-const getPageContext = (pathname) => {
+const getPageContext = (pathname: string): PageContext => {
   // Medical/clinical pages
   if (
     pathname.includes('/consultation') ||
@@ -52,8 +56,15 @@ const getPageContext = (pathname) => {
   return 'app';
 };
 
+interface GlobalLanguageSwitcherProps {
+  forceStyle?: SwitcherStyle | null;
+  showFloating?: boolean;
+  className?: string;
+  position?: Position;
+}
+
 // 🎯 GLOBAL LANGUAGE SWITCHER
-const GlobalLanguageSwitcher = ({
+const GlobalLanguageSwitcher: React.FC<GlobalLanguageSwitcherProps> = ({
   forceStyle = null,
   showFloating = true,
   className = '',
@@ -163,8 +174,12 @@ const GlobalLanguageSwitcher = ({
   );
 };
 
+interface LanguageSwitcherProps {
+  className?: string;
+}
+
 // 🎯 HEADER LANGUAGE SWITCHER
-export const HeaderLanguageSwitcher = ({ className = '' }) => {
+export const HeaderLanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ className = '' }) => {
   return (
     <GlobalLanguageSwitcher
       position="header"
@@ -175,7 +190,7 @@ export const HeaderLanguageSwitcher = ({ className = '' }) => {
 };
 
 // 🎯 SIDEBAR LANGUAGE SWITCHER
-export const SidebarLanguageSwitcher = ({ className = '' }) => {
+export const SidebarLanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ className = '' }) => {
   return (
     <GlobalLanguageSwitcher
       position="sidebar"
@@ -186,7 +201,7 @@ export const SidebarLanguageSwitcher = ({ className = '' }) => {
 };
 
 // 🎯 MEDICAL HEADER LANGUAGE SWITCHER
-export const MedicalHeaderLanguageSwitcher = ({ className = '' }) => {
+export const MedicalHeaderLanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ className = '' }) => {
   return (
     <GlobalLanguageSwitcher
       forceStyle="medical"
@@ -198,7 +213,7 @@ export const MedicalHeaderLanguageSwitcher = ({ className = '' }) => {
 };
 
 // 🎯 SETTINGS LANGUAGE SWITCHER
-export const SettingsLanguageSwitcher = ({ className = '' }) => {
+export const SettingsLanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ className = '' }) => {
   return (
     <GlobalLanguageSwitcher
       forceStyle="full"

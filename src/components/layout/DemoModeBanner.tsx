@@ -2,6 +2,7 @@
 import { useAppMode } from '../../providers/AppModeProvider';
 import { useTranslation } from '../../providers/I18nProvider';
 import dynamic from 'next/dynamic';
+import React from 'react';
 
 function DemoBannerContent() {
   const { isDemoMode, toggleMode } = useAppMode();

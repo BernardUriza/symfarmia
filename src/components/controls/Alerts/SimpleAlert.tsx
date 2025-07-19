@@ -7,7 +7,13 @@ import {
   AlertDialogAction,
 } from '../../ui/alert-dialog';
 
-export function SimpleAlert({ open, onClose, text }) {
+interface SimpleAlertProps {
+  open: boolean;
+  onClose: () => void;
+  text: string;
+}
+
+export function SimpleAlert({ open, onClose, text }: SimpleAlertProps) {
   return (
     <AlertDialog open={open} onOpenChange={onClose}>
       <AlertDialogContent>

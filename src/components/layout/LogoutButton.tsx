@@ -3,7 +3,11 @@
 import React from 'react';
 import { LogOut } from 'lucide-react';
 
-const LogoutButton = ({ className = '' }) => {
+interface LogoutButtonProps {
+  className?: string;
+}
+
+const LogoutButton: React.FC<LogoutButtonProps> = ({ className = '' }) => {
   const handleLogout = () => {
     // Clear any local storage items
     localStorage.removeItem('medicalAIDemoPatient');
